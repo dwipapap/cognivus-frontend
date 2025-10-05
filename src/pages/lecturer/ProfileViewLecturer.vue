@@ -74,27 +74,27 @@ const formatBirthdate = (dateString) => {
         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 max-w-4xl mx-auto">
           <!-- Left Column -->
           <div class="space-y-5">
-            <!-- Age -->
+            <!-- Gender -->
             <div>
-              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Age</dt>
-              <dd class="mt-1 text-base font-semibold text-gray-900 dark:text-white">{{ lecturerProfile.age || '-' }}</dd>
+              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Gender</dt>
+              <dd class="mt-1 text-base font-semibold text-gray-900 dark:text-white">{{ lecturerProfile.gender || '-' }}</dd>
             </div>
 
             <!-- Email -->
             <div>
               <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Email</dt>
-              <dd class="mt-1 text-base font-semibold text-gray-900 dark:text-white">{{ authStore.user?.email || lecturerProfile.users?.email || 'lecturer@ittr.ac.id' }}</dd>
+              <dd class="mt-1 text-base font-semibold text-gray-900 dark:text-white">{{ authStore.user?.email || '-' }}</dd>
             </div>
 
             <!-- Phone Number -->
             <div>
               <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Phone Number</dt>
-              <dd class="mt-1 text-base font-semibold text-gray-900 dark:text-white">{{ lecturerProfile.phone_number || '-' }}</dd>
+              <dd class="mt-1 text-base font-semibold text-gray-900 dark:text-white">{{ lecturerProfile.phone || '-' }}</dd>
             </div>
 
             <!-- Birthplace -->
             <div>
-              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Birthplace</dt>
+              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Birth Place</dt>
               <dd class="mt-1 text-base font-semibold text-gray-900 dark:text-white">{{ lecturerProfile.birthplace || '-' }}</dd>
             </div>
           </div>
@@ -103,14 +103,14 @@ const formatBirthdate = (dateString) => {
           <div class="space-y-5">
             <!-- Birthdate -->
             <div>
-              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Birthdate</dt>
+              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Birth Date</dt>
               <dd class="mt-1 text-base font-semibold text-gray-900 dark:text-white">{{ formatBirthdate(lecturerProfile.birthdate) }}</dd>
             </div>
 
-            <!-- Academic Background -->
+            <!-- Last Education -->
             <div>
-              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Academic Background</dt>
-              <dd class="mt-1 text-base font-semibold text-gray-900 dark:text-white">{{ lecturerProfile.academic_background || '-' }}</dd>
+              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Last Education</dt>
+              <dd class="mt-1 text-base font-semibold text-gray-900 dark:text-white">{{ lecturerProfile.lasteducation || '-' }}</dd>
             </div>
 
             <!-- Address -->

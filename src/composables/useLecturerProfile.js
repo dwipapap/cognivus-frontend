@@ -3,8 +3,28 @@ import { lecturerAPI } from '../services/api';
 import { authStore } from '../store/auth';
 
 /**
- * Kelola profil lecturer.
- * @returns {Object} State dan fungsi profil
+ * Map gender from backend to frontend.
+ * @param {string} gender - Backend gender code (L/P)
+ * @returns {string} Frontend display text
+ */
+const mapGenderToFrontend = (gender) => {
+  const mapping = { L: 'Laki-laki', P: 'Perempuan' };
+  return mapping[gender] || gender;
+};
+
+/**
+ * Map gender from frontend to backend.
+ * @param {string} gender - Frontend display text
+ * @returns {string} Backend gender code
+ */
+const mapGenderToBackend = (gender) => {
+  const mapping = { 'Laki-laki': 'L', 'Perempuan': 'P' };
+  return mapping[gender] || gender;
+};
+
+/**
+ * Manage lecturer profile.
+ * @returns {Object} State and functions
  */
 export function useLecturerProfile() {
   const lecturerProfile = ref(null);
@@ -13,7 +33,7 @@ export function useLecturerProfile() {
   const isUpdating = ref(false);
 
   /**
-   * Ambil data profil lecturer.
+   * Fetch lecturer profile data.
    */
   const fetchLecturerProfile = async () => {
     const userId = authStore.user?.id;
@@ -28,7 +48,12 @@ export function useLecturerProfile() {
     try {
       const response = await lecturerAPI.getLecturerById(userId);
       if (response.data.success) {
-        lecturerProfile.value = response.data.data;
+        // Transform backend gender to frontend display
+        const data = response.data.data;
+        lecturerProfile.value = {
+          ...data,
+          gender: mapGenderToFrontend(data.gender)
+        };
       } else {
         errorMessage.value = response.data.message || "Profile not found.";
       }
@@ -45,9 +70,9 @@ export function useLecturerProfile() {
   };
 
   /**
-   * Perbarui data profil lecturer.
-   * @param {Object} updateData - Data yang akan diperbarui
-   * @returns {boolean} True jika berhasil
+   * Update lecturer profile data.
+   * @param {Object} updateData - Data to update
+   * @returns {boolean} True if successful
    */
   const updateLecturerProfile = async (updateData) => {
     const userId = authStore.user?.id;
@@ -82,8 +107,8 @@ export function useLecturerProfile() {
   };
 
   /**
-   * Ambil semua data lecturer.
-   * @returns {Array} Daftar lecturer
+   * Get all lecturers data.
+   * @returns {Array} List of lecturers
    */
   const getAllLecturers = async () => {
     isLoading.value = true;
@@ -111,7 +136,7 @@ export function useLecturerProfile() {
   };
 
   onMounted(() => {
-    // Hanya ambil profil jika pengguna adalah lecturer
+    // Only fetch profile if user is lecturer
     if (authStore.role === 'lecturer') {
       fetchLecturerProfile();
     }
@@ -125,5 +150,6 @@ export function useLecturerProfile() {
     fetchLecturerProfile,
     updateLecturerProfile,
     getAllLecturers,
+    mapGenderToBackend // Export for use in forms
   };
 }

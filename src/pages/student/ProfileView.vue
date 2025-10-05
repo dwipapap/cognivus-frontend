@@ -34,7 +34,7 @@ const handleImageError = (event) => {
       </div>
       
       <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-4">
-        {{ studentProfile.nama_lengkap || 'Nama Lengkap' }}
+        {{ studentProfile.fullname || 'Full Name' }}
       </h2>
       
       <!-- Action Button (Centered) -->
@@ -57,43 +57,55 @@ const handleImageError = (event) => {
         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 max-w-4xl mx-auto">
           <!-- Left Column -->
           <div class="space-y-5">
-            <!-- Jenis Kelamin -->
+            <!-- Gender -->
             <div>
-              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Jenis Kelamin</dt>
-              <dd class="mt-1 text-base font-semibold text-gray-900 dark:text-white">{{ studentProfile.jenis_kelamin || 'Laki-laki' }}</dd>
+              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Gender</dt>
+              <dd class="mt-1 text-base font-semibold text-gray-900 dark:text-white">{{ studentProfile.gender || '-' }}</dd>
             </div>
 
             <!-- Email -->
             <div>
               <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Email</dt>
-              <dd class="mt-1 text-base font-semibold text-gray-900 dark:text-white">{{ authStore.user?.email || 'student@unri.ac.id' }}</dd>
+              <dd class="mt-1 text-base font-semibold text-gray-900 dark:text-white">{{ authStore.user?.email || '-' }}</dd>
             </div>
 
             <!-- Phone -->
             <div>
-              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">No. Telp</dt>
-              <dd class="mt-1 text-base font-semibold text-gray-900 dark:text-white">{{ studentProfile.no_hp || '-' }}</dd>
+              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Phone Number</dt>
+              <dd class="mt-1 text-base font-semibold text-gray-900 dark:text-white">{{ studentProfile.phone || '-' }}</dd>
+            </div>
+
+            <!-- Birth Place -->
+            <div>
+              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Birth Place</dt>
+              <dd class="mt-1 text-base font-semibold text-gray-900 dark:text-white">{{ studentProfile.birthplace || '-' }}</dd>
             </div>
           </div>
 
           <!-- Right Column -->
           <div class="space-y-5">
+            <!-- Birth Date -->
+            <div>
+              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Birth Date</dt>
+              <dd class="mt-1 text-base font-semibold text-gray-900 dark:text-white">{{ studentProfile.birthdate || '-' }}</dd>
+            </div>
+
             <!-- Parent Name -->
             <div>
-              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Nama Orang Tua</dt>
-              <dd class="mt-1 text-base font-semibold text-gray-900 dark:text-white">{{ studentProfile.nama_ortu || '-' }}</dd>
+              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Parent Name</dt>
+              <dd class="mt-1 text-base font-semibold text-gray-900 dark:text-white">{{ studentProfile.parentname || '-' }}</dd>
             </div>
 
             <!-- Parent Phone -->
             <div>
-              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">No. HP Orang Tua</dt>
-              <dd class="mt-1 text-base font-semibold text-gray-900 dark:text-white">{{ studentProfile.no_hp_ortu || '-' }}</dd>
+              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Parent Phone</dt>
+              <dd class="mt-1 text-base font-semibold text-gray-900 dark:text-white">{{ studentProfile.parentphone || '-' }}</dd>
             </div>
 
             <!-- Address -->
             <div>
-              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Alamat</dt>
-              <dd class="mt-1 text-base font-semibold text-gray-900 dark:text-white whitespace-pre-line">{{ studentProfile.alamat || '-' }}</dd>
+              <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Address</dt>
+              <dd class="mt-1 text-base font-semibold text-gray-900 dark:text-white whitespace-pre-line">{{ studentProfile.address || '-' }}</dd>
             </div>
           </div>
         </div>

@@ -3,6 +3,7 @@ import { ref, onMounted, nextTick } from 'vue';
 import apiClient from '../../services/api';
 import { authStore } from '../../store/auth';
 import { useForm } from '../../composables/useForm';
+import { useStudentProfile } from '../../composables/useStudentProfile';
 
 // Import reusable components
 import Modal from '../../components/ui/Modal.vue';
@@ -13,31 +14,36 @@ import BaseTextarea from '../../components/form/BaseTextarea.vue';
 import BaseCard from '../../components/ui/BaseCard.vue';
 import LoadingSpinner from '../../components/ui/LoadingSpinner.vue';
 
+const { mapGenderToBackend } = useStudentProfile();
+
 const isLoading = ref(true);
 const showModal = ref(false);
 const modalType = ref('info');
 const modalMessage = ref('');
 const modalRef = ref(null);
 
-// Form setup with validation
+// Form setup with validation (using backend field names)
 const { formData, errors, isSubmitting, submit, getFieldProps, reset } = useForm(
   {
-    id: null,
-    nama_lengkap: '',
-    jenis_kelamin: '',
-    alamat: '',
-    no_hp: '',
-    nama_ortu: '',
-    no_hp_ortu: '',
-    user_id: null,
+    studentid: null,
+    fullname: '',
+    gender: '',
+    address: '',
+    phone: '',
+    parentname: '',
+    parentphone: '',
+    birthdate: '',
+    birthplace: '',
+    classid: null,
+    userid: null
   },
   {
-    nama_lengkap: ['required', { type: 'minLength', min: 2 }],
-    jenis_kelamin: ['required'],
-    alamat: ['required'],
-    no_hp: ['required', 'phone'],
-    nama_ortu: ['required'],
-    no_hp_ortu: ['phone']
+    fullname: ['required', { type: 'minLength', min: 2 }],
+    gender: ['required'],
+    address: ['required'],
+    phone: ['required', 'phone'],
+    parentname: ['required'],
+    parentphone: ['phone']
   }
 );
 
@@ -51,7 +57,7 @@ const fetchProfile = async () => {
   const userId = authStore.user?.id;
   if (!userId) {
     modalType.value = 'error';
-    modalMessage.value = "Pengguna tidak terautentikasi.";
+    modalMessage.value = "User not authenticated.";
     openModal();
     isLoading.value = false;
     return;
@@ -60,15 +66,12 @@ const fetchProfile = async () => {
   try {
     const response = await apiClient.get(`/students/${userId}`);
     if (response.data.success) {
-      console.log('Student profile data:', response.data.data);
-      console.log('Available fields:', Object.keys(response.data.data));
-      
-      // Update form data
+      // Assign backend data directly to form
       Object.assign(formData, response.data.data);
     }
   } catch (error) {
     modalType.value = 'error';
-    modalMessage.value = "Gagal memuat data profil.";
+    modalMessage.value = "Failed to load profile data.";
     openModal();
     console.error(error);
   } finally {
@@ -79,25 +82,29 @@ const fetchProfile = async () => {
 const handleUpdateProfile = async () => {
   try {
     await submit(async (data) => {
-      const userId = data.user_id || authStore.user?.id;
+      const userId = data.userid || authStore.user?.id;
       
       if (!userId) {
-        throw new Error('Tidak dapat memperbarui profil: ID pengguna tidak ditemukan. Silakan muat ulang halaman.');
+        throw new Error('Cannot update profile: User ID not found.');
       }
       
-      console.log('Updating student profile with user ID:', userId);
+      // Transform gender to backend format before sending
+      const updateData = {
+        ...data,
+        gender: mapGenderToBackend(data.gender)
+      };
       
-      const response = await apiClient.put(`/students/${userId}`, data);
+      const response = await apiClient.put(`/students/${userId}`, updateData);
       if (response.data.success) {
         modalType.value = 'success';
-        modalMessage.value = "Profil berhasil diperbarui!";
+        modalMessage.value = "Profile updated successfully!";
         openModal();
       }
     });
   } catch (error) {
     console.error('Update error:', error);
     modalType.value = 'error';
-    modalMessage.value = error.message || "Gagal memperbarui profil. Silakan coba lagi.";
+    modalMessage.value = error.message || "Failed to update profile. Please try again.";
     openModal();
   }
 };
@@ -137,57 +144,71 @@ onMounted(fetchProfile);
 
       <form @submit.prevent="handleUpdateProfile" class="space-y-6">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Nama Lengkap -->
+          <!-- Full Name -->
           <BaseInput
-            v-bind="getFieldProps('nama_lengkap')"
-            label="Nama Lengkap"
-            placeholder="Nama Lengkap"
+            v-bind="getFieldProps('fullname')"
+            label="Full Name"
+            placeholder="Full Name"
             required
           />
           
-          <!-- Jenis Kelamin -->
+          <!-- Gender -->
           <BaseSelect
-            v-bind="getFieldProps('jenis_kelamin')"
-            label="Jenis Kelamin"
-            placeholder="Pilih Jenis Kelamin"
+            v-bind="getFieldProps('gender')"
+            label="Gender"
+            placeholder="Select Gender"
             :options="genderOptions"
             required
           />
 
-          <!-- Nomor HP -->
+          <!-- Phone -->
           <BaseInput
-            v-bind="getFieldProps('no_hp')"
+            v-bind="getFieldProps('phone')"
             type="tel"
-            label="Nomor HP"
+            label="Phone Number"
             placeholder="08xxxxxxxxxx"
             required
           />
 
-          <!-- Nama Orang Tua -->
+          <!-- Parent Name -->
           <BaseInput
-            v-bind="getFieldProps('nama_ortu')"
-            label="Nama Orang Tua"
-            placeholder="Nama Orang Tua"
+            v-bind="getFieldProps('parentname')"
+            label="Parent Name"
+            placeholder="Parent Name"
             required
           />
 
-          <!-- Alamat -->
+          <!-- Address -->
           <div class="md:col-span-2">
             <BaseTextarea
-              v-bind="getFieldProps('alamat')"
-              label="Alamat"
-              placeholder="Alamat lengkap"
+              v-bind="getFieldProps('address')"
+              label="Address"
+              placeholder="Complete address"
               :rows="4"
               required
             />
           </div>
 
-          <!-- Nomor HP Orang Tua -->
+          <!-- Parent Phone -->
           <BaseInput
-            v-bind="getFieldProps('no_hp_ortu')"
+            v-bind="getFieldProps('parentphone')"
             type="tel"
-            label="Nomor HP Orang Tua"
+            label="Parent Phone Number"
             placeholder="08xxxxxxxxxx"
+          />
+
+          <!-- Birth Place -->
+          <BaseInput
+            v-bind="getFieldProps('birthplace')"
+            label="Birth Place"
+            placeholder="Birth Place"
+          />
+
+          <!-- Birth Date -->
+          <BaseInput
+            v-bind="getFieldProps('birthdate')"
+            type="date"
+            label="Birth Date"
           />
         </div>
         
@@ -197,7 +218,7 @@ onMounted(fetchProfile);
             variant="glass-secondary"
             @click="reset"
           >
-            Atur Ulang
+            Reset
           </BaseButton>
           
           <BaseButton
@@ -205,7 +226,7 @@ onMounted(fetchProfile);
             variant="glass-primary"
             :loading="isSubmitting"
           >
-            Perbarui Profil
+            Update Profile
           </BaseButton>
         </div>
       </form>

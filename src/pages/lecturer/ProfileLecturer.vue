@@ -3,14 +3,18 @@ import { ref, onMounted, nextTick } from 'vue';
 import { lecturerAPI } from '../../services/api';
 import { authStore } from '../../store/auth';
 import { useForm } from '../../composables/useForm';
+import { useLecturerProfile } from '../../composables/useLecturerProfile';
 
 // Import reusable components
 import Modal from '../../components/ui/Modal.vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
 import BaseInput from '../../components/form/BaseInput.vue';
+import BaseSelect from '../../components/form/BaseSelect.vue';
 import BaseTextarea from '../../components/form/BaseTextarea.vue';
 import BaseCard from '../../components/ui/BaseCard.vue';
 import LoadingSpinner from '../../components/ui/LoadingSpinner.vue';
+
+const { mapGenderToBackend } = useLecturerProfile();
 
 const isLoading = ref(true);
 const showModal = ref(false);
@@ -18,29 +22,34 @@ const modalType = ref('info');
 const modalMessage = ref('');
 const modalRef = ref(null);
 
-// Form setup with validation
+// Form setup with validation (using backend field names)
 const { formData, errors, isSubmitting, submit, getFieldProps, reset } = useForm(
   {
-    id: null,
+    teacherid: null,
     fullname: '',
-    age: '',
+    gender: '',
     birthplace: '',
-    address: '',
-    phone_number: '',
     birthdate: '',
-    academic_background: '',
-    user_id: null,
+    address: '',
+    phone: '',
+    lasteducation: '',
+    userid: null
   },
   {
     fullname: ['required', { type: 'minLength', min: 2 }],
-    age: ['required'],
+    gender: ['required'],
     birthplace: ['required'],
     address: ['required'],
-    phone_number: ['required', 'phone'],
+    phone: ['required', 'phone'],
     birthdate: ['required'],
-    academic_background: ['required']
+    lasteducation: ['required']
   }
 );
+
+const genderOptions = [
+  { value: 'Laki-laki', label: 'Laki-laki' },
+  { value: 'Perempuan', label: 'Perempuan' }
+];
 
 const fetchProfile = async () => {
   const userId = authStore.user?.id;
@@ -55,21 +64,11 @@ const fetchProfile = async () => {
   try {
     const response = await lecturerAPI.getLecturerById(userId);
     if (response.data.success) {
-      console.log('Lecturer profile data:', response.data.data);
-      console.log('Available fields:', Object.keys(response.data.data));
-      
-      // Update form data with lecturer profile
+      // Assign backend data directly to form
       const profileData = response.data.data;
       Object.assign(formData, {
-        id: profileData.id,
-        fullname: profileData.fullname || '',
-        age: profileData.age || '',
-        birthplace: profileData.birthplace || '',
-        address: profileData.address || '',
-        phone_number: profileData.phone_number || '',
-        birthdate: profileData.birthdate ? profileData.birthdate.split('T')[0] : '', // Format for date input
-        academic_background: profileData.academic_background || '',
-        user_id: profileData.user_id
+        ...profileData,
+        birthdate: profileData.birthdate ? profileData.birthdate.split('T')[0] : ''
       });
     }
   } catch (error) {
@@ -85,23 +84,16 @@ const fetchProfile = async () => {
 const handleUpdateProfile = async () => {
   try {
     await submit(async (data) => {
-      const userId = data.user_id || authStore.user?.id;
+      const userId = data.userid || authStore.user?.id;
       
       if (!userId) {
-        throw new Error('Cannot update profile: User ID not found. Please reload the page.');
+        throw new Error('Cannot update profile: User ID not found.');
       }
       
-      console.log('Updating lecturer profile with user ID:', userId);
-      
-      // Prepare data for update
+      // Transform gender to backend format before sending
       const updateData = {
-        fullname: data.fullname,
-        age: parseInt(data.age),
-        birthplace: data.birthplace,
-        address: data.address,
-        phone_number: data.phone_number,
-        birthdate: data.birthdate,
-        academic_background: data.academic_background
+        ...data,
+        gender: mapGenderToBackend(data.gender)
       };
       
       const response = await lecturerAPI.updateLecturer(userId, updateData);
@@ -162,28 +154,27 @@ onMounted(fetchProfile);
             required
           />
           
-          <!-- Age -->
-          <BaseInput
-            v-bind="getFieldProps('age')"
-            type="number"
-            label="Age"
-            placeholder="Age"
-            min="18"
-            max="100"
+          <!-- Gender -->
+                    <!-- Gender -->
+          <BaseSelect
+            v-bind="getFieldProps('gender')"
+            label="Gender"
+            placeholder="Select Gender"
+            :options="genderOptions"
             required
           />
 
           <!-- Birthplace -->
           <BaseInput
             v-bind="getFieldProps('birthplace')"
-            label="Birthplace"
-            placeholder="Birthplace"
+            label="Birth Place"
+            placeholder="Birth Place"
             required
           />
 
           <!-- Phone Number -->
           <BaseInput
-            v-bind="getFieldProps('phone_number')"
+            v-bind="getFieldProps('phone')"
             type="tel"
             label="Phone Number"
             placeholder="08xxxxxxxxxx"
@@ -194,14 +185,14 @@ onMounted(fetchProfile);
           <BaseInput
             v-bind="getFieldProps('birthdate')"
             type="date"
-            label="Birthdate"
+            label="Birth Date"
             required
           />
 
-          <!-- Academic Background -->
+          <!-- Last Education -->
           <BaseInput
-            v-bind="getFieldProps('academic_background')"
-            label="Academic Background"
+            v-bind="getFieldProps('lasteducation')"
+            label="Last Education"
             placeholder="e.g., M.A. in English Literature"
             required
           />
