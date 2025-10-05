@@ -121,26 +121,22 @@ export const authStore = reactive({
   },
 
   /**
-   * Set data autentikasi user.
-   * @param {Object} user - Data user
+   * Set auth data. Handles both JWT and OAuth.
+   * @param {Object} user - User data
    * @param {string} token - Access token
-   * @param {string} role - Peran user
+   * @param {string} role - User role (student/lecturer/admin/etc)
    */
   setAuth(user, token, role = null) {
     console.log('Setting auth:', { user, token: token ? 'present' : 'null', role });
     
-    // Tentukan role berdasarkan user data atau default ke student
-    let userRole = role;
-    if (!userRole) {
-      // Jika tidak ada role, cek user metadata atau default ke student
-      userRole = user?.user_metadata?.role || user?.app_metadata?.role || 'student';
-    }
+    // Determine role: prioritize explicit role, fallback to metadata
+    const userRole = role || user?.user_metadata?.role || user?.app_metadata?.role || 'student';
     
-  this.user = user;
+    this.user = user;
     this.token = token;
     this.role = userRole;
     
-    // Set expiry 3 jam dari sekarang
+    // Token expires in 3 hours
     const expiryTime = Date.now() + (3 * 60 * 60 * 1000);
     this.tokenExpiry = expiryTime;
     
@@ -150,11 +146,6 @@ export const authStore = reactive({
     try {
       localStorage.setItem('user', JSON.stringify(user));
     } catch {}
-    
-    // Simpan refresh token untuk persistensi sesi
-    if (user?.refresh_token) {
-      localStorage.setItem('refresh_token', user.refresh_token);
-    }
     
     console.log('Auth state after setAuth:', {
       user: this.user,
@@ -166,7 +157,7 @@ export const authStore = reactive({
   },
 
   /**
-   * Hapus semua data autentikasi.
+   * Clear all auth data.
    */
   clearAuth() {
     this.stopExpiryCheck();
@@ -178,13 +169,13 @@ export const authStore = reactive({
     localStorage.removeItem('tokenExpiry');
     localStorage.removeItem('role');
     localStorage.removeItem('user');
-    localStorage.removeItem('refresh_token');
+    // Only sign out Supabase if OAuth was used
     supabase.auth.signOut();
   },
 
   /**
-   * Cek apakah token sudah expired.
-   * @returns {boolean} True jika expired
+   * Check if token is expired.
+   * @returns {boolean} True if expired
    */
   isTokenExpired() {
     if (!this.tokenExpiry && !localStorage.getItem('tokenExpiry')) {
@@ -192,48 +183,50 @@ export const authStore = reactive({
     }
     
     const expiry = this.tokenExpiry || localStorage.getItem('tokenExpiry');
-    const now = Date.now();
-    const isExpired = now > parseInt(expiry);
-    
-    if (isExpired) {
-      console.log('Token expired:', {
-        now: new Date(now).toLocaleString(),
-        expiry: new Date(parseInt(expiry)).toLocaleString()
-      });
-    }
-    
-    return isExpired;
+    return Date.now() > parseInt(expiry);
   },
 
   /**
-   * Cek apakah user terautentikasi.
-   * @returns {boolean} True jika terautentikasi
+   * Check if user is authenticated.
+   * @returns {boolean} True if authenticated
    */
   isAuthenticated() {
-    const hasToken = !!(this.token || localStorage.getItem('token'));
-    const notExpired = !this.isTokenExpired();
-    
-    return hasToken && notExpired;
+    return !!(this.token || localStorage.getItem('token')) && !this.isTokenExpired();
   },
 
   /**
-   * Hitung waktu sisa token.
-   * @returns {Object|null} Waktu sisa dalam jam dan menit
+   * Get time remaining until token expires.
+   * @returns {Object|null} Hours and minutes remaining
    */
   getTimeRemaining() {
-    if (!this.tokenExpiry && !localStorage.getItem('tokenExpiry')) {
-      return null;
-    }
-    
     const expiry = this.tokenExpiry || localStorage.getItem('tokenExpiry');
-    const remaining = parseInt(expiry) - Date.now();
+    if (!expiry) return null;
     
+    const remaining = parseInt(expiry) - Date.now();
     if (remaining <= 0) return null;
     
     const hours = Math.floor(remaining / (60 * 60 * 1000));
     const minutes = Math.floor((remaining % (60 * 60 * 1000)) / (60 * 1000));
     
     return { hours, minutes, totalMs: remaining };
+  },
+
+  /**
+   * Check if user has specific role.
+   * @param {string} requiredRole - Role to check
+   * @returns {boolean} True if user has role
+   */
+  hasRole(requiredRole) {
+    return this.role === requiredRole;
+  },
+
+  /**
+   * Check if user has any of the specified roles.
+   * @param {string[]} roles - Array of roles to check
+   * @returns {boolean} True if user has any role
+   */
+  hasAnyRole(roles) {
+    return roles.includes(this.role);
   }
 });
 

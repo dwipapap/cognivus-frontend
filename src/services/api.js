@@ -79,12 +79,66 @@ export const lecturerAPI = {
   deleteLecturer: (id) => apiClient.delete(`/lecturers/${id}`)
 };
 
+// Course API endpoints
+export const courseAPI = {
+  getAllCourses: () => apiClient.get('/courses'),
+  getCourseById: (id) => apiClient.get(`/courses/${id}`),
+  createCourse: (courseData) => apiClient.post('/courses', courseData),
+  updateCourse: (id, courseData) => apiClient.put(`/courses/${id}`, courseData),
+  deleteCourse: (id) => apiClient.delete(`/courses/${id}`)
+};
+
+// Class API endpoints
+export const classAPI = {
+  getAllClasses: () => apiClient.get('/classes'),
+  getClassById: (id) => apiClient.get(`/classes/${id}`),
+  createClass: (classData) => apiClient.post('/classes', classData),
+  updateClass: (id, classData) => apiClient.put(`/classes/${id}`, classData),
+  deleteClass: (id) => apiClient.delete(`/classes/${id}`)
+};
+
+// Program API endpoints
+export const programAPI = {
+  getAllPrograms: () => apiClient.get('/programs'),
+  getProgramById: (id) => apiClient.get(`/programs/${id}`),
+  createProgram: (programData) => apiClient.post('/programs', programData),
+  updateProgram: (id, programData) => apiClient.put(`/programs/${id}`, programData),
+  deleteProgram: (id) => apiClient.delete(`/programs/${id}`)
+};
+
+// Price API endpoints
+export const priceAPI = {
+  getAllPrices: () => apiClient.get('/prices'),
+  getPriceById: (id) => apiClient.get(`/prices/${id}`),
+  createPrice: (priceData) => apiClient.post('/prices', priceData),
+  updatePrice: (id, priceData) => apiClient.put(`/prices/${id}`, priceData),
+  deletePrice: (id) => apiClient.delete(`/prices/${id}`)
+};
+
+// Level API endpoints
+export const levelAPI = {
+  getAllLevels: () => apiClient.get('/levels'),
+  getLevelById: (id) => apiClient.get(`/levels/${id}`),
+  createLevel: (levelData) => apiClient.post('/levels', levelData),
+  updateLevel: (id, levelData) => apiClient.put(`/levels/${id}`, levelData),
+  deleteLevel: (id) => apiClient.delete(`/levels/${id}`)
+};
+
+// Teacher Level API endpoints
+export const teacherLevelAPI = {
+  getAllTeacherLevels: () => apiClient.get('/teacher_level'),
+  getTeacherLevelById: (id) => apiClient.get(`/teacher_level/${id}`),
+  createTeacherLevel: (data) => apiClient.post('/teacher_level', data),
+  updateTeacherLevel: (id, data) => apiClient.put(`/teacher_level/${id}`, data),
+  deleteTeacherLevel: (id) => apiClient.delete(`/teacher_level/${id}`)
+};
+
 // Auth API endpoints
 export const authAPI = {
   login: (credentials) => apiClient.post('/auth/login', credentials),
   register: (userData) => apiClient.post('/auth/register', userData),
-  logout: () => apiClient.post('/auth/logout'),
-  refreshToken: () => apiClient.post('/auth/refresh')
+  getProfile: () => apiClient.get('/auth/profile'),
+  logout: () => apiClient.post('/auth/logout')
 };
 
 export default apiClient;

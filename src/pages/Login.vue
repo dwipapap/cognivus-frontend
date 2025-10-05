@@ -60,20 +60,25 @@ const handleLogin = async () => {
       if (response.data.success) {
         const { user, token, role } = response.data;
         
-        // Simpan token kustom dan role ke state management
+        // Save JWT token and role to auth store
         authStore.setAuth(user, token, role);
 
+        // Role-based redirect mapping
+        const roleRoutes = {
+          student: '/student/dashboard',
+          lecturer: '/lecturer/dashboard',
+          moderator: '/admin/dashboard',
+          admin: '/admin/dashboard',
+          owner: '/admin/dashboard'
+        };
+
+        const targetRoute = roleRoutes[role] || '/student/dashboard';
+        
         openModal('success', 'Login Berhasil!', `Selamat datang! Anda akan diarahkan ke dashboard ${role}.`);
         
         setTimeout(() => {
           closeModal();
-          if (role === 'lecturer') {
-            router.push('/lecturer/dashboard');
-          } else if (role === 'admin') {
-            router.push('/admin/dashboard');
-          } else {
-            router.push('/');
-          }
+          router.push(targetRoute);
         }, 2000);
       }
     });

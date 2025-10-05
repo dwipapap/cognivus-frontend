@@ -85,11 +85,11 @@ const routes = [
     ]
   },
 
-  // Admin routes
+  // Admin routes (owner, admin, moderator)
   {
     path: '/admin',
     component: AdminLayout,
-    meta: { requiresAuth: true, role: 'admin' }, // Kunci: hanya untuk peran 'admin'
+    meta: { requiresAuth: true, roles: ['owner', 'admin', 'moderator'] },
     children: [
       {
         path: 'dashboard',
@@ -101,7 +101,7 @@ const routes = [
         redirect: { name: 'AdminDashboard' }
       },
       {
-        path: 'lecturers', // URL: /admin/lecturers
+        path: 'lecturers',
         name: 'AdminManageLecturers',
         component: ManageLecturers,
       },
@@ -129,16 +129,17 @@ const router = createRouter({
 });
 
 /**
- * Dapatkan rute dashboard default berdasarkan peran pengguna.
- * @param {string} role - Peran pengguna
- * @returns {string} Nama rute
+ * Get default dashboard route based on user role.
+ * @param {string} role - User role
+ * @returns {string} Route name
  */
 const getDefaultDashboard = (role) => {
   const dashboards = {
+    owner: 'AdminDashboard',
     admin: 'AdminDashboard',
+    moderator: 'AdminDashboard',
     lecturer: 'LecturerDashboard',
-    student: 'StudentDashboard',
-    authenticated: 'StudentDashboard' // Pengguna OAuth default ke student
+    student: 'StudentDashboard'
   };
   return dashboards[role] || 'StudentDashboard';
 };
@@ -146,17 +147,13 @@ const getDefaultDashboard = (role) => {
 // Navigation Guard
 router.beforeEach((to, from, next) => {
   const isAuthenticated = authStore.isAuthenticated();
-  const userRole = authStore.role || authStore.user?.role;
+  const userRole = authStore.role;
 
   console.log('Router guard check:', {
     to: to.path,
-    from: from.path,
     requiresAuth: to.meta.requiresAuth,
     isAuthenticated,
-    userRole,
-    storeRole: authStore.role,
-    tokenExpired: authStore.isTokenExpired(),
-    currentTime: new Date().toLocaleString()
+    userRole
   });
 
   if (to.meta.requiresAuth) {
@@ -164,13 +161,17 @@ router.beforeEach((to, from, next) => {
       return next({ name: 'Login' });
     }
 
-    // Periksa akses berdasarkan peran
+    // Check role-based access (single role or multiple roles)
     if (to.meta.role && to.meta.role !== userRole) {
+      return next({ name: getDefaultDashboard(userRole) });
+    }
+    
+    if (to.meta.roles && !to.meta.roles.includes(userRole)) {
       return next({ name: getDefaultDashboard(userRole) });
     }
   }
 
-  // Arahkan pengguna terautentikasi dari halaman publik
+  // Redirect authenticated users from public pages
   if (isAuthenticated && (to.name === 'Login' || to.name === 'Home')) {
     return next({ name: getDefaultDashboard(userRole) });
   }
