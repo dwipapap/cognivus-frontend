@@ -2,12 +2,19 @@ import { ref, onMounted } from 'vue';
 import { userAPI } from '../services/api';
 import { authStore } from '../store/auth';
 
+/**
+ * Kelola profil user umum.
+ * @returns {Object} State dan fungsi profil
+ */
 export function useUserProfile() {
   const userProfile = ref(null);
   const isLoading = ref(true);
   const errorMessage = ref('');
   const isUpdating = ref(false);
 
+  /**
+   * Ambil data profil user.
+   */
   const fetchUserProfile = async () => {
     const userId = authStore.user?.id;
     if (!userId) {
@@ -26,7 +33,6 @@ export function useUserProfile() {
         errorMessage.value = response.data.message || "Profile not found.";
       }
     } catch (error) {
-      // Handle rate limiting and other errors
       if (error.message && error.message.includes('Too many requests')) {
         errorMessage.value = error.message;
       } else {
@@ -38,6 +44,11 @@ export function useUserProfile() {
     }
   };
 
+  /**
+   * Perbarui data profil user.
+   * @param {Object} updateData - Data yang akan diperbarui
+   * @returns {boolean} True jika berhasil
+   */
   const updateUserProfile = async (updateData) => {
     const userId = authStore.user?.id;
     if (!userId) {
@@ -70,6 +81,11 @@ export function useUserProfile() {
     }
   };
 
+  /**
+   * Buat profil user baru.
+   * @param {Object} userData - Data user baru
+   * @returns {boolean} True jika berhasil
+   */
   const createUserProfile = async (userData) => {
     isUpdating.value = true;
     errorMessage.value = '';

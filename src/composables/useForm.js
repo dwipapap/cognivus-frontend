@@ -1,14 +1,22 @@
 import { ref, computed, reactive } from 'vue';
 
+/**
+ * Kelola state dan validasi form.
+ * @param {Object} initialData - Nilai awal form
+ * @param {Object} validationRules - Aturan validasi field
+ * @returns {Object} Utilitas form
+ */
 export function useForm(initialData = {}, validationRules = {}) {
-  // Form data
   const formData = reactive({ ...initialData });
   const errors = ref({});
   const isSubmitting = ref(false);
   const isDirty = ref(false);
 
-  // Validation rules
+  /**
+   * Aturan validasi bawaan.
+   */
   const rules = {
+    /** Validasi field wajib diisi */
     required: (value) => {
       if (value === null || value === undefined || value === '') {
         return 'This field is required';
@@ -16,29 +24,33 @@ export function useForm(initialData = {}, validationRules = {}) {
       return null;
     },
     
+    /** Validasi format email */
     email: (value) => {
       if (!value) return null;
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       return emailRegex.test(value) ? null : 'Please enter a valid email address';
     },
     
+    /** Validasi panjang minimum */
     minLength: (min) => (value) => {
       if (!value) return null;
       return value.length >= min ? null : `Minimum ${min} characters required`;
     },
     
+    /** Validasi panjang maksimum */
     maxLength: (max) => (value) => {
       if (!value) return null;
       return value.length <= max ? null : `Maximum ${max} characters allowed`;
     },
     
+    /** Validasi nomor telepon */
     phone: (value) => {
       if (!value) return null;
-      // Allow spaces, digits, and optional + at the start.
       const phoneRegex = /^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s./0-9]*$/;
       return phoneRegex.test(value) ? null : 'Please enter a valid phone number';
     },
     
+    /** Validasi URL */
     url: (value) => {
       if (!value) return null;
       try {
@@ -49,15 +61,16 @@ export function useForm(initialData = {}, validationRules = {}) {
       }
     },
     
+    /** Validasi dengan pattern regex */
     pattern: (regex, message = 'Invalid format') => (value) => {
       if (!value) return null;
       return regex.test(value) ? null : message;
     },
     
+    /** Validasi kustom */
     custom: (validator) => validator
   };
 
-  // Computed properties
   const isValid = computed(() => {
     return Object.keys(errors.value).length === 0;
   });
@@ -66,7 +79,12 @@ export function useForm(initialData = {}, validationRules = {}) {
     return Object.keys(errors.value).some(field => errors.value[field]);
   });
 
-  // Methods
+  /**
+   * Validasi satu field.
+   * @param {string} fieldName - Nama field
+   * @param {*} value - Nilai field
+   * @returns {string|null} Pesan error atau null
+   */
   const validateField = (fieldName, value) => {
     const fieldRules = validationRules[fieldName];
     if (!fieldRules) return null;
@@ -98,6 +116,10 @@ export function useForm(initialData = {}, validationRules = {}) {
     return null;
   };
 
+  /**
+   * Validasi semua field.
+   * @returns {boolean} True jika valid
+   */
   const validate = () => {
     const newErrors = {};
     
@@ -112,6 +134,11 @@ export function useForm(initialData = {}, validationRules = {}) {
     return Object.keys(newErrors).length === 0;
   };
 
+  /**
+   * Validasi satu field saja.
+   * @param {string} fieldName - Nama field
+   * @returns {boolean} True jika valid
+   */
   const validateSingleField = (fieldName) => {
     const error = validateField(fieldName, formData[fieldName]);
     if (error) {
@@ -122,22 +149,37 @@ export function useForm(initialData = {}, validationRules = {}) {
     return !error;
   };
 
+  /** Hapus semua error */
   const clearErrors = () => {
     errors.value = {};
   };
 
+  /**
+   * Hapus error field tertentu.
+   * @param {string} fieldName - Nama field
+   */
   const clearError = (fieldName) => {
     delete errors.value[fieldName];
   };
 
+  /**
+   * Set error untuk field.
+   * @param {string} fieldName - Nama field
+   * @param {string} message - Pesan error
+   */
   const setError = (fieldName, message) => {
     errors.value[fieldName] = message;
   };
 
+  /**
+   * Set multiple errors.
+   * @param {Object} errorObj - Object error
+   */
   const setErrors = (errorObj) => {
     errors.value = { ...errors.value, ...errorObj };
   };
 
+  /** Reset form ke nilai awal */
   const reset = () => {
     Object.keys(formData).forEach(key => {
       formData[key] = initialData[key] || '';
@@ -146,6 +188,11 @@ export function useForm(initialData = {}, validationRules = {}) {
     isDirty.value = false;
   };
 
+  /**
+   * Submit form dengan validasi.
+   * @param {Function} submitHandler - Handler untuk submit
+   * @returns {Promise} Hasil submit
+   */
   const submit = async (submitHandler) => {
     if (isSubmitting.value) return;
     
@@ -166,17 +213,21 @@ export function useForm(initialData = {}, validationRules = {}) {
     }
   };
 
+  /**
+   * Update nilai field.
+   * @param {string} fieldName - Nama field
+   * @param {*} value - Nilai baru
+   */
   const updateField = (fieldName, value) => {
     formData[fieldName] = value;
     isDirty.value = true;
     
-    // Clear error for this field if it exists
     if (errors.value[fieldName]) {
       clearError(fieldName);
     }
   };
 
-  // Watch for changes to mark form as dirty
+  /** Tandai form sudah diubah */
   const markDirty = () => {
     isDirty.value = true;
   };
@@ -202,7 +253,11 @@ export function useForm(initialData = {}, validationRules = {}) {
     updateField,
     markDirty,
     
-    // Field helpers
+    /**
+     * Dapatkan props untuk field component.
+     * @param {string} fieldName - Nama field
+     * @returns {Object} Props untuk v-bind
+     */
     getFieldProps: (fieldName) => ({
       modelValue: formData[fieldName],
       error: errors.value[fieldName],
@@ -212,7 +267,9 @@ export function useForm(initialData = {}, validationRules = {}) {
   };
 }
 
-// Predefined validation rule sets
+/**
+ * Set aturan validasi umum.
+ */
 export const commonValidations = {
   email: ['required', 'email'],
   password: ['required', { type: 'minLength', min: 6 }],

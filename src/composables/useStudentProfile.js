@@ -2,11 +2,18 @@ import { ref, onMounted } from 'vue';
 import { studentAPI } from '../services/api';
 import { authStore } from '../store/auth';
 
+/**
+ * Kelola profil student.
+ * @returns {Object} State dan fungsi profil
+ */
 export function useStudentProfile() {
   const studentProfile = ref(null);
   const isLoading = ref(true);
   const errorMessage = ref('');
 
+  /**
+   * Ambil data profil student.
+   */
   const fetchStudentProfile = async () => {
     const userId = authStore.user?.id;
     if (!userId) {
@@ -25,7 +32,6 @@ export function useStudentProfile() {
         errorMessage.value = response.data.message || "Profile not found.";
       }
     } catch (error) {
-      // Handle rate limiting and other errors
       if (error.message && error.message.includes('Too many requests')) {
         errorMessage.value = error.message;
       } else {

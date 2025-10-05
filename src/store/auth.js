@@ -1,6 +1,10 @@
 import { reactive } from 'vue';
 import { supabase } from '../supabase';
 
+/**
+ * Store manajemen autentikasi.
+ * Mengelola state user, token, dan sesi.
+ */
 export const authStore = reactive({
   user: (() => {
     try {
@@ -16,6 +20,10 @@ export const authStore = reactive({
   isInitialized: false,
   expiryCheckInterval: null,
 
+  /**
+   * Inisialisasi auth store.
+   * Setup listener dan interval check.
+   */
   async init() {
     // Prevent double initialization
     if (this.isInitialized) {
@@ -112,14 +120,19 @@ export const authStore = reactive({
     }
   },
 
+  /**
+   * Set data autentikasi user.
+   * @param {Object} user - Data user
+   * @param {string} token - Access token
+   * @param {string} role - Peran user
+   */
   setAuth(user, token, role = null) {
     console.log('Setting auth:', { user, token: token ? 'present' : 'null', role });
     
-    // Determine role based on user data or default to student for OAuth users
+    // Tentukan role berdasarkan user data atau default ke student
     let userRole = role;
     if (!userRole) {
-      // If no role provided, check user metadata or default to student
-      // For Google OAuth users, default to student unless specified otherwise
+      // Jika tidak ada role, cek user metadata atau default ke student
       userRole = user?.user_metadata?.role || user?.app_metadata?.role || 'student';
     }
     
@@ -127,8 +140,8 @@ export const authStore = reactive({
     this.token = token;
     this.role = userRole;
     
-    // Set token expiry to 3 hours from now
-    const expiryTime = Date.now() + (3 * 60 * 60 * 1000); // 3 hours in milliseconds
+    // Set expiry 3 jam dari sekarang
+    const expiryTime = Date.now() + (3 * 60 * 60 * 1000);
     this.tokenExpiry = expiryTime;
     
     localStorage.setItem('token', token);
@@ -138,7 +151,7 @@ export const authStore = reactive({
       localStorage.setItem('user', JSON.stringify(user));
     } catch {}
     
-    // Store refresh token for session persistence
+    // Simpan refresh token untuk persistensi sesi
     if (user?.refresh_token) {
       localStorage.setItem('refresh_token', user.refresh_token);
     }
@@ -152,6 +165,9 @@ export const authStore = reactive({
     });
   },
 
+  /**
+   * Hapus semua data autentikasi.
+   */
   clearAuth() {
     this.stopExpiryCheck();
     this.user = null;
@@ -166,9 +182,13 @@ export const authStore = reactive({
     supabase.auth.signOut();
   },
 
+  /**
+   * Cek apakah token sudah expired.
+   * @returns {boolean} True jika expired
+   */
   isTokenExpired() {
     if (!this.tokenExpiry && !localStorage.getItem('tokenExpiry')) {
-      return false; // No expiry set
+      return false;
     }
     
     const expiry = this.tokenExpiry || localStorage.getItem('tokenExpiry');
@@ -185,14 +205,21 @@ export const authStore = reactive({
     return isExpired;
   },
 
+  /**
+   * Cek apakah user terautentikasi.
+   * @returns {boolean} True jika terautentikasi
+   */
   isAuthenticated() {
-    // Check if token exists and is not expired
     const hasToken = !!(this.token || localStorage.getItem('token'));
     const notExpired = !this.isTokenExpired();
     
     return hasToken && notExpired;
   },
 
+  /**
+   * Hitung waktu sisa token.
+   * @returns {Object|null} Waktu sisa dalam jam dan menit
+   */
   getTimeRemaining() {
     if (!this.tokenExpiry && !localStorage.getItem('tokenExpiry')) {
       return null;

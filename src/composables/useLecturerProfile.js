@@ -2,12 +2,19 @@ import { ref, onMounted } from 'vue';
 import { lecturerAPI } from '../services/api';
 import { authStore } from '../store/auth';
 
+/**
+ * Kelola profil lecturer.
+ * @returns {Object} State dan fungsi profil
+ */
 export function useLecturerProfile() {
   const lecturerProfile = ref(null);
   const isLoading = ref(true);
   const errorMessage = ref('');
   const isUpdating = ref(false);
 
+  /**
+   * Ambil data profil lecturer.
+   */
   const fetchLecturerProfile = async () => {
     const userId = authStore.user?.id;
     if (!userId) {
@@ -26,7 +33,6 @@ export function useLecturerProfile() {
         errorMessage.value = response.data.message || "Profile not found.";
       }
     } catch (error) {
-      // Handle rate limiting and other errors
       if (error.message && error.message.includes('Too many requests')) {
         errorMessage.value = error.message;
       } else {
@@ -38,6 +44,11 @@ export function useLecturerProfile() {
     }
   };
 
+  /**
+   * Perbarui data profil lecturer.
+   * @param {Object} updateData - Data yang akan diperbarui
+   * @returns {boolean} True jika berhasil
+   */
   const updateLecturerProfile = async (updateData) => {
     const userId = authStore.user?.id;
     if (!userId) {
@@ -70,6 +81,10 @@ export function useLecturerProfile() {
     }
   };
 
+  /**
+   * Ambil semua data lecturer.
+   * @returns {Array} Daftar lecturer
+   */
   const getAllLecturers = async () => {
     isLoading.value = true;
     errorMessage.value = '';
@@ -96,7 +111,7 @@ export function useLecturerProfile() {
   };
 
   onMounted(() => {
-    // Only fetch profile if user is a lecturer
+    // Hanya ambil profil jika pengguna adalah lecturer
     if (authStore.role === 'lecturer') {
       fetchLecturerProfile();
     }
