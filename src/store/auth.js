@@ -16,10 +16,17 @@ export const authStore = reactive({
   isInitialized: false,
 
   async init() {
+    // Prevent double initialization
+    if (this.isInitialized) {
+      console.log('Auth store already initialized, skipping');
+      return;
+    }
+
     // Check if token is expired on initialization
     if (this.isTokenExpired()) {
       console.log('Token expired on init, clearing auth');
       this.clearAuth();
+      this.isInitialized = true;
       return;
     }
 
