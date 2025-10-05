@@ -129,16 +129,16 @@ const router = createRouter({
 });
 
 /**
- * Get default dashboard route for user role.
- * @param {string} role - User role
- * @returns {string} Route name
+ * Dapatkan rute dashboard default berdasarkan peran pengguna.
+ * @param {string} role - Peran pengguna
+ * @returns {string} Nama rute
  */
 const getDefaultDashboard = (role) => {
   const dashboards = {
     admin: 'AdminDashboard',
     lecturer: 'LecturerDashboard',
     student: 'StudentDashboard',
-    authenticated: 'StudentDashboard' // OAuth users default to student
+    authenticated: 'StudentDashboard' // Pengguna OAuth default ke student
   };
   return dashboards[role] || 'StudentDashboard';
 };
@@ -164,13 +164,13 @@ router.beforeEach((to, from, next) => {
       return next({ name: 'Login' });
     }
 
-    // Check role-specific access
+    // Periksa akses berdasarkan peran
     if (to.meta.role && to.meta.role !== userRole) {
       return next({ name: getDefaultDashboard(userRole) });
     }
   }
 
-  // Redirect authenticated users from public pages
+  // Arahkan pengguna terautentikasi dari halaman publik
   if (isAuthenticated && (to.name === 'Login' || to.name === 'Home')) {
     return next({ name: getDefaultDashboard(userRole) });
   }

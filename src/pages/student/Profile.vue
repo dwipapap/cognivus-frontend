@@ -51,7 +51,7 @@ const fetchProfile = async () => {
   const userId = authStore.user?.id;
   if (!userId) {
     modalType.value = 'error';
-    modalMessage.value = "User not authenticated.";
+    modalMessage.value = "Pengguna tidak terautentikasi.";
     openModal();
     isLoading.value = false;
     return;
@@ -68,7 +68,7 @@ const fetchProfile = async () => {
     }
   } catch (error) {
     modalType.value = 'error';
-    modalMessage.value = "Failed to fetch profile data.";
+    modalMessage.value = "Gagal memuat data profil.";
     openModal();
     console.error(error);
   } finally {
@@ -82,7 +82,7 @@ const handleUpdateProfile = async () => {
       const userId = data.user_id || authStore.user?.id;
       
       if (!userId) {
-        throw new Error('Cannot update profile: User ID not found. Please reload the page.');
+        throw new Error('Tidak dapat memperbarui profil: ID pengguna tidak ditemukan. Silakan muat ulang halaman.');
       }
       
       console.log('Updating student profile with user ID:', userId);
@@ -90,14 +90,14 @@ const handleUpdateProfile = async () => {
       const response = await apiClient.put(`/students/${userId}`, data);
       if (response.data.success) {
         modalType.value = 'success';
-        modalMessage.value = "Profile updated successfully!";
+        modalMessage.value = "Profil berhasil diperbarui!";
         openModal();
       }
     });
   } catch (error) {
     console.error('Update error:', error);
     modalType.value = 'error';
-    modalMessage.value = error.message || "Failed to update profile. Please try again.";
+    modalMessage.value = error.message || "Gagal memperbarui profil. Silakan coba lagi.";
     openModal();
   }
 };
@@ -121,18 +121,18 @@ onMounted(fetchProfile);
 
 <template>
   <div>
-    <h1 class="text-3xl font-bold text-gray-900 mb-6">Edit My Profile</h1>
+    <h1 class="text-3xl font-bold text-gray-900 mb-6">Edit Profil Saya</h1>
 
     <LoadingSpinner
       v-if="isLoading"
       center
       size="lg"
-      text="Loading profile data..."
+      text="Memuat data profil..."
     />
 
     <BaseCard v-else size="lg" class="max-w-4xl">
       <template #title>
-        <h2 class="text-xl font-semibold text-gray-800">Profile Information</h2>
+        <h2 class="text-xl font-semibold text-gray-800">Informasi Profil</h2>
       </template>
 
       <form @submit.prevent="handleUpdateProfile" class="space-y-6">
@@ -197,7 +197,7 @@ onMounted(fetchProfile);
             variant="glass-secondary"
             @click="reset"
           >
-            Reset
+            Atur Ulang
           </BaseButton>
           
           <BaseButton
@@ -205,7 +205,7 @@ onMounted(fetchProfile);
             variant="glass-primary"
             :loading="isSubmitting"
           >
-            Update Profile
+            Perbarui Profil
           </BaseButton>
         </div>
       </form>
