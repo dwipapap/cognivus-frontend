@@ -16,6 +16,8 @@ import ProfileLecturer from '../pages/lecturer/ProfileLecturer.vue';
 import AdminLayout from '../pages/admin/AdminLayout.vue';
 import DashboardAdmin from '../pages/admin/DashboardAdmin.vue';
 import ManageLecturers from '../pages/admin/ManageLecturers.vue';
+import ManageClasses from '../pages/admin/ManageClasses.vue';
+import ManagePrices from '../pages/admin/ManagePrices.vue';
 
 const routes = [
   {
@@ -104,6 +106,16 @@ const routes = [
         path: 'lecturers',
         name: 'AdminManageLecturers',
         component: ManageLecturers,
+      },
+      {
+        path: 'classes',
+        name: 'AdminManageClasses',
+        component: ManageClasses,
+      },
+      {
+        path: 'prices',
+        name: 'AdminManagePrices',
+        component: ManagePrices,
       },
     ]
   },
