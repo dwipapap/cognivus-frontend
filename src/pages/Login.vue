@@ -151,7 +151,7 @@ const handleGoogleLogin = async () => {
               block
               :loading="isSubmitting"
             >
-              Masuk sebagai Pengajar
+              Masuk
             </BaseButton>
           </form>
 
