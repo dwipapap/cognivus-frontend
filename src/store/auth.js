@@ -14,6 +14,7 @@ export const authStore = reactive({
   role: localStorage.getItem('role') || null,
   tokenExpiry: localStorage.getItem('tokenExpiry') || null,
   isInitialized: false,
+  expiryCheckInterval: null,
 
   async init() {
     // Prevent double initialization
@@ -69,9 +70,19 @@ export const authStore = reactive({
     
     this.isInitialized = true;
 
-    // Set up token expiry check interval (every 5 minutes)
+    // Start token expiry check interval
+    this.startExpiryCheck();
+  },
+
+  /**
+   * Start interval to check token expiry.
+   */
+  startExpiryCheck() {
+    // Clear existing interval
+    this.stopExpiryCheck();
+
     let lastCheckTime = Date.now();
-    setInterval(() => {
+    this.expiryCheckInterval = setInterval(() => {
       const now = Date.now();
       if (now - lastCheckTime < 60000) {
         console.log('Skipping redundant token check');
@@ -82,14 +93,23 @@ export const authStore = reactive({
       if (this.isTokenExpired()) {
         console.log('Token expired, auto-logout');
         this.clearAuth();
-        // Redirect to login if on a protected route
         if (window.location.pathname.startsWith('/student')) {
           window.location.href = '/login';
         }
       } else {
         console.log('Token still valid, no action taken');
       }
-    }, 60000); // 60 seconds
+    }, 60000);
+  },
+
+  /**
+   * Stop token expiry check interval.
+   */
+  stopExpiryCheck() {
+    if (this.expiryCheckInterval) {
+      clearInterval(this.expiryCheckInterval);
+      this.expiryCheckInterval = null;
+    }
   },
 
   setAuth(user, token, role = null) {
@@ -133,6 +153,7 @@ export const authStore = reactive({
   },
 
   clearAuth() {
+    this.stopExpiryCheck();
     this.user = null;
     this.token = null;
     this.role = null;
