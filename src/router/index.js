@@ -128,10 +128,25 @@ const router = createRouter({
   routes,
 });
 
+/**
+ * Get default dashboard route for user role.
+ * @param {string} role - User role
+ * @returns {string} Route name
+ */
+const getDefaultDashboard = (role) => {
+  const dashboards = {
+    admin: 'AdminDashboard',
+    lecturer: 'LecturerDashboard',
+    student: 'StudentDashboard',
+    authenticated: 'StudentDashboard' // OAuth users default to student
+  };
+  return dashboards[role] || 'StudentDashboard';
+};
+
 // Navigation Guard
 router.beforeEach((to, from, next) => {
   const isAuthenticated = authStore.isAuthenticated();
-  const userRole = authStore.role || authStore.user?.role; // Get role from store or user object
+  const userRole = authStore.role || authStore.user?.role;
 
   console.log('Router guard check:', {
     to: to.path,
@@ -146,39 +161,21 @@ router.beforeEach((to, from, next) => {
 
   if (to.meta.requiresAuth) {
     if (!isAuthenticated) {
-      // Jika tidak login, arahkan ke halaman login
       return next({ name: 'Login' });
     }
 
-    // Cek jika rute memerlukan peran spesifik
+    // Check role-specific access
     if (to.meta.role && to.meta.role !== userRole) {
-      // Jika peran tidak cocok, arahkan ke halaman yang sesuai
-      // Default to student for OAuth users with 'authenticated' role
-      if (userRole === 'student' || userRole === 'authenticated') {
-        return next({ name: 'StudentDashboard' });
-      }
-      // Jika ada peran lain, bisa ditambahkan di sini
-      return next({ name: 'Login' }); // fallback
+      return next({ name: getDefaultDashboard(userRole) });
     }
   }
 
-  // Redirect pengguna yang sudah login dari halaman publik
+  // Redirect authenticated users from public pages
   if (isAuthenticated && (to.name === 'Login' || to.name === 'Home')) {
-    // Default to student dashboard for OAuth users with 'authenticated' role
-    if (userRole === 'student' || userRole === 'authenticated') {
-      return next({ name: 'StudentDashboard' });
-    }
-    if (userRole === 'lecturer') {
-      return next({ name: 'LecturerDashboard' });
-    }
-    if (userRole === 'admin') {
-      return next({ name: 'AdminDashboard' });
-    }
-    // Fallback to student dashboard for any other authenticated users
-    return next({ name: 'StudentDashboard' });
+    return next({ name: getDefaultDashboard(userRole) });
   }
 
-  next(); // Izinkan navigasi
+  next();
 });
 
 export default router;
