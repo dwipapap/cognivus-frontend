@@ -1,0 +1,107 @@
+/* 
+ * Performance-Optimized Glassmorphism Utilities
+ * Reduces blur values and adds performance optimizations for better support on older devices
+ */
+
+/* Base performance optimizations for all glassmorphism elements */
+.glass-performance {
+  /* Force hardware acceleration */
+  will-change: transform;
+  transform: translateZ(0);
+  
+  /* Optimize compositing */
+  isolation: isolate;
+  
+  /* Reduce motion for users who prefer it */
+  @media (prefers-reduced-motion: reduce) {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+  }
+  
+  /* Fallback for browsers that don't support backdrop-filter */
+  @supports not (backdrop-filter: blur(1px)) {
+    background: rgba(255, 255, 255, 0.8) !important;
+  }
+}
+
+/* Utility classes for optimized glassmorphism */
+.glass-light {
+  background: rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 4px 16px rgba(31, 38, 135, 0.2);
+}
+
+.glass-medium {
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 4px 16px rgba(31, 38, 135, 0.25);
+}
+
+.glass-dark {
+  background: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* Performance-optimized blur utilities */
+.blur-xs { backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); }
+.blur-sm { backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+.blur-md { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.blur-lg { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+
+/* Mobile-specific optimizations */
+@media (max-width: 768px) {
+  .glass-light,
+  .glass-medium,
+  .glass-dark {
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+  }
+  
+  .blur-xs { backdrop-filter: blur(1px); -webkit-backdrop-filter: blur(1px); }
+  .blur-sm { backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); }
+  .blur-md { backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+  .blur-lg { backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+}
+
+/* GPU-based performance hints */
+.glass-optimized {
+  /* Promote to composite layer */
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  
+  /* Use GPU for filters when possible */
+  filter: brightness(1.02);
+  
+  /* Optimize repaints */
+  contain: layout style paint;
+}
+
+/* Responsive glassmorphism that adapts to device capabilities */
+@media (prefers-reduced-motion: no-preference) and (min-resolution: 2dppx) {
+  /* High DPI displays can handle slightly more blur */
+  .glass-light,
+  .glass-medium,
+  .glass-dark {
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+  }
+}
+
+/* Battery-saving mode adjustments */
+@media (prefers-reduced-motion: reduce) {
+  .glass-light,
+  .glass-medium,
+  .glass-dark {
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    box-shadow: 0 2px 8px rgba(31, 38, 135, 0.15);
+  }
+}
