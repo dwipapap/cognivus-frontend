@@ -19,31 +19,31 @@ const props = defineProps({
 const emit = defineEmits(['close', 'save']);
 
 const { formData, errors, isSubmitting, submit, getFieldProps, reset } = useForm(
-  {}, // Initial data will be set via watcher
+  {},
   {
     username: ['required'],
     email: ['required', 'email'],
-    password: props.isEditMode ? [] : ['required', { type: 'minLength', min: 8 }], // Password only required on create
+    password: props.isEditMode ? [] : ['required', { type: 'minLength', min: 8 }],
     fullname: ['required'],
-    phone_number: ['required', 'phone']
+    phone: ['required', 'phone']
   }
 );
 
-// Watch for changes in the lecturer prop to populate the form
+// Watch for changes to populate form
 watch(() => props.lecturer, (newVal) => {
   if (newVal) {
-    formData.username = newVal.users?.username || '';
-    formData.email = newVal.users?.email || '';
+    formData.username = newVal.tbuser?.username || '';
+    formData.email = newVal.tbuser?.email || '';
     formData.fullname = newVal.fullname || '';
-    formData.age = newVal.age || '';
     formData.birthplace = newVal.birthplace || '';
     formData.address = newVal.address || '';
-    formData.phone_number = newVal.phone_number || '';
+    formData.phone = newVal.phone || '';
     formData.birthdate = newVal.birthdate ? newVal.birthdate.split('T')[0] : '';
-    formData.academic_background = newVal.academic_background || '';
-    formData.password = ''; // Selalu kosongkan password
+    formData.lasteducation = newVal.lasteducation || '';
+    formData.gender = newVal.gender || '';
+    formData.password = '';
   } else {
-    reset(); // Reset form jika tidak ada data lecturer (mode tambah)
+    reset();
   }
 }, { immediate: true });
 
@@ -79,14 +79,14 @@ const handleSave = async () => {
     <hr class="border-gray-600 my-4" />
     <BaseInput v-bind="getFieldProps('fullname')" label="Full Name" required />
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <BaseInput v-bind="getFieldProps('phone_number')" type="tel" label="Phone Number" required />
-        <BaseInput v-bind="getFieldProps('age')" type="number" label="Age" />
+        <BaseInput v-bind="getFieldProps('phone')" type="tel" label="Phone Number" required />
+        <BaseInput v-bind="getFieldProps('gender')" label="Gender" placeholder="L or P" />
     </div>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <BaseInput v-bind="getFieldProps('birthplace')" label="Birthplace" />
         <BaseInput v-bind="getFieldProps('birthdate')" type="date" label="Birthdate" />
     </div>
-    <BaseInput v-bind="getFieldProps('academic_background')" label="Academic Background" />
+    <BaseInput v-bind="getFieldProps('lasteducation')" label="Last Education" />
     <BaseTextarea v-bind="getFieldProps('address')" label="Address" :rows="3" />
 
     <div class="flex justify-end space-x-3 pt-4">

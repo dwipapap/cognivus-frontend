@@ -22,10 +22,10 @@ const modalType = ref('info');
 const modalMessage = ref('');
 const modalRef = ref(null);
 
-// Form setup with validation (using backend field names)
+// Form setup with validation
 const { formData, errors, isSubmitting, submit, getFieldProps, reset } = useForm(
   {
-    teacherid: null,
+    lecturerid: null,
     fullname: '',
     gender: '',
     birthplace: '',
@@ -63,8 +63,7 @@ const fetchProfile = async () => {
 
   try {
     const response = await lecturerAPI.getLecturerById(userId);
-    if (response.data.success) {
-      // Assign backend data directly to form
+    if (response.data.success && response.data.data) {
       const profileData = response.data.data;
       Object.assign(formData, {
         ...profileData,
@@ -90,7 +89,7 @@ const handleUpdateProfile = async () => {
         throw new Error('Cannot update profile: User ID not found.');
       }
       
-      // Transform gender to backend format before sending
+      // Transform gender to backend format
       const updateData = {
         ...data,
         gender: mapGenderToBackend(data.gender)
@@ -155,7 +154,6 @@ onMounted(fetchProfile);
           />
           
           <!-- Gender -->
-                    <!-- Gender -->
           <BaseSelect
             v-bind="getFieldProps('gender')"
             label="Gender"

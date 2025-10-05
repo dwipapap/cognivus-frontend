@@ -49,17 +49,15 @@ const openEditModal = (lecturer) => {
 const handleSave = async (formData) => {
   try {
     if (isEditMode.value) {
-      // Panggil API update
-      const lecturerId = selectedLecturer.value.id;
+      const lecturerId = selectedLecturer.value.userid;
       await lecturerAPI.updateLecturer(lecturerId, formData);
       showNotification('success', 'Lecturer data has been successfully updated.');
     } else {
-      // Panggil API create
       await lecturerAPI.createLecturer(formData);
       showNotification('success', 'New lecturer has been successfully created.');
     }
     showFormModal.value = false;
-    fetchLecturers(); // Muat ulang data
+    fetchLecturers();
   } catch (error) {
     const message = error.response?.data?.message || 'An error occurred.';
     showNotification('error', `Failed to save lecturer: ${message}`);
@@ -69,7 +67,7 @@ const handleSave = async (formData) => {
 const handleDelete = async (lecturer) => {
   if (confirm(`Are you sure you want to delete ${lecturer.fullname}? This action cannot be undone.`)) {
     try {
-      await lecturerAPI.deleteLecturer(lecturer.id);
+      await lecturerAPI.deleteLecturer(lecturer.lecturerid);
       showNotification('success', 'Lecturer has been deleted.');
       fetchLecturers();
     } catch (error) {
@@ -109,10 +107,10 @@ onMounted(fetchLecturers);
             <tr v-else-if="lecturers.length === 0">
               <td colspan="4" class="text-center py-4">No lecturers found.</td>
             </tr>
-            <tr v-for="lecturer in lecturers" :key="lecturer.id" class="border-b border-gray-700 hover:bg-gray-700">
+            <tr v-for="lecturer in lecturers" :key="lecturer.lecturerid" class="border-b border-gray-700 hover:bg-gray-700">
               <td class="px-6 py-4 font-medium text-white">{{ lecturer.fullname }}</td>
-              <td class="px-6 py-4">{{ lecturer.users?.email || 'N/A' }}</td>
-              <td class="px-6 py-4">{{ lecturer.phone_number }}</td>
+              <td class="px-6 py-4">{{ lecturer.tbuser?.email || 'N/A' }}</td>
+              <td class="px-6 py-4">{{ lecturer.phone || 'N/A' }}</td>
               <td class="px-6 py-4 flex space-x-2">
                 <button @click="openEditModal(lecturer)" class="font-medium text-blue-500 hover:underline">Edit</button>
                 <button @click="handleDelete(lecturer)" class="font-medium text-red-500 hover:underline">Delete</button>

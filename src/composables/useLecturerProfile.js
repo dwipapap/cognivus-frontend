@@ -47,8 +47,7 @@ export function useLecturerProfile() {
     errorMessage.value = '';
     try {
       const response = await lecturerAPI.getLecturerById(userId);
-      if (response.data.success) {
-        // Transform backend gender to frontend display
+      if (response.data.success && response.data.data) {
         const data = response.data.data;
         lecturerProfile.value = {
           ...data,
