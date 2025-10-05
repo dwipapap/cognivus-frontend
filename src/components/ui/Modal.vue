@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, nextTick, watch } from 'vue';
+import { ref, computed, nextTick, watch, onMounted, onUnmounted } from 'vue';
 
 // Props definition with proper validation
 const props = defineProps({
@@ -99,21 +99,28 @@ const handleConfirm = () => {
 
 // Handle escape key
 const handleKeydown = (event) => {
-  if (event.key === 'Escape' && !props.persistent) {
-    emit('close');
+  if (event.key === 'Escape' && props.show) {
+    emit('update:show', false);
   }
 };
 
-// Focus management
+// Setup event listener once on mount
+onMounted(() => {
+  document.addEventListener('keydown', handleKeydown);
+});
+
+// Cleanup event listener on unmount
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleKeydown);
+});
+
+// Watch the `show` prop to focus the modal when it opens
 watch(() => props.show, async (newValue) => {
   if (newValue) {
     await nextTick();
     if (modalRef.value) {
       modalRef.value.focus();
     }
-    document.addEventListener('keydown', handleKeydown);
-  } else {
-    document.removeEventListener('keydown', handleKeydown);
   }
 });
 </script>
