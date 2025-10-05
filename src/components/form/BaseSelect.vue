@@ -155,7 +155,7 @@ defineExpose({
     >
       <!-- Placeholder option -->
       <option 
-        v-if="!multiple && placeholder" 
+        v-if="!multiple && placeholder && !$slots.default" 
         value="" 
         disabled
         :selected="modelValue === ''"
@@ -163,8 +163,12 @@ defineExpose({
         {{ placeholder }}
       </option>
 
-      <!-- Options -->
+      <!-- Slot content (priority over options prop) -->
+      <slot v-if="$slots.default"></slot>
+
+      <!-- Options from prop -->
       <option
+        v-else
         v-for="option in normalizedOptions"
         :key="option[valueKey]"
         :value="option[valueKey]"
