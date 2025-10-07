@@ -182,12 +182,13 @@ onUnmounted(() => {
               </router-link>
             </li>
             <li>
-              <a href="#" class="nav-item flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:text-blue-600 group">
+              <router-link to="/student/courses"
+                class="nav-item flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:text-blue-600 group">
                 <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"></path>
                 </svg>
-                <span class="sidebar-text ml-3 opacity-0 whitespace-nowrap overflow-hidden">Courses</span>
-              </a>
+                <span class="sidebar-text ml-3 opacity-0 whitespace-nowrap overflow-hidden">My Courses</span>
+              </router-link>
             </li>
             <li>
               <router-link to="/student/profile-view"
@@ -224,12 +225,12 @@ onUnmounted(() => {
               </router-link>
             </li>
             <li>
-              <a href="#" class="mobile-nav-item flex flex-col items-center gap-1">
+              <router-link to="/student/courses" class="mobile-nav-item flex flex-col items-center gap-1">
                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"></path>
                 </svg>
                 <span class="text-xs">Courses</span>
-              </a>
+              </router-link>
             </li>
             <li>
               <router-link to="/student/profile-view" class="mobile-nav-item flex flex-col items-center gap-1">
