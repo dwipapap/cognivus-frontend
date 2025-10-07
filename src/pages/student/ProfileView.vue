@@ -1,8 +1,12 @@
 <script setup>
+import { ref, watchEffect } from 'vue';
 import { authStore } from '../../store/auth';
 import { useStudentProfile } from '../../composables/useStudentProfile';
+import { classAPI, levelAPI } from '../../services/api';
 
 const { studentProfile, isLoading, errorMessage } = useStudentProfile();
+const classCode = ref('-');
+const levelName = ref('-');
 
 /** Handle avatar image loading errors */
 const handleImageError = (event) => {
@@ -22,6 +26,28 @@ const formatDate = (dateString) => {
     return dateString;
   }
 };
+
+/** Fetch class and level data */
+watchEffect(async () => {
+  if (studentProfile.value?.classid) {
+    try {
+      const classRes = await classAPI.getClassById(studentProfile.value.classid);
+      if (classRes.data.success) {
+        classCode.value = classRes.data.data.class_code || '-';
+        
+        // Fetch level name
+        if (classRes.data.data.levelid) {
+          const levelRes = await levelAPI.getLevelById(classRes.data.data.levelid);
+          if (levelRes.data.success) {
+            levelName.value = levelRes.data.data.name || '-';
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching class data:', error);
+    }
+  }
+});
 </script>
 
 
@@ -56,8 +82,8 @@ const formatDate = (dateString) => {
             />
             
             <h2 class="text-3xl font-bold mb-2">{{ studentProfile.fullname || 'Full Name' }}</h2>
-            <p class="text-blue-100 text-base mb-1">Elementary Level</p>
-            <p class="text-2xl font-semibold mb-6">B3</p>
+            <p class="text-blue-100 text-base mb-1">{{ levelName }}</p>
+            <p class="text-2xl font-semibold mb-6">{{ classCode }}</p>
             <p class="text-base text-blue-100 mb-8">{{ authStore.user?.email || '-' }}</p>
 
             <router-link 
