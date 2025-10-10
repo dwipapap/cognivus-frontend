@@ -13,6 +13,7 @@ import LecturerLayout from '../pages/lecturer/LecturerLayout.vue';
 import LecturerDashboard from '../pages/lecturer/DashboardLecturer.vue';
 import ProfileViewLecturer from '../pages/lecturer/ProfileViewLecturer.vue';
 import ProfileLecturer from '../pages/lecturer/ProfileLecturer.vue';
+import ManageMaterials from '../pages/lecturer/ManageMaterials.vue';
 // admin pages
 import AdminLayout from '../pages/admin/AdminLayout.vue';
 import DashboardAdmin from '../pages/admin/DashboardAdmin.vue';
@@ -74,6 +75,11 @@ const routes = [
         path: 'dashboard',
         name: 'LecturerDashboard',
         component: LecturerDashboard,
+      },
+      {
+        path: 'materials',
+        name: 'LecturerMaterials',
+        component: ManageMaterials,
       },
       {
         path: 'profile-view',

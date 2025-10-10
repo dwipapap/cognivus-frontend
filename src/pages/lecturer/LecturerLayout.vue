@@ -183,6 +183,15 @@ onUnmounted(() => {
               </router-link>
             </li>
             <li>
+              <router-link to="/lecturer/materials"
+                class="nav-item flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:text-blue-600 group">
+                <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"></path>
+                </svg>
+                <span class="sidebar-text ml-3 opacity-0 whitespace-nowrap overflow-hidden">Materials</span>
+              </router-link>
+            </li>
+            <li>
               <a href="#" class="nav-item flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:text-blue-600 group">
                 <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"></path>
@@ -229,6 +238,14 @@ onUnmounted(() => {
                   <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
                 </svg>
                 <span class="text-xs">Dashboard</span>
+              </router-link>
+            </li>
+            <li>
+              <router-link to="/lecturer/materials" class="mobile-nav-item flex flex-col items-center gap-1">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"></path>
+                </svg>
+                <span class="text-xs">Materials</span>
               </router-link>
             </li>
             <li>
