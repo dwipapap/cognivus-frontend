@@ -38,9 +38,19 @@ const fetchCourseData = async () => {
 
       // Fetch lecturer name
       if (classInfo.value.lecturerid) {
-        const lecturerRes = await lecturerAPI.getLecturerById(classInfo.value.lecturerid);
-        if (lecturerRes.data.success) {
-          lecturerName.value = lecturerRes.data.data.fullname;
+        try {
+          const lecturersRes = await lecturerAPI.getAllLecturers();
+          if (lecturersRes.data.success) {
+            const lecturer = lecturersRes.data.data.find(
+              l => l.lecturerid === classInfo.value.lecturerid
+            );
+            if (lecturer) {
+              lecturerName.value = lecturer.fullname;
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching lecturer:', error);
+          lecturerName.value = '-';
         }
       }
     }
