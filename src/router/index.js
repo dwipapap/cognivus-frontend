@@ -14,6 +14,7 @@ import LecturerDashboard from '../pages/lecturer/DashboardLecturer.vue';
 import ProfileViewLecturer from '../pages/lecturer/ProfileViewLecturer.vue';
 import ProfileLecturer from '../pages/lecturer/ProfileLecturer.vue';
 import ManageMaterials from '../pages/lecturer/ManageMaterials.vue';
+import ManageStudents from '../pages/lecturer/ManageStudents.vue';
 // admin pages
 import AdminLayout from '../pages/admin/AdminLayout.vue';
 import DashboardAdmin from '../pages/admin/DashboardAdmin.vue';
@@ -80,6 +81,11 @@ const routes = [
         path: 'materials',
         name: 'LecturerMaterials',
         component: ManageMaterials,
+      },
+      {
+        path: 'students',
+        name: 'LecturerStudents',
+        component: ManageStudents,
       },
       {
         path: 'profile-view',

@@ -192,12 +192,13 @@ onUnmounted(() => {
               </router-link>
             </li>
             <li>
-              <a href="#" class="nav-item flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:text-blue-600 group">
+              <router-link to="/lecturer/students"
+                class="nav-item flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:text-blue-600 group">
                 <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"></path>
                 </svg>
                 <span class="sidebar-text ml-3 opacity-0 whitespace-nowrap overflow-hidden">Students</span>
-              </a>
+              </router-link>
             </li>
             <li>
               <a href="#" class="nav-item flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:text-blue-600 group">
@@ -249,12 +250,12 @@ onUnmounted(() => {
               </router-link>
             </li>
             <li>
-              <a href="#" class="mobile-nav-item flex flex-col items-center gap-1">
+              <router-link to="/lecturer/students" class="mobile-nav-item flex flex-col items-center gap-1">
                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"></path>
                 </svg>
                 <span class="text-xs">Students</span>
-              </a>
+              </router-link>
             </li>
             <li>
               <a href="#" class="mobile-nav-item flex flex-col items-center gap-1">
