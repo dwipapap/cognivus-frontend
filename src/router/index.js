@@ -21,6 +21,10 @@ import DashboardAdmin from '../pages/admin/DashboardAdmin.vue';
 import ManageLecturers from '../pages/admin/ManageLecturers.vue';
 import ManageClasses from '../pages/admin/ManageClasses.vue';
 import ManagePrices from '../pages/admin/ManagePrices.vue';
+import AdminManageStudents from '../pages/admin/ManageStudents.vue';
+import ManagePrograms from '../pages/admin/ManagePrograms.vue';
+import ManageLevels from '../pages/admin/ManageLevels.vue';
+import ManageTeacherLevels from '../pages/admin/ManageTeacherLevels.vue';
 
 const routes = [
   {
@@ -134,6 +138,26 @@ const routes = [
         path: 'prices',
         name: 'AdminManagePrices',
         component: ManagePrices,
+      },
+      {
+        path: 'students',
+        name: 'AdminManageStudents',
+        component: AdminManageStudents,
+      },
+      {
+        path: 'programs',
+        name: 'AdminManagePrograms',
+        component: ManagePrograms,
+      },
+      {
+        path: 'levels',
+        name: 'AdminManageLevels',
+        component: ManageLevels,
+      },
+      {
+        path: 'teacher-levels',
+        name: 'AdminManageTeacherLevels',
+        component: ManageTeacherLevels,
       },
     ]
   },
