@@ -11,6 +11,16 @@ const courses = ref([]);
 const isLoading = ref(true);
 const errorMessage = ref('');
 const expandedVideos = ref(new Set());
+const expandedCourses = ref(new Set());
+
+/** Toggle course details */
+const toggleCourse = (courseid) => {
+  if (expandedCourses.value.has(courseid)) {
+    expandedCourses.value.delete(courseid);
+  } else {
+    expandedCourses.value.add(courseid);
+  }
+};
 
 /** Extract YouTube video ID from URL */
 const getYouTubeId = (url) => {
@@ -98,12 +108,14 @@ const fetchCourseData = async () => {
   }
 };
 
-/** Format date */
+/** Format date with day name */
 const formatDate = (dateString) => {
   if (!dateString) return '-';
   try {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-GB');
+    const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
+    const dateOnly = date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    return `${dayName}, ${dateOnly}`;
   } catch {
     return dateString;
   }
@@ -144,28 +156,36 @@ onMounted(async () => {
     <!-- Course Content -->
     <div v-else class="space-y-6">
       <!-- Class Info Card -->
-      <div class="bg-white rounded-2xl shadow-lg p-8">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div>
-            <p class="text-sm font-semibold text-gray-500 mb-1">Class Code</p>
-            <p class="text-xl font-bold text-gray-900">{{ classInfo?.class_code || '-' }}</p>
+      <div class="relative bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-lg overflow-hidden">
+        <!-- Diagonal Book Graphics -->
+        <div class="absolute top-0 right-0 w-1/2 h-full pointer-events-none overflow-hidden">
+          <div class="absolute -top-10 -right-10 w-40 h-48 bg-blue-400/30 rounded-lg transform rotate-12"></div>
+          <div class="absolute top-20 -right-5 w-32 h-40 bg-blue-300/40 rounded-lg transform rotate-12"></div>
+          <div class="absolute top-40 right-10 w-28 h-36 bg-white/20 rounded-lg transform rotate-12"></div>
+        </div>
+
+        <!-- Content -->
+        <div class="relative p-8 z-10">
+          <div class="mb-6">
+            <h2 class="text-3xl font-bold text-white mb-2">{{ levelName || 'Your Course Level' }}</h2>
+            <h3 class="text-xl font-semibold text-white/90 mb-3">{{ classInfo?.class_code || 'Class Code' }}</h3>
+            <p class="text-sm text-white/80">
+              {{ classInfo?.description || 'Access your course materials and learning resources' }}
+            </p>
           </div>
-          <div>
-            <p class="text-sm font-semibold text-gray-500 mb-1">Level</p>
-            <p class="text-xl font-bold text-blue-600">{{ levelName || '-' }}</p>
-          </div>
-          <div>
-            <p class="text-sm font-semibold text-gray-500 mb-1">Lecturer</p>
-            <p class="text-xl font-bold text-gray-900">{{ lecturerName || '-' }}</p>
+
+          <!-- Lecturer Badge -->
+          <div class="inline-block bg-white/20 backdrop-blur-sm rounded-full px-4 py-2">
+            <p class="text-white text-sm font-medium">{{ lecturerName || 'Instructor' }}</p>
           </div>
         </div>
       </div>
 
       <!-- Course List -->
-      <div class="bg-white rounded-2xl shadow-lg p-8">
-        <h2 class="text-2xl font-bold text-gray-900 mb-6">Course Materials</h2>
+      <div class="space-y-4">
+        <h2 class="text-2xl font-bold text-gray-900 mb-2">Course Materials</h2>
         
-        <div v-if="courses.length === 0" class="text-center py-12 text-gray-500">
+        <div v-if="courses.length === 0" class="bg-white rounded-2xl shadow-lg p-12 text-center text-gray-500">
           No course materials available yet.
         </div>
 
@@ -173,65 +193,108 @@ onMounted(async () => {
           <div 
             v-for="course in courses" 
             :key="course.courseid"
-            class="border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow"
+            class="relative bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer"
+            @click="toggleCourse(course.courseid)"
           >
-            <div class="flex justify-between items-start mb-4">
-              <div>
-                <h3 class="text-lg font-bold text-gray-900">{{ course.title }}</h3>
-                <p class="text-sm text-gray-500">Uploaded: {{ formatDate(course.upload_date) }}</p>
+            <!-- Main Card Content -->
+            <div class="flex items-center gap-4 p-5">
+              <!-- Book Icon -->
+              <div class="flex-shrink-0">
+                <svg class="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 24 24">
+                  <rect x="4" y="4" width="4" height="16" rx="1" opacity="0.7"/>
+                  <rect x="10" y="2" width="4" height="18" rx="1" opacity="0.85"/>
+                  <rect x="16" y="6" width="4" height="14" rx="1"/>
+                </svg>
               </div>
-              <span v-if="course.course_code" class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">
-                {{ course.course_code }}
-              </span>
+
+              <!-- Content -->
+              <div class="flex-1 min-w-0">
+                <h3 class="text-lg font-bold text-white mb-1">{{ course.title }}</h3>
+                <!-- TODO: Replace placeholder with actual course description from backend -->
+                <p class="text-sm text-white/80 line-clamp-1 mb-2">
+                  Study materials and resources for this course topic. Click to view available downloads and videos.
+                </p>
+                <p class="text-xs text-white/70">{{ formatDate(course.upload_date) }}</p>
+              </div>
+
+              <!-- Expand Icon -->
+              <div class="flex-shrink-0">
+                <svg 
+                  class="w-6 h-6 text-white transition-transform duration-300 ease-in-out"
+                  :class="{ 'rotate-180': expandedCourses.has(course.courseid) }"
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+              </div>
             </div>
 
-            <div class="flex gap-3">
-              <a 
-                v-if="course.file" 
-                :href="course.file" 
-                target="_blank"
-                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-              >
-                📄 Download File
-              </a>
-              
-              <!-- YouTube Video Embed -->
-              <template v-if="course.video_link">
-                <button 
-                  v-if="isYouTubeVideo(course.video_link)"
-                  @click="toggleVideo(course.courseid)"
-                  class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
-                >
-                  🎥 {{ expandedVideos.has(course.courseid) ? 'Hide Video' : 'Watch Video' }}
-                </button>
-                <a 
-                  v-else
-                  :href="course.video_link" 
-                  target="_blank"
-                  class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
-                >
-                  🎥 Watch Video
-                </a>
-              </template>
-              
-              <p v-if="!course.file && !course.video_link" class="text-gray-500 text-sm">
-                No materials available
-              </p>
-            </div>
-
-            <!-- YouTube Embed -->
-            <div 
-              v-if="course.video_link && isYouTubeVideo(course.video_link) && expandedVideos.has(course.courseid)"
-              class="mt-4 aspect-video rounded-xl overflow-hidden shadow-lg border-4 border-gray-100"
+            <!-- Expanded Actions -->
+            <transition
+              enter-active-class="transition-all duration-300 ease-out"
+              enter-from-class="max-h-0 opacity-0"
+              enter-to-class="max-h-[500px] opacity-100"
+              leave-active-class="transition-all duration-300 ease-in"
+              leave-from-class="max-h-[500px] opacity-100"
+              leave-to-class="max-h-0 opacity-0"
             >
-              <iframe
-                :src="`https://www.youtube.com/embed/${getYouTubeId(course.video_link)}`"
-                class="w-full h-full"
-                frameborder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen
-              ></iframe>
-            </div>
+              <div 
+                v-if="expandedCourses.has(course.courseid)"
+                class="bg-blue-700/30 backdrop-blur-sm border-t border-white/10 overflow-hidden"
+                @click.stop
+              >
+                <div class="p-5">
+                  <div class="flex flex-wrap gap-3 mb-4">
+                    <a 
+                      v-if="course.file" 
+                      :href="course.file" 
+                      target="_blank"
+                      class="px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-colors text-sm font-semibold shadow-md"
+                    >
+                      📄 Download File
+                    </a>
+                    
+                    <template v-if="course.video_link">
+                      <button 
+                        v-if="isYouTubeVideo(course.video_link)"
+                        @click="toggleVideo(course.courseid)"
+                        class="px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-colors text-sm font-semibold shadow-md"
+                      >
+                        🎥 {{ expandedVideos.has(course.courseid) ? 'Hide Video' : 'Watch Video' }}
+                      </button>
+                      <a 
+                        v-else
+                        :href="course.video_link" 
+                        target="_blank"
+                        class="px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-colors text-sm font-semibold shadow-md"
+                      >
+                        🎥 Watch Video
+                      </a>
+                    </template>
+
+                    <span v-if="course.course_code" class="px-3 py-2 bg-white/20 backdrop-blur-sm text-white rounded-lg text-sm font-medium">
+                      Code: {{ course.course_code }}
+                    </span>
+                  </div>
+
+                  <!-- YouTube Embed -->
+                  <div 
+                    v-if="course.video_link && isYouTubeVideo(course.video_link) && expandedVideos.has(course.courseid)"
+                    class="mt-4 aspect-video rounded-xl overflow-hidden shadow-lg"
+                  >
+                    <iframe
+                      :src="`https://www.youtube.com/embed/${getYouTubeId(course.video_link)}`"
+                      class="w-full h-full"
+                      frameborder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowfullscreen
+                    ></iframe>
+                  </div>
+                </div>
+              </div>
+            </transition>
           </div>
         </div>
       </div>
