@@ -10,6 +10,35 @@ const lecturerName = ref('');
 const courses = ref([]);
 const isLoading = ref(true);
 const errorMessage = ref('');
+const expandedVideos = ref(new Set());
+
+/** Extract YouTube video ID from URL */
+const getYouTubeId = (url) => {
+  if (!url) return null;
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
+    /youtube\.com\/watch\?.*v=([^&\n?#]+)/
+  ];
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match) return match[1];
+  }
+  return null;
+};
+
+/** Check if URL is a YouTube video */
+const isYouTubeVideo = (url) => {
+  return getYouTubeId(url) !== null;
+};
+
+/** Toggle video embed */
+const toggleVideo = (courseid) => {
+  if (expandedVideos.value.has(courseid)) {
+    expandedVideos.value.delete(courseid);
+  } else {
+    expandedVideos.value.add(courseid);
+  }
+};
 
 /** Fetch class and related data */
 const fetchCourseData = async () => {
@@ -165,17 +194,43 @@ onMounted(async () => {
               >
                 📄 Download File
               </a>
-              <a 
-                v-if="course.video_link" 
-                :href="course.video_link" 
-                target="_blank"
-                class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
-              >
-                🎥 Watch Video
-              </a>
+              
+              <!-- YouTube Video Embed -->
+              <template v-if="course.video_link">
+                <button 
+                  v-if="isYouTubeVideo(course.video_link)"
+                  @click="toggleVideo(course.courseid)"
+                  class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
+                >
+                  🎥 {{ expandedVideos.has(course.courseid) ? 'Hide Video' : 'Watch Video' }}
+                </button>
+                <a 
+                  v-else
+                  :href="course.video_link" 
+                  target="_blank"
+                  class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
+                >
+                  🎥 Watch Video
+                </a>
+              </template>
+              
               <p v-if="!course.file && !course.video_link" class="text-gray-500 text-sm">
                 No materials available
               </p>
+            </div>
+
+            <!-- YouTube Embed -->
+            <div 
+              v-if="course.video_link && isYouTubeVideo(course.video_link) && expandedVideos.has(course.courseid)"
+              class="mt-4 aspect-video rounded-xl overflow-hidden shadow-lg border-4 border-gray-100"
+            >
+              <iframe
+                :src="`https://www.youtube.com/embed/${getYouTubeId(course.video_link)}`"
+                class="w-full h-full"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen
+              ></iframe>
             </div>
           </div>
         </div>
