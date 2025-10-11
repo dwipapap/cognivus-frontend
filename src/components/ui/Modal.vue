@@ -130,14 +130,14 @@ watch(() => props.show, async (newValue) => {
     <transition name="modal" appear>
       <div
         v-if="show"
-        class="modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4 bg-transparent backdrop-blur-lg"
+        class="modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4 bg-transparent backdrop-blur-lg overflow-y-auto"
         @click.self="handleBackdropClick"
       >
         <!-- Modal content -->
         <div
           ref="modalRef"
           :class="[
-            'modal-content relative w-full max-h-full bg-white bg-opacity-90 backdrop-blur-lg rounded-lg shadow-2xl border border-white border-opacity-20',
+            'modal-content relative w-full my-8 bg-white bg-opacity-90 backdrop-blur-lg rounded-lg shadow-2xl border border-white border-opacity-20',
             sizeClass
           ]"
           tabindex="-1"
@@ -192,7 +192,7 @@ watch(() => props.show, async (newValue) => {
           </div>
           
           <!-- Modal body -->
-          <div class="p-6">
+          <div class="p-6 max-h-[60vh] overflow-y-auto">
             <slot name="content">
               <p class="text-base text-gray-700">
                 {{ message }}
@@ -274,5 +274,28 @@ watch(() => props.show, async (newValue) => {
 .modal-content button:focus {
   outline: 2px solid rgba(59, 130, 246, 0.5);
   outline-offset: 2px;
+}
+
+/* Smooth scrolling for modal body */
+.modal-content > div {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+}
+
+.modal-content > div::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-content > div::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modal-content > div::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.5);
+  border-radius: 3px;
+}
+
+.modal-content > div::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(107, 114, 128, 0.7);
 }
 </style>
