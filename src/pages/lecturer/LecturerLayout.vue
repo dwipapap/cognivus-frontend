@@ -201,22 +201,6 @@ onUnmounted(() => {
               </router-link>
             </li>
             <li>
-              <a href="#" class="nav-item flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:text-blue-600 group">
-                <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                <span class="sidebar-text ml-3 opacity-0 whitespace-nowrap overflow-hidden">Classes</span>
-              </a>
-            </li>
-            <li>
-              <a href="#" class="nav-item flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:text-blue-600 group">
-                <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                </svg>
-                <span class="sidebar-text ml-3 opacity-0 whitespace-nowrap overflow-hidden">Assignments</span>
-              </a>
-            </li>
-            <li>
               <a @click="handleLogout"
                 class="nav-item flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:text-red-600 cursor-pointer group">
                 <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
@@ -256,14 +240,6 @@ onUnmounted(() => {
                 </svg>
                 <span class="text-xs">Students</span>
               </router-link>
-            </li>
-            <li>
-              <a href="#" class="mobile-nav-item flex flex-col items-center gap-1">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                <span class="text-xs">Classes</span>
-              </a>
             </li>
             <li>
               <a @click="handleLogout" class="mobile-nav-item flex flex-col items-center gap-1">
