@@ -1,13 +1,43 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import { studentAPI, lecturerAPI, classAPI } from '../../services/api';
 
-// Sample data for dashboard cards
-const stats = ref([
-  { title: 'Total Students', value: '1,234', icon: 'users', color: 'blue' },
-  { title: 'Total Lecturers', value: '56', icon: 'teacher', color: 'green' },
-  { title: 'Active Classes', value: '89', icon: 'class', color: 'purple' },
-  { title: 'Revenue', value: 'Rp 45M', icon: 'money', color: 'yellow' },
+const students = ref([]);
+const lecturers = ref([]);
+const classes = ref([]);
+const isLoading = ref(true);
+
+/** Fetch dashboard data */
+const fetchDashboardData = async () => {
+  try {
+    isLoading.value = true;
+    const [studentsRes, lecturersRes, classesRes] = await Promise.all([
+      studentAPI.getAllStudents(),
+      lecturerAPI.getAllLecturers(),
+      classAPI.getAllClasses()
+    ]);
+
+    if (studentsRes.data.success) students.value = studentsRes.data.data;
+    if (lecturersRes.data.success) lecturers.value = lecturersRes.data.data;
+    if (classesRes.data.success) classes.value = classesRes.data.data;
+  } catch (error) {
+    console.error('Failed to fetch dashboard data:', error);
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+/** Computed stats */
+const stats = computed(() => [
+  { title: 'Total Students', value: students.value.length.toString(), icon: 'users', color: 'blue' },
+  { title: 'Total Lecturers', value: lecturers.value.length.toString(), icon: 'teacher', color: 'green' },
+  { title: 'Total Classes', value: classes.value.length.toString(), icon: 'class', color: 'purple' },
+  { title: 'Revenue', value: 'Coming Soon', icon: 'money', color: 'yellow' },
 ]);
+
+onMounted(() => {
+  fetchDashboardData();
+});
 </script>
 
 <template>
@@ -37,7 +67,12 @@ const stats = ref([
     <!-- ==================== END OF RICK ROLL SECTION ==================== -->
 
     <!-- Stats Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div v-if="isLoading" class="text-center py-12">
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <p class="mt-2 text-gray-600">Loading dashboard...</p>
+    </div>
+
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       <div 
         v-for="stat in stats" 
         :key="stat.title"
