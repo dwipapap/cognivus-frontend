@@ -110,7 +110,9 @@ const handleGoogleLogin = async () => {
         <BaseCard size="md" class="w-full max-w-md">
           <template #title>
             <div class="text-center">
-              <img :src="ittrLogo" alt="ITTR English Logo" class="w-40 mb-6 mx-auto" />
+              <router-link to="/" class="inline-block">
+                <img :src="ittrLogo" alt="ITTR English Logo" class="w-40 mb-6 mx-auto cursor-pointer hover:opacity-80 transition-opacity" />
+              </router-link>
               <h2 class="text-2xl font-bold text-gray-900 mb-2">Halo, Selamat Datang</h2>
               <p class="text-gray-600 mb-6 text-sm">Silakan lengkapi data pada kolom yang tersedia</p>
             </div>
