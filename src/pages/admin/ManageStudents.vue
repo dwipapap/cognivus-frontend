@@ -1,12 +1,13 @@
 <script setup>
-import { ref, onMounted } from 'vue';
-import { studentAPI, classAPI } from '../../services/api';
+import { ref, onMounted, computed } from 'vue';
+import { studentAPI, classAPI, levelAPI } from '../../services/api';
 import Modal from '../../components/ui/Modal.vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
 import StudentForm from './StudentForm.vue';
 
 const students = ref([]);
 const classes = ref([]);
+const levels = ref([]);
 const isLoading = ref(true);
 const showFormModal = ref(false);
 const showNotificationModal = ref(false);
@@ -14,6 +15,21 @@ const notificationMessage = ref('');
 const notificationType = ref('info');
 const selectedStudent = ref(null);
 const isEditMode = ref(false);
+
+/** Get class code by classid */
+const getClassCode = (classid) => {
+  if (!classid) return 'Unassigned';
+  const cls = classes.value.find(c => c.classid === classid);
+  return cls?.class_code || 'Unassigned';
+};
+
+/** Enrich classes with level names */
+const enrichedClasses = computed(() => {
+  return classes.value.map(cls => ({
+    ...cls,
+    level: levels.value.find(l => l.levelid === cls.levelid)
+  }));
+});
 
 /** Fetch all students */
 const fetchStudents = async () => {
@@ -39,6 +55,18 @@ const fetchClasses = async () => {
     }
   } catch (error) {
     console.error('Failed to fetch classes:', error);
+  }
+};
+
+/** Fetch levels for class display */
+const fetchLevels = async () => {
+  try {
+    const response = await levelAPI.getAllLevels();
+    if (response.data.success) {
+      levels.value = response.data.data;
+    }
+  } catch (error) {
+    console.error('Failed to fetch levels:', error);
   }
 };
 
@@ -96,6 +124,7 @@ const handleDelete = async (student) => {
 onMounted(() => {
   fetchStudents();
   fetchClasses();
+  fetchLevels();
 });
 </script>
 
@@ -147,7 +176,7 @@ onMounted(() => {
               </td>
               <td class="px-6 py-4 text-sm text-gray-700">{{ student.gender || '-' }}</td>
               <td class="px-6 py-4 text-sm text-gray-700">
-                {{ student.tbclass?.class_code || 'Unassigned' }}
+                {{ getClassCode(student.classid) }}
               </td>
               <td class="px-6 py-4 text-sm text-gray-700">{{ student.phone || '-' }}</td>
               <td class="px-6 py-4">
@@ -179,35 +208,27 @@ onMounted(() => {
     </div>
 
     <!-- Form Modal -->
-    <Modal :show="showFormModal" @close="showFormModal = false">
-      <template #header>
-        <h2 class="text-xl font-bold text-gray-800">
+    <Modal :show="showFormModal" @close="showFormModal = false" size="lg" :persistent="true">
+      <template #content>
+        <h2 class="text-xl font-bold text-gray-800 mb-4">
           {{ isEditMode ? 'Edit Student' : 'Add New Student' }}
         </h2>
-      </template>
-      <template #body>
         <StudentForm
           :student="selectedStudent"
-          :classes="classes"
+          :classes="enrichedClasses"
           :is-edit-mode="isEditMode"
           @submit="handleSave"
           @cancel="showFormModal = false"
         />
       </template>
+      <template #footer>
+        <span></span>
+      </template>
     </Modal>
 
     <!-- Notification Modal -->
-    <Modal :show="showNotificationModal" @close="showNotificationModal = false">
-      <template #header>
-        <h2 class="text-xl font-bold" :class="{
-          'text-green-600': notificationType === 'success',
-          'text-red-600': notificationType === 'error',
-          'text-blue-600': notificationType === 'info'
-        }">
-          {{ notificationType === 'success' ? 'Success' : notificationType === 'error' ? 'Error' : 'Info' }}
-        </h2>
-      </template>
-      <template #body>
+    <Modal :show="showNotificationModal" @close="showNotificationModal = false" :type="notificationType">
+      <template #content>
         <p class="text-gray-700">{{ notificationMessage }}</p>
       </template>
       <template #footer>

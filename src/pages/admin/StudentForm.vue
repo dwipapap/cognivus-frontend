@@ -1,15 +1,60 @@
 <template>
   <form @submit.prevent="handleSubmit" class="space-y-4">
-    <!-- Full Name -->
+    <!-- User Account Fields (Create Only) -->
+    <div v-if="!isEditMode" class="pb-4 border-b border-gray-200">
+      <h3 class="text-sm font-semibold text-gray-700 mb-3">Account Details</h3>
+      
+      <div class="space-y-3">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Username *</label>
+          <input
+            v-model="formData.username"
+            type="text"
+            required
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Enter username"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+          <input
+            v-model="formData.email"
+            type="email"
+            required
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Enter email"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Password *</label>
+          <input
+            v-model="formData.password"
+            type="password"
+            required
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Enter password"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Student Profile Fields -->
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
-      <input
-        v-model="formData.fullname"
-        type="text"
-        required
-        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        placeholder="Enter full name"
-      />
+      <h3 v-if="!isEditMode" class="text-sm font-semibold text-gray-700 mb-3">Profile Information</h3>
+      
+      <!-- Full Name -->
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+        <input
+          v-model="formData.fullname"
+          type="text"
+          required
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          placeholder="Enter full name"
+        />
+      </div>
     </div>
 
     <!-- Gender -->
@@ -144,6 +189,9 @@ const props = defineProps({
 const emit = defineEmits(['submit', 'cancel']);
 
 const formData = ref({
+  username: '',
+  email: '',
+  password: '',
   fullname: '',
   gender: '',
   birthdate: '',
@@ -160,6 +208,9 @@ const formData = ref({
 watch(() => props.student, (newStudent) => {
   if (newStudent) {
     formData.value = {
+      username: '',
+      email: '',
+      password: '',
       fullname: newStudent.fullname || '',
       gender: newStudent.gender || '',
       birthdate: newStudent.birthdate || '',
@@ -170,6 +221,23 @@ watch(() => props.student, (newStudent) => {
       parentphone: newStudent.parentphone || '',
       classid: newStudent.classid || null,
       payment_type: newStudent.payment_type || ''
+    };
+  } else {
+    // Reset form for create mode
+    formData.value = {
+      username: '',
+      email: '',
+      password: '',
+      fullname: '',
+      gender: '',
+      birthdate: '',
+      birthplace: '',
+      phone: '',
+      address: '',
+      parentname: '',
+      parentphone: '',
+      classid: null,
+      payment_type: ''
     };
   }
 }, { immediate: true });
