@@ -11,12 +11,45 @@ const levels = ref([]);
 const selectedClass = ref(null);
 const isLoading = ref(true);
 const errorMessage = ref('');
+const searchQuery = ref('');
+const currentPage = ref(1);
+const itemsPerPage = 15;
 
 /** Get students for selected class */
 const classStudents = computed(() => {
   if (!selectedClass.value) return [];
-  return allStudents.value.filter(s => s.classid === selectedClass.value.classid);
+  let students = allStudents.value.filter(s => s.classid === selectedClass.value.classid);
+  
+  // Apply search filter
+  if (searchQuery.value.trim()) {
+    const query = searchQuery.value.toLowerCase();
+    students = students.filter(s => 
+      s.fullname?.toLowerCase().includes(query) ||
+      s.tbuser?.email?.toLowerCase().includes(query) ||
+      s.tbuser?.username?.toLowerCase().includes(query) ||
+      s.phone?.includes(query)
+    );
+  }
+  
+  return students;
 });
+
+/** Paginated students */
+const paginatedStudents = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  return classStudents.value.slice(start, end);
+});
+
+/** Total pages */
+const totalPages = computed(() => {
+  return Math.ceil(classStudents.value.length / itemsPerPage);
+});
+
+/** Reset to first page when search or class changes */
+const resetPagination = () => {
+  currentPage.value = 1;
+};
 
 /** Get level name by id */
 const getLevelName = (levelid) => {
@@ -76,8 +109,8 @@ const fetchStudents = async () => {
 
 /** Get gender label */
 const getGenderLabel = (gender) => {
-  if (gender === 'L') return 'Male';
-  if (gender === 'P') return 'Female';
+  if (gender === 'L') return 'M';
+  if (gender === 'P') return 'F';
   return '-';
 };
 
@@ -90,6 +123,19 @@ const getInitials = (name) => {
     .slice(0, 2)
     .join('')
     .toUpperCase();
+};
+
+/** Handle class selection */
+const selectClass = (cls) => {
+  selectedClass.value = cls;
+  resetPagination();
+};
+
+/** Go to page */
+const goToPage = (page) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+  }
 };
 
 onMounted(async () => {
@@ -129,7 +175,7 @@ onMounted(async () => {
           <button
             v-for="cls in myClasses"
             :key="cls.classid"
-            @click="selectedClass = cls"
+            @click="selectClass(cls)"
             :class="[
               'p-4 rounded-xl border-2 text-left transition-all',
               selectedClass?.classid === cls.classid
@@ -146,90 +192,119 @@ onMounted(async () => {
 
       <!-- Students Section -->
       <div v-if="selectedClass" class="bg-white rounded-2xl shadow-lg p-6">
-        <div class="mb-6">
+        <div class="mb-4">
           <h2 class="text-2xl font-bold text-gray-900">Students</h2>
           <p class="text-sm text-gray-600">Class: {{ selectedClass.class_code }}</p>
-          <p class="text-sm text-gray-500 mt-1">Total: {{ classStudents.length }} student(s)</p>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="mb-4">
+          <div class="relative">
+            <input
+              v-model="searchQuery"
+              @input="resetPagination"
+              type="text"
+              placeholder="Search by name, email, username, or phone..."
+              class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            <svg class="absolute left-3 top-2.5 w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
+            </svg>
+          </div>
+          <p class="text-sm text-gray-500 mt-2">Total: {{ classStudents.length }} student(s)</p>
         </div>
 
         <!-- No Students -->
         <div v-if="classStudents.length === 0" class="text-center py-12 text-gray-500">
-          No students enrolled in this class yet.
+          {{ searchQuery ? 'No students found matching your search.' : 'No students enrolled in this class yet.' }}
         </div>
 
-        <!-- Students List -->
-        <div v-else class="space-y-4">
-          <div
-            v-for="student in classStudents"
-            :key="student.studentid"
-            class="border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow"
-          >
-            <div class="flex items-start gap-4">
-              <!-- Avatar -->
-              <div class="flex-shrink-0">
-                <div class="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-xl">
-                  {{ getInitials(student.fullname) }}
-                </div>
-              </div>
+        <!-- Students Table -->
+        <div v-else>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gender</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Parent</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr v-for="student in paginatedStudents" :key="student.studentid" class="hover:bg-gray-50">
+                  <!-- Student Info -->
+                  <td class="px-4 py-3">
+                    <div class="flex items-center gap-3">
+                      <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                        {{ getInitials(student.fullname) }}
+                      </div>
+                      <div class="min-w-0">
+                        <p class="text-sm font-medium text-gray-900 truncate">{{ student.fullname }}</p>
+                        <p v-if="student.tbuser?.username" class="text-xs text-gray-500">@{{ student.tbuser.username }}</p>
+                      </div>
+                    </div>
+                  </td>
 
-              <!-- Student Info -->
-              <div class="flex-1 min-w-0">
-                <h3 class="text-lg font-bold text-gray-900 mb-1">{{ student.fullname }}</h3>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
-                  <!-- Email -->
-                  <div v-if="student.tbuser?.email" class="flex items-center gap-2 text-sm">
-                    <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
-                      <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
-                    </svg>
-                    <span class="text-gray-700 truncate">{{ student.tbuser.email }}</span>
-                  </div>
-
-                  <!-- Username -->
-                  <div v-if="student.tbuser?.username" class="flex items-center gap-2 text-sm">
-                    <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
-                    </svg>
-                    <span class="text-gray-700">@{{ student.tbuser.username }}</span>
-                  </div>
-
-                  <!-- Phone -->
-                  <div v-if="student.phone" class="flex items-center gap-2 text-sm">
-                    <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path>
-                    </svg>
-                    <span class="text-gray-700">{{ student.phone }}</span>
-                  </div>
+                  <!-- Contact Info -->
+                  <td class="px-4 py-3">
+                    <div class="space-y-1">
+                      <p v-if="student.tbuser?.email" class="text-sm text-gray-700 truncate">{{ student.tbuser.email }}</p>
+                      <p v-if="student.phone" class="text-xs text-gray-500">{{ student.phone }}</p>
+                    </div>
+                  </td>
 
                   <!-- Gender -->
-                  <div v-if="student.gender" class="flex items-center gap-2 text-sm">
-                    <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd"></path>
-                    </svg>
-                    <span class="text-gray-700">{{ getGenderLabel(student.gender) }}</span>
-                  </div>
-                </div>
+                  <td class="px-4 py-3">
+                    <span class="text-sm text-gray-700">{{ getGenderLabel(student.gender) }}</span>
+                  </td>
 
-                <!-- Parent Info -->
-                <div v-if="student.parentname || student.parentphone" class="mt-4 pt-4 border-t border-gray-100">
-                  <p class="text-xs font-semibold text-gray-500 mb-2">PARENT/GUARDIAN</p>
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div v-if="student.parentname" class="flex items-center gap-2 text-sm">
-                      <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
-                      </svg>
-                      <span class="text-gray-700">{{ student.parentname }}</span>
+                  <!-- Parent Info -->
+                  <td class="px-4 py-3">
+                    <div v-if="student.parentname || student.parentphone" class="space-y-1">
+                      <p v-if="student.parentname" class="text-sm text-gray-700">{{ student.parentname }}</p>
+                      <p v-if="student.parentphone" class="text-xs text-gray-500">{{ student.parentphone }}</p>
                     </div>
-                    <div v-if="student.parentphone" class="flex items-center gap-2 text-sm">
-                      <svg class="w-4 h-4 text-gray-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path>
-                      </svg>
-                      <span class="text-gray-700">{{ student.parentphone }}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                    <span v-else class="text-sm text-gray-400">-</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div v-if="totalPages > 1" class="mt-4 flex items-center justify-between">
+            <p class="text-sm text-gray-600">
+              Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to {{ Math.min(currentPage * itemsPerPage, classStudents.length) }} of {{ classStudents.length }}
+            </p>
+            <div class="flex gap-2">
+              <button
+                @click="goToPage(currentPage - 1)"
+                :disabled="currentPage === 1"
+                class="px-3 py-1 border border-gray-300 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              >
+                Previous
+              </button>
+              <button
+                v-for="page in totalPages"
+                :key="page"
+                @click="goToPage(page)"
+                :class="[
+                  'px-3 py-1 border rounded-lg text-sm',
+                  currentPage === page
+                    ? 'bg-blue-600 text-white border-blue-600'
+                    : 'border-gray-300 hover:bg-gray-50'
+                ]"
+              >
+                {{ page }}
+              </button>
+              <button
+                @click="goToPage(currentPage + 1)"
+                :disabled="currentPage === totalPages"
+                class="px-3 py-1 border border-gray-300 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              >
+                Next
+              </button>
             </div>
           </div>
         </div>
