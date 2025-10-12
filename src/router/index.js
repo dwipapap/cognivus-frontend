@@ -8,6 +8,7 @@ import Dashboard from '../pages/student/Dashboard.vue';
 import Profile from '../pages/student/Profile.vue';
 import ProfileView from '../pages/student/ProfileView.vue';
 import MyCourses from '../pages/student/MyCourses.vue';
+import CourseDetail from '../pages/student/CourseDetail.vue';
 // lecturer pages
 import LecturerLayout from '../pages/lecturer/LecturerLayout.vue';
 import LecturerDashboard from '../pages/lecturer/DashboardLecturer.vue';
@@ -62,6 +63,11 @@ const routes = [
         path: 'courses',
         name: 'StudentMyCourses',
         component: MyCourses,
+      },
+      {
+        path: 'courses/:id',
+        name: 'StudentCourseDetail',
+        component: CourseDetail,
       },
       // Default child route for /student
       {
