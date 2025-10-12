@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { levelAPI } from '../../services/api';
 import Modal from '../../components/ui/Modal.vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
@@ -13,6 +13,24 @@ const notificationMessage = ref('');
 const notificationType = ref('info');
 const selectedLevel = ref(null);
 const isEditMode = ref(false);
+const currentPage = ref(1);
+const itemsPerPage = 9; // 3x3 grid
+
+/** Pagination */
+const totalPages = computed(() => Math.ceil(levels.value.length / itemsPerPage));
+const paginatedLevels = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  return levels.value.slice(start, end);
+});
+
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) currentPage.value++;
+};
+
+const prevPage = () => {
+  if (currentPage.value > 1) currentPage.value--;
+};
 
 /** Fetch all levels */
 const fetchLevels = async () => {
@@ -107,9 +125,9 @@ onMounted(() => {
     <!-- Levels Grid -->
     <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <div
-        v-for="level in levels"
+        v-for="level in paginatedLevels"
         :key="level.levelid"
-        class="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow"
+        class="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-200"
       >
         <div class="flex items-start justify-between mb-3">
           <div class="flex-shrink-0 h-12 w-12 bg-gradient-to-br from-purple-400 to-pink-500 rounded-lg flex items-center justify-center text-white font-bold text-xl">
@@ -134,14 +152,23 @@ onMounted(() => {
       </div>
     </div>
 
+    <!-- Pagination -->
+    <div v-if="levels.length > itemsPerPage" class="flex justify-center items-center gap-4 mt-6">
+      <BaseButton @click="prevPage" :disabled="currentPage === 1" variant="secondary">
+        Previous
+      </BaseButton>
+      <span class="text-gray-700">Page {{ currentPage }} of {{ totalPages }}</span>
+      <BaseButton @click="nextPage" :disabled="currentPage === totalPages" variant="secondary">
+        Next
+      </BaseButton>
+    </div>
+
     <!-- Form Modal -->
-    <Modal :show="showFormModal" @close="showFormModal = false">
-      <template #header>
-        <h2 class="text-xl font-bold text-gray-800">
+    <Modal :show="showFormModal" @close="showFormModal = false" :persistent="true" size="lg">
+      <template #content>
+        <h2 class="text-xl font-bold text-gray-800 mb-4">
           {{ isEditMode ? 'Edit Level' : 'Add New Level' }}
         </h2>
-      </template>
-      <template #body>
         <LevelForm
           :level="selectedLevel"
           :is-edit-mode="isEditMode"
@@ -153,16 +180,14 @@ onMounted(() => {
 
     <!-- Notification Modal -->
     <Modal :show="showNotificationModal" @close="showNotificationModal = false">
-      <template #header>
-        <h2 class="text-xl font-bold" :class="{
+      <template #content>
+        <h2 class="text-xl font-bold mb-4" :class="{
           'text-green-600': notificationType === 'success',
           'text-red-600': notificationType === 'error',
           'text-blue-600': notificationType === 'info'
         }">
           {{ notificationType === 'success' ? 'Success' : notificationType === 'error' ? 'Error' : 'Info' }}
         </h2>
-      </template>
-      <template #body>
         <p class="text-gray-700">{{ notificationMessage }}</p>
       </template>
       <template #footer>
