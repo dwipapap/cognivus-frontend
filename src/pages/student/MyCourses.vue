@@ -1,10 +1,8 @@
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
 import { useStudentProfile } from '../../composables/useStudentProfile';
 import { classAPI, levelAPI, lecturerAPI, courseAPI } from '../../services/api';
 
-const router = useRouter();
 const { studentProfile, isLoading: profileLoading } = useStudentProfile();
 const classInfo = ref(null);
 const levelName = ref('');
@@ -12,11 +10,6 @@ const lecturerName = ref('');
 const courses = ref([]);
 const isLoading = ref(true);
 const errorMessage = ref('');
-
-/** Navigate to course detail */
-const viewCourse = (courseid) => {
-  router.push({ name: 'StudentCourseDetail', params: { id: courseid } });
-};
 
 /** Fetch class and related data */
 const fetchCourseData = async () => {
@@ -158,11 +151,11 @@ onMounted(async () => {
         </div>
 
         <div v-else class="space-y-4">
-          <div 
+          <router-link 
             v-for="course in courses" 
             :key="course.courseid"
-            class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-200 cursor-pointer"
-            @click="viewCourse(course.courseid)"
+            :to="{ name: 'StudentCourseDetail', params: { id: course.courseid } }"
+            class="block bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-200"
           >
             <div class="flex items-center gap-4 p-5">
               <!-- Book Icon -->
@@ -190,7 +183,7 @@ onMounted(async () => {
                 </svg>
               </div>
             </div>
-          </div>
+          </router-link>
         </div>
       </div>
     </div>
