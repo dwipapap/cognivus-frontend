@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { priceAPI, levelAPI, programAPI } from '../../services/api';
 import Modal from '../../components/ui/Modal.vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
@@ -15,6 +15,49 @@ const notificationMessage = ref('');
 const notificationType = ref('info');
 const selectedPrice = ref(null);
 const isEditMode = ref(false);
+const currentPage = ref(1);
+const itemsPerPage = 15;
+
+/** Paginated prices */
+const paginatedPrices = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  return prices.value.slice(start, end);
+});
+
+/** Total pages */
+const totalPages = computed(() => {
+  return Math.ceil(prices.value.length / itemsPerPage);
+});
+
+/** Go to specific page */
+const goToPage = (page) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+  }
+};
+
+/** Format currency to IDR */
+const formatCurrency = (amount) => {
+  if (!amount) return '-';
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0
+  }).format(amount);
+};
+
+/** Get level name */
+const getLevelName = (levelId) => {
+  const level = levels.value.find(l => l.levelid === levelId);
+  return level?.name || 'N/A';
+};
+
+/** Get program name */
+const getProgramName = (programId) => {
+  const program = programs.value.find(p => p.programid === programId);
+  return program?.name || 'N/A';
+};
 
 /** Fetch all prices */
 const fetchPrices = async () => {
@@ -103,18 +146,6 @@ const handleDelete = async (priceItem) => {
   }
 };
 
-/** Get level name */
-const getLevelName = (levelId) => {
-  const level = levels.value.find(l => l.levelid === levelId);
-  return level?.name || 'N/A';
-};
-
-/** Get program name */
-const getProgramName = (programId) => {
-  const program = programs.value.find(p => p.programid === programId);
-  return program?.name || 'N/A';
-};
-
 onMounted(() => {
   fetchPrices();
   fetchOptions();
@@ -122,49 +153,137 @@ onMounted(() => {
 </script>
 
 <template>
-  <div>
-    <h1 class="text-3xl font-bold text-white mb-6">Classes Price</h1>
-
-    <div class="mb-6 flex justify-end">
-      <BaseButton @click="openAddModal" variant="glass-primary">
-        + Add New Price
+  <div class="p-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-800">Classes Price</h1>
+        <p class="text-gray-600 mt-1">Manage pricing for different levels and programs</p>
+      </div>
+      <BaseButton @click="openAddModal" variant="primary">
+        <span class="mr-2">+</span> Add Price
       </BaseButton>
     </div>
 
-    <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
+    <!-- Loading State -->
+    <div v-if="isLoading" class="text-center py-12">
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <p class="mt-2 text-gray-600">Loading prices...</p>
+    </div>
+
+    <!-- Prices Table -->
+    <div v-else class="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg overflow-hidden">
       <div class="overflow-x-auto">
-        <table class="min-w-full text-sm text-left text-gray-300">
-          <thead class="text-xs text-gray-400 uppercase bg-gray-700">
+        <table class="w-full">
+          <thead class="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
             <tr>
-              <th scope="col" class="px-6 py-3">Level</th>
-              <th scope="col" class="px-6 py-3">Program</th>
-              <th scope="col" class="px-6 py-3">Price</th>
-              <th scope="col" class="px-6 py-3">Actions</th>
+              <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Level</th>
+              <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Program</th>
+              <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Name</th>
+              <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Total Price</th>
+              <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Monthly Price</th>
+              <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
-          <tbody>
-            <tr v-if="isLoading">
-              <td colspan="4" class="text-center py-4">Loading data...</td>
+          <tbody class="divide-y divide-gray-200">
+            <tr v-for="priceItem in paginatedPrices" :key="priceItem.priceid" class="hover:bg-blue-50 transition-colors">
+              <!-- Level -->
+              <td class="px-6 py-4">
+                <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                  {{ getLevelName(priceItem.levelid) }}
+                </span>
+              </td>
+
+              <!-- Program -->
+              <td class="px-6 py-4">
+                <span class="px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
+                  {{ getProgramName(priceItem.programid) }}
+                </span>
+              </td>
+
+              <!-- Name -->
+              <td class="px-6 py-4 text-sm text-gray-700">
+                {{ priceItem.name || '-' }}
+              </td>
+
+              <!-- Total Price -->
+              <td class="px-6 py-4">
+                <div class="text-sm font-semibold text-green-600">
+                  {{ formatCurrency(priceItem.harga) }}
+                </div>
+              </td>
+
+              <!-- Monthly Price -->
+              <td class="px-6 py-4">
+                <div class="text-sm font-semibold text-blue-600">
+                  {{ formatCurrency(priceItem.monthlyprice) }}
+                </div>
+              </td>
+
+              <!-- Actions -->
+              <td class="px-6 py-4 text-sm">
+                <div class="flex gap-2">
+                  <button @click="openEditModal(priceItem)" class="text-blue-600 hover:text-blue-800 font-medium">
+                    Edit
+                  </button>
+                  <button @click="handleDelete(priceItem)" class="text-red-600 hover:text-red-800 font-medium">
+                    Delete
+                  </button>
+                </div>
+              </td>
             </tr>
-            <tr v-else-if="prices.length === 0">
-              <td colspan="4" class="text-center py-4">No prices found.</td>
-            </tr>
-            <tr v-for="priceItem in prices" :key="priceItem.priceid" class="border-b border-gray-700 hover:bg-gray-700">
-              <td class="px-6 py-4 font-medium text-white">{{ getLevelName(priceItem.levelid) }}</td>
-              <td class="px-6 py-4">{{ getProgramName(priceItem.programid) }}</td>
-              <td class="px-6 py-4">{{ priceItem.harga || '-' }}</td>
-              <td class="px-6 py-4 flex space-x-2">
-                <button @click="openEditModal(priceItem)" class="font-medium text-blue-500 hover:underline">Edit</button>
-                <button @click="handleDelete(priceItem)" class="font-medium text-red-500 hover:underline">Delete</button>
+            <tr v-if="prices.length === 0">
+              <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                No prices found. Click "Add Price" to create one.
               </td>
             </tr>
           </tbody>
         </table>
       </div>
+
+      <!-- Pagination -->
+      <div v-if="totalPages > 1" class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+        <p class="text-sm text-gray-600">
+          Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to {{ Math.min(currentPage * itemsPerPage, prices.length) }} of {{ prices.length }}
+        </p>
+        <div class="flex gap-2">
+          <button
+            @click="goToPage(currentPage - 1)"
+            :disabled="currentPage === 1"
+            class="px-3 py-1 border border-gray-300 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+          >
+            Previous
+          </button>
+          <button
+            v-for="page in totalPages"
+            :key="page"
+            @click="goToPage(page)"
+            :class="[
+              'px-3 py-1 border rounded-lg text-sm',
+              currentPage === page
+                ? 'bg-blue-600 text-white border-blue-600'
+                : 'border-gray-300 hover:bg-gray-50'
+            ]"
+          >
+            {{ page }}
+          </button>
+          <button
+            @click="goToPage(currentPage + 1)"
+            :disabled="currentPage === totalPages"
+            class="px-3 py-1 border border-gray-300 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+          >
+            Next
+          </button>
+        </div>
+      </div>
     </div>
 
+    <!-- Form Modal -->
     <Modal :show="showFormModal" @close="showFormModal = false" :persistent="true" size="lg">
       <template #content>
+        <h2 class="text-xl font-bold text-gray-800 mb-4">
+          {{ isEditMode ? 'Edit Price' : 'Add New Price' }}
+        </h2>
         <PriceForm
           :price-item="selectedPrice"
           :is-edit-mode="isEditMode"
@@ -174,8 +293,12 @@ onMounted(() => {
           @save="handleSave"
         />
       </template>
+      <template #footer>
+        <span></span>
+      </template>
     </Modal>
 
+    <!-- Notification Modal -->
     <Modal :show="showNotificationModal" :type="notificationType" :message="notificationMessage" @close="showNotificationModal = false" />
   </div>
 </template>

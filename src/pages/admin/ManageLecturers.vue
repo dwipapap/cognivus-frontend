@@ -1,9 +1,9 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { lecturerAPI } from '../../services/api';
 import Modal from '../../components/ui/Modal.vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
-import LecturerForm from './LecturerForm.vue'; // <-- Impor komponen form baru
+import LecturerForm from './LecturerForm.vue';
 
 const lecturers = ref([]);
 const isLoading = ref(true);
@@ -13,6 +13,33 @@ const notificationMessage = ref('');
 const notificationType = ref('info');
 const selectedLecturer = ref(null);
 const isEditMode = ref(false);
+const currentPage = ref(1);
+const itemsPerPage = 15;
+
+/** Paginated lecturers */
+const paginatedLecturers = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  return lecturers.value.slice(start, end);
+});
+
+/** Total pages */
+const totalPages = computed(() => {
+  return Math.ceil(lecturers.value.length / itemsPerPage);
+});
+
+/** Go to specific page */
+const goToPage = (page) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+  }
+};
+
+/** Get initials from name */
+const getInitials = (name) => {
+  if (!name) return '?';
+  return name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
+};
 
 const fetchLecturers = async () => {
   try {
@@ -80,58 +107,145 @@ onMounted(fetchLecturers);
 </script>
 
 <template>
-  <div>
-    <h1 class="text-3xl font-bold text-white mb-6">Manage Lecturers</h1>
-
-    <div class="mb-6 flex justify-end">
-      <BaseButton @click="openAddModal" variant="glass-primary">
-        + Add New Lecturer
+  <div class="p-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-800">Manage Lecturers</h1>
+        <p class="text-gray-600 mt-1">Create, edit, and manage lecturer records</p>
+      </div>
+      <BaseButton @click="openAddModal" variant="primary">
+        <span class="mr-2">+</span> Add Lecturer
       </BaseButton>
     </div>
 
-    <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
+    <!-- Loading State -->
+    <div v-if="isLoading" class="text-center py-12">
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <p class="mt-2 text-gray-600">Loading lecturers...</p>
+    </div>
+
+    <!-- Lecturers Table -->
+    <div v-else class="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg overflow-hidden">
       <div class="overflow-x-auto">
-        <table class="min-w-full text-sm text-left text-gray-300">
-          <thead class="text-xs text-gray-400 uppercase bg-gray-700">
+        <table class="w-full">
+          <thead class="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
             <tr>
-              <th scope="col" class="px-6 py-3">Full Name</th>
-              <th scope="col" class="px-6 py-3">Email</th>
-              <th scope="col" class="px-6 py-3">Phone Number</th>
-              <th scope="col" class="px-6 py-3">Actions</th>
+              <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Lecturer</th>
+              <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Contact</th>
+              <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Education</th>
+              <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Gender</th>
+              <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
-          <tbody>
-            <tr v-if="isLoading">
-              <td colspan="4" class="text-center py-4">Loading data...</td>
+          <tbody class="divide-y divide-gray-200">
+            <tr v-for="lecturer in paginatedLecturers" :key="lecturer.lecturerid" class="hover:bg-blue-50 transition-colors">
+              <!-- Lecturer Info -->
+              <td class="px-6 py-4">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0 h-10 w-10 bg-gradient-to-br from-purple-400 to-indigo-500 rounded-full flex items-center justify-center text-white font-bold">
+                    {{ getInitials(lecturer.fullname) }}
+                  </div>
+                  <div class="ml-3">
+                    <div class="text-sm font-medium text-gray-900">{{ lecturer.fullname }}</div>
+                    <div class="text-sm text-gray-500">{{ lecturer.tbuser?.username || 'No username' }}</div>
+                  </div>
+                </div>
+              </td>
+
+              <!-- Contact Info -->
+              <td class="px-6 py-4">
+                <div class="text-sm text-gray-900">{{ lecturer.tbuser?.email || '-' }}</div>
+                <div class="text-sm text-gray-500">{{ lecturer.phone || '-' }}</div>
+              </td>
+
+              <!-- Education -->
+              <td class="px-6 py-4 text-sm text-gray-700">
+                {{ lecturer.lasteducation || '-' }}
+              </td>
+
+              <!-- Gender -->
+              <td class="px-6 py-4 text-sm text-gray-700">
+                {{ lecturer.gender || '-' }}
+              </td>
+
+              <!-- Actions -->
+              <td class="px-6 py-4 text-sm">
+                <div class="flex gap-2">
+                  <button @click="openEditModal(lecturer)" class="text-blue-600 hover:text-blue-800 font-medium">
+                    Edit
+                  </button>
+                  <button @click="handleDelete(lecturer)" class="text-red-600 hover:text-red-800 font-medium">
+                    Delete
+                  </button>
+                </div>
+              </td>
             </tr>
-            <tr v-else-if="lecturers.length === 0">
-              <td colspan="4" class="text-center py-4">No lecturers found.</td>
-            </tr>
-            <tr v-for="lecturer in lecturers" :key="lecturer.lecturerid" class="border-b border-gray-700 hover:bg-gray-700">
-              <td class="px-6 py-4 font-medium text-white">{{ lecturer.fullname }}</td>
-              <td class="px-6 py-4">{{ lecturer.tbuser?.email || 'N/A' }}</td>
-              <td class="px-6 py-4">{{ lecturer.phone || 'N/A' }}</td>
-              <td class="px-6 py-4 flex space-x-2">
-                <button @click="openEditModal(lecturer)" class="font-medium text-blue-500 hover:underline">Edit</button>
-                <button @click="handleDelete(lecturer)" class="font-medium text-red-500 hover:underline">Delete</button>
+            <tr v-if="lecturers.length === 0">
+              <td colspan="5" class="px-6 py-8 text-center text-gray-500">
+                No lecturers found. Click "Add Lecturer" to create one.
               </td>
             </tr>
           </tbody>
         </table>
       </div>
+
+      <!-- Pagination -->
+      <div v-if="totalPages > 1" class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+        <p class="text-sm text-gray-600">
+          Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to {{ Math.min(currentPage * itemsPerPage, lecturers.length) }} of {{ lecturers.length }}
+        </p>
+        <div class="flex gap-2">
+          <button
+            @click="goToPage(currentPage - 1)"
+            :disabled="currentPage === 1"
+            class="px-3 py-1 border border-gray-300 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+          >
+            Previous
+          </button>
+          <button
+            v-for="page in totalPages"
+            :key="page"
+            @click="goToPage(page)"
+            :class="[
+              'px-3 py-1 border rounded-lg text-sm',
+              currentPage === page
+                ? 'bg-blue-600 text-white border-blue-600'
+                : 'border-gray-300 hover:bg-gray-50'
+            ]"
+          >
+            {{ page }}
+          </button>
+          <button
+            @click="goToPage(currentPage + 1)"
+            :disabled="currentPage === totalPages"
+            class="px-3 py-1 border border-gray-300 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+          >
+            Next
+          </button>
+        </div>
+      </div>
     </div>
 
+    <!-- Form Modal -->
     <Modal :show="showFormModal" @close="showFormModal = false" :persistent="true" size="lg">
-        <template #content>
-            <LecturerForm
-                :lecturer="selectedLecturer"
-                :is-edit-mode="isEditMode"
-                @close="showFormModal = false"
-                @save="handleSave"
-            />
-        </template>
+      <template #content>
+        <h2 class="text-xl font-bold text-gray-800 mb-4">
+          {{ isEditMode ? 'Edit Lecturer' : 'Add New Lecturer' }}
+        </h2>
+        <LecturerForm
+          :lecturer="selectedLecturer"
+          :is-edit-mode="isEditMode"
+          @close="showFormModal = false"
+          @save="handleSave"
+        />
+      </template>
+      <template #footer>
+        <span></span>
+      </template>
     </Modal>
 
+    <!-- Notification Modal -->
     <Modal :show="showNotificationModal" :type="notificationType" :message="notificationMessage" @close="showNotificationModal = false" />
   </div>
 </template>

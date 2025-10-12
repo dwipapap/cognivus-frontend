@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { classAPI, levelAPI, lecturerAPI } from '../../services/api';
 import Modal from '../../components/ui/Modal.vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
@@ -15,6 +15,39 @@ const notificationMessage = ref('');
 const notificationType = ref('info');
 const selectedClass = ref(null);
 const isEditMode = ref(false);
+const currentPage = ref(1);
+const itemsPerPage = 15;
+
+/** Paginated classes */
+const paginatedClasses = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  return classes.value.slice(start, end);
+});
+
+/** Total pages */
+const totalPages = computed(() => {
+  return Math.ceil(classes.value.length / itemsPerPage);
+});
+
+/** Go to specific page */
+const goToPage = (page) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+  }
+};
+
+/** Get level name by ID */
+const getLevelName = (levelId) => {
+  const level = levels.value.find(l => l.levelid === levelId);
+  return level?.name || 'N/A';
+};
+
+/** Get lecturer name by ID */
+const getLecturerName = (lecturerId) => {
+  const lecturer = lecturers.value.find(l => l.lecturerid === lecturerId);
+  return lecturer?.fullname || 'Unassigned';
+};
 
 /** Fetch all classes from API */
 const fetchClasses = async () => {
@@ -103,18 +136,6 @@ const handleDelete = async (classItem) => {
   }
 };
 
-/** Get level name by ID */
-const getLevelName = (levelId) => {
-  const level = levels.value.find(l => l.levelid === levelId);
-  return level?.name || 'N/A';
-};
-
-/** Get lecturer name by ID */
-const getLecturerName = (lecturerId) => {
-  const lecturer = lecturers.value.find(l => l.lecturerid === lecturerId);
-  return lecturer?.fullname || 'Unassigned';
-};
-
 onMounted(() => {
   fetchClasses();
   fetchOptions();
@@ -122,51 +143,125 @@ onMounted(() => {
 </script>
 
 <template>
-  <div>
-    <h1 class="text-3xl font-bold text-white mb-6">Manage Classes</h1>
-
-    <div class="mb-6 flex justify-end">
-      <BaseButton @click="openAddModal" variant="glass-primary">
-        + Add New Class
+  <div class="p-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-800">Manage Classes</h1>
+        <p class="text-gray-600 mt-1">Create, edit, and manage class records</p>
+      </div>
+      <BaseButton @click="openAddModal" variant="primary">
+        <span class="mr-2">+</span> Add Class
       </BaseButton>
     </div>
 
-    <div class="bg-gray-800 p-6 rounded-2xl shadow-lg">
+    <!-- Loading State -->
+    <div v-if="isLoading" class="text-center py-12">
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <p class="mt-2 text-gray-600">Loading classes...</p>
+    </div>
+
+    <!-- Classes Table -->
+    <div v-else class="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg overflow-hidden">
       <div class="overflow-x-auto">
-        <table class="min-w-full text-sm text-left text-gray-300">
-          <thead class="text-xs text-gray-400 uppercase bg-gray-700">
+        <table class="w-full">
+          <thead class="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
             <tr>
-              <th scope="col" class="px-6 py-3">Class Code</th>
-              <th scope="col" class="px-6 py-3">Level</th>
-              <th scope="col" class="px-6 py-3">Lecturer</th>
-              <th scope="col" class="px-6 py-3">Description</th>
-              <th scope="col" class="px-6 py-3">Actions</th>
+              <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Class Code</th>
+              <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Level</th>
+              <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Lecturer</th>
+              <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Description</th>
+              <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
-          <tbody>
-            <tr v-if="isLoading">
-              <td colspan="5" class="text-center py-4">Loading data...</td>
+          <tbody class="divide-y divide-gray-200">
+            <tr v-for="classItem in paginatedClasses" :key="classItem.classid" class="hover:bg-blue-50 transition-colors">
+              <!-- Class Code -->
+              <td class="px-6 py-4">
+                <div class="text-sm font-medium text-gray-900">{{ classItem.class_code }}</div>
+              </td>
+
+              <!-- Level -->
+              <td class="px-6 py-4">
+                <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                  {{ getLevelName(classItem.levelid) }}
+                </span>
+              </td>
+
+              <!-- Lecturer -->
+              <td class="px-6 py-4 text-sm text-gray-700">
+                {{ getLecturerName(classItem.lecturerid) }}
+              </td>
+
+              <!-- Description -->
+              <td class="px-6 py-4 text-sm text-gray-700">
+                {{ classItem.description || '-' }}
+              </td>
+
+              <!-- Actions -->
+              <td class="px-6 py-4 text-sm">
+                <div class="flex gap-2">
+                  <button @click="openEditModal(classItem)" class="text-blue-600 hover:text-blue-800 font-medium">
+                    Edit
+                  </button>
+                  <button @click="handleDelete(classItem)" class="text-red-600 hover:text-red-800 font-medium">
+                    Delete
+                  </button>
+                </div>
+              </td>
             </tr>
-            <tr v-else-if="classes.length === 0">
-              <td colspan="5" class="text-center py-4">No classes found.</td>
-            </tr>
-            <tr v-for="classItem in classes" :key="classItem.classid" class="border-b border-gray-700 hover:bg-gray-700">
-              <td class="px-6 py-4 font-medium text-white">{{ classItem.class_code }}</td>
-              <td class="px-6 py-4">{{ getLevelName(classItem.levelid) }}</td>
-              <td class="px-6 py-4">{{ getLecturerName(classItem.lecturerid) }}</td>
-              <td class="px-6 py-4">{{ classItem.description || '-' }}</td>
-              <td class="px-6 py-4 flex space-x-2">
-                <button @click="openEditModal(classItem)" class="font-medium text-blue-500 hover:underline">Edit</button>
-                <button @click="handleDelete(classItem)" class="font-medium text-red-500 hover:underline">Delete</button>
+            <tr v-if="classes.length === 0">
+              <td colspan="5" class="px-6 py-8 text-center text-gray-500">
+                No classes found. Click "Add Class" to create one.
               </td>
             </tr>
           </tbody>
         </table>
       </div>
+
+      <!-- Pagination -->
+      <div v-if="totalPages > 1" class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+        <p class="text-sm text-gray-600">
+          Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to {{ Math.min(currentPage * itemsPerPage, classes.length) }} of {{ classes.length }}
+        </p>
+        <div class="flex gap-2">
+          <button
+            @click="goToPage(currentPage - 1)"
+            :disabled="currentPage === 1"
+            class="px-3 py-1 border border-gray-300 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+          >
+            Previous
+          </button>
+          <button
+            v-for="page in totalPages"
+            :key="page"
+            @click="goToPage(page)"
+            :class="[
+              'px-3 py-1 border rounded-lg text-sm',
+              currentPage === page
+                ? 'bg-blue-600 text-white border-blue-600'
+                : 'border-gray-300 hover:bg-gray-50'
+            ]"
+          >
+            {{ page }}
+          </button>
+          <button
+            @click="goToPage(currentPage + 1)"
+            :disabled="currentPage === totalPages"
+            class="px-3 py-1 border border-gray-300 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+          >
+            Next
+          </button>
+        </div>
+      </div>
     </div>
 
+    <!-- Form Modal -->
     <Modal :show="showFormModal" @close="showFormModal = false" :persistent="true" size="lg">
       <template #content>
+        <h2 class="text-xl font-bold text-gray-800 mb-4">
+          {{ isEditMode ? 'Edit Class' : 'Add New Class' }}
+        </h2>
         <ClassForm
           :class-item="selectedClass"
           :is-edit-mode="isEditMode"
@@ -176,8 +271,12 @@ onMounted(() => {
           @save="handleSave"
         />
       </template>
+      <template #footer>
+        <span></span>
+      </template>
     </Modal>
 
+    <!-- Notification Modal -->
     <Modal :show="showNotificationModal" :type="notificationType" :message="notificationMessage" @close="showNotificationModal = false" />
   </div>
 </template>
