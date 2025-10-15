@@ -158,13 +158,20 @@ onMounted(async () => {
             class="block bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-200"
           >
             <div class="flex items-center gap-4 p-5">
-              <!-- Book Icon -->
+              <!-- Book Icon with styled background -->
               <div class="flex-shrink-0">
-                <svg class="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <rect x="4" y="4" width="4" height="16" rx="1" opacity="0.7"/>
-                  <rect x="10" y="2" width="4" height="18" rx="1" opacity="0.85"/>
-                  <rect x="16" y="6" width="4" height="14" rx="1"/>
-                </svg>
+                <div class="relative w-14 h-14 flex items-center justify-center rounded-lg bg-gradient-to-br from-white/10 to-blue-50/20 backdrop-blur-sm shadow-sm overflow-visible">
+                  <!-- Layered decorative shapes with a subtle bluish tint -->
+                  <span class="absolute -left-2 -top-2 w-7 h-7 bg-blue-100/30 rounded-md transform rotate-12"></span>
+                  <span class="absolute right-0 bottom-0 w-6 h-10 bg-blue-200/25 rounded-md transform rotate-6"></span>
+
+                  <!-- Book SVG (kept visual weight but slightly smaller to fit the background) -->
+                  <svg class="w-10 h-10 text-white z-10" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="4" y="4" width="4" height="16" rx="1" opacity="0.7"/>
+                    <rect x="10" y="2" width="4" height="18" rx="1" opacity="0.85"/>
+                    <rect x="16" y="6" width="4" height="14" rx="1"/>
+                  </svg>
+                </div>
               </div>
 
               <!-- Content -->
