@@ -164,9 +164,9 @@ onUnmounted(() => {
       </div>
     </header>
 
-    <div class="flex flex-1 relative">
+    <div class="flex flex-1 relative sidebar-container">
       <!-- Desktop Sidebar -->
-      <aside class="sidebar group w-19 hover:w-40 flex-shrink-0 sidebar-glass shadow-2xl transition-all duration-250 ease-in-out overflow-hidden fixed left-4 top-26 bottom-4 rounded-4xl z-10 border border-white/20 hidden md:block">
+      <aside class="sidebar group w-19 hover:w-64 flex-shrink-0 sidebar-glass shadow-2xl transition-all duration-300 ease-in-out overflow-hidden absolute left-4 top-2 bottom-4 rounded-4xl z-10 border border-white/20 hidden md:block">
         <!-- Navigation Menu -->
         <nav class="p-4 h-full overflow-y-auto">
           <p class="sidebar-text text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 opacity-0 whitespace-nowrap overflow-hidden">
@@ -254,7 +254,7 @@ onUnmounted(() => {
       </nav>
 
       <!-- Main Content Area - This is where child routes will render -->
-      <main class="flex-1 p-6 lg:p-8 overflow-auto md:ml-20 mb-20 md:mb-0">
+      <main class="main-content flex-1 p-6 lg:p-8 overflow-auto md:ml-28 mb-20 md:mb-0 transition-all duration-300 ease-in-out">
         <router-view />
       </main>
     </div>
@@ -355,6 +355,11 @@ onUnmounted(() => {
   transform: translateZ(0);
 }
 
+/* Sidebar container for hover detection */
+.sidebar-container {
+  position: relative;
+}
+
 /* Sidebar hover animations */
 .sidebar {
   transition: width 300ms ease-in-out, transform 200ms ease, box-shadow 300ms ease;
@@ -367,6 +372,11 @@ onUnmounted(() => {
     0 35px 60px rgba(31, 41, 55, 0.15),
     0 12px 40px rgba(59, 130, 246, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+/* Push content when sidebar expands */
+.sidebar-container:has(.sidebar:hover) .main-content {
+  margin-left: 17.5rem;
 }
 
 .sidebar:hover .sidebar-text {
