@@ -166,7 +166,7 @@ onUnmounted(() => {
 
     <div class="flex flex-1 relative sidebar-container">
       <!-- Desktop Sidebar -->
-      <aside class="sidebar group w-19 hover:w-64 flex-shrink-0 sidebar-glass shadow-2xl transition-all duration-300 ease-in-out overflow-hidden absolute left-4 top-2 bottom-4 rounded-4xl z-10 border border-white/20 hidden md:block">
+      <aside class="sidebar group w-19 hover:w-64 flex-shrink-0 sidebar-glass shadow-2xl transition-all duration-300 ease-in-out overflow-hidden fixed left-4 top-24 bottom-4 rounded-4xl z-10 border border-white/20 hidden md:block">
         <!-- Navigation Menu -->
         <nav class="p-4 h-full overflow-y-auto">
           <p class="sidebar-text text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 opacity-0 whitespace-nowrap overflow-hidden">
