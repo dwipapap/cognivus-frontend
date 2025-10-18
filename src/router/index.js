@@ -26,6 +26,7 @@ import AdminManageStudents from '../pages/admin/ManageStudents.vue';
 import ManagePrograms from '../pages/admin/ManagePrograms.vue';
 import ManageLevels from '../pages/admin/ManageLevels.vue';
 import ManageTeacherLevels from '../pages/admin/ManageTeacherLevels.vue';
+import ManageGrades from '../pages/admin/ManageGrades.vue';
 
 const routes = [
   {
@@ -165,6 +166,11 @@ const routes = [
         name: 'AdminManageTeacherLevels',
         component: ManageTeacherLevels,
       },
+      {
+        path: 'grades',
+        name: 'AdminManageGrades',
+        component: ManageGrades,
+      }
     ]
   },
 

@@ -83,8 +83,48 @@ export const lecturerAPI = {
 export const courseAPI = {
   getAllCourses: () => apiClient.get('/courses'),
   getCourseById: (id) => apiClient.get(`/courses/${id}`),
-  createCourse: (courseData) => apiClient.post('/courses', courseData),
-  updateCourse: (id, courseData) => apiClient.put(`/courses/${id}`, courseData),
+  /** Create course with optional file upload */
+  createCourse: (courseData, files = null) => {
+    const formData = new FormData();
+    // Add course fields
+    Object.keys(courseData).forEach(key => {
+      if (courseData[key] !== null && courseData[key] !== undefined) {
+        formData.append(key, courseData[key]);
+      }
+    });
+    // Add files if provided
+    if (files) {
+      if (Array.isArray(files)) {
+        files.forEach(file => formData.append('files', file));
+      } else {
+        formData.append('files', files);
+      }
+    }
+    return apiClient.post('/courses', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+  /** Update course with optional file upload */
+  updateCourse: (id, courseData, files = null) => {
+    const formData = new FormData();
+    // Add course fields
+    Object.keys(courseData).forEach(key => {
+      if (courseData[key] !== null && courseData[key] !== undefined) {
+        formData.append(key, courseData[key]);
+      }
+    });
+    // Add files if provided
+    if (files) {
+      if (Array.isArray(files)) {
+        files.forEach(file => formData.append('files', file));
+      } else {
+        formData.append('files', files);
+      }
+    }
+    return apiClient.put(`/courses/${id}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
   deleteCourse: (id) => apiClient.delete(`/courses/${id}`)
 };
 
@@ -139,6 +179,31 @@ export const authAPI = {
   register: (userData) => apiClient.post('/auth/register', userData),
   getProfile: () => apiClient.get('/auth/profile'),
   logout: () => apiClient.post('/auth/logout')
+};
+
+// Report Files API endpoints
+export const reportFileAPI = {
+  /** Upload grade report file */
+  uploadReportFile: (studentid, gradeid, file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('studentid', studentid);
+    formData.append('gradeid', gradeid);
+    return apiClient.post('/report_files', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+  getAllReportFiles: () => apiClient.get('/report_files'),
+  getReportFileById: (id) => apiClient.get(`/report_files/${id}`)
+};
+
+// Grade API endpoints
+export const gradeAPI = {
+  getAllGrades: () => apiClient.get('/grades'),
+  getGradeById: (id) => apiClient.get(`/grades/${id}`),
+  createGrade: (gradeData) => apiClient.post('/grades', gradeData),
+  updateGrade: (id, gradeData) => apiClient.put(`/grades/${id}`, gradeData),
+  deleteGrade: (id) => apiClient.delete(`/grades/${id}`)
 };
 
 export default apiClient;

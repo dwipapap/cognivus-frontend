@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { useLecturerProfile } from '../../composables/useLecturerProfile';
 import { classAPI, courseAPI, levelAPI } from '../../services/api';
+import BaseFileUpload from '../../components/form/BaseFileUpload.vue';
 
 const { lecturerProfile, isLoading: profileLoading } = useLecturerProfile();
 
@@ -22,6 +23,8 @@ const formData = ref({
   file: '',
   video_link: ''
 });
+const uploadFile = ref(null);
+const isUploading = ref(false);
 
 /** Get courses for selected class */
 const classCourses = computed(() => {
@@ -93,6 +96,7 @@ const resetForm = () => {
     file: '',
     video_link: ''
   };
+  uploadFile.value = null;
   editingCourse.value = null;
   showModal.value = false;
 };
@@ -115,6 +119,12 @@ const openEditForm = (course) => {
   showModal.value = true;
 };
 
+/** Create placeholder file when no file uploaded */
+const createPlaceholderFile = () => {
+  const blob = new Blob(['Placeholder'], { type: 'text/plain' });
+  return new File([blob], 'placeholder.txt', { type: 'text/plain' });
+};
+
 /** Save material */
 const saveMaterial = async () => {
   if (!formData.value.title.trim()) {
@@ -128,16 +138,22 @@ const saveMaterial = async () => {
   }
 
   try {
+    isUploading.value = true;
     const payload = {
-      ...formData.value,
+      title: formData.value.title,
+      course_code: formData.value.course_code,
+      video_link: formData.value.video_link,
       classid: selectedClass.value.classid
     };
 
+    // Use uploaded file or create placeholder
+    const fileToUpload = uploadFile.value || createPlaceholderFile();
+    
     if (editingCourse.value) {
-      await courseAPI.updateCourse(editingCourse.value.courseid, payload);
+      await courseAPI.updateCourse(editingCourse.value.courseid, payload, fileToUpload);
       successMessage.value = 'Material updated successfully';
     } else {
-      await courseAPI.createCourse(payload);
+      await courseAPI.createCourse(payload, fileToUpload);
       successMessage.value = 'Material added successfully';
     }
 
@@ -150,6 +166,8 @@ const saveMaterial = async () => {
   } catch (error) {
     errorMessage.value = 'Failed to save material';
     console.error('Error saving material:', error);
+  } finally {
+    isUploading.value = false;
   }
 };
 
@@ -359,16 +377,13 @@ onMounted(async () => {
                 />
               </div>
 
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">File URL</label>
-                <input
-                  v-model="formData.file"
-                  type="text"
-                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="https://example.com/file.pdf"
-                />
-                <p class="text-xs text-gray-500 mt-1">Link to PDF, document, or other file</p>
-              </div>
+              <BaseFileUpload
+                v-model="uploadFile"
+                label="Upload File (Optional)"
+                accept=".pdf,.doc,.docx,.ppt,.pptx"
+                :max-size="10"
+                hint="PDF, Word, or PowerPoint (max 50MB). Placeholder will be used if none selected."
+              />
 
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Video Link</label>
@@ -392,9 +407,10 @@ onMounted(async () => {
               </button>
               <button
                 @click="saveMaterial"
-                class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                :disabled="isUploading"
+                class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {{ editingCourse ? 'Update Material' : 'Save Material' }}
+                {{ isUploading ? 'Uploading...' : (editingCourse ? 'Update Material' : 'Save Material') }}
               </button>
             </div>
           </div>
