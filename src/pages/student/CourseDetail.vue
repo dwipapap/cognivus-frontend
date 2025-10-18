@@ -13,7 +13,6 @@ const levelName = ref('');
 const lecturerName = ref('');
 const isLoading = ref(true);
 const errorMessage = ref('');
-const showVideo = ref(false);
 
 /** Extract YouTube video ID */
 const getYouTubeId = (url) => {
@@ -22,10 +21,20 @@ const getYouTubeId = (url) => {
   return match ? match[1] : null;
 };
 
-/** Check if video is YouTube */
-const isYouTubeVideo = computed(() => {
-  return course.value?.video_link && getYouTubeId(course.value.video_link) !== null;
+/** Get all course files (PDFs and other materials) */
+const courseFiles = computed(() => {
+  if (!course.value?.tbcourse_files) {
+    console.log('No tbcourse_files found');
+    return [];
+  }
+  console.log('Course files:', course.value.tbcourse_files);
+  return course.value.tbcourse_files;
 });
+
+/** Get file display URL (prioritize url over path) */
+const getFileUrl = (file) => {
+  return file.url || file.path;
+};
 
 /** Format date with day name */
 const formatDate = (dateString) => {
@@ -54,6 +63,10 @@ const fetchCourseData = async () => {
     }
 
     course.value = courseRes.data.data;
+    
+    // Debug: Log course data structure
+    console.log('Course data:', course.value);
+    console.log('Course files:', course.value.tbcourse_files);
 
     // Fetch class info
     if (course.value.classid) {
@@ -169,64 +182,72 @@ onMounted(fetchCourseData);
       <div class="bg-white rounded-xl shadow-lg p-6">
         <h2 class="text-xl font-bold text-gray-800 mb-4">Course Materials</h2>
         
-        <div class="space-y-3">
-          <!-- File Download -->
-          <a 
-            v-if="course.file" 
-            :href="course.file" 
-            target="_blank"
-            class="flex items-center gap-3 p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
-          >
-            <svg class="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11zM8 15.01l1.41 1.41L11 14.84V19h2v-4.16l1.59 1.59L16 15.01 12.01 11z"/>
-            </svg>
-            <div class="flex-1">
-              <p class="font-semibold text-gray-800">Download Course File</p>
-              <p class="text-sm text-gray-600">Click to download course materials</p>
-            </div>
-          </a>
+        <!-- No Materials -->
+        <div v-if="courseFiles.length === 0 && !course.video_link" class="text-center py-8 text-gray-500">
+          <svg class="w-16 h-16 mx-auto mb-3 text-gray-300" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5-7v-2h-2V7h-2v3H8v2h2v3h2v-3h2z"/>
+          </svg>
+          <p>No materials available yet.</p>
+        </div>
 
-          <!-- Video -->
-          <div v-if="course.video_link">
-            <div v-if="isYouTubeVideo" class="space-y-3">
-              <BaseButton @click="showVideo = !showVideo" variant="primary" class="w-full">
-                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M10 8.64L15.27 12 10 15.36V8.64M8 5v14l11-7L8 5z"/>
+        <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Course Files (PDF/Documents) -->
+          <a 
+            v-for="file in courseFiles" 
+            :key="file.cfid"
+            :href="getFileUrl(file)" 
+            target="_blank"
+            class="flex items-center gap-4 p-4 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5"
+          >
+            <!-- PDF Thumbnail -->
+            <div class="flex-shrink-0 w-20 h-24 bg-white rounded-lg flex items-center justify-center">
+              <div class="text-center">
+                <svg class="w-10 h-10 mx-auto text-red-600" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/>
+                  <path d="M8 16h8v-2H8v2zm0-4h8v-2H8v2z"/>
                 </svg>
-                {{ showVideo ? 'Hide Video' : 'Watch Video' }}
-              </BaseButton>
-              
-              <div v-if="showVideo" class="aspect-video rounded-lg overflow-hidden shadow-lg">
-                <iframe
-                  :src="`https://www.youtube.com/embed/${getYouTubeId(course.video_link)}`"
-                  class="w-full h-full"
-                  frameborder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowfullscreen
-                ></iframe>
+                <p class="text-xs font-bold text-gray-700 mt-1">PDF</p>
               </div>
             </div>
             
-            <a 
-              v-else
-              :href="course.video_link" 
-              target="_blank"
-              class="flex items-center gap-3 p-4 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors"
-            >
-              <svg class="w-8 h-8 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
+            <!-- File Info -->
+            <div class="flex-1 text-white">
+              <p class="font-bold text-lg mb-1">Learning Materials</p>
+              <p class="text-sm text-blue-100">Click to view PDF</p>
+              <p class="text-xs text-blue-200 mt-1">{{ formatDate(file.upload_date) }}</p>
+            </div>
+            
+            <!-- Open Icon -->
+            <svg class="w-6 h-6 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+            </svg>
+          </a>
+
+          <!-- YouTube Video Button -->
+          <a 
+            v-if="course.video_link && getYouTubeId(course.video_link)"
+            :href="`https://www.youtube.com/watch?v=${getYouTubeId(course.video_link)}`" 
+            target="_blank"
+            class="flex items-center gap-4 p-4 bg-gradient-to-br from-red-600 to-red-700 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5"
+          >
+            <!-- Video Thumbnail -->
+            <div class="flex-shrink-0 w-20 h-24 bg-white rounded-lg flex items-center justify-center">
+              <svg class="w-12 h-12 text-red-600" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M10 8.64L15.27 12 10 15.36V8.64M8 5v14l11-7L8 5z"/>
               </svg>
-              <div class="flex-1">
-                <p class="font-semibold text-gray-800">Watch Video</p>
-                <p class="text-sm text-gray-600">Open video in new tab</p>
-              </div>
-            </a>
-          </div>
-
-          <!-- No Materials -->
-          <div v-if="!course.file && !course.video_link" class="text-center py-8 text-gray-500">
-            No materials available yet.
-          </div>
+            </div>
+            
+            <!-- Video Info -->
+            <div class="flex-1 text-white">
+              <p class="font-bold text-lg mb-1">Video Lesson</p>
+              <p class="text-sm text-red-100">Watch on YouTube</p>
+            </div>
+            
+            <!-- Open Icon -->
+            <svg class="w-6 h-6 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+            </svg>
+          </a>
         </div>
       </div>
     </div>

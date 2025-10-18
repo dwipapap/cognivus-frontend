@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useLecturerProfile } from '../../composables/useLecturerProfile';
-import { classAPI, courseAPI, levelAPI } from '../../services/api';
+import { classAPI, courseAPI, courseFileAPI, levelAPI } from '../../services/api';
 import BaseFileUpload from '../../components/form/BaseFileUpload.vue';
 
 const { lecturerProfile, isLoading: profileLoading } = useLecturerProfile();
@@ -17,20 +17,27 @@ const successMessage = ref('');
 /** Modal and form state */
 const showModal = ref(false);
 const editingCourse = ref(null);
+const existingFiles = ref([]);
 const formData = ref({
   title: '',
   course_code: '',
-  file: '',
+  description: '',
   video_link: ''
 });
-const uploadFile = ref(null);
+const uploadFiles = ref([]);
 const isUploading = ref(false);
+const isDeletingFile = ref(false);
 
-/** Get courses for selected class */
+/** Get courses for selected class with file count */
 const classCourses = computed(() => {
   if (!selectedClass.value) return [];
   return allCourses.value.filter(c => c.classid === selectedClass.value.classid);
 });
+
+/** Get file count for a course */
+const getFileCount = (course) => {
+  return course.tbcourse_files?.length || 0;
+};
 
 /** Get level name by id */
 const getLevelName = (levelid) => {
@@ -93,10 +100,11 @@ const resetForm = () => {
   formData.value = {
     title: '',
     course_code: '',
-    file: '',
+    description: '',
     video_link: ''
   };
-  uploadFile.value = null;
+  uploadFiles.value = [];
+  existingFiles.value = [];
   editingCourse.value = null;
   showModal.value = false;
 };
@@ -113,10 +121,29 @@ const openEditForm = (course) => {
   formData.value = {
     title: course.title,
     course_code: course.course_code || '',
-    file: course.file || '',
+    description: course.description || '',
     video_link: course.video_link || ''
   };
+  existingFiles.value = course.tbcourse_files || [];
   showModal.value = true;
+};
+
+/** Delete an existing course file */
+const deleteExistingFile = async (fileId) => {
+  if (!confirm('Delete this file?')) return;
+  
+  try {
+    isDeletingFile.value = true;
+    await courseFileAPI.deleteCourseFile(fileId);
+    existingFiles.value = existingFiles.value.filter(f => f.cfid !== fileId);
+    successMessage.value = 'File deleted';
+    setTimeout(() => successMessage.value = '', 2000);
+  } catch (error) {
+    errorMessage.value = 'Failed to delete file';
+    console.error('Error deleting file:', error);
+  } finally {
+    isDeletingFile.value = false;
+  }
 };
 
 /** Create placeholder file when no file uploaded */
@@ -142,18 +169,19 @@ const saveMaterial = async () => {
     const payload = {
       title: formData.value.title,
       course_code: formData.value.course_code,
+      description: formData.value.description,
       video_link: formData.value.video_link,
       classid: selectedClass.value.classid
     };
 
-    // Use uploaded file or create placeholder
-    const fileToUpload = uploadFile.value || createPlaceholderFile();
+    // Use uploaded files or create placeholder if none
+    const filesToUpload = uploadFiles.value.length > 0 ? uploadFiles.value : [createPlaceholderFile()];
     
     if (editingCourse.value) {
-      await courseAPI.updateCourse(editingCourse.value.courseid, payload, fileToUpload);
+      await courseAPI.updateCourse(editingCourse.value.courseid, payload, filesToUpload);
       successMessage.value = 'Material updated successfully';
     } else {
-      await courseAPI.createCourse(payload, fileToUpload);
+      await courseAPI.createCourse(payload, filesToUpload);
       successMessage.value = 'Material added successfully';
     }
 
@@ -283,22 +311,18 @@ onMounted(async () => {
                   <span v-if="course.course_code" class="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">
                     {{ course.course_code }}
                   </span>
+                  <span v-if="getFileCount(course) > 0" class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
+                    📎 {{ getFileCount(course) }} file{{ getFileCount(course) > 1 ? 's' : '' }}
+                  </span>
                 </div>
+                <p v-if="course.description" class="text-sm text-gray-600 mb-2">{{ course.description }}</p>
                 <p class="text-sm text-gray-500 mb-3">Uploaded: {{ formatDate(course.upload_date) }}</p>
                 <div class="flex gap-2">
-                  <a
-                    v-if="course.file"
-                    :href="course.file"
-                    target="_blank"
-                    class="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm"
-                  >
-                    📄 File
-                  </a>
                   <a
                     v-if="course.video_link"
                     :href="course.video_link"
                     target="_blank"
-                    class="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm"
+                    class="px-3 py-1 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 text-sm"
                   >
                     🎥 Video
                   </a>
@@ -337,7 +361,7 @@ onMounted(async () => {
           class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
           @click.self="resetForm"
         >
-          <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-y-auto">
             <!-- Modal Header -->
             <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center rounded-t-2xl">
               <h3 class="text-xl font-bold text-gray-900">
@@ -377,12 +401,58 @@ onMounted(async () => {
                 />
               </div>
 
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                <textarea
+                  v-model="formData.description"
+                  rows="3"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Describe the course material..."
+                ></textarea>
+              </div>
+
+              <!-- Existing Files (Edit Mode) -->
+              <div v-if="editingCourse && existingFiles.length > 0" class="space-y-2">
+                <label class="block text-sm font-medium text-gray-700">Existing Files</label>
+                <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-2">
+                  <div
+                    v-for="file in existingFiles"
+                    :key="file.cfid"
+                    class="flex items-center justify-between bg-white border border-gray-200 rounded-lg p-3"
+                  >
+                    <div class="flex items-center gap-3 flex-1">
+                      <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/>
+                      </svg>
+                      <div class="flex-1 min-w-0">
+                        <a 
+                          :href="file.url || file.path" 
+                          target="_blank"
+                          class="text-sm font-medium text-blue-600 hover:text-blue-800 truncate block"
+                        >
+                          File {{ file.cfid }} - {{ formatDate(file.upload_date) }}
+                        </a>
+                        <p class="text-xs text-gray-500 truncate">{{ file.url || file.path }}</p>
+                      </div>
+                    </div>
+                    <button
+                      @click="deleteExistingFile(file.cfid)"
+                      :disabled="isDeletingFile"
+                      class="ml-3 px-3 py-1 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+
               <BaseFileUpload
-                v-model="uploadFile"
-                label="Upload File (Optional)"
+                v-model="uploadFiles"
+                label="Upload New Files"
                 accept=".pdf,.doc,.docx,.ppt,.pptx"
-                :max-size="10"
-                hint="PDF, Word, or PowerPoint (max 50MB). Placeholder will be used if none selected."
+                :max-size="50"
+                :multiple="true"
+                hint="PDF, Word, or PowerPoint (max 50MB each). Multiple files allowed."
               />
 
               <div>

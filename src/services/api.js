@@ -206,4 +206,11 @@ export const gradeAPI = {
   deleteGrade: (id) => apiClient.delete(`/grades/${id}`)
 };
 
+// Course Files API endpoints
+export const courseFileAPI = {
+  getAllCourseFiles: () => apiClient.get('/course_files'),
+  getCourseFileById: (id) => apiClient.get(`/course_files/${id}`),
+  deleteCourseFile: (id) => apiClient.delete(`/course_files/${id}`)
+};
+
 export default apiClient;
