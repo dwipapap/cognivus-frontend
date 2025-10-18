@@ -24,10 +24,8 @@ const getYouTubeId = (url) => {
 /** Get all course files (PDFs and other materials) */
 const courseFiles = computed(() => {
   if (!course.value?.tbcourse_files) {
-    console.log('No tbcourse_files found');
     return [];
   }
-  console.log('Course files:', course.value.tbcourse_files);
   return course.value.tbcourse_files;
 });
 
@@ -62,11 +60,7 @@ const fetchCourseData = async () => {
       return;
     }
 
-    course.value = courseRes.data.data;
-    
-    // Debug: Log course data structure
-    console.log('Course data:', course.value);
-    console.log('Course files:', course.value.tbcourse_files);
+  course.value = courseRes.data.data;
 
     // Fetch class info
     if (course.value.classid) {
@@ -172,15 +166,14 @@ onMounted(fetchCourseData);
         </div>
       </div>
 
-      <!-- Description -->
-      <div v-if="course.description" class="bg-white rounded-xl shadow-lg p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-3">Description</h2>
-        <p class="text-gray-700 whitespace-pre-wrap">{{ course.description }}</p>
-      </div>
-
       <!-- Course Materials -->
       <div class="bg-white rounded-xl shadow-lg p-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">Course Materials</h2>
+
+        <!-- Description  -->
+        <div v-if="course.description" class="mb-4">
+          <h3 class="text-lg font-semibold text-gray-800 mb-2">Class Notes</h3>
+          <p class="text-gray-700 whitespace-pre-wrap">{{ course.description }}</p>
+        </div>
         
         <!-- No Materials -->
         <div v-if="courseFiles.length === 0 && !course.video_link" class="text-center py-8 text-gray-500">

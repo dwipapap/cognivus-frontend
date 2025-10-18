@@ -146,13 +146,7 @@ const deleteExistingFile = async (fileId) => {
   }
 };
 
-/** Create placeholder file when no file uploaded */
-const createPlaceholderFile = () => {
-  const blob = new Blob(['Placeholder'], { type: 'text/plain' });
-  return new File([blob], 'placeholder.txt', { type: 'text/plain' });
-};
-
-/** Save material */
+/** Save material (files optional) */
 const saveMaterial = async () => {
   if (!formData.value.title.trim()) {
     errorMessage.value = 'Title is required';
@@ -174,8 +168,8 @@ const saveMaterial = async () => {
       classid: selectedClass.value.classid
     };
 
-    // Use uploaded files or create placeholder if none
-    const filesToUpload = uploadFiles.value.length > 0 ? uploadFiles.value : [createPlaceholderFile()];
+    // Upload files only if provided
+    const filesToUpload = uploadFiles.value.length > 0 ? uploadFiles.value : null;
     
     if (editingCourse.value) {
       await courseAPI.updateCourse(editingCourse.value.courseid, payload, filesToUpload);
@@ -448,15 +442,15 @@ onMounted(async () => {
 
               <BaseFileUpload
                 v-model="uploadFiles"
-                label="Upload New Files"
+                label="Upload New Files (Optional)"
                 accept=".pdf,.doc,.docx,.ppt,.pptx"
                 :max-size="50"
                 :multiple="true"
-                hint="PDF, Word, or PowerPoint (max 50MB each). Multiple files allowed."
+                hint="Optional: PDF, Word, or PowerPoint (max 50MB each). Multiple files allowed."
               />
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Video Link</label>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Video Link (Optional)</label>
                 <input
                   v-model="formData.video_link"
                   type="text"
