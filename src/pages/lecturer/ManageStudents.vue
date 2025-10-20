@@ -1,8 +1,10 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { useLecturerProfile } from '../../composables/useLecturerProfile';
 import { classAPI, studentAPI, levelAPI } from '../../services/api';
 
+const router = useRouter();
 const { lecturerProfile, isLoading: profileLoading } = useLecturerProfile();
 
 const myClasses = ref([]);
@@ -109,8 +111,8 @@ const fetchStudents = async () => {
 
 /** Get gender label */
 const getGenderLabel = (gender) => {
-  if (gender === 'L') return 'M';
-  if (gender === 'P') return 'F';
+  if (gender === 'L') return 'Male';
+  if (gender === 'F') return 'Female';
   return '-';
 };
 
@@ -136,6 +138,30 @@ const goToPage = (page) => {
   if (page >= 1 && page <= totalPages.value) {
     currentPage.value = page;
   }
+};
+
+/** Navigate to student details */
+const viewStudentDetails = (student) => {
+  const userId = student.tbuser?.userid || student.userid;
+  if (!userId) {
+    console.error('User ID not found for student:', student);
+    return;
+  }
+  router.push({ name: 'StudentDetail', params: { id: userId } });
+};
+
+/** Get payment label */
+const getPaymentLabel = (type) => {
+  if (type === 'Full') return 'Full Payment';
+  if (type === 'Monthly') return 'Monthly';
+  return type;
+};
+
+/** Get payment badge style */
+const getPaymentStyle = (type) => {
+  if (type === 'Full') return 'bg-emerald-100 text-emerald-700';
+  if (type === 'Monthly') return 'bg-blue-100 text-blue-700';
+  return 'bg-gray-100 text-gray-600';
 };
 
 onMounted(async () => {
@@ -229,6 +255,8 @@ onMounted(async () => {
                   <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
                   <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gender</th>
                   <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Parent</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-200">
@@ -266,6 +294,27 @@ onMounted(async () => {
                       <p v-if="student.parentphone" class="text-xs text-gray-500">{{ student.parentphone }}</p>
                     </div>
                     <span v-else class="text-sm text-gray-400">-</span>
+                  </td>
+                  <td class="px-4 py-3">
+                    <span
+                      v-if="student.payment_type"
+                      :class="[
+                        'inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full',
+                        getPaymentStyle(student.payment_type)
+                      ]"
+                    >
+                      {{ getPaymentLabel(student.payment_type) }}
+                    </span>
+                    <span v-else class="text-sm text-gray-400">-</span>
+                  </td>
+                  <td class="px-4 py-3">
+                    <button
+                      type="button"
+                      @click="viewStudentDetails(student)"
+                      class="inline-flex items-center px-3 py-1.5 border border-blue-600 text-blue-600 rounded-lg text-xs font-semibold transition-colors hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+                    >
+                      Details
+                    </button>
                   </td>
                 </tr>
               </tbody>

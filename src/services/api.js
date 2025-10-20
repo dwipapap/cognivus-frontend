@@ -201,8 +201,34 @@ export const reportFileAPI = {
 export const gradeAPI = {
   getAllGrades: () => apiClient.get('/grades'),
   getGradeById: (id) => apiClient.get(`/grades/${id}`),
-  createGrade: (gradeData) => apiClient.post('/grades', gradeData),
-  updateGrade: (id, gradeData) => apiClient.put(`/grades/${id}`, gradeData),
+  createGrade: (gradeData, file = null) => {
+    const formData = new FormData();
+    Object.keys(gradeData).forEach(key => {
+      if (gradeData[key] !== null && gradeData[key] !== undefined) {
+        formData.append(key, gradeData[key]);
+      }
+    });
+    if (file) {
+      formData.append('file', file);
+    }
+    return apiClient.post('/grades', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
+  updateGrade: (id, gradeData, file = null) => {
+    const formData = new FormData();
+    Object.keys(gradeData).forEach(key => {
+      if (gradeData[key] !== null && gradeData[key] !== undefined) {
+        formData.append(key, gradeData[key]);
+      }
+    });
+    if (file) {
+      formData.append('file', file);
+    }
+    return apiClient.put(`/grades/${id}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
   deleteGrade: (id) => apiClient.delete(`/grades/${id}`)
 };
 
