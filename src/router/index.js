@@ -1,33 +1,43 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import { authStore } from '../store/auth'; // <-- Impor auth store
-import Home from '../pages/Home.vue';
-import Login from '../pages/Login.vue';
-// student pages
-import StudentLayout from '../pages/student/StudentLayout.vue';
-import Dashboard from '../pages/student/Dashboard.vue';
-import Profile from '../pages/student/Profile.vue';
-import ProfileView from '../pages/student/ProfileView.vue';
-import MyCourses from '../pages/student/MyCourses.vue';
-import CourseDetail from '../pages/student/CourseDetail.vue';
-// lecturer pages
-import LecturerLayout from '../pages/lecturer/LecturerLayout.vue';
-import LecturerDashboard from '../pages/lecturer/DashboardLecturer.vue';
-import ProfileViewLecturer from '../pages/lecturer/ProfileViewLecturer.vue';
-import ProfileLecturer from '../pages/lecturer/ProfileLecturer.vue';
-import ManageMaterials from '../pages/lecturer/ManageMaterials.vue';
-import ManageStudents from '../pages/lecturer/ManageStudents.vue';
-import StudentDetail from '../pages/lecturer/StudentDetail.vue';
-// admin pages
-import AdminLayout from '../pages/admin/AdminLayout.vue';
-import DashboardAdmin from '../pages/admin/DashboardAdmin.vue';
-import ManageLecturers from '../pages/admin/ManageLecturers.vue';
-import ManageClasses from '../pages/admin/ManageClasses.vue';
-import ManagePrices from '../pages/admin/ManagePrices.vue';
-import AdminManageStudents from '../pages/admin/ManageStudents.vue';
-import ManagePrograms from '../pages/admin/ManagePrograms.vue';
-import ManageLevels from '../pages/admin/ManageLevels.vue';
-import ManageTeacherLevels from '../pages/admin/ManageTeacherLevels.vue';
-import ManageGrades from '../pages/admin/ManageGrades.vue';
+import { authStore } from '../store/auth';
+
+/**
+ * Lazy-loaded route components.
+ * Grouped by role using webpackChunkName for optimal code splitting.
+ */
+
+// Public pages - loaded immediately for faster initial access
+const Home = () => import('../pages/Home.vue');
+const Login = () => import('../pages/Login.vue');
+
+// Student pages - grouped in 'student' chunk
+const StudentLayout = () => import(/* webpackChunkName: "student" */ '../pages/student/StudentLayout.vue');
+const Dashboard = () => import(/* webpackChunkName: "student" */ '../pages/student/Dashboard.vue');
+const Profile = () => import(/* webpackChunkName: "student" */ '../pages/student/Profile.vue');
+const ProfileView = () => import(/* webpackChunkName: "student" */ '../pages/student/ProfileView.vue');
+const MyCourses = () => import(/* webpackChunkName: "student" */ '../pages/student/MyCourses.vue');
+const CourseDetail = () => import(/* webpackChunkName: "student" */ '../pages/student/CourseDetail.vue');
+
+// Lecturer pages - grouped in 'lecturer' chunk
+const LecturerLayout = () => import(/* webpackChunkName: "lecturer" */ '../pages/lecturer/LecturerLayout.vue');
+const LecturerDashboard = () => import(/* webpackChunkName: "lecturer" */ '../pages/lecturer/DashboardLecturer.vue');
+const ProfileViewLecturer = () => import(/* webpackChunkName: "lecturer" */ '../pages/lecturer/ProfileViewLecturer.vue');
+const ProfileLecturer = () => import(/* webpackChunkName: "lecturer" */ '../pages/lecturer/ProfileLecturer.vue');
+const ManageMaterials = () => import(/* webpackChunkName: "lecturer" */ '../pages/lecturer/ManageMaterials.vue');
+const ManageStudents = () => import(/* webpackChunkName: "lecturer" */ '../pages/lecturer/ManageStudents.vue');
+const StudentDetail = () => import(/* webpackChunkName: "lecturer" */ '../pages/lecturer/StudentDetail.vue');
+
+// Admin pages - grouped in 'admin' chunk
+const AdminLayout = () => import(/* webpackChunkName: "admin" */ '../pages/admin/AdminLayout.vue');
+const DashboardAdmin = () => import(/* webpackChunkName: "admin" */ '../pages/admin/DashboardAdmin.vue');
+const ManageLecturers = () => import(/* webpackChunkName: "admin" */ '../pages/admin/ManageLecturers.vue');
+const ManageClasses = () => import(/* webpackChunkName: "admin" */ '../pages/admin/ManageClasses.vue');
+const ManagePrices = () => import(/* webpackChunkName: "admin" */ '../pages/admin/ManagePrices.vue');
+const AdminManageStudents = () => import(/* webpackChunkName: "admin" */ '../pages/admin/ManageStudents.vue');
+const ManagePrograms = () => import(/* webpackChunkName: "admin" */ '../pages/admin/ManagePrograms.vue');
+const ManageLevels = () => import(/* webpackChunkName: "admin" */ '../pages/admin/ManageLevels.vue');
+const ManageTeacherLevels = () => import(/* webpackChunkName: "admin" */ '../pages/admin/ManageTeacherLevels.vue');
+const ManageGrades = () => import(/* webpackChunkName: "admin" */ '../pages/admin/ManageGrades.vue');
 
 const routes = [
   {
@@ -211,9 +221,7 @@ const router = createRouter({
 });
 
 /**
- * Get default dashboard route based on user role.
- * @param {string} role - User role
- * @returns {string} Route name
+ * Returns default dashboard route for a user role.
  */
 const getDefaultDashboard = (role) => {
   const dashboards = {
