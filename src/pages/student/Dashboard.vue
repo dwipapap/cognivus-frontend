@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, watchEffect } from 'vue';
 import { useRouter } from 'vue-router';
 import { authStore } from '../../store/auth';
 import { useStudentProfile } from '../../composables/useStudentProfile';
@@ -25,6 +25,7 @@ const getGreeting = () => {
 const greeting = ref(getGreeting());
 const courses = ref([]);
 const coursesLoading = ref(false);
+const coursesError = ref(null);
 
 /** Default placeholder images */
 const placeholderImages = [
@@ -54,8 +55,10 @@ const formatDate = (dateString) => {
 const fetchCourses = async () => {
   if (!studentProfile.value?.classid) return;
   
+  coursesLoading.value = true;
+  coursesError.value = null;
+  
   try {
-    coursesLoading.value = true;
     const response = await courseAPI.getAllCourses();
     
     if (response.data.success) {
@@ -66,6 +69,7 @@ const fetchCourses = async () => {
         .slice(0, 3);
     }
   } catch (error) {
+    coursesError.value = 'Failed to load courses';
     console.error('Failed to fetch courses:', error);
   } finally {
     coursesLoading.value = false;
@@ -83,17 +87,10 @@ const stats = ref([
   { title: 'This Week', value: '4 classes' }
 ]);
 
-onMounted(async () => {
-  // Wait for profile to load before fetching courses
+// Auto-fetch courses when profile loads
+watchEffect(() => {
   if (!isLoading.value && studentProfile.value) {
-    await fetchCourses();
-  } else {
-    const interval = setInterval(() => {
-      if (!isLoading.value && studentProfile.value) {
-        clearInterval(interval);
-        fetchCourses();
-      }
-    }, 100);
+    fetchCourses();
   }
 });
 </script>
@@ -288,6 +285,17 @@ onMounted(async () => {
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
+      </div>
+
+      <!-- Error State -->
+      <div v-else-if="coursesError" class="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+        <p class="text-red-800 mb-4">{{ coursesError }}</p>
+        <button 
+          @click="fetchCourses"
+          class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+        >
+          Retry
+        </button>
       </div>
 
       <!-- Empty State -->

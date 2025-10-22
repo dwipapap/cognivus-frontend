@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watchEffect } from 'vue';
 import { useRouter } from 'vue-router';
 import { authStore } from '../../store/auth';
 import { useLecturerProfile } from '../../composables/useLecturerProfile';
@@ -27,6 +27,7 @@ const myClasses = ref([]);
 const allStudents = ref([]);
 const levels = ref([]);
 const dataLoading = ref(false);
+const dataError = ref(null);
 
 /** Calculate total students across all classes */
 const totalStudents = computed(() => {
@@ -58,6 +59,7 @@ const fetchDashboardData = async () => {
 
   try {
     dataLoading.value = true;
+    dataError.value = null;
     const lecturerid = lecturerProfile.value.lecturerid;
 
     const [classesRes, studentsRes, levelsRes] = await Promise.all([
@@ -79,6 +81,7 @@ const fetchDashboardData = async () => {
     }
   } catch (error) {
     console.error('Failed to fetch dashboard data:', error);
+    dataError.value = error.message || 'Failed to load dashboard data';
   } finally {
     dataLoading.value = false;
   }
@@ -96,7 +99,14 @@ const handleLogout = () => {
 
 const showError = computed(() => !isLoading.value && errorMessage.value);
 
-onMounted(async () => {
+/** Auto-fetch dashboard data when profile loads */
+watchEffect(() => {
+  if (!isLoading.value && lecturerProfile.value) {
+    fetchDashboardData();
+  }
+});
+
+onMounted(() => {
   if (!authStore.isAuthenticated() || authStore.role !== 'lecturer') {
     router.push('/login');
     return;
@@ -104,18 +114,6 @@ onMounted(async () => {
   
   if (!lecturerProfile.value && authStore.role === 'lecturer') {
     fetchLecturerProfile();
-  }
-
-  // Wait for profile to load before fetching dashboard data
-  if (!isLoading.value && lecturerProfile.value) {
-    await fetchDashboardData();
-  } else {
-    const interval = setInterval(() => {
-      if (!isLoading.value && lecturerProfile.value) {
-        clearInterval(interval);
-        fetchDashboardData();
-      }
-    }, 100);
   }
 });
 </script>
@@ -131,11 +129,37 @@ onMounted(async () => {
 
   <!-- Error State -->
   <div v-else-if="showError" class="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
-    <div class="flex items-center">
-      <svg class="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
-      </svg>
-      <p class="text-red-700">{{ errorMessage }}</p>
+    <div class="flex items-center justify-between">
+      <div class="flex items-center">
+        <svg class="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+        </svg>
+        <p class="text-red-700">{{ errorMessage }}</p>
+      </div>
+      <button 
+        @click="fetchLecturerProfile"
+        class="px-3 py-1.5 text-sm font-medium text-red-700 hover:text-red-800 hover:bg-red-100 rounded-lg transition-colors"
+      >
+        Retry
+      </button>
+    </div>
+  </div>
+
+  <!-- Dashboard Data Error -->
+  <div v-else-if="dataError" class="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center">
+        <svg class="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+        </svg>
+        <p class="text-red-700">{{ dataError }}</p>
+      </div>
+      <button 
+        @click="fetchDashboardData"
+        class="px-3 py-1.5 text-sm font-medium text-red-700 hover:text-red-800 hover:bg-red-100 rounded-lg transition-colors"
+      >
+        Retry
+      </button>
     </div>
   </div>
 

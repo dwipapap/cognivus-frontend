@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watchEffect } from 'vue';
 import { useRouter } from 'vue-router';
 import { useLecturerProfile } from '../../composables/useLecturerProfile';
 import { classAPI, studentAPI, levelAPI } from '../../services/api';
@@ -59,7 +59,7 @@ const getLevelName = (levelid) => {
   return level?.name || '-';
 };
 
-/** Fetch lecturer's classes */
+/** Fetch lecturer's classes and students in parallel */
 const fetchMyClasses = async () => {
   if (!lecturerProfile.value?.lecturerid) {
     errorMessage.value = 'Lecturer profile not found';
@@ -69,11 +69,13 @@ const fetchMyClasses = async () => {
 
   try {
     isLoading.value = true;
+    errorMessage.value = '';
     const lecturerid = lecturerProfile.value.lecturerid;
 
-    const [classesRes, levelsRes] = await Promise.all([
+    const [classesRes, levelsRes, studentsRes] = await Promise.all([
       classAPI.getAllClasses(),
-      levelAPI.getAllLevels()
+      levelAPI.getAllLevels(),
+      studentAPI.getAllStudents()
     ]);
 
     if (classesRes.data.success) {
@@ -84,28 +86,18 @@ const fetchMyClasses = async () => {
       levels.value = levelsRes.data.data;
     }
 
+    if (studentsRes.data.success) {
+      allStudents.value = studentsRes.data.data;
+    }
+
     if (myClasses.value.length > 0) {
       selectedClass.value = myClasses.value[0];
     }
-
-    await fetchStudents();
   } catch (error) {
     errorMessage.value = 'Failed to load classes';
     console.error('Error fetching classes:', error);
   } finally {
     isLoading.value = false;
-  }
-};
-
-/** Fetch all students */
-const fetchStudents = async () => {
-  try {
-    const res = await studentAPI.getAllStudents();
-    if (res.data.success) {
-      allStudents.value = res.data.data;
-    }
-  } catch (error) {
-    console.error('Error fetching students:', error);
   }
 };
 
@@ -164,16 +156,17 @@ const getPaymentStyle = (type) => {
   return 'bg-gray-100 text-gray-600';
 };
 
-onMounted(async () => {
+/** Auto-fetch classes when profile loads */
+watchEffect(() => {
   if (!profileLoading.value && lecturerProfile.value) {
-    await fetchMyClasses();
-  } else {
-    const interval = setInterval(() => {
-      if (!profileLoading.value && lecturerProfile.value) {
-        clearInterval(interval);
-        fetchMyClasses();
-      }
-    }, 100);
+    fetchMyClasses();
+  }
+});
+
+onMounted(() => {
+  // Trigger initial fetch if profile already loaded
+  if (!profileLoading.value && lecturerProfile.value) {
+    fetchMyClasses();
   }
 });
 </script>
@@ -184,7 +177,15 @@ onMounted(async () => {
 
     <!-- Error Message -->
     <div v-if="errorMessage" class="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
-      <p class="text-red-800">{{ errorMessage }}</p>
+      <div class="flex items-center justify-between">
+        <p class="text-red-800">{{ errorMessage }}</p>
+        <button 
+          @click="fetchMyClasses"
+          class="px-3 py-1.5 text-sm font-medium text-red-700 hover:text-red-800 hover:bg-red-100 rounded-lg transition-colors"
+        >
+          Retry
+        </button>
+      </div>
     </div>
 
     <!-- Loading -->
@@ -260,7 +261,12 @@ onMounted(async () => {
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-200">
-                <tr v-for="student in paginatedStudents" :key="student.studentid" class="hover:bg-gray-50">
+                <tr 
+                  v-for="student in paginatedStudents" 
+                  :key="student.studentid" 
+                  v-memo="[student.studentid, student.fullname, student.payment_type]"
+                  class="hover:bg-gray-50"
+                >
                   <!-- Student Info -->
                   <td class="px-4 py-3">
                     <div class="flex items-center gap-3">

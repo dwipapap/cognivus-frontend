@@ -44,38 +44,37 @@ const getAverageScore = (grade) => {
   return avg.toFixed(1);
 };
 
-/** Fetch grades by studentid */
-const fetchGrades = async (studentid) => {
-  try {
-    const response = await gradeAPI.getGradeById(studentid);
-    if (response.data.success) {
-      grades.value = response.data.data || [];
-    }
-  } catch (error) {
-    console.error('Error fetching grades:', error);
-    grades.value = [];
-  }
-};
-
-/** Fetch student data */
+/** Fetch student data and grades in parallel */
 const fetchStudentData = async () => {
   try {
     isLoading.value = true;
-    const response = await studentAPI.getStudentById(studentId);
+    errorMessage.value = '';
     
-    if (response.data.success) {
-      student.value = response.data.data;
-      
-      // Fetch grades using studentid
-      if (student.value.studentid) {
-        await fetchGrades(student.value.studentid);
-      }
-      
-      // TODO: Fetch transactions when endpoint is available
-      transactions.value = [];
-    } else {
+    // First get student to retrieve studentid
+    const studentResponse = await studentAPI.getStudentById(studentId);
+    
+    if (!studentResponse.data.success) {
       errorMessage.value = 'Student not found';
+      return;
     }
+    
+    student.value = studentResponse.data.data;
+    
+    // Then fetch grades if studentid exists
+    if (student.value.studentid) {
+      try {
+        const gradesResponse = await gradeAPI.getGradeById(student.value.studentid);
+        if (gradesResponse.data.success) {
+          grades.value = gradesResponse.data.data || [];
+        }
+      } catch (error) {
+        console.error('Error fetching grades:', error);
+        grades.value = [];
+      }
+    }
+    
+    // TODO: Fetch transactions when endpoint is available
+    transactions.value = [];
   } catch (error) {
     errorMessage.value = 'Failed to load student data';
     console.error('Error fetching student:', error);
@@ -116,7 +115,15 @@ onMounted(() => {
 
     <!-- Error -->
     <div v-else-if="errorMessage" class="bg-red-50 border border-red-200 rounded-xl p-4">
-      <p class="text-red-800">{{ errorMessage }}</p>
+      <div class="flex items-center justify-between">
+        <p class="text-red-800">{{ errorMessage }}</p>
+        <button 
+          @click="fetchStudentData"
+          class="px-3 py-1.5 text-sm font-medium text-red-700 hover:text-red-800 hover:bg-red-100 rounded-lg transition-colors"
+        >
+          Retry
+        </button>
+      </div>
     </div>
 
     <!-- Content -->

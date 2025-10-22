@@ -1,73 +1,52 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, watchEffect } from 'vue';
 import { useStudentProfile } from '../../composables/useStudentProfile';
-import { classAPI, levelAPI, lecturerAPI, courseAPI } from '../../services/api';
+import { useClassDetails } from '../../composables/useClassDetails';
+import { courseAPI } from '../../services/api';
 
 const { studentProfile, isLoading: profileLoading } = useStudentProfile();
-const classInfo = ref(null);
-const levelName = ref('');
-const lecturerName = ref('');
+
+// Use composable for class details
+const classId = computed(() => studentProfile.value?.classid);
+const { classInfo, levelName, lecturerName, isLoading: classLoading, error: classError, retry: retryClass } = useClassDetails(classId);
+
 const courses = ref([]);
-const isLoading = ref(true);
-const errorMessage = ref('');
+const coursesLoading = ref(false);
+const coursesError = ref(null);
 
-/** Fetch class and related data */
-const fetchCourseData = async () => {
-  if (!studentProfile.value?.classid) {
-    errorMessage.value = 'No class assigned to your account.';
-    isLoading.value = false;
-    return;
-  }
-
+/** Fetch courses for the class */
+const fetchCourses = async () => {
+  if (!classId.value) return;
+  
+  coursesLoading.value = true;
+  coursesError.value = null;
+  
   try {
-    isLoading.value = true;
-    const classid = studentProfile.value.classid;
-
-    // Fetch class details
-    const classRes = await classAPI.getClassById(classid);
-    if (classRes.data.success) {
-      classInfo.value = classRes.data.data;
-
-      // Fetch level name
-      if (classInfo.value.levelid) {
-        const levelRes = await levelAPI.getLevelById(classInfo.value.levelid);
-        if (levelRes.data.success) {
-          levelName.value = levelRes.data.data.name;
-        }
-      }
-
-      // Fetch lecturer name
-      if (classInfo.value.lecturerid) {
-        try {
-          const lecturersRes = await lecturerAPI.getAllLecturers();
-          if (lecturersRes.data.success) {
-            const lecturer = lecturersRes.data.data.find(
-              l => l.lecturerid === classInfo.value.lecturerid
-            );
-            if (lecturer) {
-              lecturerName.value = lecturer.fullname;
-            }
-          }
-        } catch (error) {
-          console.error('Error fetching lecturer:', error);
-          lecturerName.value = '-';
-        }
-      }
-    }
-
-    // Fetch courses
     const courseRes = await courseAPI.getAllCourses();
     if (courseRes.data.success) {
-      // Filter courses by classid
-      courses.value = courseRes.data.data.filter(course => course.classid === classid);
+      courses.value = courseRes.data.data.filter(course => course.classid === classId.value);
     }
   } catch (error) {
-    errorMessage.value = 'Failed to load course data.';
-    console.error('Error fetching course data:', error);
+    coursesError.value = 'Failed to load courses';
+    console.error('Error fetching courses:', error);
   } finally {
-    isLoading.value = false;
+    coursesLoading.value = false;
   }
 };
+
+// Auto-fetch courses when profile loads
+watchEffect(() => {
+  if (!profileLoading.value && classId.value) {
+    fetchCourses();
+  }
+});
+
+// Combined loading and error states
+const isLoading = computed(() => profileLoading.value || classLoading.value || coursesLoading.value);
+const errorMessage = computed(() => {
+  if (!classId.value && !profileLoading.value) return 'No class assigned to your account.';
+  return classError.value || coursesError.value;
+});
 
 /** Format date with day name */
 const formatDate = (dateString) => {
@@ -81,20 +60,6 @@ const formatDate = (dateString) => {
     return dateString;
   }
 };
-
-onMounted(async () => {
-  // Wait for student profile to load
-  if (!profileLoading.value && studentProfile.value) {
-    await fetchCourseData();
-  } else {
-    const interval = setInterval(() => {
-      if (!profileLoading.value && studentProfile.value) {
-        clearInterval(interval);
-        fetchCourseData();
-      }
-    }, 100);
-  }
-});
 </script>
 
 <template>
@@ -110,8 +75,22 @@ onMounted(async () => {
     </div>
 
     <!-- Error State -->
-    <div v-else-if="errorMessage" class="bg-red-50 border border-red-200 rounded-xl p-6">
-      <p class="text-red-800">{{ errorMessage }}</p>
+    <div v-else-if="errorMessage" class="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+      <p class="text-red-800 mb-4">{{ errorMessage }}</p>
+      <button 
+        v-if="classError"
+        @click="retryClass"
+        class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors mr-2"
+      >
+        Retry Class Details
+      </button>
+      <button 
+        v-if="coursesError"
+        @click="fetchCourses"
+        class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+      >
+        Retry Courses
+      </button>
     </div>
 
     <!-- Course Content -->

@@ -1,18 +1,20 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, computed, watchEffect } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { courseAPI, classAPI, levelAPI, lecturerAPI } from '../../services/api';
+import { useClassDetails } from '../../composables/useClassDetails';
+import { courseAPI } from '../../services/api';
 import BaseButton from '../../components/ui/BaseButton.vue';
 
 const route = useRoute();
 const router = useRouter();
 
 const course = ref(null);
-const classInfo = ref(null);
-const levelName = ref('');
-const lecturerName = ref('');
-const isLoading = ref(true);
-const errorMessage = ref('');
+const courseLoading = ref(false);
+const courseError = ref(null);
+
+// Use composable for class details
+const classId = computed(() => course.value?.classid);
+const { classInfo, levelName, lecturerName, isLoading: classLoading, error: classError, retry: retryClass } = useClassDetails(classId);
 
 /** Extract YouTube video ID */
 const getYouTubeId = (url) => {
@@ -47,58 +49,39 @@ const formatDate = (dateString) => {
   }
 };
 
-/** Fetch course and related data */
+/** Fetch course details */
 const fetchCourseData = async () => {
+  courseLoading.value = true;
+  courseError.value = null;
+  
   try {
-    isLoading.value = true;
     const courseId = route.params.id;
-
-    // Fetch course details
     const courseRes = await courseAPI.getCourseById(courseId);
+    
     if (!courseRes.data.success) {
-      errorMessage.value = 'Course not found.';
+      courseError.value = 'Course not found';
       return;
     }
-
-  course.value = courseRes.data.data;
-
-    // Fetch class info
-    if (course.value.classid) {
-      const classRes = await classAPI.getClassById(course.value.classid);
-      if (classRes.data.success) {
-        classInfo.value = classRes.data.data;
-
-        // Fetch level name
-        if (classInfo.value.levelid) {
-          const levelRes = await levelAPI.getLevelById(classInfo.value.levelid);
-          if (levelRes.data.success) {
-            levelName.value = levelRes.data.data.name;
-          }
-        }
-
-        // Fetch lecturer name
-        if (classInfo.value.lecturerid) {
-          const lecturersRes = await lecturerAPI.getAllLecturers();
-          if (lecturersRes.data.success) {
-            const lecturer = lecturersRes.data.data.find(
-              l => l.lecturerid === classInfo.value.lecturerid
-            );
-            if (lecturer) {
-              lecturerName.value = lecturer.fullname;
-            }
-          }
-        }
-      }
-    }
+    
+    course.value = courseRes.data.data;
   } catch (error) {
-    errorMessage.value = 'Failed to load course data.';
+    courseError.value = 'Failed to load course';
     console.error('Error fetching course:', error);
   } finally {
-    isLoading.value = false;
+    courseLoading.value = false;
   }
 };
 
-onMounted(fetchCourseData);
+// Combined states
+const isLoading = computed(() => courseLoading.value || classLoading.value);
+const errorMessage = computed(() => courseError.value || classError.value);
+
+// Auto-fetch course on mount
+watchEffect(() => {
+  if (route.params.id) {
+    fetchCourseData();
+  }
+});
 </script>
 
 <template>
@@ -125,8 +108,22 @@ onMounted(fetchCourseData);
     </div>
 
     <!-- Error State -->
-    <div v-else-if="errorMessage" class="bg-red-50 border border-red-200 rounded-xl p-6">
-      <p class="text-red-800">{{ errorMessage }}</p>
+    <div v-else-if="errorMessage" class="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+      <p class="text-red-800 mb-4">{{ errorMessage }}</p>
+      <button 
+        v-if="courseError"
+        @click="fetchCourseData"
+        class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors mr-2"
+      >
+        Retry Course
+      </button>
+      <button 
+        v-if="classError"
+        @click="retryClass"
+        class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+      >
+        Retry Class Details
+      </button>
     </div>
 
     <!-- Course Content -->
