@@ -1,22 +1,23 @@
 import { reactive } from 'vue';
 import { supabase } from '../supabase';
+import secureStorage from '../utils/secureStorage';
 
 /**
  * Store manajemen autentikasi.
  * Mengelola state user, token, dan sesi.
+ * Uses encrypted localStorage for security.
  */
 export const authStore = reactive({
   user: (() => {
     try {
-      const raw = localStorage.getItem('user');
-      return raw ? JSON.parse(raw) : null;
+      return secureStorage.getItem('user');
     } catch {
       return null;
     }
   })(),
-  token: localStorage.getItem('token') || null,
-  role: localStorage.getItem('role') || null,
-  tokenExpiry: localStorage.getItem('tokenExpiry') || null,
+  token: secureStorage.getItem('token') || null,
+  role: secureStorage.getItem('role') || null,
+  tokenExpiry: secureStorage.getItem('tokenExpiry') || null,
   isInitialized: false,
   expiryCheckInterval: null,
 
@@ -122,6 +123,7 @@ export const authStore = reactive({
 
   /**
    * Set auth data. Handles both JWT and OAuth.
+   * Data is encrypted before storing in localStorage.
    * @param {Object} user - User data
    * @param {string} token - Access token
    * @param {string} role - User role (student/lecturer/admin/etc)
@@ -140,12 +142,11 @@ export const authStore = reactive({
     const expiryTime = Date.now() + (3 * 60 * 60 * 1000);
     this.tokenExpiry = expiryTime;
     
-    localStorage.setItem('token', token);
-    localStorage.setItem('role', userRole);
-    localStorage.setItem('tokenExpiry', expiryTime.toString());
-    try {
-      localStorage.setItem('user', JSON.stringify(user));
-    } catch {}
+    // Store encrypted data
+    secureStorage.setItem('token', token);
+    secureStorage.setItem('role', userRole);
+    secureStorage.setItem('tokenExpiry', expiryTime);
+    secureStorage.setItem('user', user);
     
     console.log('Auth state after setAuth:', {
       user: this.user,
@@ -165,10 +166,10 @@ export const authStore = reactive({
     this.token = null;
     this.role = null;
     this.tokenExpiry = null;
-    localStorage.removeItem('token');
-    localStorage.removeItem('tokenExpiry');
-    localStorage.removeItem('role');
-    localStorage.removeItem('user');
+    secureStorage.removeItem('token');
+    secureStorage.removeItem('tokenExpiry');
+    secureStorage.removeItem('role');
+    secureStorage.removeItem('user');
     // Only sign out Supabase if OAuth was used
     supabase.auth.signOut();
   },
@@ -178,11 +179,11 @@ export const authStore = reactive({
    * @returns {boolean} True if expired
    */
   isTokenExpired() {
-    if (!this.tokenExpiry && !localStorage.getItem('tokenExpiry')) {
+    if (!this.tokenExpiry && !secureStorage.getItem('tokenExpiry')) {
       return false;
     }
     
-    const expiry = this.tokenExpiry || localStorage.getItem('tokenExpiry');
+    const expiry = this.tokenExpiry || secureStorage.getItem('tokenExpiry');
     return Date.now() > parseInt(expiry);
   },
 
@@ -191,7 +192,7 @@ export const authStore = reactive({
    * @returns {boolean} True if authenticated
    */
   isAuthenticated() {
-    return !!(this.token || localStorage.getItem('token')) && !this.isTokenExpired();
+    return !!(this.token || secureStorage.getItem('token')) && !this.isTokenExpired();
   },
 
   /**
@@ -199,7 +200,7 @@ export const authStore = reactive({
    * @returns {Object|null} Hours and minutes remaining
    */
   getTimeRemaining() {
-    const expiry = this.tokenExpiry || localStorage.getItem('tokenExpiry');
+    const expiry = this.tokenExpiry || secureStorage.getItem('tokenExpiry');
     if (!expiry) return null;
     
     const remaining = parseInt(expiry) - Date.now();
