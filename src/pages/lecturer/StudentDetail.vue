@@ -44,13 +44,16 @@ const getAverageScore = (grade) => {
   return avg.toFixed(1);
 };
 
-/** Fetch student data and grades in parallel */
+/**
+ * Fetch student profile and grades.
+ * Grades fetched separately since they depend on studentid.
+ */
 const fetchStudentData = async () => {
   try {
     isLoading.value = true;
     errorMessage.value = '';
     
-    // First get student to retrieve studentid
+    // Get student profile
     const studentResponse = await studentAPI.getStudentById(studentId);
     
     if (!studentResponse.data.success) {
@@ -60,15 +63,18 @@ const fetchStudentData = async () => {
     
     student.value = studentResponse.data.data;
     
-    // Then fetch grades if studentid exists
+    // Fetch grades (student can have multiple test attempts)
     if (student.value.studentid) {
       try {
         const gradesResponse = await gradeAPI.getGradeById(student.value.studentid);
         if (gradesResponse.data.success) {
-          grades.value = gradesResponse.data.data || [];
+          grades.value = Array.isArray(gradesResponse.data.data) 
+            ? gradesResponse.data.data 
+            : [];
         }
       } catch (error) {
         console.error('Error fetching grades:', error);
+        // Don't block page load if grades fail
         grades.value = [];
       }
     }
