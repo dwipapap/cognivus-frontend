@@ -42,12 +42,18 @@ const decrypt = (ciphertext) => {
     
     if (!decryptedString) {
       // Decryption failed (wrong key or tampered data)
+      // This is expected behavior, not an error
       return null;
     }
     
     return JSON.parse(decryptedString);
   } catch (error) {
-    console.error('Decryption error:', error);
+    // Tampered/corrupted data will fail JSON.parse
+    // Return null silently as this is expected security behavior
+    // Only log in development for debugging
+    if (import.meta.env.DEV) {
+      console.warn('SecureStorage: Data corruption detected (tampered or invalid)', error.message);
+    }
     return null;
   }
 };
