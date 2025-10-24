@@ -9,6 +9,7 @@ import { authStore } from '../store/auth';
 // Public pages - loaded immediately for faster initial access
 const Home = () => import('../pages/Home.vue');
 const Login = () => import('../pages/Login.vue');
+const GoogleCallback = () => import('../pages/GoogleCallback.vue');
 
 // Student pages - grouped in 'student' chunk
 const StudentLayout = () => import(/* webpackChunkName: "student" */ '../pages/student/StudentLayout.vue');
@@ -49,6 +50,11 @@ const routes = [
     path: '/login',
     name: 'Login',
     component: Login,
+  },
+  {
+    path: '/auth/callback',
+    name: 'GoogleCallback',
+    component: GoogleCallback,
   },
   // Student routes with nested layout
   {
