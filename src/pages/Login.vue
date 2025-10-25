@@ -3,12 +3,10 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { authStore } from '../store/auth';
 import apiClient from '../services/api';
-import { supabase } from '../supabase';
 import { useForm, commonValidations } from '../composables/useForm';
 import ittrLogo from '../assets/ittrlogo.png';
 import kucingterbang from '../assets/kucingterbang.png';
 
-// Import reusable components
 import Modal from '../components/ui/Modal.vue';
 import BaseButton from '../components/ui/BaseButton.vue';
 import BaseInput from '../components/form/BaseInput.vue';
@@ -88,17 +86,8 @@ const handleLogin = async () => {
   }
 };
 
-const handleGoogleLogin = async () => {
-  try {
-    openModal('info', 'Menghubungkan...', 'Sedang menghubungkan dengan Google. Mohon tunggu...');
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-    });
-    if (error) throw error;
-    closeModal();
-  } catch (error) {
-    openModal('error', 'Google Login Gagal', error.message);
-  }
+const handleGoogleLogin = () => {
+  window.location.href = 'http://localhost:5000/api/auth/google';
 };
 </script>
 

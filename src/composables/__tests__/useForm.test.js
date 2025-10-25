@@ -308,11 +308,11 @@ describe('useForm', () => {
       const promise1 = form.submit(mockHandler)
       expect(form.isSubmitting.value).toBe(true)
       
-      // Second submission should be blocked
+      // Second submission should be blocked (returns Promise<undefined>)
       const promise2 = form.submit(mockHandler)
       
-      // Second call should return undefined (early return)
-      expect(promise2).toBeUndefined()
+      // Async functions always return a Promise, so we need to check the resolved value
+      await expect(promise2).resolves.toBeUndefined()
       
       // Only first handler should be called
       expect(mockHandler).toHaveBeenCalledTimes(1)
