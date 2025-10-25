@@ -30,7 +30,14 @@ onMounted(async () => {
 
     await new Promise(resolve => setTimeout(resolve, 500));
 
-    router.push('/student/dashboard');
+    // Redirect based on user role
+    let dashboardPath = '/student/dashboard';
+    if (role === 'lecturer') {
+      dashboardPath = '/lecturer/dashboard';
+    } else if (role === 'admin') {
+      dashboardPath = '/admin/dashboard';
+    }
+    router.push(dashboardPath);
   } catch (err) {
     error.value = err.message;
     setTimeout(() => {
