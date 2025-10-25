@@ -169,13 +169,13 @@ onUnmounted(() => {
       <aside class="sidebar group w-19 hover:w-64 flex-shrink-0 sidebar-glass shadow-2xl transition-all duration-300 ease-in-out overflow-hidden fixed left-4 top-24 bottom-4 rounded-4xl z-10 border border-white/20 hidden md:block">
         <!-- Navigation Menu -->
         <nav class="p-4 h-full overflow-y-auto">
-          <p class="sidebar-text text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 opacity-0 whitespace-nowrap overflow-hidden">
+          <p class="sidebar-text text-xs font-semibold text-white/80 uppercase tracking-wider mb-3 opacity-0 whitespace-nowrap overflow-hidden">
             Menu
           </p>
           <ul class="space-y-2">
             <li>
               <router-link to="/lecturer/dashboard"
-                class="nav-item flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:text-blue-600 group">
+                class="nav-item flex items-center px-3 py-2 text-sm font-medium rounded-lg group">
                 <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
                 </svg>
@@ -184,7 +184,7 @@ onUnmounted(() => {
             </li>
             <li>
               <router-link to="/lecturer/materials"
-                class="nav-item flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:text-blue-600 group">
+                class="nav-item flex items-center px-3 py-2 text-sm font-medium rounded-lg group">
                 <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"></path>
                 </svg>
@@ -193,7 +193,7 @@ onUnmounted(() => {
             </li>
             <li>
               <router-link to="/lecturer/students"
-                class="nav-item flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:text-blue-600 group">
+                class="nav-item flex items-center px-3 py-2 text-sm font-medium rounded-lg group">
                 <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"></path>
                 </svg>
@@ -202,7 +202,7 @@ onUnmounted(() => {
             </li>
             <li>
               <a @click="handleLogout"
-                class="nav-item flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:text-red-600 cursor-pointer group">
+                class="nav-item flex items-center px-3 py-2 text-sm font-medium rounded-lg hover:text-red-400 cursor-pointer group">
                 <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"></path>
                 </svg>
@@ -343,13 +343,13 @@ onUnmounted(() => {
 
 /* Sidebar glassmorphism effect - Performance optimized */
 .sidebar-glass {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.85), rgba(240, 249, 255, 0.8), rgba(224, 242, 254, 0.75));
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  background: linear-gradient(135deg, rgba(43, 127, 255, 0.95), rgba(43, 127, 255, 0.90), rgba(43, 127, 255, 0.85));
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   box-shadow: 
-    0 12px 24px rgba(31, 41, 55, 0.08),
-    0 4px 16px rgba(59, 130, 246, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    0 12px 24px rgba(31, 41, 55, 0.15),
+    0 4px 16px rgba(43, 127, 255, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
   /* Performance optimizations */
   will-change: transform;
   transform: translateZ(0);
@@ -398,13 +398,21 @@ onUnmounted(() => {
 /* Smooth hover effects for nav items */
 .nav-item {
   transition: all 200ms ease-in-out;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .nav-item:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(2px);
   transform: translateX(4px);
-  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.08);
+  box-shadow: 0 2px 6px rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+.nav-item.router-link-active {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  font-weight: 600;
 }
 
 /* Optional: Add a subtle indicator when sidebar is expandable */
