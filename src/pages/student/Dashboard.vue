@@ -3,11 +3,16 @@ import { ref, computed, watchEffect } from 'vue';
 import { useRouter } from 'vue-router';
 import { authStore } from '../../store/auth';
 import { useStudentProfile } from '../../composables/useStudentProfile';
+import { useClassDetails } from '../../composables/useClassDetails';
 import { courseAPI } from '../../services/api';
 import gambar1 from '../../assets/kucingterbang.png';
 
 const router = useRouter();
 const { studentProfile, isLoading } = useStudentProfile();
+
+// Fetch class details (level and lecturer info)
+const classId = computed(() => studentProfile.value?.classid);
+const { levelName, lecturerName, isLoading: classLoading } = useClassDetails(classId);
 
 const user = computed(() => ({
   name: studentProfile.value?.nama_lengkap || authStore.user?.email?.split('@')[0] || 'Student',
@@ -62,11 +67,30 @@ const fetchCourses = async () => {
     const response = await courseAPI.getAllCourses();
     
     if (response.data.success) {
-      // Filter by classid and limit to 3 recent courses
-      courses.value = response.data.data
+      // Filter by classid and sort by upload_date (newest first), then by courseid (highest first)
+      const filtered = response.data.data
         .filter(course => course.classid === studentProfile.value.classid)
-        .sort((a, b) => new Date(b.upload_date) - new Date(a.upload_date))
-        .slice(0, 3);
+        .sort((a, b) => {
+          const dateA = new Date(a.upload_date).getTime();
+          const dateB = new Date(b.upload_date).getTime();
+          
+          // Primary sort: by date (newest first)
+          if (dateB !== dateA) {
+            return dateB - dateA;
+          }
+          
+          // Secondary sort: by courseid (highest first) when dates are equal
+          return (b.courseid || 0) - (a.courseid || 0);
+        });
+      
+      // Take only the 3 most recent courses
+      courses.value = filtered.slice(0, 3);
+      
+      console.log('Sorted courses:', filtered.map(c => ({ 
+        id: c.courseid, 
+        title: c.title, 
+        date: c.upload_date 
+      })));
     }
   } catch (error) {
     coursesError.value = 'Failed to load courses';
@@ -81,11 +105,30 @@ const goToMyCourses = () => {
   router.push({ name: 'StudentMyCourses' });
 };
 
-const stats = ref([
-  { title: 'Active Classes', value: '1' },
-  { title: 'Next Session', value: 'Wed 04:00 PM' },
-  { title: 'This Week', value: '4 classes' }
-]);
+/** Computed stats based on real data */
+const stats = computed(() => {
+  const latestCourse = courses.value.length > 0 ? courses.value[0] : null;
+  
+  return [
+    { 
+      title: 'Student Level', 
+      value: classLoading.value ? 'Loading...' : (levelName.value || '-'),
+      icon: 'level'
+    },
+    { 
+      title: 'Latest Course Material', 
+      value: coursesLoading.value 
+        ? 'Loading...' 
+        : (latestCourse ? latestCourse.title : 'No materials'),
+      icon: 'course'
+    },
+    { 
+      title: 'Assigned Teacher', 
+      value: classLoading.value ? 'Loading...' : (lecturerName.value || '-'),
+      icon: 'teacher'
+    }
+  ];
+});
 
 // Auto-fetch courses when profile loads
 watchEffect(() => {
@@ -246,15 +289,22 @@ watchEffect(() => {
     >
       <div class="flex items-center gap-4">
         <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
-          <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-            <path v-if="stat.title === 'Active Classes'" fill-rule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v6.586l-1.293-1.293a1 1 0 00-1.414 1.414L16 16.414V18a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2h2zM8 5a1 1 0 011-1h2a1 1 0 011 1v1H8V5z" clip-rule="evenodd"></path>
-            <path v-else-if="stat.title === 'Next Session'" fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
-            <path v-else fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
+          <!-- Level Icon -->
+          <svg v-if="stat.icon === 'level'" class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 0l-2 2a1 1 0 101.414 1.414L8 10.414l1.293 1.293a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+          </svg>
+          <!-- Course Icon -->
+          <svg v-else-if="stat.icon === 'course'" class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"></path>
+          </svg>
+          <!-- Teacher Icon -->
+          <svg v-else class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"></path>
           </svg>
         </div>
-        <div class="flex-1">
+        <div class="flex-1 min-w-0">
           <p class="text-sm font-medium text-gray-600 mb-1">{{ stat.title }}</p>
-          <p class="text-2xl font-bold text-gray-900">{{ stat.value }}</p>
+          <p class="text-xl font-bold text-gray-900 truncate" :title="stat.value">{{ stat.value }}</p>
         </div>
       </div>
     </div>
