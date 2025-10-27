@@ -10,6 +10,7 @@ import { authStore } from '../store/auth';
 const Home = () => import('../pages/Home.vue');
 const Login = () => import('../pages/Login.vue');
 const GoogleCallback = () => import('../pages/GoogleCallback.vue');
+const NewUser = () => import('../pages/NewUser.vue');
 
 // Student pages - grouped in 'student' chunk
 const StudentLayout = () => import(/* webpackChunkName: "student" */ '../pages/student/StudentLayout.vue');
@@ -55,6 +56,12 @@ const routes = [
     path: '/auth/callback',
     name: 'GoogleCallback',
     component: GoogleCallback,
+  },
+  {
+    path: '/new-user',
+    name: 'NewUser',
+    component: NewUser,
+    meta: { requiresAuth: true }
   },
   // Student routes with nested layout
   {
@@ -252,6 +259,11 @@ router.beforeEach((to, from, next) => {
     userRole
   });
 
+  // Allow access to NewUser page for authenticated users (bypass role checks)
+  if (to.name === 'NewUser' && isAuthenticated) {
+    return next();
+  }
+
   if (to.meta.requiresAuth) {
     if (!isAuthenticated) {
       return next({ name: 'Login' });
@@ -267,7 +279,7 @@ router.beforeEach((to, from, next) => {
     }
   }
 
-  // Redirect authenticated users from public pages
+  // Redirect authenticated users from public pages (except NewUser)
   if (isAuthenticated && (to.name === 'Login' || to.name === 'Home')) {
     return next({ name: getDefaultDashboard(userRole) });
   }
