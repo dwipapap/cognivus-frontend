@@ -193,9 +193,6 @@ const handleCompleteProfile = async () => {
 const openModal = async () => {
   showModal.value = true;
   await nextTick();
-  if (modalRef.value) {
-    modalRef.value.focus();
-  }
 };
 
 const closeModal = () => {
