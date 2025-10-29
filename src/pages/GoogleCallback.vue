@@ -2,10 +2,12 @@
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { authStore } from '../store/auth';
+import apiClient from '../services/api';
 import LoadingSpinner from '../components/ui/LoadingSpinner.vue';
 
 const router = useRouter();
 const error = ref(null);
+const statusMessage = ref('Completing login...');
 
 onMounted(async () => {
   try {
@@ -28,6 +30,29 @@ onMounted(async () => {
 
     authStore.setAuth(user, token, role);
 
+    // Check if user has a password set
+    statusMessage.value = 'Checking account status...';
+    
+    try {
+      const response = await apiClient.get(`/users/${id}`);
+      
+      if (response.data.success) {
+        const userData = response.data.data;
+        
+        // If password is null, redirect to new user page
+        if (!userData.password || userData.password === null) {
+          statusMessage.value = 'Setting up your account...';
+          await new Promise(resolve => setTimeout(resolve, 500));
+          router.push('/new-user');
+          return;
+        }
+      }
+    } catch (checkError) {
+      console.error('Error checking user password:', checkError);
+      // Continue to dashboard if check fails (fail gracefully)
+    }
+
+    statusMessage.value = 'Redirecting to dashboard...';
     await new Promise(resolve => setTimeout(resolve, 500));
 
     // Redirect based on user role
@@ -52,7 +77,7 @@ onMounted(async () => {
     <div class="bg-white/90 backdrop-blur-md rounded-3xl p-8 shadow-2xl text-center max-w-md">
       <div v-if="!error">
         <LoadingSpinner size="lg" />
-        <h2 class="mt-6 text-2xl font-bold text-gray-800">Menyelesaikan Login...</h2>
+        <h2 class="mt-6 text-2xl font-bold text-gray-800">{{ statusMessage }}</h2>
         <p class="mt-2 text-gray-600">Mohon tunggu sebentar</p>
       </div>
       <div v-else>
