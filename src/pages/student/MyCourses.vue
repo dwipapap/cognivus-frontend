@@ -64,24 +64,22 @@ const formatDate = (dateString) => {
 
 <template>
   <!-- Welcome Banner -->
-  <div class="bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 rounded-3xl shadow-lg mb-8 overflow-hidden">
-    <div class="flex flex-col lg:flex-row items-center">
-      <!-- Left: Text Content -->
-      <div class="flex-1 p-8 lg:p-12">
-        <h1 class="text-4xl lg:text-6xl font-bold text-white mb-6 leading-tight">
-          My Courses
-        </h1>
-        <p class="text-white/80 text-base lg:text-lg leading-relaxed max-w-lg">
-          Access all your course materials and learning resources in one place.
-        </p>
-      </div>
+  <div class="relative bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 rounded-3xl shadow-lg mb-8 overflow-hidden">
+    <!-- Diagonal Book Graphics -->
+    <div class="absolute top-0 right-0 w-1/2 h-full pointer-events-none overflow-hidden">
+      <div class="absolute -top-10 -right-10 w-40 h-48 bg-indigo-400/30 rounded-lg transform rotate-12"></div>
+      <div class="absolute top-20 -right-5 w-32 h-40 bg-indigo-300/40 rounded-lg transform rotate-12"></div>
+      <div class="absolute top-40 right-10 w-28 h-36 bg-white/20 rounded-lg transform rotate-12"></div>
+    </div>
 
-      <!-- Right: Icon Illustration -->
-      <div class="w-full lg:w-1/2 p-8 lg:p-12 flex items-center justify-center">
-        <svg class="w-32 h-32 text-white/20" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"/>
-        </svg>
-      </div>
+    <!-- Content -->
+    <div class="relative p-8 lg:p-12 z-10">
+      <h1 class="text-4xl lg:text-6xl font-bold text-white mb-6 leading-tight">
+        My Courses
+      </h1>
+      <p class="text-white/80 text-base lg:text-lg leading-relaxed max-w-lg">
+        Access all your course materials and learning resources in one place.
+      </p>
     </div>
   </div>
 

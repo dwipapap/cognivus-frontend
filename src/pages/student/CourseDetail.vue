@@ -85,19 +85,6 @@ watchEffect(() => {
 </script>
 
 <template>
-  <!-- Breadcrumb -->
-  <div class="mb-6">
-    <button 
-      @click="router.push({ name: 'StudentMyCourses' })"
-      class="text-blue-600 hover:text-blue-800 font-medium flex items-center gap-2"
-    >
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-      </svg>
-      Back to My Courses
-    </button>
-  </div>
-
   <!-- Loading State -->
   <div v-if="isLoading" class="flex items-center justify-center py-20">
     <svg class="w-12 h-12 text-blue-600 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -162,23 +149,19 @@ watchEffect(() => {
       </div>
     </div>
 
-    <!-- Course Materials -->
-    <div class="bg-white rounded-xl shadow-lg p-6">
-
-      <!-- Description  -->
-      <div v-if="course.description" class="mb-4">
-        <h3 class="text-lg font-semibold text-gray-800 mb-2">Class Notes</h3>
-        <p class="text-gray-700 whitespace-pre-wrap">{{ course.description }}</p>
-      </div>
+    <!-- Course Materials Section -->
+    <section class="bg-white rounded-xl shadow-lg p-6">
+      <h2 class="text-2xl font-bold text-gray-900 mb-6">Course Materials</h2>
       
       <!-- No Materials -->
-      <div v-if="courseFiles.length === 0 && !course.video_link" class="text-center py-8 text-gray-500">
+      <div v-if="courseFiles.length === 0 && !course.video_link" class="text-center py-12 text-gray-500">
         <svg class="w-16 h-16 mx-auto mb-3 text-gray-300" fill="currentColor" viewBox="0 0 24 24">
           <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5-7v-2h-2V7h-2v3H8v2h2v3h2v-3h2z"/>
         </svg>
-        <p>No materials available yet.</p>
+        <p class="font-medium">No materials available yet.</p>
       </div>
 
+      <!-- Materials Grid -->
       <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <!-- Course Files (PDF/Documents) -->
         <a 
@@ -186,6 +169,7 @@ watchEffect(() => {
           :key="file.cfid"
           :href="getFileUrl(file)" 
           target="_blank"
+          rel="noopener noreferrer"
           class="flex items-center gap-4 p-4 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5"
         >
           <!-- PDF Thumbnail -->
@@ -207,16 +191,17 @@ watchEffect(() => {
           </div>
           
           <!-- Open Icon -->
-          <svg class="w-6 h-6 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-6 h-6 text-white/80 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
           </svg>
         </a>
 
-        <!-- YouTube Video Button -->
+        <!-- YouTube Video -->
         <a 
           v-if="course.video_link && getYouTubeId(course.video_link)"
           :href="`https://www.youtube.com/watch?v=${getYouTubeId(course.video_link)}`" 
           target="_blank"
+          rel="noopener noreferrer"
           class="flex items-center gap-4 p-4 bg-gradient-to-br from-red-600 to-red-700 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5"
         >
           <!-- Video Thumbnail -->
@@ -233,11 +218,33 @@ watchEffect(() => {
           </div>
           
           <!-- Open Icon -->
-          <svg class="w-6 h-6 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-6 h-6 text-white/80 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
           </svg>
         </a>
       </div>
+    </section>
+
+    <!-- Description Section -->
+    <section v-if="course.description" class="bg-white rounded-xl shadow-lg p-6">
+      <h2 class="text-2xl font-bold text-gray-900 mb-4">Class Notes</h2>
+      <div class="prose max-w-none">
+        <p class="text-gray-700 whitespace-pre-wrap leading-relaxed">{{ course.description }}</p>
+      </div>
+    </section>
+
+    <!-- Back Button -->
+    <div class="flex justify-center pt-4 pb-8">
+      <BaseButton 
+        @click="router.push({ name: 'StudentMyCourses' })"
+        variant="secondary"
+        size="lg"
+      >
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+        Back
+      </BaseButton>
     </div>
   </div>
 </template>
