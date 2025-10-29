@@ -19,7 +19,6 @@ const isSubmitting = ref(false);
 const showModal = ref(false);
 const modalType = ref('info');
 const modalMessage = ref('');
-const modalRef = ref(null);
 
 // Form data - includes username and password fields
 const formData = ref({
