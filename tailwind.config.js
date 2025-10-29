@@ -7,6 +7,9 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Figtree', 'system-ui', '-apple-system', 'sans-serif'],
+      },
       // Performance-optimized backdrop blur utilities
       backdropBlur: {
         'xs': '2px',
