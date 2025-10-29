@@ -94,7 +94,7 @@ onUnmounted(() => {
         <!-- Right: Notifications and User Profile -->
         <div class="ml-auto flex items-center gap-1 xs:gap-2 sm:gap-3 md:gap-4 flex-nowrap min-w-0">
           <!-- Notification Bell -->
-          <button class="h-10 w-10 sm:h-12 sm:w-12 flex items-center justify-center rounded-full sm:rounded-4xl bg-white/30 backdrop-blur-sm border border-white/50 hover:bg-white/40 transition-all duration-200 shadow-sm shrink-0">
+          <button class="h-10 w-10 sm:h-12 sm:w-12 flex items-center justify-center rounded-full sm:rounded-[28px] bg-white/30 backdrop-blur-sm border border-white/50 hover:bg-white/40 transition-all duration-200 shadow-sm shrink-0">
             <svg class="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
               <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"></path>
             </svg>
@@ -106,7 +106,7 @@ onUnmounted(() => {
             <div 
               id="profile-button"
               @click.stop="toggleDropdown()"
-              class="flex items-center gap-2 sm:gap-3 h-10 sm:h-12 px-2 xs:px-3 sm:px-4 rounded-full sm:rounded-4xl bg-white/30 backdrop-blur-sm border border-white/50 shadow-sm overflow-hidden whitespace-nowrap max-w-[50vw] xs:max-w-[60vw] sm:max-w-[200px] md:max-w-[240px] min-w-0 hover:bg-white/40 transition-all duration-200 cursor-pointer active:scale-95"
+              class="flex items-center gap-2 sm:gap-3 h-10 sm:h-12 px-2 xs:px-3 sm:px-4 rounded-full sm:rounded-[28px] bg-white/30 backdrop-blur-sm border border-white/50 shadow-sm overflow-hidden whitespace-nowrap max-w-[50vw] xs:max-w-[60vw] sm:max-w-[200px] md:max-w-[240px] min-w-0 hover:bg-white/40 transition-all duration-200 cursor-pointer active:scale-95"
             >
               <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden border-2 border-white/50">
                 <!-- Skeleton while avatar loading -->
@@ -165,7 +165,7 @@ onUnmounted(() => {
 
     <div class="flex flex-1 relative sidebar-container">
       <!-- Desktop Sidebar -->
-      <aside class="sidebar group w-19 hover:w-64 flex-shrink-0 sidebar-glass shadow-2xl transition-all duration-300 ease-in-out overflow-hidden fixed left-4 top-24 bottom-4 rounded-4xl z-10 border border-white/20 hidden md:block">
+      <aside class="sidebar group w-19 hover:w-64 flex-shrink-0 sidebar-glass shadow-2xl transition-all duration-300 ease-in-out overflow-hidden fixed left-4 top-28 bottom-4 rounded-[28px] z-10 border border-white/20 hidden md:block">
         <!-- Navigation Menu -->
         <nav class="p-4 h-full overflow-y-auto">
           <p class="sidebar-text text-xs font-semibold text-white/80 uppercase tracking-wider mb-3 opacity-0 whitespace-nowrap overflow-hidden">
@@ -252,8 +252,8 @@ onUnmounted(() => {
         </div>
       </nav>
 
-      <!-- Main Content Area - This is where child routes will render -->
-      <main class="main-content flex-1 p-6 lg:p-8 overflow-auto md:ml-28 mb-20 md:mb-0 transition-all duration-300 ease-in-out">
+      <!-- Main Content Area -->
+      <main class="main-content flex-1 p-6 lg:p-8 overflow-auto md:ml-24 mb-20 md:mb-0 transition-all duration-300 ease-in-out">
         <router-view />
       </main>
     </div>

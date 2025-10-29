@@ -82,7 +82,7 @@ onUnmounted(() => {
 <template>
   <div class="flex flex-col min-h-screen bg-blue-200">
     <!-- Header -->
-    <header class="header-glass backdrop-blur-lg bg-gradient-to-r from-white via-blue-50 to-indigo-100 shadow-lg border-b border-white/20 sticky top-0 z-40">
+    <header class="header-glass backdrop-blur-lg bg-gradient-to-r from-white via-blue-50 to-indigo-100 shadow-lg border-b border-white/20 sticky top-0 z-40 rounded-b-[28px]">
       <div class="flex items-center justify-between px-6 py-4 min-w-0">
         <!-- Left: ITTR Logo -->
         <div class="flex items-center">
@@ -92,7 +92,7 @@ onUnmounted(() => {
         <!-- Right: Notifications and User Profile -->
         <div class="ml-auto flex items-center gap-1 xs:gap-2 sm:gap-3 md:gap-4 flex-nowrap min-w-0">
           <!-- Notification Bell -->
-          <button class="h-10 w-10 sm:h-12 sm:w-12 flex items-center justify-center rounded-full sm:rounded-4xl bg-white/30 backdrop-blur-sm border border-white/50 hover:bg-white/40 transition-all duration-200 shadow-sm shrink-0">
+          <button class="h-10 w-10 sm:h-12 sm:w-12 flex items-center justify-center rounded-full bg-white/30 backdrop-blur-sm border border-white/50 hover:bg-white/40 transition-all duration-200 shadow-sm shrink-0">
             <svg class="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
               <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"></path>
             </svg>
@@ -104,7 +104,7 @@ onUnmounted(() => {
             <div 
               id="profile-button"
               @click.stop="toggleDropdown()"
-              class="flex items-center gap-2 sm:gap-3 h-10 sm:h-12 px-2 xs:px-3 sm:px-4 rounded-full sm:rounded-4xl bg-white/30 backdrop-blur-sm border border-white/50 shadow-sm overflow-hidden whitespace-nowrap max-w-[50vw] xs:max-w-[60vw] sm:max-w-[200px] md:max-w-[240px] min-w-0 hover:bg-white/40 transition-all duration-200 cursor-pointer active:scale-95"
+              class="flex items-center gap-2 sm:gap-3 h-10 sm:h-12 px-2 xs:px-3 sm:px-4 rounded-full bg-white/30 backdrop-blur-sm border border-white/50 shadow-sm overflow-hidden whitespace-nowrap max-w-[50vw] xs:max-w-[60vw] sm:max-w-[200px] md:max-w-[240px] min-w-0 hover:bg-white/40 transition-all duration-200 cursor-pointer active:scale-95"
             >
               <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden border-2 border-white/50">
                 <!-- Avatar image -->
@@ -166,7 +166,7 @@ onUnmounted(() => {
 
     <div class="flex flex-1 relative sidebar-container">
       <!-- Desktop Sidebar -->
-      <aside class="sidebar group w-19 hover:w-64 flex-shrink-0 sidebar-glass shadow-2xl transition-all duration-300 ease-in-out overflow-hidden fixed left-4 top-24 bottom-4 rounded-4xl z-10 border border-white/20 hidden md:block">
+      <aside class="sidebar group w-19 hover:w-64 flex-shrink-0 sidebar-glass shadow-2xl transition-all duration-300 ease-in-out overflow-hidden fixed left-4 top-28 bottom-4 rounded-[28px] z-10 border border-white/20 hidden md:block">
         <!-- Navigation Menu -->
         <nav class="p-4 h-full overflow-y-auto">
           <p class="sidebar-text text-xs font-semibold text-white/80 uppercase tracking-wider mb-3 opacity-0 whitespace-nowrap overflow-hidden">
@@ -215,7 +215,7 @@ onUnmounted(() => {
 
       <!-- Mobile Bottom Navigation -->
       <nav class="mobile-nav fixed bottom-0 left-0 right-0 h-16 bg-transparent md:hidden z-50">
-        <div class="mobile-nav-glass h-full mb-0 rounded-2xl">
+        <div class="mobile-nav-glass h-full mb-0 rounded-3xl">
           <ul class="h-full flex justify-around items-center px-6">
             <li>
               <router-link to="/lecturer/dashboard" class="mobile-nav-item flex flex-col items-center gap-1">
@@ -267,7 +267,6 @@ onUnmounted(() => {
   background: linear-gradient(135deg, #ffffffe6, #dbebffcc, rgba(199, 210, 254, 0.7));
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
-  border-radius: 0 0 30px 30px;
   box-shadow: 0 4px 16px rgba(31, 38, 135, 0.12);
   border: 1px solid rgba(255, 255, 255, 0.2);
   /* Performance optimizations */

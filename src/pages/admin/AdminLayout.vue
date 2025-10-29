@@ -85,7 +85,7 @@ const handleLogout = async () => {
         <!-- Right: Notifications and User Profile -->
         <div class="ml-auto flex items-center gap-1 xs:gap-2 sm:gap-3 md:gap-4 flex-nowrap min-w-0">
           <!-- Notification Bell -->
-          <button class="h-10 w-10 sm:h-12 sm:w-12 flex items-center justify-center rounded-full sm:rounded-4xl bg-white/30 backdrop-blur-sm border border-white/50 hover:bg-white/40 transition-all duration-200 shadow-sm shrink-0">
+          <button class="h-10 w-10 sm:h-12 sm:w-12 flex items-center justify-center rounded-full bg-white/30 backdrop-blur-sm border border-white/50 hover:bg-white/40 transition-all duration-200 shadow-sm shrink-0">
             <svg class="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
               <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"></path>
             </svg>
@@ -97,7 +97,7 @@ const handleLogout = async () => {
             <div 
               id="profile-button"
               @click.stop="toggleDropdown()"
-              class="flex items-center gap-2 sm:gap-3 h-10 sm:h-12 px-2 xs:px-3 sm:px-4 rounded-full sm:rounded-4xl bg-white/30 backdrop-blur-sm border border-white/50 shadow-sm overflow-hidden whitespace-nowrap max-w-[50vw] xs:max-w-[60vw] sm:max-w-[200px] md:max-w-[240px] min-w-0 hover:bg-white/40 transition-all duration-200 cursor-pointer active:scale-95"
+              class="flex items-center gap-2 sm:gap-3 h-10 sm:h-12 px-2 xs:px-3 sm:px-4 rounded-full bg-white/30 backdrop-blur-sm border border-white/50 shadow-sm overflow-hidden whitespace-nowrap max-w-[50vw] xs:max-w-[60vw] sm:max-w-[200px] md:max-w-[240px] min-w-0 hover:bg-white/40 transition-all duration-200 cursor-pointer active:scale-95"
             >
               <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden border-2 border-white/50">
                 <img :src="authStore.user?.user_metadata?.avatar_url || '/src/assets/kucingterbang.png'"
@@ -148,8 +148,8 @@ const handleLogout = async () => {
     </header>
 
     <div class="flex flex-1 relative">
-      <!-- Desktop Sidebar - Always visible, no hover collapse -->
-      <aside class="sidebar w-64 flex-shrink-0 sidebar-glass shadow-2xl overflow-hidden fixed left-4 top-26 bottom-4 rounded-4xl z-10 border border-white/20 hidden md:block">
+      <!-- Desktop Sidebar - Always visible, no hover collapse, no rounded corners -->
+      <aside class="sidebar w-64 flex-shrink-0 sidebar-glass shadow-2xl overflow-hidden fixed left-0 top-20 bottom-0 z-10 hidden md:block">
         <!-- Navigation Menu -->
         <nav class="p-4 h-full overflow-y-auto">
           <p class="text-xs font-semibold text-white/80 uppercase tracking-wider mb-3">
@@ -244,7 +244,7 @@ const handleLogout = async () => {
 
       <!-- Mobile Bottom Navigation -->
       <nav class="mobile-nav fixed bottom-0 left-0 right-0 h-16 bg-transparent md:hidden z-50">
-        <div class="mobile-nav-glass h-full mb-0 rounded-2xl">
+        <div class="mobile-nav-glass h-full mb-0 rounded-3xl">
           <ul class="h-full flex justify-around items-center px-2">
             <li>
               <router-link to="/admin/dashboard" class="mobile-nav-item flex flex-col items-center gap-1">
@@ -292,7 +292,7 @@ const handleLogout = async () => {
       </nav>
 
       <!-- Main Content Area -->
-      <main class="flex-1 p-6 lg:p-8 overflow-auto md:ml-72 mb-20 md:mb-0">
+      <main class="flex-1 p-6 lg:p-8 overflow-auto md:ml-64 mb-20 md:mb-0">
         <router-view />
       </main>
     </div>
@@ -374,7 +374,7 @@ const handleLogout = async () => {
   backdrop-filter: blur(2px);
 }
 
-/* Sidebar glassmorphism effect - Always visible (no hover collapse) */
+/* Sidebar glassmorphism effect - Always visible (no hover collapse), no rounded corners */
 .sidebar-glass {
   background: linear-gradient(135deg, rgba(43, 127, 255, 0.95), rgba(43, 127, 255, 0.90), rgba(43, 127, 255, 0.85));
   backdrop-filter: blur(8px);
