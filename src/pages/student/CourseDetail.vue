@@ -3,7 +3,6 @@ import { ref, computed, watchEffect } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useClassDetails } from '../../composables/useClassDetails';
 import { courseAPI } from '../../services/api';
-import BaseButton from '../../components/ui/BaseButton.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -234,17 +233,16 @@ watchEffect(() => {
     </section>
 
     <!-- Back Button -->
-    <div class="flex justify-center pt-4 pb-8">
-      <BaseButton 
+    <div class="flex justify-end pt-4 pb-8">
+      <button
         @click="router.push({ name: 'StudentMyCourses' })"
-        variant="secondary"
-        size="lg"
+        class="flex items-center gap-2 h-12 px-6 rounded-full bg-white border-2 border-blue-600 text-blue-600 font-semibold shadow-sm hover:bg-blue-50 transition-all duration-200 cursor-pointer active:scale-95"
       >
-        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
         </svg>
-        Back
-      </BaseButton>
+        <span>Back</span>
+      </button>
     </div>
   </div>
 </template>
