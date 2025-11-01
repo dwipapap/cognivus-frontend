@@ -82,15 +82,8 @@ const handleLogout = async () => {
           <span class="ml-4 text-lg font-semibold text-gray-800 hidden sm:inline">Admin Panel</span>
         </div>
 
-        <!-- Right: Notifications and User Profile -->
+        <!-- Right: User Profile -->
         <div class="ml-auto flex items-center gap-1 xs:gap-2 sm:gap-3 md:gap-4 flex-nowrap min-w-0">
-          <!-- Notification Bell -->
-          <button class="h-10 w-10 sm:h-12 sm:w-12 flex items-center justify-center rounded-full bg-white/30 backdrop-blur-sm border border-white/50 hover:bg-white/40 transition-all duration-200 shadow-sm shrink-0">
-            <svg class="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"></path>
-            </svg>
-          </button>
-
           <!-- User Profile Section -->
           <div class="relative z-50">
             <!-- Profile Pill -->
