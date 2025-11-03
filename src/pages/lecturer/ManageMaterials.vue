@@ -7,6 +7,7 @@ import BaseInput from '../../components/form/BaseInput.vue';
 import BaseTextarea from '../../components/form/BaseTextarea.vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
 import LoadingBar from '../../components/ui/LoadingBar.vue';
+import ConfirmDialog from '../../components/ui/ConfirmDialog.vue';
 
 const { lecturerProfile, isLoading: profileLoading } = useLecturerProfile();
 
@@ -33,6 +34,15 @@ const formData = ref({
 const uploadFiles = ref([]);
 const isUploading = ref(false);
 const isDeletingFile = ref(false);
+
+/** Confirmation dialog state */
+const showConfirmDialog = ref(false);
+const confirmAction = ref(null);
+const confirmConfig = ref({
+  title: '',
+  message: '',
+  variant: 'danger'
+});
 
 /** Get courses for selected class with file count */
 const classCourses = computed(() => {
@@ -151,22 +161,50 @@ const openEditForm = (course) => {
   showModal.value = true;
 };
 
-/** Delete an existing course file */
-const deleteExistingFile = async (fileId) => {
-  if (!confirm('Delete this file?')) return;
-  
-  try {
-    isDeletingFile.value = true;
-    await courseFileAPI.deleteCourseFile(fileId);
-    existingFiles.value = existingFiles.value.filter(f => f.cfid !== fileId);
-    successMessage.value = 'File deleted';
-    setTimeout(() => successMessage.value = '', 2000);
-  } catch (error) {
-    errorMessage.value = 'Failed to delete file';
-    console.error('Error deleting file:', error);
-  } finally {
-    isDeletingFile.value = false;
+/** Show confirmation dialog */
+const showConfirmation = (config, action) => {
+  confirmConfig.value = config;
+  confirmAction.value = action;
+  showConfirmDialog.value = true;
+};
+
+/** Handle confirmation */
+const handleConfirm = async () => {
+  if (confirmAction.value) {
+    await confirmAction.value();
   }
+  showConfirmDialog.value = false;
+};
+
+/** Handle cancel */
+const handleCancel = () => {
+  showConfirmDialog.value = false;
+  confirmAction.value = null;
+};
+
+/** Delete an existing course file */
+const deleteExistingFile = (fileId) => {
+  showConfirmation(
+    {
+      title: 'Delete File',
+      message: 'Are you sure you want to delete this file? This action cannot be undone.',
+      variant: 'danger'
+    },
+    async () => {
+      try {
+        isDeletingFile.value = true;
+        await courseFileAPI.deleteCourseFile(fileId);
+        existingFiles.value = existingFiles.value.filter(f => f.cfid !== fileId);
+        successMessage.value = 'File deleted successfully';
+        setTimeout(() => successMessage.value = '', 3000);
+      } catch (error) {
+        errorMessage.value = 'Failed to delete file';
+        console.error('Error deleting file:', error);
+      } finally {
+        isDeletingFile.value = false;
+      }
+    }
+  );
 };
 
 /** Save material (files optional) */
@@ -217,21 +255,28 @@ const saveMaterial = async () => {
 };
 
 /** Delete material */
-const deleteMaterial = async (courseid) => {
-  if (!confirm('Are you sure you want to delete this material?')) return;
-
-  try {
-    await courseAPI.deleteCourse(courseid);
-    successMessage.value = 'Material deleted successfully';
-    await fetchCourses();
-    
-    setTimeout(() => {
-      successMessage.value = '';
-    }, 3000);
-  } catch (error) {
-    errorMessage.value = 'Failed to delete material';
-    console.error('Error deleting material:', error);
-  }
+const deleteMaterial = (courseid) => {
+  showConfirmation(
+    {
+      title: 'Delete Material',
+      message: 'Are you sure you want to delete this material? All associated files will also be deleted. This action cannot be undone.',
+      variant: 'danger'
+    },
+    async () => {
+      try {
+        await courseAPI.deleteCourse(courseid);
+        successMessage.value = 'Material deleted successfully';
+        await fetchCourses();
+        
+        setTimeout(() => {
+          successMessage.value = '';
+        }, 3000);
+      } catch (error) {
+        errorMessage.value = 'Failed to delete material';
+        console.error('Error deleting material:', error);
+      }
+    }
+  );
 };
 
 /** Format date */
@@ -600,6 +645,19 @@ onMounted(() => {
         </div>
       </Transition>
     </Teleport>
+
+    <!-- Confirmation Dialog -->
+    <ConfirmDialog
+      :show="showConfirmDialog"
+      :title="confirmConfig.title"
+      :message="confirmConfig.message"
+      :variant="confirmConfig.variant"
+      confirm-text="Delete"
+      cancel-text="Cancel"
+      @confirm="handleConfirm"
+      @cancel="handleCancel"
+      @close="handleCancel"
+    />
   </div>
 </template>
 

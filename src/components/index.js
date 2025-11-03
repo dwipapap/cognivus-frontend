@@ -1,5 +1,6 @@
 // UI Components
 export { default as Modal } from './ui/Modal.vue';
+export { default as ConfirmDialog } from './ui/ConfirmDialog.vue';
 export { default as BaseButton } from './ui/BaseButton.vue';
 export { default as BaseCard } from './ui/BaseCard.vue';
 export { default as LoadingSpinner } from './ui/LoadingSpinner.vue';
