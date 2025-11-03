@@ -144,8 +144,10 @@ onMounted(() => {
     </div>
 
     <!-- Loading -->
-    <div v-if="isLoading" class="flex justify-center py-20">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <!-- Loading State -->
+    <div v-if="loading" class="max-w-2xl mx-auto py-20">
+      <LoadingBar :loading="true" color="blue" :duration="2000" />
+      <p class="text-center text-gray-600 mt-4">Loading grades...</p>
     </div>
 
     <!-- Main Content -->

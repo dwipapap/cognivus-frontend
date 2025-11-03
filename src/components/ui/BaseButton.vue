@@ -32,7 +32,7 @@ const props = defineProps({
   },
   rounded: {
     type: String,
-    default: 'lg',
+    default: 'full',
     validator: (value) => ['none', 'sm', 'md', 'lg', 'xl', 'full'].includes(value)
   },
   href: {
@@ -65,30 +65,30 @@ const buttonClasses = computed(() => {
   const baseClasses = 'inline-flex items-center justify-center font-medium text-center transition-all duration-300 focus:ring-4 focus:outline-none relative overflow-hidden';
   
   const variantClasses = {
-    // Traditional variants
-    primary: 'text-white bg-blue-700 hover:bg-blue-800 focus:ring-blue-300 disabled:bg-blue-400',
-    secondary: 'text-gray-900 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-200 disabled:bg-gray-100',
-    success: 'text-white bg-green-700 hover:bg-green-800 focus:ring-green-300 disabled:bg-green-400',
-    danger: 'text-white bg-red-700 hover:bg-red-800 focus:ring-red-300 disabled:bg-red-400',
-    warning: 'text-white bg-yellow-700 hover:bg-yellow-800 focus:ring-yellow-300 disabled:bg-yellow-400',
-    info: 'text-white bg-cyan-700 hover:bg-cyan-800 focus:ring-cyan-300 disabled:bg-cyan-400',
-    light: 'text-gray-900 bg-gray-100 hover:bg-gray-200 focus:ring-gray-200 disabled:bg-gray-50',
-    dark: 'text-white bg-gray-800 hover:bg-gray-900 focus:ring-gray-700 disabled:bg-gray-600',
+    // Traditional variants with gradient blue theme
+    primary: 'text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:ring-blue-300 disabled:from-blue-400 disabled:to-blue-500 shadow-md hover:shadow-lg',
+    secondary: 'text-gray-700 bg-white border-2 border-gray-300 hover:bg-gray-50 hover:border-gray-400 focus:ring-gray-200 disabled:bg-gray-100 shadow-sm hover:shadow-md',
+    success: 'text-white bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800 focus:ring-green-300 disabled:from-green-400 disabled:to-emerald-500 shadow-md hover:shadow-lg',
+    danger: 'text-white bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-700 hover:to-rose-800 focus:ring-red-300 disabled:from-red-400 disabled:to-rose-500 shadow-md hover:shadow-lg',
+    warning: 'text-white bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 focus:ring-yellow-300 disabled:from-yellow-400 disabled:to-orange-500 shadow-md hover:shadow-lg',
+    info: 'text-white bg-gradient-to-r from-cyan-600 to-blue-700 hover:from-cyan-700 hover:to-blue-800 focus:ring-cyan-300 disabled:from-cyan-400 disabled:to-blue-500 shadow-md hover:shadow-lg',
+    light: 'text-gray-800 bg-gradient-to-r from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 focus:ring-gray-200 disabled:from-gray-50 disabled:to-gray-100 shadow-sm hover:shadow-md',
+    dark: 'text-white bg-gradient-to-r from-gray-700 to-gray-900 hover:from-gray-800 hover:to-black focus:ring-gray-700 disabled:from-gray-600 disabled:to-gray-700 shadow-md hover:shadow-lg',
     link: 'text-blue-600 hover:text-blue-800 underline hover:no-underline disabled:text-blue-400',
     
-    // Glassmorphism variants
-    glass: 'glass-button text-gray-700 hover:text-blue-700 focus:ring-blue-300/50 disabled:opacity-40',
-    'glass-primary': 'glass-button-primary text-white hover:text-white focus:ring-blue-300/50 disabled:opacity-40',
-    'glass-secondary': 'glass-button-secondary text-gray-600 hover:text-gray-800 focus:ring-gray-300/50 disabled:opacity-40',
-    gradient: 'gradient-button text-white hover:text-white focus:ring-blue-300/50 disabled:opacity-40'
+    // Glassmorphism variants with enhanced styling
+    glass: 'glass-button text-gray-700 hover:text-blue-700 focus:ring-blue-300/50 disabled:opacity-40 shadow-md hover:shadow-lg',
+    'glass-primary': 'glass-button-primary text-white hover:text-white focus:ring-blue-300/50 disabled:opacity-40 shadow-md hover:shadow-xl',
+    'glass-secondary': 'glass-button-secondary text-gray-600 hover:text-gray-800 focus:ring-gray-300/50 disabled:opacity-40 shadow-sm hover:shadow-md',
+    gradient: 'gradient-button text-white hover:text-white focus:ring-blue-300/50 disabled:opacity-40 shadow-lg hover:shadow-xl'
   };
   
   const sizeClasses = {
-    xs: 'px-3 py-2 text-xs',
-    sm: 'px-3 py-2 text-sm',
-    md: 'px-5 py-2.5 text-sm',
-    lg: 'px-5 py-3 text-base',
-    xl: 'px-6 py-3.5 text-base'
+    xs: 'px-4 py-2 text-xs gap-1.5',
+    sm: 'px-5 py-2 text-sm gap-2',
+    md: 'px-6 py-2.5 text-sm gap-2',
+    lg: 'px-8 py-3 text-base gap-2.5',
+    xl: 'px-10 py-3.5 text-base gap-3'
   };
   
   const roundedClasses = {
@@ -101,7 +101,7 @@ const buttonClasses = computed(() => {
   };
   
   const blockClass = props.block ? 'w-full' : '';
-  const disabledClass = (props.disabled || props.loading) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer';
+  const disabledClass = (props.disabled || props.loading) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:scale-105 active:scale-95';
   const linkClass = props.variant === 'link' ? '' : '';
   
   return [
@@ -208,21 +208,21 @@ const component = computed(() => props.href ? 'a' : 'button');
 }
 
 .glass-button-primary {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.5), rgba(147, 51, 234, 0.5));
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.6), rgba(79, 70, 229, 0.6));
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   border: 1px solid rgba(255, 255, 255, 0.4);
-  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.25);
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.3);
   /* Performance optimizations */
   will-change: transform;
   transform: translateZ(0);
 }
 
 .glass-button-primary:hover {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.6), rgba(147, 51, 234, 0.6));
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.7), rgba(79, 70, 229, 0.7));
   border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 6px 24px rgba(59, 130, 246, 0.3);
-  transform: translateY(-1px) translateZ(0);
+  box-shadow: 0 8px 32px rgba(37, 99, 235, 0.4);
+  transform: translateY(-2px) translateZ(0);
 }
 
 .glass-button-primary:active {
@@ -254,9 +254,9 @@ const component = computed(() => props.href ? 'a' : 'button');
 }
 
 .gradient-button {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #3b82f6 0%, #4f46e5 100%);
   border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
   position: relative;
   overflow: hidden;
   /* Performance optimizations */
@@ -276,9 +276,9 @@ const component = computed(() => props.href ? 'a' : 'button');
 }
 
 .gradient-button:hover {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  box-shadow: 0 6px 24px rgba(102, 126, 234, 0.4);
-  transform: translateY(-1px) translateZ(0);
+  background: linear-gradient(135deg, #2563eb 0%, #4338ca 100%);
+  box-shadow: 0 8px 32px rgba(59, 130, 246, 0.5);
+  transform: translateY(-2px) translateZ(0);
 }
 
 .gradient-button:hover::before {

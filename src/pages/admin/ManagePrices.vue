@@ -166,9 +166,10 @@ onMounted(() => {
     </div>
 
     <!-- Loading State -->
-    <div v-if="isLoading" class="text-center py-12">
-      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      <p class="mt-2 text-gray-600">Loading prices...</p>
+        <!-- Loading State -->
+    <div v-if="loading" class="max-w-2xl mx-auto py-20">
+      <LoadingBar :loading="true" color="blue" :duration="2000" />
+      <p class="text-center text-gray-600 mt-4">Loading prices...</p>
     </div>
 
     <!-- Prices Table -->

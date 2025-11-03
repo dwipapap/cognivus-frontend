@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { studentAPI, gradeAPI } from '../../services/api';
+import LoadingBar from '../../components/ui/LoadingBar.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -115,8 +116,8 @@ onMounted(() => {
     <h1 class="text-4xl font-bold text-gray-900 mb-8">Student Details</h1>
 
     <!-- Loading -->
-    <div v-if="isLoading" class="flex justify-center py-20">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+    <div v-if="isLoading" class="max-w-2xl mx-auto py-20">
+      <LoadingBar :loading="true" color="blue" :duration="2000" />
     </div>
 
     <!-- Error -->
@@ -125,7 +126,7 @@ onMounted(() => {
         <p class="text-red-800">{{ errorMessage }}</p>
         <button 
           @click="fetchStudentData"
-          class="px-3 py-1.5 text-sm font-medium text-red-700 hover:text-red-800 hover:bg-red-100 rounded-lg transition-colors"
+          class="px-4 py-2 text-sm font-semibold text-red-700 hover:text-white bg-gradient-to-r from-red-50 to-rose-50 hover:from-red-600 hover:to-rose-600 border-2 border-red-200 hover:border-red-600 rounded-full transition-all shadow-sm hover:shadow-md hover:scale-105 active:scale-95"
         >
           Retry
         </button>
@@ -208,9 +209,9 @@ onMounted(() => {
           <h2 class="text-2xl font-bold text-gray-900">Grades</h2>
           <router-link
             :to="{ name: 'AddGrade', params: { userid: studentId } }"
-            class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+            class="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-semibold rounded-full hover:from-blue-700 hover:to-indigo-700 hover:scale-105 active:scale-95 transition-all shadow-md hover:shadow-lg"
           >
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
             </svg>
             Add Grade
@@ -262,7 +263,7 @@ onMounted(() => {
                 <td class="px-4 py-3">
                   <router-link
                     :to="{ name: 'EditGrade', params: { userid: studentId, gradeid: grade.gradeid } }"
-                    class="inline-flex items-center px-3 py-1 bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200 text-sm font-medium"
+                    class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-yellow-50 to-amber-50 text-yellow-700 border-2 border-yellow-200 rounded-full hover:from-yellow-100 hover:to-amber-100 hover:border-yellow-300 hover:scale-105 active:scale-95 text-sm font-semibold transition-all shadow-sm hover:shadow-md"
                   >
                     Edit
                   </router-link>

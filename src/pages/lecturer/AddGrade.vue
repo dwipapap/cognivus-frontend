@@ -14,8 +14,8 @@
     <h1 class="text-4xl font-bold text-gray-900 mb-8">Add Grade</h1>
 
     <!-- Loading -->
-    <div v-if="isLoading" class="flex justify-center py-20">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+    <div v-if="isLoading" class="max-w-2xl mx-auto py-20">
+      <LoadingBar :loading="true" color="blue" :duration="2000" />
     </div>
 
     <!-- Error -->
@@ -162,14 +162,14 @@
           <button
             type="submit"
             :disabled="isSubmitting"
-            class="flex-1 px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+            class="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-full hover:from-blue-700 hover:to-indigo-700 hover:scale-105 active:scale-95 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all shadow-md hover:shadow-lg"
           >
             {{ isSubmitting ? 'Saving...' : 'Save Grade' }}
           </button>
           <button
             type="button"
             @click="goBack"
-            class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition-colors"
+            class="flex-1 px-6 py-3 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 font-semibold rounded-full hover:from-gray-200 hover:to-gray-300 hover:scale-105 active:scale-95 transition-all shadow-sm hover:shadow-md"
           >
             Cancel
           </button>
@@ -194,6 +194,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { studentAPI, gradeAPI } from '../../services/api';
 import BaseFileUpload from '../../components/form/BaseFileUpload.vue';
+import LoadingBar from '../../components/ui/LoadingBar.vue';
 
 const route = useRoute();
 const router = useRouter();

@@ -3,6 +3,7 @@ import { ref, onMounted, computed, watchEffect } from 'vue';
 import { useRouter } from 'vue-router';
 import { useLecturerProfile } from '../../composables/useLecturerProfile';
 import { classAPI, studentAPI, levelAPI } from '../../services/api';
+import LoadingBar from '../../components/ui/LoadingBar.vue';
 
 const router = useRouter();
 const { lecturerProfile, isLoading: profileLoading } = useLecturerProfile();
@@ -181,7 +182,7 @@ onMounted(() => {
         <p class="text-red-800">{{ errorMessage }}</p>
         <button 
           @click="fetchMyClasses"
-          class="px-3 py-1.5 text-sm font-medium text-red-700 hover:text-red-800 hover:bg-red-100 rounded-lg transition-colors"
+          class="px-4 py-2 text-sm font-semibold text-red-700 hover:text-white bg-gradient-to-r from-red-50 to-rose-50 hover:from-red-600 hover:to-rose-600 border-2 border-red-200 hover:border-red-600 rounded-full transition-all shadow-sm hover:shadow-md hover:scale-105 active:scale-95"
         >
           Retry
         </button>
@@ -189,8 +190,8 @@ onMounted(() => {
     </div>
 
     <!-- Loading -->
-    <div v-if="isLoading || profileLoading" class="flex justify-center py-20">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+    <div v-if="isLoading || profileLoading" class="max-w-2xl mx-auto py-20">
+      <LoadingBar :loading="true" color="blue" :duration="2000" />
     </div>
 
     <!-- Main Content -->
@@ -204,10 +205,10 @@ onMounted(() => {
             :key="cls.classid"
             @click="selectClass(cls)"
             :class="[
-              'p-4 rounded-xl border-2 text-left transition-all',
+              'p-4 rounded-2xl border-2 text-left transition-all shadow-sm hover:shadow-lg',
               selectedClass?.classid === cls.classid
-                ? 'border-blue-600 bg-blue-50'
-                : 'border-gray-200 hover:border-blue-300'
+                ? 'border-blue-600 bg-gradient-to-br from-blue-50 to-indigo-50 scale-105'
+                : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50/30'
             ]"
           >
             <h3 class="font-bold text-lg text-gray-900">{{ cls.class_code }}</h3>
@@ -317,9 +318,10 @@ onMounted(() => {
                     <button
                       type="button"
                       @click="viewStudentDetails(student)"
-                      class="inline-flex items-center px-3 py-1.5 border border-blue-600 text-blue-600 rounded-lg text-xs font-semibold transition-colors hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+                      class="inline-flex items-center justify-center w-10 h-10 border-2 border-blue-200 text-blue-600 rounded-full text-lg font-semibold transition-all hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:border-blue-400 hover:scale-110 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 shadow-sm hover:shadow-md"
                     >
-                      Details
+                      <span aria-hidden="true">&gt;</span>
+                      <span class="sr-only">View details</span>
                     </button>
                   </td>
                 </tr>
@@ -336,7 +338,7 @@ onMounted(() => {
               <button
                 @click="goToPage(currentPage - 1)"
                 :disabled="currentPage === 1"
-                class="px-3 py-1 border border-gray-300 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                class="px-4 py-2 border-2 border-gray-300 text-gray-600 rounded-full text-sm font-semibold transition-all hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:border-blue-400 hover:text-blue-700 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-sm hover:shadow-md"
               >
                 Previous
               </button>
@@ -345,10 +347,10 @@ onMounted(() => {
                 :key="page"
                 @click="goToPage(page)"
                 :class="[
-                  'px-3 py-1 border rounded-lg text-sm',
+                  'px-4 py-2 border-2 rounded-full text-sm font-semibold transition-all shadow-sm hover:shadow-md',
                   currentPage === page
-                    ? 'bg-blue-600 text-white border-blue-600'
-                    : 'border-gray-300 hover:bg-gray-50'
+                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-blue-600 scale-105'
+                    : 'border-gray-300 text-gray-600 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:border-blue-400 hover:text-blue-700 hover:scale-105 active:scale-95'
                 ]"
               >
                 {{ page }}
@@ -356,7 +358,7 @@ onMounted(() => {
               <button
                 @click="goToPage(currentPage + 1)"
                 :disabled="currentPage === totalPages"
-                class="px-3 py-1 border border-gray-300 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                class="px-4 py-2 border-2 border-gray-300 text-gray-600 rounded-full text-sm font-semibold transition-all hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:border-blue-400 hover:text-blue-700 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-sm hover:shadow-md"
               >
                 Next
               </button>

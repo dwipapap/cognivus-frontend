@@ -1,8 +1,12 @@
 <script setup>
-import { ref, onMounted, computed, watchEffect } from 'vue';
+import { ref, onMounted, computed, watch, watchEffect } from 'vue';
 import { useLecturerProfile } from '../../composables/useLecturerProfile';
 import { classAPI, courseAPI, courseFileAPI, levelAPI } from '../../services/api';
 import BaseFileUpload from '../../components/form/BaseFileUpload.vue';
+import BaseInput from '../../components/form/BaseInput.vue';
+import BaseTextarea from '../../components/form/BaseTextarea.vue';
+import BaseButton from '../../components/ui/BaseButton.vue';
+import LoadingBar from '../../components/ui/LoadingBar.vue';
 
 const { lecturerProfile, isLoading: profileLoading } = useLecturerProfile();
 
@@ -13,6 +17,8 @@ const selectedClass = ref(null);
 const isLoading = ref(true);
 const errorMessage = ref('');
 const successMessage = ref('');
+const currentPage = ref(1);
+const itemsPerPage = 5;
 
 /** Modal and form state */
 const showModal = ref(false);
@@ -32,6 +38,19 @@ const isDeletingFile = ref(false);
 const classCourses = computed(() => {
   if (!selectedClass.value) return [];
   return allCourses.value.filter(c => c.classid === selectedClass.value.classid);
+});
+
+const totalPages = computed(() => {
+  if (classCourses.value.length === 0) return 1;
+  return Math.ceil(classCourses.value.length / itemsPerPage);
+});
+
+const shouldPaginate = computed(() => classCourses.value.length > itemsPerPage);
+
+const paginatedClassCourses = computed(() => {
+  if (!shouldPaginate.value) return classCourses.value;
+  const start = (currentPage.value - 1) * itemsPerPage;
+  return classCourses.value.slice(start, start + itemsPerPage);
 });
 
 /** Get file count for a course */
@@ -221,6 +240,22 @@ const formatDate = (dateString) => {
   return new Date(dateString).toLocaleDateString('en-GB');
 };
 
+const goToPage = (page) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page;
+  }
+};
+
+watch(() => selectedClass.value?.classid, () => {
+  currentPage.value = 1;
+});
+
+watch(classCourses, () => {
+  if (currentPage.value > totalPages.value) {
+    currentPage.value = totalPages.value;
+  }
+});
+
 /** Auto-fetch classes when profile loads */
 watchEffect(() => {
   if (!profileLoading.value && lecturerProfile.value) {
@@ -249,7 +284,7 @@ onMounted(() => {
         <p class="text-red-800">{{ errorMessage }}</p>
         <button 
           @click="fetchMyClasses"
-          class="px-3 py-1.5 text-sm font-medium text-red-700 hover:text-red-800 hover:bg-red-100 rounded-lg transition-colors"
+          class="px-4 py-2 text-sm font-semibold text-red-700 hover:text-white bg-gradient-to-r from-red-50 to-rose-50 hover:from-red-600 hover:to-rose-600 border-2 border-red-200 hover:border-red-600 rounded-full transition-all shadow-sm hover:shadow-md hover:scale-105 active:scale-95"
         >
           Retry
         </button>
@@ -257,8 +292,8 @@ onMounted(() => {
     </div>
 
     <!-- Loading -->
-    <div v-if="isLoading || profileLoading" class="flex justify-center py-20">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+    <div v-if="isLoading || profileLoading" class="max-w-2xl mx-auto py-20">
+      <LoadingBar :loading="true" color="blue" :duration="2000" />
     </div>
 
     <!-- Main Content -->
@@ -272,10 +307,10 @@ onMounted(() => {
             :key="cls.classid"
             @click="selectedClass = cls"
             :class="[
-              'p-4 rounded-xl border-2 text-left transition-all',
+              'p-4 rounded-2xl border-2 text-left transition-all shadow-sm hover:shadow-lg',
               selectedClass?.classid === cls.classid
-                ? 'border-blue-600 bg-blue-50'
-                : 'border-gray-200 hover:border-blue-300'
+                ? 'border-blue-600 bg-gradient-to-br from-blue-50 to-indigo-50 scale-105'
+                : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50/30'
             ]"
           >
             <h3 class="font-bold text-lg text-gray-900">{{ cls.class_code }}</h3>
@@ -294,9 +329,12 @@ onMounted(() => {
           </div>
           <button
             @click="openAddForm"
-            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            class="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-full hover:from-blue-700 hover:to-blue-800 hover:scale-105 active:scale-95 transition-all shadow-md hover:shadow-lg font-semibold"
           >
-            + Add Material
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Add Material
           </button>
         </div>
 
@@ -305,46 +343,49 @@ onMounted(() => {
           No materials yet. Click "Add Material" to get started.
         </div>
 
-        <div v-else class="space-y-4">
+          <div v-else class="space-y-3">
           <div
-            v-for="course in classCourses"
+              v-for="course in paginatedClassCourses"
             :key="course.courseid"
-            class="border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow"
+              v-memo="[course.courseid, course.title, getFileCount(course)]"
+              class="border border-gray-200 rounded-xl bg-white px-4 py-3 shadow-sm hover:shadow-md transition-all"
           >
-            <div class="flex justify-between items-start">
-              <div class="flex-1">
-                <div class="flex items-center gap-3 mb-2">
-                  <h3 class="text-lg font-bold text-gray-900">{{ course.title }}</h3>
-                  <span v-if="course.course_code" class="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">
-                    {{ course.course_code }}
-                  </span>
-                  <span v-if="getFileCount(course) > 0" class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
-                    📎 {{ getFileCount(course) }} file{{ getFileCount(course) > 1 ? 's' : '' }}
-                  </span>
-                </div>
-                <p v-if="course.description" class="text-sm text-gray-600 mb-2">{{ course.description }}</p>
-                <p class="text-sm text-gray-500 mb-3">Uploaded: {{ formatDate(course.upload_date) }}</p>
-                <div class="flex gap-2">
-                  <a
-                    v-if="course.video_link"
-                    :href="course.video_link"
-                    target="_blank"
-                    class="px-3 py-1 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 text-sm"
-                  >
-                    🎥 Video
-                  </a>
-                </div>
+              <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div class="flex-1 min-w-0">
+                  <div class="flex flex-wrap items-center gap-2 mb-2">
+                    <h3 class="text-base font-semibold text-gray-900 truncate">{{ course.title }}</h3>
+                    <span v-if="course.course_code" class="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-600">
+                      {{ course.course_code }}
+                    </span>
+                    <span v-if="getFileCount(course) > 0" class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-600">
+                      <span aria-hidden="true">📎</span>
+                      {{ getFileCount(course) }} file{{ getFileCount(course) > 1 ? 's' : '' }}
+                    </span>
+                  </div>
+                  <p v-if="course.description" class="text-sm text-gray-600">{{ course.description }}</p>
+                  <div class="mt-2 flex flex-wrap items-center gap-3 text-xs text-gray-500">
+                    <span>Uploaded: {{ formatDate(course.upload_date) }}</span>
+                    <a
+                      v-if="course.video_link"
+                      :href="course.video_link"
+                      target="_blank"
+                      class="inline-flex items-center gap-1 rounded-md bg-rose-50 px-2 py-1 font-semibold text-rose-600 hover:bg-rose-100"
+                    >
+                      <span aria-hidden="true">🎥</span>
+                      Video
+                    </a>
+                  </div>
               </div>
-              <div class="flex gap-2 ml-4">
+              <div class="flex gap-2 md:ml-4">
                 <button
                   @click="openEditForm(course)"
-                  class="px-3 py-2 bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200 text-sm font-medium"
+                  class="inline-flex items-center rounded-full border border-yellow-200 bg-gradient-to-r from-yellow-50 to-amber-50 px-4 py-1.5 text-xs font-semibold text-yellow-700 transition-all hover:from-yellow-100 hover:to-amber-100 hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
                 >
                   Edit
                 </button>
                 <button
                   @click="deleteMaterial(course.courseid)"
-                  class="px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 text-sm font-medium"
+                  class="inline-flex items-center rounded-full border border-red-200 bg-gradient-to-r from-red-50 to-rose-50 px-4 py-1.5 text-xs font-semibold text-red-700 transition-all hover:from-red-100 hover:to-rose-100 hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
                 >
                   Delete
                 </button>
@@ -352,6 +393,51 @@ onMounted(() => {
             </div>
           </div>
         </div>
+
+          <div
+            v-if="shouldPaginate"
+            class="mt-4 flex flex-col gap-3 border-t border-gray-100 pt-4 md:flex-row md:items-center md:justify-between"
+          >
+            <p class="text-xs text-gray-500">
+              Showing
+              {{ (currentPage - 1) * itemsPerPage + 1 }}
+              -
+              {{ Math.min(currentPage * itemsPerPage, classCourses.length) }}
+              of
+              {{ classCourses.length }}
+            </p>
+            <div class="flex items-center gap-2">
+              <button
+                @click="goToPage(currentPage - 1)"
+                :disabled="currentPage === 1"
+                class="inline-flex h-9 w-9 items-center justify-center rounded-full border-2 border-gray-300 text-sm text-gray-600 transition-all hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:border-blue-400 hover:text-blue-700 hover:scale-110 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 shadow-sm hover:shadow-md"
+              >
+                <span aria-hidden="true">‹</span>
+                <span class="sr-only">Previous page</span>
+              </button>
+              <button
+                v-for="page in totalPages"
+                :key="page"
+                @click="goToPage(page)"
+                :class="[
+                  'inline-flex h-9 min-w-[2.25rem] items-center justify-center rounded-full border-2 text-sm font-semibold transition-all shadow-sm hover:shadow-md',
+                  currentPage === page
+                    ? 'border-blue-600 bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 scale-110'
+                    : 'border-gray-300 text-gray-600 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:border-blue-400 hover:text-blue-700 hover:scale-110 active:scale-95'
+                ]"
+              >
+                {{ page }}
+              </button>
+              <button
+                @click="goToPage(currentPage + 1)"
+                :disabled="currentPage === totalPages"
+                class="inline-flex h-9 w-9 items-center justify-center rounded-full border-2 border-gray-300 text-sm text-gray-600 transition-all hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:border-blue-400 hover:text-blue-700 hover:scale-110 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 shadow-sm hover:shadow-md"
+              >
+                <span aria-hidden="true">›</span>
+                <span class="sr-only">Next page</span>
+              </button>
+            </div>
+          </div>
       </div>
     </div>
 
@@ -365,18 +451,25 @@ onMounted(() => {
       <Transition name="modal">
         <div
           v-if="showModal"
-          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
           @click.self="resetForm"
         >
-          <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-y-auto">
-            <!-- Modal Header -->
-            <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center rounded-t-2xl">
-              <h3 class="text-xl font-bold text-gray-900">
-                {{ editingCourse ? 'Edit Material' : 'Add New Material' }}
-              </h3>
+          <div class="bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+            <!-- Modal Header with Gradient -->
+            <div class="sticky top-0 bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 px-8 py-6 flex justify-between items-center shadow-lg">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <h3 class="text-2xl font-bold text-white">
+                  {{ editingCourse ? 'Edit Material' : 'Add New Material' }}
+                </h3>
+              </div>
               <button
                 @click="resetForm"
-                class="text-gray-400 hover:text-gray-600 transition-colors"
+                class="text-white/80 hover:text-white hover:bg-white/10 rounded-full p-2 transition-all hover:scale-110 active:scale-95"
               >
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -384,75 +477,74 @@ onMounted(() => {
               </button>
             </div>
 
-            <!-- Modal Body -->
-            <div class="px-6 py-6 space-y-4">
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                  Title <span class="text-red-500">*</span>
-                </label>
-                <input
-                  v-model="formData.title"
-                  type="text"
-                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter material title"
-                />
-              </div>
+            <!-- Modal Body - Scrollable -->
+            <div class="flex-1 overflow-y-auto px-8 py-6 space-y-6 bg-gradient-to-b from-gray-50/50 to-white">
+              <!-- Title Input -->
+              <BaseInput
+                v-model="formData.title"
+                label="Title"
+                placeholder="Enter material title"
+                required
+                size="lg"
+              />
 
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Course Code</label>
-                <input
-                  v-model="formData.course_code"
-                  type="text"
-                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="e.g., ENG-101"
-                />
-              </div>
+              <!-- Course Code Input -->
+              <BaseInput
+                v-model="formData.course_code"
+                label="Course Code"
+                placeholder="e.g., ENG-101"
+                size="lg"
+              />
 
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                <textarea
-                  v-model="formData.description"
-                  rows="3"
-                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Describe the course material..."
-                ></textarea>
-              </div>
+              <!-- Description Textarea -->
+              <BaseTextarea
+                v-model="formData.description"
+                label="Description"
+                placeholder="Describe the course material..."
+                :rows="3"
+              />
 
               <!-- Existing Files (Edit Mode) -->
-              <div v-if="editingCourse && existingFiles.length > 0" class="space-y-2">
-                <label class="block text-sm font-medium text-gray-700">Existing Files</label>
-                <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-2">
+              <div v-if="editingCourse && existingFiles.length > 0" class="space-y-3">
+                <label class="block text-sm font-semibold text-gray-700">Existing Files</label>
+                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-4 space-y-3">
                   <div
                     v-for="file in existingFiles"
                     :key="file.cfid"
-                    class="flex items-center justify-between bg-white border border-gray-200 rounded-lg p-3"
+                    class="flex items-center justify-between bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-all"
                   >
-                    <div class="flex items-center gap-3 flex-1">
-                      <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/>
-                      </svg>
+                    <div class="flex items-center gap-3 flex-1 min-w-0">
+                      <div class="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-sm">
+                        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/>
+                        </svg>
+                      </div>
                       <div class="flex-1 min-w-0">
                         <a 
                           :href="file.url || file.path" 
                           target="_blank"
-                          class="text-sm font-medium text-blue-600 hover:text-blue-800 truncate block"
+                          class="text-sm font-semibold text-blue-600 hover:text-blue-800 truncate block transition-colors"
                         >
-                          File {{ file.cfid }} - {{ formatDate(file.upload_date) }}
+                          File {{ file.cfid }}
                         </a>
-                        <p class="text-xs text-gray-500 truncate">{{ file.url || file.path }}</p>
+                        <p class="text-xs text-gray-500 mt-0.5">Uploaded: {{ formatDate(file.upload_date) }}</p>
                       </div>
                     </div>
                     <button
                       @click="deleteExistingFile(file.cfid)"
                       :disabled="isDeletingFile"
-                      class="ml-3 px-3 py-1 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+                      class="ml-3 flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-red-50 to-rose-50 text-red-600 hover:from-red-100 hover:to-rose-100 border-2 border-red-200 hover:border-red-300 rounded-full text-sm font-semibold transition-all hover:scale-105 active:scale-95 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                     >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
                       Delete
                     </button>
                   </div>
                 </div>
               </div>
 
+              <!-- File Upload -->
               <BaseFileUpload
                 v-model="uploadFiles"
                 label="Upload New Files (Optional)"
@@ -462,33 +554,47 @@ onMounted(() => {
                 hint="Optional: PDF, Word, or PowerPoint (max 50MB each). Multiple files allowed."
               />
 
+              <!-- Video Link Input -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Video Link (Optional)</label>
-                <input
+                <BaseInput
                   v-model="formData.video_link"
-                  type="text"
-                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  label="Video Link (Optional)"
                   placeholder="https://youtube.com/watch?v=..."
+                  type="url"
                 />
-                <p class="text-xs text-gray-500 mt-1">YouTube, Vimeo, or other video platform</p>
+                <div class="flex items-start gap-2 mt-2">
+                  <svg class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                  </svg>
+                  <p class="text-xs text-gray-500">YouTube, Vimeo, or other video platform link</p>
+                </div>
               </div>
             </div>
 
-            <!-- Modal Footer -->
-            <div class="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-6 py-4 flex justify-end gap-3 rounded-b-2xl">
-              <button
+            <!-- Modal Footer with Actions -->
+            <div class="sticky bottom-0 bg-white border-t border-gray-200 px-8 py-5 flex justify-end gap-3 shadow-lg">
+              <BaseButton 
+                type="button" 
+                variant="glass-secondary" 
                 @click="resetForm"
-                class="px-6 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                size="lg"
               >
                 Cancel
-              </button>
-              <button
+              </BaseButton>
+              <BaseButton 
+                type="button" 
+                variant="glass-primary" 
                 @click="saveMaterial"
-                :disabled="isUploading"
-                class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                :loading="isUploading"
+                size="lg"
               >
-                {{ isUploading ? 'Uploading...' : (editingCourse ? 'Update Material' : 'Save Material') }}
-              </button>
+                <span v-if="!isUploading">
+                  <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  {{ editingCourse ? 'Update Material' : 'Save Material' }}
+                </span>
+              </BaseButton>
             </div>
           </div>
         </div>
@@ -501,7 +607,7 @@ onMounted(() => {
 /** Modal transition animations */
 .modal-enter-active,
 .modal-leave-active {
-  transition: opacity 0.2s ease;
+  transition: opacity 0.3s ease;
 }
 
 .modal-enter-from,
@@ -511,14 +617,14 @@ onMounted(() => {
 
 .modal-enter-active .bg-white,
 .modal-leave-active .bg-white {
-  transition: transform 0.2s ease;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .modal-enter-from .bg-white {
-  transform: scale(0.95);
+  transform: scale(0.9) translateY(-20px);
 }
 
 .modal-leave-to .bg-white {
-  transform: scale(0.95);
+  transform: scale(0.95) translateY(10px);
 }
 </style>

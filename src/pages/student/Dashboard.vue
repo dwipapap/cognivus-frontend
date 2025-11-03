@@ -5,6 +5,7 @@ import { authStore } from '../../store/auth';
 import { useStudentProfile } from '../../composables/useStudentProfile';
 import { useClassDetails } from '../../composables/useClassDetails';
 import { courseAPI } from '../../services/api';
+import LoadingBar from '../../components/ui/LoadingBar.vue';
 import gambar1 from '../../assets/kucingterbang.png';
 
 const router = useRouter();
@@ -330,11 +331,9 @@ watchEffect(() => {
       </div>
 
       <!-- Loading State -->
-      <div v-if="coursesLoading" class="flex items-center justify-center py-12">
-        <svg class="w-8 h-8 text-blue-600 animate-spin" fill="none" viewBox="0 0 24 24">
-          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
+      <div v-if="coursesLoading" class="max-w-2xl mx-auto py-12">
+        <LoadingBar :loading="true" color="blue" :duration="2000" />
+        <p class="text-center text-gray-600 mt-4">Loading courses...</p>
       </div>
 
       <!-- Error State -->

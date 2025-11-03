@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import { authStore } from '../../store/auth';
 import { useLecturerProfile } from '../../composables/useLecturerProfile';
 import { classAPI, studentAPI, levelAPI } from '../../services/api';
+import LoadingBar from '../../components/ui/LoadingBar.vue';
 
 const router = useRouter();
 const { lecturerProfile, isLoading, errorMessage, fetchLecturerProfile } = useLecturerProfile();
@@ -120,11 +121,8 @@ onMounted(() => {
 
 <template>
   <!-- Loading State -->
-  <div v-if="isLoading || dataLoading" class="flex items-center justify-center min-h-[200px]">
-    <div class="text-center">
-      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-      <p class="text-gray-600">Loading your dashboard...</p>
-    </div>
+    <div v-if="isLoading || dataLoading" class="max-w-2xl mx-auto py-20">
+    <LoadingBar :loading="true" color="blue" :duration="2000" />
   </div>
 
   <!-- Error State -->
@@ -138,7 +136,7 @@ onMounted(() => {
       </div>
       <button 
         @click="fetchLecturerProfile"
-        class="px-3 py-1.5 text-sm font-medium text-red-700 hover:text-red-800 hover:bg-red-100 rounded-lg transition-colors"
+        class="px-4 py-2 text-sm font-semibold text-red-700 hover:text-white bg-gradient-to-r from-red-50 to-rose-50 hover:from-red-600 hover:to-rose-600 border-2 border-red-200 hover:border-red-600 rounded-full transition-all shadow-sm hover:shadow-md hover:scale-105 active:scale-95"
       >
         Retry
       </button>
@@ -156,7 +154,7 @@ onMounted(() => {
       </div>
       <button 
         @click="fetchDashboardData"
-        class="px-3 py-1.5 text-sm font-medium text-red-700 hover:text-red-800 hover:bg-red-100 rounded-lg transition-colors"
+        class="px-4 py-2 text-sm font-semibold text-red-700 hover:text-white bg-gradient-to-r from-red-50 to-rose-50 hover:from-red-600 hover:to-rose-600 border-2 border-red-200 hover:border-red-600 rounded-full transition-all shadow-sm hover:shadow-md hover:scale-105 active:scale-95"
       >
         Retry
       </button>
@@ -232,7 +230,7 @@ onMounted(() => {
             </div>
             <button 
               @click="goToMaterials"
-              class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-300 transition-colors"
+              class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full hover:from-blue-700 hover:to-indigo-700 hover:scale-105 active:scale-95 focus:ring-2 focus:ring-blue-300 transition-all shadow-md hover:shadow-lg"
             >
               View All
             </button>
@@ -270,7 +268,7 @@ onMounted(() => {
                 </div>
                 <button 
                   @click="goToMaterials"
-                  class="ml-3 inline-flex items-center px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg focus:ring-2 focus:ring-blue-300 transition-colors flex-shrink-0"
+                  class="ml-3 inline-flex items-center px-4 py-2 text-xs font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-full focus:ring-2 focus:ring-blue-300 transition-all shadow-sm hover:shadow-md hover:scale-105 active:scale-95 flex-shrink-0"
                 >
                   Manage
                 </button>

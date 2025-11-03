@@ -1,6 +1,8 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import { studentAPI, lecturerAPI, classAPI } from '../../services/api';
+import { ref, onMounted, computed } from 'vue';
+import { adminAPI } from '@/services/api';
+import BaseCard from '@/components/ui/BaseCard.vue';
+import LoadingBar from '@/components/ui/LoadingBar.vue';
 
 const students = ref([]);
 const lecturers = ref([]);
@@ -67,9 +69,10 @@ onMounted(() => {
     <!-- ==================== END OF RICK ROLL SECTION ==================== -->
 
     <!-- Stats Grid -->
-    <div v-if="isLoading" class="text-center py-12">
-      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      <p class="mt-2 text-gray-600">Loading dashboard...</p>
+        <!-- Loading State -->
+    <div v-if="loading" class="max-w-2xl mx-auto py-20">
+      <LoadingBar :loading="true" color="blue" :duration="2000" />
+      <p class="text-center text-gray-600 mt-4">Loading dashboard...</p>
     </div>
 
     <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
