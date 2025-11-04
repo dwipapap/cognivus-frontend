@@ -1,8 +1,9 @@
 import axios from 'axios';
 import { authStore } from '../store/auth';
 
+// Use environment variable for API base URL, fallback to localhost for development
 const apiClient = axios.create({
-  baseURL: 'http://localhost:5000/api', // URL backend Anda
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api',
   headers: {
     'Content-Type': 'application/json',
   },
