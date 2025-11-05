@@ -27,7 +27,32 @@ const props = defineProps({
   size: {
     type: String,
     default: 'md',
-    validator: (value) => ['sm', 'md', 'lg', 'xl'].includes(value)
+    validator: (value) => ['sm', 'md', 'lg', 'xl', '2xl', '3xl', '4xl', '5xl', '6xl', '7xl'].includes(value)
+  },
+  variant: {
+    type: String,
+    default: 'default',
+    validator: (value) => ['default', 'gradient'].includes(value)
+  },
+  gradientFrom: {
+    type: String,
+    default: 'blue-500'
+  },
+  gradientVia: {
+    type: String,
+    default: 'blue-600'
+  },
+  gradientTo: {
+    type: String,
+    default: 'indigo-600'
+  },
+  iconComponent: {
+    type: String,
+    default: ''
+  },
+  hideFooter: {
+    type: Boolean,
+    default: false
   }
 });
 
@@ -75,10 +100,23 @@ const sizeClass = computed(() => {
     sm: 'max-w-sm',
     md: 'max-w-md',
     lg: 'max-w-lg',
-    xl: 'max-w-xl'
+    xl: 'max-w-xl',
+    '2xl': 'max-w-2xl',
+    '3xl': 'max-w-3xl',
+    '4xl': 'max-w-4xl',
+    '5xl': 'max-w-5xl',
+    '6xl': 'max-w-6xl',
+    '7xl': 'max-w-7xl'
   };
   return sizes[props.size];
 });
+
+const gradientClass = computed(() => {
+  if (props.variant !== 'gradient') return '';
+  return `bg-gradient-to-r from-${props.gradientFrom} via-${props.gradientVia} to-${props.gradientTo}`;
+});
+
+const isGradientVariant = computed(() => props.variant === 'gradient');
 
 // Methods
 const handleClose = () => {
@@ -130,14 +168,15 @@ watch(() => props.show, async (newValue) => {
     <transition name="modal" appear>
       <div
         v-if="show"
-        class="modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4 bg-transparent backdrop-blur-lg overflow-y-auto"
+        class="modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto"
         @click.self="handleBackdropClick"
       >
         <!-- Modal content -->
         <div
           ref="modalRef"
           :class="[
-            'modal-content relative w-full my-8 bg-white bg-opacity-90 backdrop-blur-lg rounded-lg shadow-2xl border border-white border-opacity-20',
+            'modal-content relative w-full my-8 rounded-3xl shadow-2xl overflow-hidden flex flex-col',
+            isGradientVariant ? 'bg-white max-h-[90vh]' : 'bg-white bg-opacity-90 backdrop-blur-lg border border-white border-opacity-20',
             sizeClass
           ]"
           tabindex="-1"
@@ -145,31 +184,77 @@ watch(() => props.show, async (newValue) => {
           :aria-labelledby="modalTitle"
           aria-modal="true"
         >
-          <!-- Modal header -->
-          <div class="flex items-start justify-between p-6 border-b border-gray-200 border-opacity-30 rounded-t">
+          <!-- Gradient Header -->
+          <div
+            v-if="isGradientVariant"
+            :class="[
+              'sticky top-0 px-8 py-6 flex justify-between items-center shadow-lg',
+              gradientClass
+            ]"
+          >
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                <slot name="icon">
+                  <!-- Default gradient icon based on type -->
+                  <svg v-if="type === 'success'" class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <svg v-else-if="type === 'error'" class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  <svg v-else-if="type === 'warning'" class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                  <svg v-else class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </slot>
+              </div>
+              <h3 class="text-2xl font-bold text-white">
+                {{ modalTitle }}
+              </h3>
+            </div>
+            <button
+              v-if="!persistent"
+              @click="handleClose"
+              class="text-white/80 hover:text-white hover:bg-white/10 rounded-full p-2 transition-all hover:scale-110 active:scale-95"
+            >
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <!-- Default Header -->
+          <div
+            v-else
+            class="flex items-start justify-between p-6 border-b border-gray-200 border-opacity-30 rounded-t"
+          >
             <div class="flex items-center space-x-3">
               <!-- Dynamic Icon -->
               <div class="flex-shrink-0">
                 <div :class="['flex items-center justify-center w-10 h-10 bg-opacity-80 rounded-full', iconClass]">
-                  <!-- Success Icon -->
-                  <svg v-if="type === 'success'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                  </svg>
-                  
-                  <!-- Error Icon -->
-                  <svg v-else-if="type === 'error'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                  </svg>
-                  
-                  <!-- Warning Icon -->
-                  <svg v-else-if="type === 'warning'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                  </svg>
-                  
-                  <!-- Info Icon -->
-                  <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                  </svg>
+                  <slot name="icon">
+                    <!-- Success Icon -->
+                    <svg v-if="type === 'success'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    
+                    <!-- Error Icon -->
+                    <svg v-else-if="type === 'error'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                    
+                    <!-- Warning Icon -->
+                    <svg v-else-if="type === 'warning'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                    </svg>
+                    
+                    <!-- Info Icon -->
+                    <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                  </slot>
                 </div>
               </div>
               
@@ -192,7 +277,12 @@ watch(() => props.show, async (newValue) => {
           </div>
           
           <!-- Modal body -->
-          <div class="p-6 max-h-[60vh] overflow-y-auto">
+          <div 
+            :class="[
+              'p-6 sm:p-8 overflow-y-auto',
+              isGradientVariant ? 'flex-1 bg-gradient-to-b from-gray-50/50 to-white' : 'max-h-[60vh]'
+            ]"
+          >
             <slot name="content">
               <p class="text-base text-gray-700">
                 {{ message }}
@@ -200,8 +290,14 @@ watch(() => props.show, async (newValue) => {
             </slot>
           </div>
           
-          <!-- Modal footer -->
-          <div class="flex justify-end space-x-3 p-6 border-t border-gray-200 border-opacity-30 rounded-b">
+          <!-- Modal footer - only show if not hidden and has content -->
+          <div 
+            v-if="!hideFooter && ($slots.footer || message || type)"
+            :class="[
+              'flex justify-end space-x-3 p-6 sm:px-8 sm:py-5',
+              isGradientVariant ? 'sticky bottom-0 bg-white border-t border-gray-200 shadow-lg' : 'border-t border-gray-200 border-opacity-30 rounded-b'
+            ]"
+          >
             <slot name="footer">
               <button
                 @click="handleClose"
@@ -231,37 +327,17 @@ watch(() => props.show, async (newValue) => {
   opacity: 0;
 }
 
-/* Backdrop animations */
-.modal-backdrop {
-  transition: all 0.3s ease-out;
-}
-
-/* Initial backdrop state for enter */
-.modal-backdrop.modal-enter-from {
-  opacity: 0;
-  backdrop-filter: blur(0px);
-}
-
-/* Final backdrop state for leave */
-.modal-backdrop.modal-leave-to {
-  opacity: 0;
-  backdrop-filter: blur(0px);
-}
-
 /* Content animations */
-.modal-content {
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+.modal-enter-active .modal-content,
+.modal-leave-active .modal-content {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Initial content state for enter */
-.modal-content.modal-enter-from {
-  opacity: 0;
-  transform: scale(0.8) translateY(-20px);
+.modal-enter-from .modal-content {
+  transform: scale(0.9) translateY(-20px);
 }
 
-/* Final content state for leave */
-.modal-content.modal-leave-to {
-  opacity: 0;
+.modal-leave-to .modal-content {
   transform: scale(0.95) translateY(10px);
 }
 
