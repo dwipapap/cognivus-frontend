@@ -225,6 +225,7 @@ const handleGoogleLogin = () => {
       :type="modalType"
       :title="modalTitle"
       :message="modalMessage"
+      variant="gradient"
       @close="closeModal"
     />
   </div>
