@@ -190,11 +190,21 @@ onMounted(() => {
     </div>
 
     <!-- Form Modal -->
-    <Modal :show="showFormModal" @close="showFormModal = false" :persistent="true" size="lg">
+    <Modal 
+      :show="showFormModal" 
+      @close="showFormModal = false" 
+      :persistent="true" 
+      :title="isEditMode ? 'Edit Program' : 'Add New Program'"
+      variant="gradient"
+      size="5xl"
+      :hide-footer="true"
+    >
+      <template #icon>
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+        </svg>
+      </template>
       <template #content>
-        <h2 class="text-xl font-bold text-gray-800 mb-4">
-          {{ isEditMode ? 'Edit Program' : 'Add New Program' }}
-        </h2>
         <ProgramForm
           :program="selectedProgram"
           :is-edit-mode="isEditMode"
@@ -202,12 +212,16 @@ onMounted(() => {
           @cancel="showFormModal = false"
         />
       </template>
-      <template #footer>
-        <span></span>
-      </template>
     </Modal>
 
     <!-- Notification Modal -->
-    <Modal :show="showNotificationModal" :type="notificationType" :message="notificationMessage" @close="showNotificationModal = false" />
+    <Modal 
+      :show="showNotificationModal" 
+      :type="notificationType" 
+      :message="notificationMessage" 
+      variant="gradient"
+      @close="showNotificationModal = false"
+      :hide-footer="true"
+    />
   </div>
 </template>

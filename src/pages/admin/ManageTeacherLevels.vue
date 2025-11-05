@@ -138,7 +138,10 @@ onMounted(() => {
         <p class="text-gray-600 mt-1">Assign teaching levels to lecturers</p>
       </div>
       <BaseButton @click="openAddModal" variant="primary">
-        <span class="mr-2">+</span> Assign Level
+        <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Assign Level
       </BaseButton>
     </div>
 
@@ -202,13 +205,20 @@ onMounted(() => {
     </div>
 
     <!-- Form Modal -->
-    <Modal :show="showFormModal" @close="showFormModal = false">
-      <template #header>
-        <h2 class="text-xl font-bold text-gray-800">
-          {{ isEditMode ? 'Edit Assignment' : 'Assign Level to Lecturer' }}
-        </h2>
+    <Modal 
+      :show="showFormModal" 
+      @close="showFormModal = false"
+      :title="isEditMode ? 'Edit Assignment' : 'Assign Level to Lecturer'"
+      variant="gradient"
+      size="5xl"
+      :hide-footer="true"
+    >
+      <template #icon>
+        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 0l-2 2a1 1 0 101.414 1.414L8 10.414l1.293 1.293a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+        </svg>
       </template>
-      <template #body>
+      <template #content>
         <TeacherLevelForm
           :teacher-level="selectedTeacherLevel"
           :lecturers="lecturers"
@@ -221,24 +231,12 @@ onMounted(() => {
     </Modal>
 
     <!-- Notification Modal -->
-    <Modal :show="showNotificationModal" @close="showNotificationModal = false">
-      <template #header>
-        <h2 class="text-xl font-bold" :class="{
-          'text-green-600': notificationType === 'success',
-          'text-red-600': notificationType === 'error',
-          'text-blue-600': notificationType === 'info'
-        }">
-          {{ notificationType === 'success' ? 'Success' : notificationType === 'error' ? 'Error' : 'Info' }}
-        </h2>
-      </template>
-      <template #body>
-        <p class="text-gray-700">{{ notificationMessage }}</p>
-      </template>
-      <template #footer>
-        <BaseButton @click="showNotificationModal = false" variant="primary">
-          OK
-        </BaseButton>
-      </template>
-    </Modal>
+    <Modal 
+      :show="showNotificationModal" 
+      @close="showNotificationModal = false"
+      :type="notificationType"
+      :message="notificationMessage"
+      variant="gradient"
+    />
   </div>
 </template>

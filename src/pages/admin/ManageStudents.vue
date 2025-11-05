@@ -209,11 +209,21 @@ onMounted(() => {
     </div>
 
     <!-- Form Modal -->
-    <Modal :show="showFormModal" @close="showFormModal = false" size="lg" :persistent="true">
+    <Modal 
+      :show="showFormModal" 
+      @close="showFormModal = false" 
+      size="5xl" 
+      :persistent="true"
+      :title="isEditMode ? 'Edit Student' : 'Add New Student'"
+      variant="gradient"
+      :hide-footer="true"
+    >
+      <template #icon>
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </svg>
+      </template>
       <template #content>
-        <h2 class="text-xl font-bold text-gray-800 mb-4">
-          {{ isEditMode ? 'Edit Student' : 'Add New Student' }}
-        </h2>
         <StudentForm
           :student="selectedStudent"
           :classes="enrichedClasses"
@@ -222,21 +232,15 @@ onMounted(() => {
           @cancel="showFormModal = false"
         />
       </template>
-      <template #footer>
-        <span></span>
-      </template>
     </Modal>
 
     <!-- Notification Modal -->
-    <Modal :show="showNotificationModal" @close="showNotificationModal = false" :type="notificationType">
-      <template #content>
-        <p class="text-gray-700">{{ notificationMessage }}</p>
-      </template>
-      <template #footer>
-        <BaseButton @click="showNotificationModal = false" variant="primary">
-          OK
-        </BaseButton>
-      </template>
-    </Modal>
+    <Modal 
+      :show="showNotificationModal" 
+      @close="showNotificationModal = false" 
+      :type="notificationType"
+      :message="notificationMessage"
+      variant="gradient"
+    />
   </div>
 </template>

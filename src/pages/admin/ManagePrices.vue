@@ -280,11 +280,21 @@ onMounted(() => {
     </div>
 
     <!-- Form Modal -->
-    <Modal :show="showFormModal" @close="showFormModal = false" :persistent="true" size="lg">
+    <Modal 
+      :show="showFormModal" 
+      @close="showFormModal = false" 
+      :persistent="true" 
+      :title="isEditMode ? 'Edit Price' : 'Add New Price'"
+      variant="gradient"
+      size="5xl"
+      :hide-footer="true"
+    >
+      <template #icon>
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </template>
       <template #content>
-        <h2 class="text-xl font-bold text-gray-800 mb-4">
-          {{ isEditMode ? 'Edit Price' : 'Add New Price' }}
-        </h2>
         <PriceForm
           :price-item="selectedPrice"
           :is-edit-mode="isEditMode"
@@ -294,12 +304,16 @@ onMounted(() => {
           @save="handleSave"
         />
       </template>
-      <template #footer>
-        <span></span>
-      </template>
     </Modal>
 
     <!-- Notification Modal -->
-    <Modal :show="showNotificationModal" :type="notificationType" :message="notificationMessage" @close="showNotificationModal = false" />
+    <Modal 
+      :show="showNotificationModal" 
+      :type="notificationType" 
+      :message="notificationMessage" 
+      variant="gradient"
+      @close="showNotificationModal = false"
+      :hide-footer="true"
+    />
   </div>
 </template>

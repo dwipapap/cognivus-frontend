@@ -165,11 +165,21 @@ onMounted(() => {
     </div>
 
     <!-- Form Modal -->
-    <Modal :show="showFormModal" @close="showFormModal = false" :persistent="true" size="lg">
+    <Modal 
+      :show="showFormModal" 
+      @close="showFormModal = false" 
+      :persistent="true" 
+      size="5xl"
+      :title="isEditMode ? 'Edit Level' : 'Add New Level'"
+      variant="gradient"
+      :hide-footer="true"
+    >
+      <template #icon>
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+        </svg>
+      </template>
       <template #content>
-        <h2 class="text-xl font-bold text-gray-800 mb-4">
-          {{ isEditMode ? 'Edit Level' : 'Add New Level' }}
-        </h2>
         <LevelForm
           :level="selectedLevel"
           :is-edit-mode="isEditMode"
@@ -180,22 +190,12 @@ onMounted(() => {
     </Modal>
 
     <!-- Notification Modal -->
-    <Modal :show="showNotificationModal" @close="showNotificationModal = false">
-      <template #content>
-        <h2 class="text-xl font-bold mb-4" :class="{
-          'text-green-600': notificationType === 'success',
-          'text-red-600': notificationType === 'error',
-          'text-blue-600': notificationType === 'info'
-        }">
-          {{ notificationType === 'success' ? 'Success' : notificationType === 'error' ? 'Error' : 'Info' }}
-        </h2>
-        <p class="text-gray-700">{{ notificationMessage }}</p>
-      </template>
-      <template #footer>
-        <BaseButton @click="showNotificationModal = false" variant="primary">
-          OK
-        </BaseButton>
-      </template>
-    </Modal>
+    <Modal 
+      :show="showNotificationModal" 
+      @close="showNotificationModal = false"
+      :type="notificationType"
+      :message="notificationMessage"
+      variant="gradient"
+    />
   </div>
 </template>

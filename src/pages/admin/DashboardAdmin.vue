@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { adminAPI } from '@/services/api';
+import { studentAPI, lecturerAPI, classAPI } from '@/services/api';
 import BaseCard from '@/components/ui/BaseCard.vue';
 import LoadingBar from '@/components/ui/LoadingBar.vue';
 
@@ -70,7 +70,7 @@ onMounted(() => {
 
     <!-- Stats Grid -->
         <!-- Loading State -->
-    <div v-if="loading" class="max-w-2xl mx-auto py-20">
+    <div v-if="isLoading" class="max-w-2xl mx-auto py-20">
       <LoadingBar :loading="true" color="blue" :duration="2000" />
       <p class="text-center text-gray-600 mt-4">Loading dashboard...</p>
     </div>

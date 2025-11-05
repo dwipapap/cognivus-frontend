@@ -229,11 +229,21 @@ onMounted(fetchLecturers);
     </div>
 
     <!-- Form Modal -->
-    <Modal :show="showFormModal" @close="showFormModal = false" :persistent="true" size="lg">
+    <Modal 
+      :show="showFormModal" 
+      @close="showFormModal = false" 
+      :persistent="true" 
+      size="5xl"
+      :title="isEditMode ? 'Edit Lecturer' : 'Add New Lecturer'"
+      variant="gradient"
+      :hide-footer="true"
+    >
+      <template #icon>
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+      </template>
       <template #content>
-        <h2 class="text-xl font-bold text-gray-800 mb-4">
-          {{ isEditMode ? 'Edit Lecturer' : 'Add New Lecturer' }}
-        </h2>
         <LecturerForm
           :lecturer="selectedLecturer"
           :is-edit-mode="isEditMode"
@@ -241,12 +251,16 @@ onMounted(fetchLecturers);
           @save="handleSave"
         />
       </template>
-      <template #footer>
-        <span></span>
-      </template>
     </Modal>
 
     <!-- Notification Modal -->
-    <Modal :show="showNotificationModal" :type="notificationType" :message="notificationMessage" @close="showNotificationModal = false" />
+    <Modal 
+      :show="showNotificationModal" 
+      :type="notificationType" 
+      :message="notificationMessage" 
+      @close="showNotificationModal = false"
+      variant="gradient"
+      :hide-footer="true"
+    />
   </div>
 </template>
