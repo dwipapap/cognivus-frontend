@@ -16,7 +16,7 @@ const classId = computed(() => studentProfile.value?.classid);
 const { levelName, lecturerName, isLoading: classLoading } = useClassDetails(classId);
 
 const user = computed(() => ({
-  name: studentProfile.value?.nama_lengkap || authStore.user?.email?.split('@')[0] || 'Student',
+  name: studentProfile.value?.nama_lengkap || studentProfile.value?.fullname || authStore.user?.username || authStore.user?.email?.split('@')[0] || 'Student',
 }));
 
 /** Get time-based greeting */

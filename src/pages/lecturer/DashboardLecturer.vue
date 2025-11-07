@@ -10,7 +10,7 @@ const router = useRouter();
 const { lecturerProfile, isLoading, errorMessage, fetchLecturerProfile } = useLecturerProfile();
 
 const user = computed(() => ({
-  name: lecturerProfile.value?.nama_lengkap || authStore.user?.email?.split('@')[0] || 'Lecturer',
+  name: lecturerProfile.value?.nama_lengkap || lecturerProfile.value?.fullname || authStore.user?.username || authStore.user?.email?.split('@')[0] || 'Lecturer',
 }));
 
 /** Get time-based greeting */

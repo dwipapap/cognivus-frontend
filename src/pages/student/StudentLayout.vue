@@ -64,7 +64,7 @@ onUnmounted(() => {
 });
 
 const displayName = computed(() => {
-  return studentProfile.value?.nama_lengkap || authStore.user?.email?.split('@')[0] || 'Student';
+  return studentProfile.value?.nama_lengkap || studentProfile.value?.fullname || authStore.user?.username || authStore.user?.email?.split('@')[0] || 'Student';
 });
 
 const handleAvatarError = (event) => {
