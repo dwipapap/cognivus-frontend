@@ -62,7 +62,7 @@ onUnmounted(() => {
 });
 
 const displayName = computed(() => {
-  return authStore.user?.email?.split('@')[0] || 'Lecturer';
+  return authStore.user?.username || authStore.user?.email?.split('@')[0] || 'Lecturer';
 });
 
 const handleAvatarError = (event) => {
