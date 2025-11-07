@@ -65,8 +65,8 @@ const displayName = computed(() => {
   return authStore.user?.username || authStore.user?.email?.split('@')[0] || 'Lecturer';
 });
 
-const handleAvatarError = (event) => {
-  event.target.src = '/src/assets/kucingterbang.png';
+const handleImageError = (event) => {
+  event.target.src = 'https://media1.tenor.com/m/JyHMlpMxRKwAAAAC/arisbm.gif';
 };
 
 const handleLogout = async () => {
@@ -101,7 +101,7 @@ onUnmounted(() => {
             >
               <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden border-2 border-white/50">
                 <!-- Avatar image -->
-                <img :src="authStore.user?.user_metadata?.avatar_url || '/src/assets/kucingterbang.png'"
+                <img :src="authStore.user?.user_metadata?.avatar_url || 'https://media1.tenor.com/m/JyHMlpMxRKwAAAAC/arisbm.gif'"
                   :alt="displayName" class="w-full h-full object-cover rounded-full" @error="handleAvatarError" />
               </div>
               <div class="text-left min-w-0 flex-1">

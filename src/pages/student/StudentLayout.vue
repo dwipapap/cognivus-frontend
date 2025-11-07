@@ -67,8 +67,8 @@ const displayName = computed(() => {
   return studentProfile.value?.nama_lengkap || studentProfile.value?.fullname || authStore.user?.username || authStore.user?.email?.split('@')[0] || 'Student';
 });
 
-const handleAvatarError = (event) => {
-  event.target.src = '/src/assets/kucingterbang.png';
+const handleImageError = (event) => {
+  event.target.src = 'https://media1.tenor.com/m/JyHMlpMxRKwAAAAC/arisbm.gif';
 };
 
 const handleLogout = async () => {
@@ -106,7 +106,7 @@ onUnmounted(() => {
                 <div v-if="isProfileLoading" class="avatar-skeleton bg-blue-100 w-full h-full rounded-full"></div>
 
                 <!-- Avatar image -->
-                <img v-else :src="authStore.user?.user_metadata?.avatar_url || '/src/assets/kucingterbang.png'"
+                <img v-else :src="authStore.user?.user_metadata?.avatar_url || 'https://media1.tenor.com/m/JyHMlpMxRKwAAAAC/arisbm.gif'"
                   :alt="displayName" class="w-full h-full object-cover rounded-full" @error="handleAvatarError" />
               </div>
               <div class="text-left min-w-0 flex-1">

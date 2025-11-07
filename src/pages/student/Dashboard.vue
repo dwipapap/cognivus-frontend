@@ -6,7 +6,6 @@ import { useStudentProfile } from '../../composables/useStudentProfile';
 import { useClassDetails } from '../../composables/useClassDetails';
 import { courseAPI } from '../../services/api';
 import LoadingBar from '../../components/ui/LoadingBar.vue';
-import gambar1 from '../../assets/kucingterbang.png';
 
 const router = useRouter();
 const { studentProfile, isLoading } = useStudentProfile();
@@ -35,7 +34,7 @@ const coursesError = ref(null);
 
 /** Default placeholder images */
 const placeholderImages = [
-  gambar1,
+  'https://media1.tenor.com/m/JyHMlpMxRKwAAAAC/arisbm.gif',
   'https://media1.tenor.com/m/L1DyVjuyLqEAAAAd/uma-musume-dance.gif',
   'https://media1.tenor.com/m/wdgDOrbSkiwAAAAd/satono-diamond-diamond-satono.gif'
 ];

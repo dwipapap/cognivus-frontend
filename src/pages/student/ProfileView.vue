@@ -10,7 +10,7 @@ const levelName = ref('-');
 
 /** Handle avatar image loading errors */
 const handleImageError = (event) => {
-  event.target.src = '/src/assets/kucingterbang.png';
+  event.target.src = 'https://media1.tenor.com/m/JyHMlpMxRKwAAAAC/arisbm.gif';
 };
 
 /** Format date to DD-MM-YYYY */
@@ -102,7 +102,7 @@ watchEffect(async () => {
         <div class="lg:col-span-1">
               <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-3xl p-10 text-white text-center shadow-lg h-full flex flex-col justify-between">
                 <img 
-                  :src="authStore.user?.user_metadata?.avatar_url || '/src/assets/kucingterbang.png'" 
+                  :src="authStore.user?.user_metadata?.avatar_url || 'https://media1.tenor.com/m/JyHMlpMxRKwAAAAC/arisbm.gif'" 
                   :alt="studentProfile.fullname"
                   class="w-48 h-48 rounded-full mx-auto object-cover border-4 border-white shadow-xl mb-6"
                   @error="handleImageError"

@@ -7,7 +7,7 @@ const { lecturerProfile, isLoading, errorMessage } = useLecturerProfile();
 
 /** Handle avatar image loading errors */
 const handleImageError = (event) => {
-  event.target.src = '/src/assets/kucingterbang.png';
+  event.target.src = 'https://media1.tenor.com/m/JyHMlpMxRKwAAAAC/arisbm.gif';
 };
 
 /** Format date to DD-MM-YYYY */
@@ -48,7 +48,7 @@ const formatDate = (dateString) => {
         <div class="lg:col-span-1">
           <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-3xl p-12 text-white text-center shadow-lg">
             <img 
-              :src="authStore.user?.user_metadata?.avatar_url || '/src/assets/kucingterbang.png'" 
+              :src="authStore.user?.user_metadata?.avatar_url || 'https://media1.tenor.com/m/JyHMlpMxRKwAAAAC/arisbm.gif'" 
               :alt="lecturerProfile.fullname"
               class="w-48 h-48 rounded-full mx-auto object-cover border-4 border-white shadow-xl mb-6"
               @error="handleImageError"
