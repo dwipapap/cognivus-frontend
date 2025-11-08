@@ -73,10 +73,6 @@ const handleLogout = async () => {
   authStore.clearAuth();
   router.push('/login');
 };
-
-onUnmounted(() => {
-  console.log('Unmounting LecturerLayout.vue');
-});
 </script>
 
 <template>

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { authStore } from '../store/auth';
+import router from '../router';
 
 // Use environment variable for API base URL, fallback to localhost for development
 const apiClient = axios.create({
@@ -25,18 +26,18 @@ apiClient.interceptors.response.use(
       // Handle rate limiting errors
       if (error.response.status === 429) {
         const message = error.response.data?.error || 'Too many requests. Please try again later.';
-        console.warn('Rate limit exceeded:', message);
-        // You can show a toast or notification here
+        if (import.meta.env.DEV) {
+          console.warn('Rate limit exceeded:', message);
+        }
         throw new Error(message);
       }
       
       // Handle authentication errors
       if (error.response.status === 401) {
-        console.warn('Authentication failed, clearing auth');
         authStore.clearAuth();
         // Redirect to login if not already there
-        if (window.location.pathname !== '/login') {
-          window.location.href = '/login';
+        if (router.currentRoute.value.name !== 'Login') {
+          router.push({ name: 'Login' });
         }
       }
     }
@@ -203,88 +204,35 @@ export const gradeAPI = {
   getAllGrades: () => apiClient.get('/grades'),
   getGradeById: (id) => apiClient.get(`/grades/${id}`),
   createGrade: (gradeData, file = null) => {
-    console.log('🔧 gradeAPI.createGrade called');
-    console.log('📦 Grade Data:', gradeData);
-    console.log('📄 File parameter:', file);
-    
     const formData = new FormData();
     
-    console.log('📋 Appending grade data to FormData...');
     Object.keys(gradeData).forEach(key => {
       if (gradeData[key] !== null && gradeData[key] !== undefined) {
         formData.append(key, gradeData[key]);
-        console.log(`  ✓ ${key}: ${gradeData[key]}`);
       }
     });
     
     if (file) {
-      console.log('📎 Appending file to FormData:', {
-        name: file.name,
-        size: file.size,
-        type: file.type,
-        isFile: file instanceof File,
-        isBlob: file instanceof Blob
-      });
       formData.append('file', file);
-    } else {
-      console.log('⚠️ No file to append to FormData');
     }
     
-    // Log FormData entries
-    console.log('📤 FormData entries:');
-    for (let pair of formData.entries()) {
-      if (pair[1] instanceof File) {
-        console.log(`  ${pair[0]}: [File] ${pair[1].name} (${pair[1].size} bytes)`);
-      } else {
-        console.log(`  ${pair[0]}: ${pair[1]}`);
-      }
-    }
-    
-    console.log('🌐 Sending POST request to /grades');
     return apiClient.post('/grades', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
   },
   updateGrade: (id, gradeData, file = null) => {
-    console.log('🔧 gradeAPI.updateGrade called');
-    console.log('🆔 Grade ID:', id);
-    console.log('📦 Grade Data:', gradeData);
-    console.log('📄 File parameter:', file);
-    
     const formData = new FormData();
     
-    console.log('📋 Appending grade data to FormData...');
     Object.keys(gradeData).forEach(key => {
       if (gradeData[key] !== null && gradeData[key] !== undefined) {
         formData.append(key, gradeData[key]);
-        console.log(`  ✓ ${key}: ${gradeData[key]}`);
       }
     });
     
     if (file) {
-      console.log('📎 Appending file to FormData:', {
-        name: file.name,
-        size: file.size,
-        type: file.type,
-        isFile: file instanceof File,
-        isBlob: file instanceof Blob
-      });
       formData.append('file', file);
-    } else {
-      console.log('⚠️ No file to append to FormData');
     }
     
-    // Log FormData entries
-    console.log('📤 FormData entries:');
-    for (let pair of formData.entries()) {
-      if (pair[1] instanceof File) {
-        console.log(`  ${pair[0]}: [File] ${pair[1].name} (${pair[1].size} bytes)`);
-      } else {
-        console.log(`  ${pair[0]}: ${pair[1]}`);
-      }
-    }
-    
-    console.log(`🌐 Sending PUT request to /grades/${id}`);
     return apiClient.put(`/grades/${id}`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });

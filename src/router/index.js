@@ -105,7 +105,7 @@ const routes = [
   {
     path: '/lecturer',
     component: LecturerLayout,
-    meta: { requiresAuth: true, role: 'lecturer' }, // Meta untuk otentikasi & peran
+    meta: { requiresAuth: true, roles: ['lecturer'] },
     children: [
       {
         path: 'dashboard',
@@ -252,12 +252,9 @@ router.beforeEach((to, from, next) => {
   const isAuthenticated = authStore.isAuthenticated();
   const userRole = authStore.role;
 
-  console.log('Router guard check:', {
-    to: to.path,
-    requiresAuth: to.meta.requiresAuth,
-    isAuthenticated,
-    userRole
-  });
+  if (import.meta.env.DEV) {
+    console.log('Route:', to.path, 'Auth:', isAuthenticated, 'Role:', userRole);
+  }
 
   // Allow access to NewUser page for authenticated users (bypass role checks)
   if (to.name === 'NewUser' && isAuthenticated) {
@@ -269,11 +266,7 @@ router.beforeEach((to, from, next) => {
       return next({ name: 'Login' });
     }
 
-    // Check role-based access (single role or multiple roles)
-    if (to.meta.role && to.meta.role !== userRole) {
-      return next({ name: getDefaultDashboard(userRole) });
-    }
-    
+    // Check role-based access using roles array
     if (to.meta.roles && !to.meta.roles.includes(userRole)) {
       return next({ name: getDefaultDashboard(userRole) });
     }

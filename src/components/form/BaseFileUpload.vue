@@ -87,16 +87,9 @@ export default {
 
     /** Handle file selection */
     const handleFileChange = (event) => {
-      console.log('📁 BaseFileUpload: handleFileChange triggered');
-      console.log('📁 Event target:', event.target);
-      console.log('📁 Files from event:', event.target.files);
-      
       const files = Array.from(event.target.files);
-      console.log('📁 Files array:', files);
-      console.log('📁 Files count:', files.length);
       
       if (!files.length) {
-        console.log('⚠️ No files selected, clearing value');
         if (props.multiple) {
           selectedFiles.value = [];
           emit('update:modelValue', []);
@@ -109,40 +102,27 @@ export default {
 
       // Validate file sizes
       const maxBytes = props.maxSize * 1024 * 1024;
-      console.log('📏 Max allowed size:', maxBytes, 'bytes (', props.maxSize, 'MB)');
-      
       const oversizedFiles = files.filter(f => f.size > maxBytes);
       
       if (oversizedFiles.length > 0) {
         const errorMsg = `${oversizedFiles.length} file(s) exceed ${props.maxSize}MB limit`;
-        console.error('❌ File size validation failed:', oversizedFiles);
+        if (import.meta.env.DEV) {
+          console.error('File size validation failed:', oversizedFiles);
+        }
         emit('error', errorMsg);
         fileInput.value.value = '';
         return;
       }
 
       if (props.multiple) {
-        console.log('✅ Multiple files mode - setting files:', files);
         selectedFiles.value = files;
         emit('update:modelValue', files);
-        console.log('📤 Emitted update:modelValue (multiple):', files);
       } else {
-        console.log('✅ Single file mode - setting file:', files[0]);
-        console.log('📄 File details:', {
-          name: files[0].name,
-          size: files[0].size,
-          type: files[0].type,
-          lastModified: files[0].lastModified,
-          isFile: files[0] instanceof File,
-          isBlob: files[0] instanceof Blob
-        });
         selectedFile.value = files[0];
         emit('update:modelValue', files[0]);
-        console.log('📤 Emitted update:modelValue (single):', files[0]);
       }
       
       emit('error', null);
-      console.log('✅ BaseFileUpload: File selection completed');
     };
 
     /** Remove file from multiple selection */

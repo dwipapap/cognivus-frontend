@@ -85,16 +85,12 @@ const fetchCourses = async () => {
       
       // Take only the 3 most recent courses
       courses.value = filtered.slice(0, 3);
-      
-      console.log('Sorted courses:', filtered.map(c => ({ 
-        id: c.courseid, 
-        title: c.title, 
-        date: c.upload_date 
-      })));
     }
   } catch (error) {
     coursesError.value = 'Failed to load courses';
-    console.error('Failed to fetch courses:', error);
+    if (import.meta.env.DEV) {
+      console.error('Failed to fetch courses:', error);
+    }
   } finally {
     coursesLoading.value = false;
   }

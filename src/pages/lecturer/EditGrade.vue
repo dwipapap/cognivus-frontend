@@ -278,12 +278,11 @@ const fetchData = async () => {
 
 /** Submit grade update */
 const handleSubmit = async () => {
-  console.log('=== EDIT GRADE SUBMISSION STARTED ===');
-  console.log('📝 Grade ID:', gradeid);
-  
   if (!student.value?.studentid) {
     submitError.value = 'Invalid student data';
-    console.error('❌ Invalid student data:', student.value);
+    if (import.meta.env.DEV) {
+      console.error('Invalid student data:', student.value);
+    }
     return;
   }
 
@@ -291,24 +290,6 @@ const handleSubmit = async () => {
     isSubmitting.value = true;
     submitError.value = '';
     successMessage.value = '';
-
-    // Log file upload information
-    console.log('📁 Upload Files:', uploadFiles.value);
-    console.log('📁 Is File object?', uploadFiles.value instanceof File);
-    console.log('📁 Upload Files Type:', typeof uploadFiles.value);
-    
-    if (uploadFiles.value && uploadFiles.value instanceof File) {
-      console.log('📄 New File Details:', {
-        name: uploadFiles.value.name,
-        size: uploadFiles.value.size,
-        type: uploadFiles.value.type,
-        lastModified: uploadFiles.value.lastModified,
-        isFile: uploadFiles.value instanceof File,
-        isBlob: uploadFiles.value instanceof Blob
-      });
-    } else {
-      console.log('⚠️ No new file to upload (uploadFiles is not a File object, keeping existing file if any)');
-    }
 
     const payload = {
       studentid: student.value.studentid,
@@ -322,38 +303,25 @@ const handleSubmit = async () => {
       date_taken: formData.value.date_taken || null
     };
 
-    console.log('📤 Payload to send:', payload);
-
-    // Fix: uploadFiles.value is a File object, not an array
     const fileToUpload = uploadFiles.value instanceof File ? uploadFiles.value : null;
-    console.log('📤 File being sent to API:', fileToUpload ? {
-      name: fileToUpload.name,
-      size: fileToUpload.size,
-      type: fileToUpload.type
-    } : 'No file');
 
-    console.log('🚀 Calling gradeAPI.updateGrade...');
     const response = await gradeAPI.updateGrade(gradeid, payload, fileToUpload);
-    console.log('✅ API Response:', response.data);
 
     if (response.data.success) {
       successMessage.value = 'Grade updated successfully!';
-      console.log('✅ Grade updated successfully');
       setTimeout(() => {
         router.push({ name: 'StudentDetail', params: { id: userid } });
       }, 1000);
     } else {
       submitError.value = response.data.message || 'Failed to update grade';
-      console.error('❌ Failed to update grade:', response.data);
     }
   } catch (error) {
     submitError.value = error.response?.data?.message || 'Error updating grade';
-    console.error('❌ Error during submission:', error);
-    console.error('❌ Error response:', error.response?.data);
-    console.error('❌ Error status:', error.response?.status);
+    if (import.meta.env.DEV) {
+      console.error('Error updating grade:', error.response?.data || error.message);
+    }
   } finally {
     isSubmitting.value = false;
-    console.log('=== EDIT GRADE SUBMISSION ENDED ===');
   }
 };
 
@@ -379,7 +347,9 @@ const handleDelete = async () => {
     }
   } catch (error) {
     submitError.value = error.response?.data?.message || 'Error deleting grade';
-    console.error('Error:', error);
+    if (import.meta.env.DEV) {
+      console.error('Error deleting grade:', error);
+    }
   } finally {
     isDeleting.value = false;
   }

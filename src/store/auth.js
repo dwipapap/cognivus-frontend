@@ -1,6 +1,7 @@
 import { reactive } from 'vue';
 import { supabase } from '../supabase';
 import secureStorage from '../utils/secureStorage';
+import router from '../router';
 
 /**
  * Store manajemen autentikasi.
@@ -22,19 +23,23 @@ export const authStore = reactive({
   expiryCheckInterval: null,
 
   /**
-   * Inisialisasi auth store.
-   * Setup listener dan interval check.
+   * Init auth store.
+   * Setup listener and interval check.
    */
   async init() {
     // Prevent double initialization
     if (this.isInitialized) {
-      console.log('Auth store already initialized, skipping');
+      if (import.meta.env.DEV) {
+        console.log('Auth store already initialized, skipping');
+      }
       return;
     }
 
     // Check if token is expired on initialization
     if (this.isTokenExpired()) {
-      console.log('Token expired on init, clearing auth');
+      if (import.meta.env.DEV) {
+        console.log('Token expired on init, clearing auth');
+      }
       this.clearAuth();
       this.isInitialized = true;
       return;
@@ -45,41 +50,27 @@ export const authStore = reactive({
       this.setAuth(session.user, session.access_token);
     }
     
-    // Listen for auth state changes but prevent unnecessary redirects
+    // Listen for auth state changes
     supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth state change detected:', { event, session });
+      if (import.meta.env.DEV) {
+        console.log('Auth state change:', event);
+      }
 
       if (event === 'SIGNED_IN' && session) {
-        if (this.token !== session.access_token) { // Only handle if token has changed
-          console.log('Handling SIGNED_IN event');
+        if (this.token !== session.access_token) {
           this.setAuth(session.user, session.access_token);
-          // Use setTimeout to ensure reactive state is updated before navigation
           setTimeout(() => {
-            if (typeof window !== 'undefined' && window.$router) {
-              window.$router.push('/student/dashboard');
-            } else {
-              window.location.href = '/student/dashboard';
-            }
+            router.push('/student/dashboard');
           }, 100);
-        } else {
-          console.log('Skipping redundant SIGNED_IN handling due to session refresh');
         }
       } else if (event === 'SIGNED_OUT') {
         if (this.user) {
-          console.log('Handling SIGNED_OUT event');
           this.clearAuth();
         }
-      }
-
-      // Ignore TOKEN_REFRESHED and other events
-      if (event === 'TOKEN_REFRESHED') {
-        console.log('Ignoring TOKEN_REFRESHED event');
       }
     });
     
     this.isInitialized = true;
-
-    // Start token expiry check interval
     this.startExpiryCheck();
   },
 
@@ -87,26 +78,24 @@ export const authStore = reactive({
    * Start interval to check token expiry.
    */
   startExpiryCheck() {
-    // Clear existing interval
     this.stopExpiryCheck();
 
     let lastCheckTime = Date.now();
     this.expiryCheckInterval = setInterval(() => {
       const now = Date.now();
       if (now - lastCheckTime < 60000) {
-        console.log('Skipping redundant token check');
         return;
       }
       lastCheckTime = now;
 
       if (this.isTokenExpired()) {
-        console.log('Token expired, auto-logout');
+        if (import.meta.env.DEV) {
+          console.log('Token expired, auto-logout');
+        }
         this.clearAuth();
         if (window.location.pathname.startsWith('/student')) {
-          window.location.href = '/login';
+          router.push({ name: 'Login' });
         }
-      } else {
-        console.log('Token still valid, no action taken');
       }
     }, 60000);
   },
@@ -122,56 +111,43 @@ export const authStore = reactive({
   },
 
   /**
-   * Set auth data. Handles both JWT and OAuth.
-   * Data is encrypted before storing in localStorage.
-   * @param {Object} user - User data
-   * @param {string} token - Access token
-   * @param {string} role - User role (student/lecturer/admin/etc)
+   * Set authentication data and persist.
    */
-  setAuth(user, token, role = null) {
-    console.log('Setting auth:', { user, token: token ? 'present' : 'null', role });
-    
-    // Determine role: prioritize explicit role, fallback to metadata
-    const userRole = role || user?.user_metadata?.role || user?.app_metadata?.role || 'student';
-    
+  setAuth(user, token, role) {
     this.user = user;
     this.token = token;
-    this.role = userRole;
-    
-    // Token expires in 3 hours
-    const expiryTime = Date.now() + (3 * 60 * 60 * 1000);
-    this.tokenExpiry = expiryTime;
-    
-    // Store encrypted data
-    secureStorage.setItem('token', token);
-    secureStorage.setItem('role', userRole);
-    secureStorage.setItem('tokenExpiry', expiryTime);
-    secureStorage.setItem('user', user);
-    
-    console.log('Auth state after setAuth:', {
-      user: this.user,
-      token: this.token ? 'present' : 'null',
-      role: this.role,
-      expiry: new Date(expiryTime).toLocaleString(),
-      isAuthenticated: this.isAuthenticated()
-    });
+    this.role = role;
+    this.isAuthenticated = true;
+
+    secureStorage.setItem('authToken', token);
+    secureStorage.setItem('userRole', role);
+    secureStorage.setItem('userName', user?.fullname || user?.username || '');
+    secureStorage.setItem('tokenExpiry', new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString());
+
+    apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    this.startExpiryCheck();
   },
 
   /**
-   * Clear all auth data.
+   * Clear auth state and redirect to login.
    */
   clearAuth() {
-    this.stopExpiryCheck();
+    if (import.meta.env.DEV) {
+      console.log('Clearing auth state');
+    }
+    
     this.user = null;
     this.token = null;
     this.role = null;
-    this.tokenExpiry = null;
-    secureStorage.removeItem('token');
+    this.isAuthenticated = false;
+
+    secureStorage.removeItem('authToken');
+    secureStorage.removeItem('userRole');
+    secureStorage.removeItem('userName');
     secureStorage.removeItem('tokenExpiry');
-    secureStorage.removeItem('role');
-    secureStorage.removeItem('user');
-    // Only sign out Supabase if OAuth was used
-    supabase.auth.signOut();
+
+    delete apiClient.defaults.headers.common['Authorization'];
+    this.stopExpiryCheck();
   },
 
   /**
@@ -180,7 +156,7 @@ export const authStore = reactive({
    */
   isTokenExpired() {
     if (!this.tokenExpiry && !secureStorage.getItem('tokenExpiry')) {
-      return false;
+      return true; // No token = expired (security fix)
     }
     
     const expiry = this.tokenExpiry || secureStorage.getItem('tokenExpiry');
@@ -232,10 +208,8 @@ export const authStore = reactive({
 });
 
 document.addEventListener('visibilitychange', () => {
-  console.log('Document visibility changed:', document.visibilityState);
-  if (document.visibilityState === 'hidden') {
-    console.log('Tab became inactive');
-  } else if (document.visibilityState === 'visible') {
-    console.log('Tab became active');
+  if (import.meta.env.DEV) {
+    console.log('Visibility:', document.visibilityState);
   }
 });
+
