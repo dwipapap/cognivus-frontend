@@ -1,20 +1,44 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { studentAPI, classAPI, levelAPI } from '../../services/api';
+import { useCrudTable } from '../../composables/useCrudTable';
+import { logger } from '../../utils/logger';
 import Modal from '../../components/ui/Modal.vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
+import LoadingBar from '../../components/ui/LoadingBar.vue';
 import StudentForm from './StudentForm.vue';
 
-const students = ref([]);
+// Wrap studentAPI to match useCrudTable interface
+const studentCrudAPI = {
+  getAll: studentAPI.getAllStudents,
+  create: studentAPI.createStudent,
+  update: studentAPI.updateStudent,
+  delete: studentAPI.deleteStudent
+};
+
+// Use CRUD composable for students
+const {
+  items: students,
+  isLoading,
+  showFormModal,
+  showNotificationModal,
+  notificationMessage,
+  notificationType,
+  selectedItem: selectedStudent,
+  isEditMode,
+  fetchItems: fetchStudents,
+  openAddModal,
+  openEditModal,
+  handleSave,
+  handleDelete
+} = useCrudTable(studentCrudAPI, {
+  resourceName: 'student',
+  idField: 'studentid'
+});
+
+// Reference data for dropdowns
 const classes = ref([]);
 const levels = ref([]);
-const isLoading = ref(true);
-const showFormModal = ref(false);
-const showNotificationModal = ref(false);
-const notificationMessage = ref('');
-const notificationType = ref('info');
-const selectedStudent = ref(null);
-const isEditMode = ref(false);
 
 /** Get class code by classid */
 const getClassCode = (classid) => {
@@ -31,21 +55,6 @@ const enrichedClasses = computed(() => {
   }));
 });
 
-/** Fetch all students */
-const fetchStudents = async () => {
-  try {
-    isLoading.value = true;
-    const response = await studentAPI.getAllStudents();
-    if (response.data.success) {
-      students.value = response.data.data;
-    }
-  } catch (error) {
-    showNotification('error', 'Failed to load student data.');
-  } finally {
-    isLoading.value = false;
-  }
-};
-
 /** Fetch classes for dropdown */
 const fetchClasses = async () => {
   try {
@@ -54,7 +63,7 @@ const fetchClasses = async () => {
       classes.value = response.data.data;
     }
   } catch (error) {
-    console.error('Failed to fetch classes:', error);
+    logger.error('Failed to fetch classes:', error);
   }
 };
 
@@ -66,58 +75,7 @@ const fetchLevels = async () => {
       levels.value = response.data.data;
     }
   } catch (error) {
-    console.error('Failed to fetch levels:', error);
-  }
-};
-
-/** Show notification */
-const showNotification = (type, message) => {
-  notificationType.value = type;
-  notificationMessage.value = message;
-  showNotificationModal.value = true;
-};
-
-/** Open add modal */
-const openAddModal = () => {
-  isEditMode.value = false;
-  selectedStudent.value = null;
-  showFormModal.value = true;
-};
-
-/** Open edit modal */
-const openEditModal = (student) => {
-  isEditMode.value = true;
-  selectedStudent.value = student;
-  showFormModal.value = true;
-};
-
-/** Handle save */
-const handleSave = async (formData) => {
-  try {
-    if (isEditMode.value) {
-      await studentAPI.updateStudent(selectedStudent.value.studentid, formData);
-      showNotification('success', 'Student updated successfully!');
-    } else {
-      await studentAPI.createStudent(formData);
-      showNotification('success', 'Student created successfully!');
-    }
-    showFormModal.value = false;
-    fetchStudents();
-  } catch (error) {
-    showNotification('error', error.response?.data?.message || 'Failed to save student.');
-  }
-};
-
-/** Handle delete */
-const handleDelete = async (student) => {
-  if (!confirm(`Delete student "${student.fullname}"?`)) return;
-
-  try {
-    await studentAPI.deleteStudent(student.studentid);
-    showNotification('success', 'Student deleted successfully!');
-    fetchStudents();
-  } catch (error) {
-    showNotification('error', 'Failed to delete student.');
+    logger.error('Failed to fetch levels:', error);
   }
 };
 
@@ -142,8 +100,7 @@ onMounted(() => {
     </div>
 
     <!-- Loading State -->
-        <!-- Loading State -->
-    <div v-if="loading" class="max-w-2xl mx-auto py-20">
+    <div v-if="isLoading" class="max-w-2xl mx-auto py-20">
       <LoadingBar :loading="true" color="blue" :duration="2000" />
       <p class="text-center text-gray-600 mt-4">Loading students...</p>
     </div>

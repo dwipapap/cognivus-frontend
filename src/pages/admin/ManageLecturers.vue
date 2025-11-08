@@ -1,106 +1,53 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { onMounted } from 'vue';
 import { lecturerAPI } from '../../services/api';
+import { useCrudTable } from '../../composables/useCrudTable';
+import { usePagination } from '../../composables/usePagination';
 import Modal from '../../components/ui/Modal.vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
+import LoadingBar from '../../components/ui/LoadingBar.vue';
 import LecturerForm from './LecturerForm.vue';
 
-const lecturers = ref([]);
-const isLoading = ref(true);
-const showFormModal = ref(false);
-const showNotificationModal = ref(false);
-const notificationMessage = ref('');
-const notificationType = ref('info');
-const selectedLecturer = ref(null);
-const isEditMode = ref(false);
-const currentPage = ref(1);
-const itemsPerPage = 15;
-
-/** Paginated lecturers */
-const paginatedLecturers = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage;
-  const end = start + itemsPerPage;
-  return lecturers.value.slice(start, end);
-});
-
-/** Total pages */
-const totalPages = computed(() => {
-  return Math.ceil(lecturers.value.length / itemsPerPage);
-});
-
-/** Go to specific page */
-const goToPage = (page) => {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page;
-  }
+// Wrap lecturerAPI to match useCrudTable interface
+const lecturerCrudAPI = {
+  getAll: lecturerAPI.getAllLecturers,
+  create: lecturerAPI.createLecturer,
+  update: lecturerAPI.updateLecturer,
+  delete: lecturerAPI.deleteLecturer
 };
+
+// Use CRUD composable for lecturers
+const {
+  items: lecturers,
+  isLoading,
+  showFormModal,
+  showNotificationModal,
+  notificationMessage,
+  notificationType,
+  selectedItem: selectedLecturer,
+  isEditMode,
+  fetchItems: fetchLecturers,
+  openAddModal,
+  openEditModal,
+  handleSave,
+  handleDelete
+} = useCrudTable(lecturerCrudAPI, {
+  resourceName: 'lecturer',
+  idField: 'lecturerid'
+});
+
+// Use pagination composable
+const {
+  paginatedItems: paginatedLecturers,
+  currentPage,
+  totalPages,
+  goToPage
+} = usePagination(lecturers, 15);
 
 /** Get initials from name */
 const getInitials = (name) => {
   if (!name) return '?';
   return name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
-};
-
-const fetchLecturers = async () => {
-  try {
-    isLoading.value = true;
-    const response = await lecturerAPI.getAllLecturers();
-    if (response.data.success) {
-      lecturers.value = response.data.data;
-    }
-  } catch (error) {
-    showNotification('error', 'Failed to load lecturer data.');
-  } finally {
-    isLoading.value = false;
-  }
-};
-
-const showNotification = (type, message) => {
-  notificationType.value = type;
-  notificationMessage.value = message;
-  showNotificationModal.value = true;
-};
-
-const openAddModal = () => {
-  isEditMode.value = false;
-  selectedLecturer.value = null;
-  showFormModal.value = true;
-};
-
-const openEditModal = (lecturer) => {
-  isEditMode.value = true;
-  selectedLecturer.value = lecturer;
-  showFormModal.value = true;
-};
-
-const handleSave = async (formData) => {
-  try {
-    if (isEditMode.value) {
-      const lecturerId = selectedLecturer.value.userid;
-      await lecturerAPI.updateLecturer(lecturerId, formData);
-      showNotification('success', 'Lecturer data has been successfully updated.');
-    } else {
-      await lecturerAPI.createLecturer(formData);
-      showNotification('success', 'New lecturer has been successfully created.');
-    }
-    showFormModal.value = false;
-    fetchLecturers();
-  } catch (error) {
-    const message = error.response?.data?.message || 'An error occurred.';
-    showNotification('error', `Failed to save lecturer: ${message}`);
-  }
-};
-
-const handleDelete = async (lecturer) => {
-  if (confirm(`Are you sure you want to delete ${lecturer.fullname}? This action cannot be undone.`)) {
-    try {
-      await lecturerAPI.deleteLecturer(lecturer.lecturerid);
-      showNotification('success', 'Lecturer has been deleted.');
-      fetchLecturers();
-    } catch (error) {
-      showNotification('error', 'Failed to delete lecturer.');
-    }
-  }
 };
 
 onMounted(fetchLecturers);
@@ -120,8 +67,7 @@ onMounted(fetchLecturers);
     </div>
 
     <!-- Loading State -->
-        <!-- Loading State -->
-    <div v-if="loading" class="max-w-2xl mx-auto py-20">
+    <div v-if="isLoading" class="max-w-2xl mx-auto py-20">
       <LoadingBar :loading="true" color="blue" :duration="2000" />
       <p class="text-center text-gray-600 mt-4">Loading lecturers...</p>
     </div>
@@ -194,7 +140,7 @@ onMounted(fetchLecturers);
       <!-- Pagination -->
       <div v-if="totalPages > 1" class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
         <p class="text-sm text-gray-600">
-          Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to {{ Math.min(currentPage * itemsPerPage, lecturers.length) }} of {{ lecturers.length }}
+          Showing {{ (currentPage - 1) * 15 + 1 }} to {{ Math.min(currentPage * 15, lecturers.length) }} of {{ lecturers.length }}
         </p>
         <div class="flex gap-2">
           <button

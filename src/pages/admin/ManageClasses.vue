@@ -1,41 +1,53 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import { classAPI, levelAPI, lecturerAPI } from '../../services/api';
+import { useCrudTable } from '../../composables/useCrudTable';
+import { usePagination } from '../../composables/usePagination';
+import { logger } from '../../utils/logger';
 import Modal from '../../components/ui/Modal.vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
+import LoadingBar from '../../components/ui/LoadingBar.vue';
 import ClassForm from './ClassForm.vue';
 
-const classes = ref([]);
+// Wrap classAPI to match useCrudTable interface
+const classCrudAPI = {
+  getAll: classAPI.getAllClasses,
+  create: classAPI.createClass,
+  update: classAPI.updateClass,
+  delete: classAPI.deleteClass
+};
+
+// Use CRUD composable for classes
+const {
+  items: classes,
+  isLoading,
+  showFormModal,
+  showNotificationModal,
+  notificationMessage,
+  notificationType,
+  selectedItem: selectedClass,
+  isEditMode,
+  fetchItems: fetchClasses,
+  openAddModal,
+  openEditModal,
+  handleSave,
+  handleDelete
+} = useCrudTable(classCrudAPI, {
+  resourceName: 'class',
+  idField: 'classid'
+});
+
+// Use pagination composable
+const {
+  paginatedItems: paginatedClasses,
+  currentPage,
+  totalPages,
+  goToPage
+} = usePagination(classes, 15);
+
+// Reference data for dropdowns
 const levels = ref([]);
 const lecturers = ref([]);
-const isLoading = ref(true);
-const showFormModal = ref(false);
-const showNotificationModal = ref(false);
-const notificationMessage = ref('');
-const notificationType = ref('info');
-const selectedClass = ref(null);
-const isEditMode = ref(false);
-const currentPage = ref(1);
-const itemsPerPage = 15;
-
-/** Paginated classes */
-const paginatedClasses = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage;
-  const end = start + itemsPerPage;
-  return classes.value.slice(start, end);
-});
-
-/** Total pages */
-const totalPages = computed(() => {
-  return Math.ceil(classes.value.length / itemsPerPage);
-});
-
-/** Go to specific page */
-const goToPage = (page) => {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page;
-  }
-};
 
 /** Get level name by ID */
 const getLevelName = (levelId) => {
@@ -47,21 +59,6 @@ const getLevelName = (levelId) => {
 const getLecturerName = (lecturerId) => {
   const lecturer = lecturers.value.find(l => l.lecturerid === lecturerId);
   return lecturer?.fullname || 'Unassigned';
-};
-
-/** Fetch all classes from API */
-const fetchClasses = async () => {
-  try {
-    isLoading.value = true;
-    const response = await classAPI.getAllClasses();
-    if (response.data.success) {
-      classes.value = response.data.data;
-    }
-  } catch (error) {
-    showNotification('error', 'Failed to load class data.');
-  } finally {
-    isLoading.value = false;
-  }
 };
 
 /** Fetch dropdown options */
@@ -80,59 +77,7 @@ const fetchOptions = async () => {
       lecturers.value = lecturerRes.data.data;
     }
   } catch (error) {
-    console.error('Failed to fetch options:', error);
-  }
-};
-
-/** Show notification modal */
-const showNotification = (type, message) => {
-  notificationType.value = type;
-  notificationMessage.value = message;
-  showNotificationModal.value = true;
-};
-
-/** Open modal to add new class */
-const openAddModal = () => {
-  isEditMode.value = false;
-  selectedClass.value = null;
-  showFormModal.value = true;
-};
-
-/** Open modal to edit class */
-const openEditModal = (classItem) => {
-  isEditMode.value = true;
-  selectedClass.value = classItem;
-  showFormModal.value = true;
-};
-
-/** Handle save (create or update) */
-const handleSave = async (formData) => {
-  try {
-    if (isEditMode.value) {
-      await classAPI.updateClass(selectedClass.value.classid, formData);
-      showNotification('success', 'Class updated successfully.');
-    } else {
-      await classAPI.createClass(formData);
-      showNotification('success', 'Class created successfully.');
-    }
-    showFormModal.value = false;
-    fetchClasses();
-  } catch (error) {
-    const message = error.response?.data?.message || 'An error occurred.';
-    showNotification('error', `Failed to save class: ${message}`);
-  }
-};
-
-/** Delete class */
-const handleDelete = async (classItem) => {
-  if (confirm(`Delete class "${classItem.class_code}"? This action cannot be undone.`)) {
-    try {
-      await classAPI.deleteClass(classItem.classid);
-      showNotification('success', 'Class deleted successfully.');
-      fetchClasses();
-    } catch (error) {
-      showNotification('error', 'Failed to delete class.');
-    }
+    logger.error('Failed to fetch options:', error);
   }
 };
 
@@ -156,8 +101,7 @@ onMounted(() => {
     </div>
 
     <!-- Loading State -->
-        <!-- Loading State -->
-    <div v-if="loading" class="max-w-2xl mx-auto py-20">
+    <div v-if="isLoading" class="max-w-2xl mx-auto py-20">
       <LoadingBar :loading="true" color="blue" :duration="2000" />
       <p class="text-center text-gray-600 mt-4">Loading classes...</p>
     </div>
@@ -223,7 +167,7 @@ onMounted(() => {
       <!-- Pagination -->
       <div v-if="totalPages > 1" class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
         <p class="text-sm text-gray-600">
-          Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to {{ Math.min(currentPage * itemsPerPage, classes.length) }} of {{ classes.length }}
+          Showing {{ (currentPage - 1) * 15 + 1 }} to {{ Math.min(currentPage * 15, classes.length) }} of {{ classes.length }}
         </p>
         <div class="flex gap-2">
           <button

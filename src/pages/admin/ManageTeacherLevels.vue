@@ -1,35 +1,44 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { teacherLevelAPI, lecturerAPI, levelAPI } from '../../services/api';
+import { useCrudTable } from '../../composables/useCrudTable';
+import { logger } from '../../utils/logger';
 import Modal from '../../components/ui/Modal.vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
+import LoadingBar from '../../components/ui/LoadingBar.vue';
 import TeacherLevelForm from './TeacherLevelForm.vue';
 
-const teacherLevels = ref([]);
+// Wrap teacherLevelAPI to match useCrudTable interface
+const teacherLevelCrudAPI = {
+  getAll: teacherLevelAPI.getAllTeacherLevels,
+  create: teacherLevelAPI.createTeacherLevel,
+  update: teacherLevelAPI.updateTeacherLevel,
+  delete: teacherLevelAPI.deleteTeacherLevel
+};
+
+// Use CRUD composable for teacher levels
+const {
+  items: teacherLevels,
+  isLoading,
+  showFormModal,
+  showNotificationModal,
+  notificationMessage,
+  notificationType,
+  selectedItem: selectedTeacherLevel,
+  isEditMode,
+  fetchItems: fetchTeacherLevels,
+  openAddModal,
+  openEditModal,
+  handleSave,
+  handleDelete
+} = useCrudTable(teacherLevelCrudAPI, {
+  resourceName: 'teacher level assignment',
+  idField: 'tlid'
+});
+
+// Reference data for dropdowns
 const lecturers = ref([]);
 const levels = ref([]);
-const isLoading = ref(true);
-const showFormModal = ref(false);
-const showNotificationModal = ref(false);
-const notificationMessage = ref('');
-const notificationType = ref('info');
-const selectedTeacherLevel = ref(null);
-const isEditMode = ref(false);
-
-/** Fetch all teacher-level assignments */
-const fetchTeacherLevels = async () => {
-  try {
-    isLoading.value = true;
-    const response = await teacherLevelAPI.getAllTeacherLevels();
-    if (response.data.success) {
-      teacherLevels.value = response.data.data;
-    }
-  } catch (error) {
-    showNotification('error', 'Failed to load teacher level data.');
-  } finally {
-    isLoading.value = false;
-  }
-};
 
 /** Fetch dropdown options */
 const fetchOptions = async () => {
@@ -47,7 +56,7 @@ const fetchOptions = async () => {
       levels.value = levelRes.data.data;
     }
   } catch (error) {
-    console.error('Failed to fetch options:', error);
+    logger.error('Failed to fetch options:', error);
   }
 };
 
@@ -68,60 +77,6 @@ const groupedByLecturer = computed(() => {
   
   return Object.values(groups);
 });
-
-/** Show notification */
-const showNotification = (type, message) => {
-  notificationType.value = type;
-  notificationMessage.value = message;
-  showNotificationModal.value = true;
-};
-
-/** Open add modal */
-const openAddModal = () => {
-  isEditMode.value = false;
-  selectedTeacherLevel.value = null;
-  showFormModal.value = true;
-};
-
-/** Open edit modal */
-const openEditModal = (teacherLevel) => {
-  isEditMode.value = true;
-  selectedTeacherLevel.value = teacherLevel;
-  showFormModal.value = true;
-};
-
-/** Handle save */
-const handleSave = async (formData) => {
-  try {
-    if (isEditMode.value) {
-      await teacherLevelAPI.updateTeacherLevel(selectedTeacherLevel.value.tlid, formData);
-      showNotification('success', 'Assignment updated successfully!');
-    } else {
-      await teacherLevelAPI.createTeacherLevel(formData);
-      showNotification('success', 'Assignment created successfully!');
-    }
-    showFormModal.value = false;
-    fetchTeacherLevels();
-  } catch (error) {
-    showNotification('error', error.response?.data?.message || 'Failed to save assignment.');
-  }
-};
-
-/** Handle delete */
-const handleDelete = async (teacherLevel) => {
-  const lecturerName = teacherLevel.tblecturer?.fullname || 'this lecturer';
-  const levelName = teacherLevel.tblevel?.name || 'this level';
-  
-  if (!confirm(`Remove ${levelName} from ${lecturerName}?`)) return;
-
-  try {
-    await teacherLevelAPI.deleteTeacherLevel(teacherLevel.tlid);
-    showNotification('success', 'Assignment deleted successfully!');
-    fetchTeacherLevels();
-  } catch (error) {
-    showNotification('error', 'Failed to delete assignment.');
-  }
-};
 
 onMounted(() => {
   fetchTeacherLevels();
@@ -146,10 +101,9 @@ onMounted(() => {
     </div>
 
     <!-- Loading State -->
-        <!-- Loading State -->
-    <div v-if="loading" class="max-w-2xl mx-auto py-20">
+    <div v-if="isLoading" class="max-w-2xl mx-auto py-20">
       <LoadingBar :loading="true" color="blue" :duration="2000" />
-      <p class="text-center text-gray-600 mt-4">Loading teacher levels...</p>
+      <p class="text-center text-gray-600 mt-4">Loading teacher level assignments...</p>
     </div>
 
     <!-- Grouped View -->

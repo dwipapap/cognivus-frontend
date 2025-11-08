@@ -1,106 +1,51 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { onMounted } from 'vue';
 import { levelAPI } from '../../services/api';
+import { useCrudTable } from '../../composables/useCrudTable';
+import { usePagination } from '../../composables/usePagination';
 import Modal from '../../components/ui/Modal.vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
+import LoadingBar from '../../components/ui/LoadingBar.vue';
 import LevelForm from './LevelForm.vue';
 
-const levels = ref([]);
-const isLoading = ref(true);
-const showFormModal = ref(false);
-const showNotificationModal = ref(false);
-const notificationMessage = ref('');
-const notificationType = ref('info');
-const selectedLevel = ref(null);
-const isEditMode = ref(false);
-const currentPage = ref(1);
-const itemsPerPage = 9; // 3x3 grid
+// Wrap levelAPI to match useCrudTable interface
+const levelCrudAPI = {
+  getAll: levelAPI.getAllLevels,
+  create: levelAPI.createLevel,
+  update: levelAPI.updateLevel,
+  delete: levelAPI.deleteLevel
+};
 
-/** Pagination */
-const totalPages = computed(() => Math.ceil(levels.value.length / itemsPerPage));
-const paginatedLevels = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage;
-  const end = start + itemsPerPage;
-  return levels.value.slice(start, end);
+// Use CRUD composable for levels
+const {
+  items: levels,
+  isLoading,
+  showFormModal,
+  showNotificationModal,
+  notificationMessage,
+  notificationType,
+  selectedItem: selectedLevel,
+  isEditMode,
+  fetchItems: fetchLevels,
+  openAddModal,
+  openEditModal,
+  handleSave,
+  handleDelete
+} = useCrudTable(levelCrudAPI, {
+  resourceName: 'level',
+  idField: 'levelid'
 });
 
-const nextPage = () => {
-  if (currentPage.value < totalPages.value) currentPage.value++;
-};
+// Use pagination composable (3x3 grid = 9 items per page)
+const {
+  paginatedItems: paginatedLevels,
+  currentPage,
+  totalPages,
+  nextPage,
+  prevPage
+} = usePagination(levels, 9);
 
-const prevPage = () => {
-  if (currentPage.value > 1) currentPage.value--;
-};
-
-/** Fetch all levels */
-const fetchLevels = async () => {
-  try {
-    isLoading.value = true;
-    const response = await levelAPI.getAllLevels();
-    if (response.data.success) {
-      levels.value = response.data.data;
-    }
-  } catch (error) {
-    showNotification('error', 'Failed to load level data.');
-  } finally {
-    isLoading.value = false;
-  }
-};
-
-/** Show notification */
-const showNotification = (type, message) => {
-  notificationType.value = type;
-  notificationMessage.value = message;
-  showNotificationModal.value = true;
-};
-
-/** Open add modal */
-const openAddModal = () => {
-  isEditMode.value = false;
-  selectedLevel.value = null;
-  showFormModal.value = true;
-};
-
-/** Open edit modal */
-const openEditModal = (level) => {
-  isEditMode.value = true;
-  selectedLevel.value = level;
-  showFormModal.value = true;
-};
-
-/** Handle save */
-const handleSave = async (formData) => {
-  try {
-    if (isEditMode.value) {
-      await levelAPI.updateLevel(selectedLevel.value.levelid, formData);
-      showNotification('success', 'Level updated successfully!');
-    } else {
-      await levelAPI.createLevel(formData);
-      showNotification('success', 'Level created successfully!');
-    }
-    showFormModal.value = false;
-    fetchLevels();
-  } catch (error) {
-    showNotification('error', error.response?.data?.message || 'Failed to save level.');
-  }
-};
-
-/** Handle delete */
-const handleDelete = async (level) => {
-  if (!confirm(`Delete level "${level.name}"?`)) return;
-
-  try {
-    await levelAPI.deleteLevel(level.levelid);
-    showNotification('success', 'Level deleted successfully!');
-    fetchLevels();
-  } catch (error) {
-    showNotification('error', 'Failed to delete level.');
-  }
-};
-
-onMounted(() => {
-  fetchLevels();
-});
+onMounted(fetchLevels);
 </script>
 
 <template>
@@ -117,8 +62,7 @@ onMounted(() => {
     </div>
 
     <!-- Loading State -->
-        <!-- Loading State -->
-    <div v-if="loading" class="max-w-2xl mx-auto py-20">
+    <div v-if="isLoading" class="max-w-2xl mx-auto py-20">
       <LoadingBar :loading="true" color="blue" :duration="2000" />
       <p class="text-center text-gray-600 mt-4">Loading levels...</p>
     </div>

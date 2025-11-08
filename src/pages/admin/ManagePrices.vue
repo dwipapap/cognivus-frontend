@@ -1,41 +1,53 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import { priceAPI, levelAPI, programAPI } from '../../services/api';
+import { useCrudTable } from '../../composables/useCrudTable';
+import { usePagination } from '../../composables/usePagination';
+import { logger } from '../../utils/logger';
 import Modal from '../../components/ui/Modal.vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
+import LoadingBar from '../../components/ui/LoadingBar.vue';
 import PriceForm from './PriceForm.vue';
 
-const prices = ref([]);
+// Wrap priceAPI to match useCrudTable interface
+const priceCrudAPI = {
+  getAll: priceAPI.getAllPrices,
+  create: priceAPI.createPrice,
+  update: priceAPI.updatePrice,
+  delete: priceAPI.deletePrice
+};
+
+// Use CRUD composable for prices
+const {
+  items: prices,
+  isLoading,
+  showFormModal,
+  showNotificationModal,
+  notificationMessage,
+  notificationType,
+  selectedItem: selectedPrice,
+  isEditMode,
+  fetchItems: fetchPrices,
+  openAddModal,
+  openEditModal,
+  handleSave,
+  handleDelete
+} = useCrudTable(priceCrudAPI, {
+  resourceName: 'price',
+  idField: 'priceid'
+});
+
+// Use pagination composable
+const {
+  paginatedItems: paginatedPrices,
+  currentPage,
+  totalPages,
+  goToPage
+} = usePagination(prices, 15);
+
+// Reference data for dropdowns
 const levels = ref([]);
 const programs = ref([]);
-const isLoading = ref(true);
-const showFormModal = ref(false);
-const showNotificationModal = ref(false);
-const notificationMessage = ref('');
-const notificationType = ref('info');
-const selectedPrice = ref(null);
-const isEditMode = ref(false);
-const currentPage = ref(1);
-const itemsPerPage = 15;
-
-/** Paginated prices */
-const paginatedPrices = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage;
-  const end = start + itemsPerPage;
-  return prices.value.slice(start, end);
-});
-
-/** Total pages */
-const totalPages = computed(() => {
-  return Math.ceil(prices.value.length / itemsPerPage);
-});
-
-/** Go to specific page */
-const goToPage = (page) => {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page;
-  }
-};
 
 /** Format currency to IDR */
 const formatCurrency = (amount) => {
@@ -59,21 +71,6 @@ const getProgramName = (programId) => {
   return program?.name || 'N/A';
 };
 
-/** Fetch all prices */
-const fetchPrices = async () => {
-  try {
-    isLoading.value = true;
-    const response = await priceAPI.getAllPrices();
-    if (response.data.success) {
-      prices.value = response.data.data;
-    }
-  } catch (error) {
-    showNotification('error', 'Failed to load price data.');
-  } finally {
-    isLoading.value = false;
-  }
-};
-
 /** Fetch dropdown options */
 const fetchOptions = async () => {
   try {
@@ -90,59 +87,7 @@ const fetchOptions = async () => {
       programs.value = programRes.data.data;
     }
   } catch (error) {
-    console.error('Failed to fetch options:', error);
-  }
-};
-
-/** Show notification */
-const showNotification = (type, message) => {
-  notificationType.value = type;
-  notificationMessage.value = message;
-  showNotificationModal.value = true;
-};
-
-/** Open add modal */
-const openAddModal = () => {
-  isEditMode.value = false;
-  selectedPrice.value = null;
-  showFormModal.value = true;
-};
-
-/** Open edit modal */
-const openEditModal = (priceItem) => {
-  isEditMode.value = true;
-  selectedPrice.value = priceItem;
-  showFormModal.value = true;
-};
-
-/** Handle save */
-const handleSave = async (formData) => {
-  try {
-    if (isEditMode.value) {
-      await priceAPI.updatePrice(selectedPrice.value.priceid, formData);
-      showNotification('success', 'Price updated successfully.');
-    } else {
-      await priceAPI.createPrice(formData);
-      showNotification('success', 'Price created successfully.');
-    }
-    showFormModal.value = false;
-    fetchPrices();
-  } catch (error) {
-    const message = error.response?.data?.message || 'An error occurred.';
-    showNotification('error', `Failed to save price: ${message}`);
-  }
-};
-
-/** Delete price */
-const handleDelete = async (priceItem) => {
-  if (confirm(`Delete this price? This action cannot be undone.`)) {
-    try {
-      await priceAPI.deletePrice(priceItem.priceid);
-      showNotification('success', 'Price deleted successfully.');
-      fetchPrices();
-    } catch (error) {
-      showNotification('error', 'Failed to delete price.');
-    }
+    logger.error('Failed to fetch options:', error);
   }
 };
 
@@ -166,8 +111,7 @@ onMounted(() => {
     </div>
 
     <!-- Loading State -->
-        <!-- Loading State -->
-    <div v-if="loading" class="max-w-2xl mx-auto py-20">
+    <div v-if="isLoading" class="max-w-2xl mx-auto py-20">
       <LoadingBar :loading="true" color="blue" :duration="2000" />
       <p class="text-center text-gray-600 mt-4">Loading prices...</p>
     </div>
@@ -245,7 +189,7 @@ onMounted(() => {
       <!-- Pagination -->
       <div v-if="totalPages > 1" class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
         <p class="text-sm text-gray-600">
-          Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to {{ Math.min(currentPage * itemsPerPage, prices.length) }} of {{ prices.length }}
+          Showing {{ (currentPage - 1) * 15 + 1 }} to {{ Math.min(currentPage * 15, prices.length) }} of {{ prices.length }}
         </p>
         <div class="flex gap-2">
           <button
