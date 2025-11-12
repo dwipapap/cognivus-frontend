@@ -47,27 +47,6 @@ onMounted(() => {
     <h1 class="text-4xl font-bold text-gray-800 mb-2">Admin Dashboard</h1>
     <p class="text-gray-600 mb-8">Welcome to the admin control panel</p>
 
-    <!-- ==================== RICK ROLL SECTION - DELETE THIS BLOCK LATER ==================== -->
-    <div class="bg-gradient-to-br from-red-50 via-pink-50 to-purple-50 backdrop-blur-sm border-2 border-pink-300 p-6 rounded-2xl shadow-lg mb-8 animate-pulse-slow">
-      <div class="flex items-center gap-3 mb-4">
-        <h2 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-pink-600 to-purple-600">
-          🎵 Mandatory Admin Training Video 🎵
-        </h2>
-      </div>
-      <p class="text-sm text-gray-600 mb-4 italic">⚠️ VIDEO WAJIB PENGGUNAAN ADMIN USER ITTR</p>
-      <div class="aspect-video relative rounded-xl overflow-hidden shadow-xl border-4 border-white">
-        <iframe
-          class="absolute top-0 left-0 w-full h-full"
-          src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&loop=1&playlist=dQw4w9WgXcQ"
-          title="Important Admin Training"
-          frameborder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowfullscreen
-        ></iframe>
-      </div>
-    </div>
-    <!-- ==================== END OF RICK ROLL SECTION ==================== -->
-
     <!-- Stats Grid -->
         <!-- Loading State -->
     <div v-if="isLoading" class="max-w-2xl mx-auto py-20">
