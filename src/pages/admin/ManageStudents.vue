@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from 'vue';
 import { studentAPI, classAPI, levelAPI } from '../../services/api';
 import Modal from '../../components/ui/Modal.vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
+import BaseSelect from '../../components/form/BaseSelect.vue';
 import StudentForm from './StudentForm.vue';
 
 const students = ref([]);
@@ -15,6 +16,7 @@ const notificationMessage = ref('');
 const notificationType = ref('info');
 const selectedStudent = ref(null);
 const isEditMode = ref(false);
+const selectedClassFilter = ref('');
 
 /** Get class code by classid */
 const getClassCode = (classid) => {
@@ -29,6 +31,14 @@ const enrichedClasses = computed(() => {
     ...cls,
     level: levels.value.find(l => l.levelid === cls.levelid)
   }));
+});
+
+/** Filtered students based on selected class */
+const filteredStudents = computed(() => {
+  if (!selectedClassFilter.value) {
+    return students.value;
+  }
+  return students.value.filter(student => student.classid === selectedClassFilter.value);
 });
 
 /** Fetch all students */
@@ -131,76 +141,123 @@ onMounted(() => {
 <template>
   <div class="p-6">
     <!-- Header -->
-    <div class="flex justify-between items-center mb-6">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-800">Manage Students</h1>
-        <p class="text-gray-600 mt-1">Create, edit, and manage student records</p>
+    <div class="mb-6">
+      <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-800">Manage Students</h1>
+          <p class="text-gray-600 mt-1">Create, edit, and manage student records</p>
+        </div>
+        <BaseButton @click="openAddModal" variant="primary" size="md">
+          <template #icon>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+          </template>
+          Add Student
+        </BaseButton>
       </div>
-      <BaseButton @click="openAddModal" variant="primary">
-        <span class="mr-2">+</span> Add Student
-      </BaseButton>
-    </div>
 
-    <!-- Loading State -->
-        <!-- Loading State -->
-    <div v-if="loading" class="max-w-2xl mx-auto py-20">
-      <LoadingBar :loading="true" color="blue" :duration="2000" />
-      <p class="text-center text-gray-600 mt-4">Loading students...</p>
+      <!-- Filter Section -->
+      <div class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+        <div class="flex flex-col md:flex-row gap-4 items-start md:items-center">
+          <label class="text-sm font-medium text-gray-700 whitespace-nowrap">Filter by Class:</label>
+          <div class="w-full md:w-64">
+            <select 
+              v-model="selectedClassFilter"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+            >
+              <option value="">All Classes</option>
+              <option v-for="cls in classes" :key="cls.classid" :value="cls.classid">
+                {{ cls.class_code }} - {{ cls.level?.level_name || 'Unknown Level' }}
+              </option>
+            </select>
+          </div>
+          <div class="text-sm text-gray-500">
+            Showing {{ filteredStudents.length }} of {{ students.length }} students
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Students Table -->
-    <div v-else class="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg overflow-hidden">
+    <div v-if="isLoading" class="bg-white rounded-lg border border-gray-200 shadow-sm p-12 text-center">
+      <div class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
+      <p class="text-gray-600 mt-4">Loading students...</p>
+    </div>
+
+    <div v-else class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
       <div class="overflow-x-auto">
-        <table class="w-full">
-          <thead class="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
-            <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Name</th>
-              <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Gender</th>
-              <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Class</th>
-              <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Phone</th>
-              <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Payment</th>
-              <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Actions</th>
+        <table class="w-full border-collapse">
+          <thead>
+            <tr class="bg-gray-50 border-b border-gray-200">
+              <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider w-16">#</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Name</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Email</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Class</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Payment</th>
+              <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-200">
-            <tr v-for="student in students" :key="student.studentid" class="hover:bg-blue-50 transition-colors">
-              <td class="px-6 py-4">
-                <div class="flex items-center">
-                  <div class="flex-shrink-0 h-10 w-10 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
-                    {{ student.fullname?.charAt(0) || '?' }}
-                  </div>
-                  <div class="ml-3">
-                    <div class="text-sm font-medium text-gray-900">{{ student.fullname }}</div>
-                    <div class="text-sm text-gray-500">{{ student.tbuser?.email || 'No email' }}</div>
-                  </div>
-                </div>
+          <tbody>
+            <tr v-for="(student, index) in filteredStudents" :key="student.studentid" 
+              class="border-b border-gray-200 transition-colors"
+              :class="index % 2 === 0 ? 'bg-white' : 'bg-gray-50'"
+            >
+              <td class="px-4 py-3 text-right text-sm text-gray-500 font-medium">{{ index + 1 }}</td>
+              <td class="px-4 py-3">
+                <div class="text-sm font-semibold text-gray-900">{{ student.fullname }}</div>
               </td>
-              <td class="px-6 py-4 text-sm text-gray-700">{{ student.gender || '-' }}</td>
-              <td class="px-6 py-4 text-sm text-gray-700">
-                {{ getClassCode(student.classid) }}
+              <td class="px-4 py-3">
+                <a v-if="student.tbuser?.email" 
+                  :href="`mailto:${student.tbuser.email}`"
+                  class="text-sm text-blue-600 hover:text-blue-800 hover:underline">
+                  {{ student.tbuser.email }}
+                </a>
+                <span v-else class="text-sm text-gray-400">No email</span>
               </td>
-              <td class="px-6 py-4 text-sm text-gray-700">{{ student.phone || '-' }}</td>
-              <td class="px-6 py-4">
-                <span v-if="student.payment_type" class="px-2 py-1 text-xs font-semibold rounded-full" 
-                  :class="student.payment_type === 'Full' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'">
+              <td class="px-4 py-3">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800">
+                  {{ getClassCode(student.classid) }}
+                </span>
+              </td>
+              <td class="px-4 py-3">
+                <span v-if="student.payment_type" 
+                  class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium" 
+                  :class="student.payment_type === 'Full' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'">
                   {{ student.payment_type }}
                 </span>
-                <span v-else class="text-gray-400">-</span>
+                <span v-else class="text-sm text-gray-400">-</span>
               </td>
-              <td class="px-6 py-4 text-sm">
-                <div class="flex gap-2">
-                  <button @click="openEditModal(student)" class="text-blue-600 hover:text-blue-800 font-medium">
+              <td class="px-4 py-3">
+                <div class="flex justify-center gap-2">
+                  <BaseButton 
+                    @click="openEditModal(student)" 
+                    variant="secondary" 
+                    size="sm"
+                  >
                     Edit
-                  </button>
-                  <button @click="handleDelete(student)" class="text-red-600 hover:text-red-800 font-medium">
+                  </BaseButton>
+                  <BaseButton 
+                    @click="handleDelete(student)" 
+                    variant="danger" 
+                    size="sm"
+                  >
                     Delete
-                  </button>
+                  </BaseButton>
                 </div>
               </td>
             </tr>
-            <tr v-if="students.length === 0">
-              <td colspan="6" class="px-6 py-8 text-center text-gray-500">
-                No students found. Click "Add Student" to create one.
+            <tr v-if="filteredStudents.length === 0">
+              <td colspan="6" class="px-4 py-12 text-center">
+                <div class="text-gray-400">
+                  <svg class="mx-auto h-12 w-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                  </svg>
+                  <p class="text-sm font-medium text-gray-900">No students found</p>
+                  <p class="text-sm text-gray-500 mt-1">
+                    {{ selectedClassFilter ? 'Try selecting a different class or clear the filter' : 'Click "Add Student" to create one' }}
+                  </p>
+                </div>
               </td>
             </tr>
           </tbody>

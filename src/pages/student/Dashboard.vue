@@ -6,6 +6,7 @@ import { useStudentProfile } from '../../composables/useStudentProfile';
 import { useClassDetails } from '../../composables/useClassDetails';
 import { courseAPI } from '../../services/api';
 import LoadingBar from '../../components/ui/LoadingBar.vue';
+import BaseButton from '../../components/ui/BaseButton.vue';
 
 const router = useRouter();
 const { studentProfile, isLoading } = useStudentProfile();
@@ -318,15 +319,18 @@ watchEffect(() => {
           <h2 class="text-2xl font-bold text-gray-900">My Courses</h2>
           <p class="text-sm text-gray-500 mt-1">Recent course materials from your class.</p>
         </div>
-        <button 
+        <BaseButton 
           @click="goToMyCourses"
-          class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg focus:ring-2 focus:ring-blue-300 transition-colors"
+          variant="primary"
+          size="md"
         >
           View All Courses
-          <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-          </svg>
-        </button>
+          <template #icon>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </template>
+        </BaseButton>
       </div>
 
       <!-- Loading State -->
@@ -338,12 +342,13 @@ watchEffect(() => {
       <!-- Error State -->
       <div v-else-if="coursesError" class="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
         <p class="text-red-800 mb-4">{{ coursesError }}</p>
-        <button 
+        <BaseButton 
           @click="fetchCourses"
-          class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+          variant="danger"
+          size="md"
         >
           Retry
-        </button>
+        </BaseButton>
       </div>
 
       <!-- Empty State -->

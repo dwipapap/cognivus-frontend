@@ -1,32 +1,60 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { studentAPI, lecturerAPI, classAPI } from '@/services/api';
+import { studentAPI, lecturerAPI, classAPI, dashboardAPI } from '@/services/api';
 import BaseCard from '@/components/ui/BaseCard.vue';
 import LoadingBar from '@/components/ui/LoadingBar.vue';
 
 const students = ref([]);
 const lecturers = ref([]);
 const classes = ref([]);
+const recentActivities = ref([]);
 const isLoading = ref(true);
 
 /** Fetch dashboard data */
 const fetchDashboardData = async () => {
   try {
     isLoading.value = true;
-    const [studentsRes, lecturersRes, classesRes] = await Promise.all([
+    const [studentsRes, lecturersRes, classesRes, activitiesRes] = await Promise.all([
       studentAPI.getAllStudents(),
       lecturerAPI.getAllLecturers(),
-      classAPI.getAllClasses()
+      classAPI.getAllClasses(),
+      dashboardAPI.getRecentActivity()
     ]);
 
     if (studentsRes.data.success) students.value = studentsRes.data.data;
     if (lecturersRes.data.success) lecturers.value = lecturersRes.data.data;
     if (classesRes.data.success) classes.value = classesRes.data.data;
+    if (activitiesRes.data.success) recentActivities.value = activitiesRes.data.data;
   } catch (error) {
     console.error('Failed to fetch dashboard data:', error);
   } finally {
     isLoading.value = false;
   }
+};
+
+/** Format timestamp to relative time */
+const getRelativeTime = (timestamp) => {
+  const date = new Date(timestamp);
+  const now = new Date();
+  const diffInSeconds = Math.floor((now - date) / 1000);
+  
+  if (diffInSeconds < 60) return 'Just now';
+  if (diffInSeconds < 3600) {
+    const minutes = Math.floor(diffInSeconds / 60);
+    return `${minutes} minute${minutes !== 1 ? 's' : ''} ago`;
+  }
+  if (diffInSeconds < 86400) {
+    const hours = Math.floor(diffInSeconds / 3600);
+    return `${hours} hour${hours !== 1 ? 's' : ''} ago`;
+  }
+  const days = Math.floor(diffInSeconds / 86400);
+  if (days < 30) return `${days} day${days !== 1 ? 's' : ''} ago`;
+  if (days < 365) {
+    const months = Math.floor(days / 30);
+    return `${months} month${months !== 1 ? 's' : ''} ago`;
+  }
+  const years = Math.floor(days / 365);
+  return `${years} year${years !== 1 ? 's' : ''} ago`;
 };
 
 /** Computed stats */
@@ -46,27 +74,6 @@ onMounted(() => {
   <div>
     <h1 class="text-4xl font-bold text-gray-800 mb-2">Admin Dashboard</h1>
     <p class="text-gray-600 mb-8">Welcome to the admin control panel</p>
-
-    <!-- ==================== RICK ROLL SECTION - DELETE THIS BLOCK LATER ==================== -->
-    <div class="bg-gradient-to-br from-red-50 via-pink-50 to-purple-50 backdrop-blur-sm border-2 border-pink-300 p-6 rounded-2xl shadow-lg mb-8 animate-pulse-slow">
-      <div class="flex items-center gap-3 mb-4">
-        <h2 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-pink-600 to-purple-600">
-          🎵 Mandatory Admin Training Video 🎵
-        </h2>
-      </div>
-      <p class="text-sm text-gray-600 mb-4 italic">⚠️ VIDEO WAJIB PENGGUNAAN ADMIN USER ITTR</p>
-      <div class="aspect-video relative rounded-xl overflow-hidden shadow-xl border-4 border-white">
-        <iframe
-          class="absolute top-0 left-0 w-full h-full"
-          src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&loop=1&playlist=dQw4w9WgXcQ"
-          title="Important Admin Training"
-          frameborder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowfullscreen
-        ></iframe>
-      </div>
-    </div>
-    <!-- ==================== END OF RICK ROLL SECTION ==================== -->
 
     <!-- Stats Grid -->
         <!-- Loading State -->
@@ -147,26 +154,37 @@ onMounted(() => {
     <!-- Recent Activity -->
     <div class="bg-white/60 backdrop-blur-sm border border-white/50 p-6 rounded-2xl shadow-lg">
       <h2 class="text-2xl font-semibold text-gray-800 mb-4">Recent Activity</h2>
-      <div class="space-y-3">
-        <div class="flex items-start gap-3 p-3 bg-white/40 rounded-lg hover:bg-white/60 transition-colors">
-          <div class="w-2 h-2 rounded-full bg-blue-500 mt-2"></div>
-          <div class="flex-1">
-            <p class="text-sm font-medium text-gray-800">New lecturer registration</p>
-            <p class="text-xs text-gray-600">John Doe registered 5 minutes ago</p>
-          </div>
-        </div>
-        <div class="flex items-start gap-3 p-3 bg-white/40 rounded-lg hover:bg-white/60 transition-colors">
-          <div class="w-2 h-2 rounded-full bg-green-500 mt-2"></div>
-          <div class="flex-1">
-            <p class="text-sm font-medium text-gray-800">Class created</p>
-            <p class="text-xs text-gray-600">Advanced Programming class added 1 hour ago</p>
-          </div>
-        </div>
-        <div class="flex items-start gap-3 p-3 bg-white/40 rounded-lg hover:bg-white/60 transition-colors">
-          <div class="w-2 h-2 rounded-full bg-yellow-500 mt-2"></div>
-          <div class="flex-1">
-            <p class="text-sm font-medium text-gray-800">Price updated</p>
-            <p class="text-xs text-gray-600">Web Development course pricing modified 2 hours ago</p>
+      
+      <!-- Loading State -->
+      <div v-if="isLoading" class="text-center py-8">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+        <p class="text-sm text-gray-600 mt-2">Loading activities...</p>
+      </div>
+      
+      <!-- Empty State -->
+      <div v-else-if="recentActivities.length === 0" class="text-center py-12">
+        <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <p class="text-gray-500 font-medium">No recent activity</p>
+        <p class="text-sm text-gray-400 mt-1">Activity will appear here as actions occur</p>
+      </div>
+      
+      <!-- Activity List -->
+      <div v-else class="space-y-3">
+        <div 
+          v-for="(activity, index) in recentActivities" 
+          :key="`${activity.type}-${activity.timestamp}-${index}`"
+          class="flex items-start gap-3 p-3 bg-white/40 rounded-lg hover:bg-white/60 transition-colors"
+        >
+          <div 
+            :class="`w-2 h-2 rounded-full bg-${activity.color}-500 mt-2 flex-shrink-0`"
+          ></div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-gray-800">{{ activity.title }}</p>
+            <p class="text-xs text-gray-600 truncate">
+              {{ activity.description }} • {{ getRelativeTime(activity.timestamp) }}
+            </p>
           </div>
         </div>
       </div>
