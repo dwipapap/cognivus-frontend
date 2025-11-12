@@ -299,4 +299,9 @@ export const courseFileAPI = {
   deleteCourseFile: (id) => apiClient.delete(`/course_files/${id}`)
 };
 
+// Dashboard API endpoints
+export const dashboardAPI = {
+  getRecentActivity: () => apiClient.get('/dashboard/recent-activity')
+};
+
 export default apiClient;

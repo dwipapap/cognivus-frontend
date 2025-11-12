@@ -189,7 +189,7 @@ onUnmounted(() => {
                 <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
                 </svg>
-                <span class="sidebar-text ml-3 opacity-0 whitespace-nowrap overflow-hidden">View Profile</span>
+                <span class="sidebar-text ml-3 opacity-0 whitespace-nowrap overflow-hidden">PLACEHOLDER</span>
               </router-link>
             </li>
             <li>
@@ -230,7 +230,7 @@ onUnmounted(() => {
                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
                 </svg>
-                <span class="text-xs">Profile</span>
+                <span class="text-xs">PLACEHOLDER</span>
               </router-link>
             </li>
             <li>

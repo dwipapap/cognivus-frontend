@@ -117,10 +117,10 @@ const formatDate = (dateString) => {
     </div>
 
     <!-- Course List -->
-    <div class="space-y-4">
-      <h2 class="text-2xl font-bold text-gray-900 mb-2">Course Materials</h2>
+    <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-200">
+      <h2 class="text-2xl font-bold text-gray-900 mb-6">Course Materials</h2>
       
-      <div v-if="courses.length === 0" class="bg-white rounded-2xl shadow-lg p-12 text-center text-gray-500">
+      <div v-if="courses.length === 0" class="py-12 text-center text-gray-500">
         No course materials available yet.
       </div>
 
@@ -151,9 +151,6 @@ const formatDate = (dateString) => {
             <!-- Content -->
             <div class="flex-1 min-w-0">
               <h3 class="text-lg font-bold text-white mb-1">{{ course.title }}</h3>
-              <p class="text-sm text-white/80 line-clamp-2 mb-2">
-                {{ course.description || 'Click to view course materials and resources.' }}
-              </p>
               <p class="text-xs text-white/70">{{ formatDate(course.upload_date) }}</p>
             </div>
 
