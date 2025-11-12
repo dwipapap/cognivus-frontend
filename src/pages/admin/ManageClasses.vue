@@ -156,27 +156,36 @@ onMounted(() => {
     </div>
 
     <!-- Loading State -->
-        <!-- Loading State -->
-    <div v-if="loading" class="max-w-2xl mx-auto py-20">
-      <LoadingBar :loading="true" color="blue" :duration="2000" />
-      <p class="text-center text-gray-600 mt-4">Loading classes...</p>
+    <div v-if="isLoading" class="flex justify-center items-center py-20">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
     </div>
 
     <!-- Classes Table -->
-    <div v-else class="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg overflow-hidden">
+    <div v-else class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full">
-          <thead class="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
-            <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Class Code</th>
-              <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Level</th>
-              <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Lecturer</th>
-              <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Description</th>
-              <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Actions</th>
+          <thead>
+            <tr class="bg-gray-50 border-b border-gray-200">
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider w-16">#</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Class Code</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Level</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Lecturer</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Description</th>
+              <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-200">
-            <tr v-for="classItem in paginatedClasses" :key="classItem.classid" class="hover:bg-blue-50 transition-colors">
+          <tbody>
+            <tr 
+              v-for="(classItem, index) in paginatedClasses" 
+              :key="classItem.classid"
+              :class="index % 2 === 0 ? 'bg-white' : 'bg-gray-50'"
+              class="border-b border-gray-100 hover:bg-blue-50 transition-colors"
+            >
+              <!-- Row Number -->
+              <td class="px-6 py-4 text-sm text-gray-500 text-right">
+                {{ (currentPage - 1) * itemsPerPage + index + 1 }}
+              </td>
+
               <!-- Class Code -->
               <td class="px-6 py-4">
                 <div class="text-sm font-medium text-gray-900">{{ classItem.class_code }}</div>
@@ -184,7 +193,7 @@ onMounted(() => {
 
               <!-- Level -->
               <td class="px-6 py-4">
-                <span class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                   {{ getLevelName(classItem.levelid) }}
                 </span>
               </td>
@@ -195,25 +204,39 @@ onMounted(() => {
               </td>
 
               <!-- Description -->
-              <td class="px-6 py-4 text-sm text-gray-700">
+              <td class="px-6 py-4 text-sm text-gray-600">
                 {{ classItem.description || '-' }}
               </td>
 
               <!-- Actions -->
-              <td class="px-6 py-4 text-sm">
-                <div class="flex gap-2">
-                  <button @click="openEditModal(classItem)" class="text-blue-600 hover:text-blue-800 font-medium">
+              <td class="px-6 py-4">
+                <div class="flex justify-center gap-2">
+                  <BaseButton 
+                    @click="openEditModal(classItem)" 
+                    variant="secondary"
+                    size="sm"
+                  >
                     Edit
-                  </button>
-                  <button @click="handleDelete(classItem)" class="text-red-600 hover:text-red-800 font-medium">
+                  </BaseButton>
+                  <BaseButton 
+                    @click="handleDelete(classItem)" 
+                    variant="danger"
+                    size="sm"
+                  >
                     Delete
-                  </button>
+                  </BaseButton>
                 </div>
               </td>
             </tr>
             <tr v-if="classes.length === 0">
-              <td colspan="5" class="px-6 py-8 text-center text-gray-500">
-                No classes found. Click "Add Class" to create one.
+              <td colspan="6" class="px-6 py-12 text-center">
+                <div class="flex flex-col items-center justify-center text-gray-500">
+                  <svg class="w-12 h-12 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                  </svg>
+                  <p class="text-sm font-medium">No classes found</p>
+                  <p class="text-xs mt-1">Click "Add Class" to create one.</p>
+                </div>
               </td>
             </tr>
           </tbody>
@@ -221,15 +244,17 @@ onMounted(() => {
       </div>
 
       <!-- Pagination -->
-      <div v-if="totalPages > 1" class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+      <div v-if="totalPages > 1" class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
         <p class="text-sm text-gray-600">
-          Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to {{ Math.min(currentPage * itemsPerPage, classes.length) }} of {{ classes.length }}
+          Showing <span class="font-medium">{{ (currentPage - 1) * itemsPerPage + 1 }}</span> to 
+          <span class="font-medium">{{ Math.min(currentPage * itemsPerPage, classes.length) }}</span> of 
+          <span class="font-medium">{{ classes.length }}</span> classes
         </p>
         <div class="flex gap-2">
           <button
             @click="goToPage(currentPage - 1)"
             :disabled="currentPage === 1"
-            class="px-3 py-1 border border-gray-300 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             Previous
           </button>
@@ -238,10 +263,10 @@ onMounted(() => {
             :key="page"
             @click="goToPage(page)"
             :class="[
-              'px-3 py-1 border rounded-lg text-sm',
+              'px-4 py-2 text-sm font-medium rounded-lg transition-colors',
               currentPage === page
-                ? 'bg-blue-600 text-white border-blue-600'
-                : 'border-gray-300 hover:bg-gray-50'
+                ? 'bg-blue-600 text-white border border-blue-600'
+                : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
             ]"
           >
             {{ page }}
@@ -249,7 +274,7 @@ onMounted(() => {
           <button
             @click="goToPage(currentPage + 1)"
             :disabled="currentPage === totalPages"
-            class="px-3 py-1 border border-gray-300 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             Next
           </button>
