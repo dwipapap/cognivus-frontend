@@ -3,6 +3,8 @@ import { ref, computed, watchEffect } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useClassDetails } from '../../composables/useClassDetails';
 import { courseAPI } from '../../services/api';
+import { VPdfViewer } from '@vue-pdf-viewer/viewer';
+import Modal from '../../components/ui/Modal.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -10,6 +12,10 @@ const router = useRouter();
 const course = ref(null);
 const courseLoading = ref(false);
 const courseError = ref(null);
+
+// PDF Modal state
+const showPdfModal = ref(false);
+const currentPdfUrl = ref(null);
 
 // Use composable for class details
 const classId = computed(() => course.value?.classid);
@@ -46,6 +52,18 @@ const formatDate = (dateString) => {
   } catch {
     return dateString;
   }
+};
+
+/** Open PDF in modal viewer */
+const openPdfModal = (url) => {
+  currentPdfUrl.value = url;
+  showPdfModal.value = true;
+};
+
+/** Close PDF modal */
+const closePdfModal = () => {
+  showPdfModal.value = false;
+  currentPdfUrl.value = null;
 };
 
 /** Fetch course details */
@@ -161,13 +179,10 @@ watchEffect(() => {
       <!-- Materials Grid -->
       <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <!-- Course Files (PDF/Documents) -->
-        <a 
+        <div 
           v-for="file in courseFiles" 
           :key="file.cfid"
-          :href="getFileUrl(file)" 
-          target="_blank"
-          rel="noopener noreferrer"
-          class="flex items-center gap-4 p-4 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5"
+          class="flex items-center gap-4 p-4 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl shadow-md hover:shadow-lg transition-all duration-200"
         >
           <!-- PDF Thumbnail -->
           <div class="flex-shrink-0 w-20 h-24 bg-white rounded-lg flex items-center justify-center">
@@ -183,15 +198,34 @@ watchEffect(() => {
           <!-- File Info -->
           <div class="flex-1 text-white">
             <p class="font-bold text-lg mb-1">Learning Materials</p>
-            <p class="text-sm text-blue-100">Click to view PDF</p>
             <p class="text-xs text-blue-200 mt-1">{{ formatDate(file.upload_date) }}</p>
+            
+            <!-- Action Buttons -->
+            <div class="flex gap-2 mt-3">
+              <button
+                @click="openPdfModal(getFileUrl(file))"
+                class="px-3 py-1.5 text-xs font-medium bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-lg transition-colors flex items-center gap-1"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+                Preview
+              </button>
+              <a
+                :href="getFileUrl(file)"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="px-3 py-1.5 text-xs font-medium bg-white text-blue-700 hover:bg-blue-50 rounded-lg transition-colors flex items-center gap-1"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                </svg>
+                Open
+              </a>
+            </div>
           </div>
-          
-          <!-- Open Icon -->
-          <svg class="w-6 h-6 text-white/80 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-          </svg>
-        </a>
+        </div>
 
         <!-- YouTube Video -->
         <a 
@@ -243,4 +277,31 @@ watchEffect(() => {
       </button>
     </div>
   </div>
+
+  <!-- PDF Viewer Modal -->
+  <Modal
+    :show="showPdfModal"
+    @close="closePdfModal"
+    size="7xl"
+    variant="gradient"
+    gradient-from="blue-600"
+    gradient-via="blue-700"
+    gradient-to="indigo-700"
+    title="PDF Viewer"
+    hide-footer
+  >
+    <template #icon>
+      <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/>
+      </svg>
+    </template>
+    <template #content>
+      <div v-if="currentPdfUrl" class="w-full" style="height: 70vh;">
+        <VPdfViewer :src="currentPdfUrl" />
+      </div>
+      <div v-else class="flex items-center justify-center h-96">
+        <p class="text-gray-500">No PDF selected</p>
+      </div>
+    </template>
+  </Modal>
 </template>
