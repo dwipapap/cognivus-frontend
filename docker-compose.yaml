@@ -14,7 +14,7 @@ services:
     environment:
       NODE_ENV: production
     ports:
-      - 8090:8090
+      - 6090:6090
 
 
 # The commented out section below is an example of how to define a PostgreSQL
