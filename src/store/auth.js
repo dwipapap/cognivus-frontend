@@ -1,5 +1,4 @@
 import { reactive } from 'vue';
-import { supabase } from '../supabase';
 import secureStorage from '../utils/secureStorage';
 
 /**
@@ -39,43 +38,6 @@ export const authStore = reactive({
       this.isInitialized = true;
       return;
     }
-
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) {
-      this.setAuth(session.user, session.access_token);
-    }
-    
-    // Listen for auth state changes but prevent unnecessary redirects
-    supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth state change detected:', { event, session });
-
-      if (event === 'SIGNED_IN' && session) {
-        if (this.token !== session.access_token) { // Only handle if token has changed
-          console.log('Handling SIGNED_IN event');
-          this.setAuth(session.user, session.access_token);
-          // Use setTimeout to ensure reactive state is updated before navigation
-          setTimeout(() => {
-            if (typeof window !== 'undefined' && window.$router) {
-              window.$router.push('/student/dashboard');
-            } else {
-              window.location.href = '/student/dashboard';
-            }
-          }, 100);
-        } else {
-          console.log('Skipping redundant SIGNED_IN handling due to session refresh');
-        }
-      } else if (event === 'SIGNED_OUT') {
-        if (this.user) {
-          console.log('Handling SIGNED_OUT event');
-          this.clearAuth();
-        }
-      }
-
-      // Ignore TOKEN_REFRESHED and other events
-      if (event === 'TOKEN_REFRESHED') {
-        console.log('Ignoring TOKEN_REFRESHED event');
-      }
-    });
     
     this.isInitialized = true;
 
@@ -170,8 +132,6 @@ export const authStore = reactive({
     secureStorage.removeItem('tokenExpiry');
     secureStorage.removeItem('role');
     secureStorage.removeItem('user');
-    // Only sign out Supabase if OAuth was used
-    supabase.auth.signOut();
   },
 
   /**
