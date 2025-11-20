@@ -1,5 +1,5 @@
 <template>
-  <form @submit.prevent="handleSubmit" class="space-y-6">
+  <form @submit.prevent="handleSave" class="space-y-6">
     <!-- Two Column Grid Layout -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       
@@ -16,49 +16,33 @@
           
           <div class="space-y-4">
             <!-- Username (Create only or Edit mode) -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
-                Username {{ !isEditMode ? '*' : '' }}
-              </label>
-              <input
-                v-model="formData.username"
-                type="text"
-                :required="!isEditMode"
-                :placeholder="isEditMode ? 'Leave blank to keep current username' : 'Enter username'"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-              <p v-if="isEditMode" class="mt-1 text-xs text-gray-500">Leave blank to keep existing username</p>
-            </div>
+            <BaseInput
+              v-bind="getFieldProps('username')"
+              label="Username"
+              :required="!isEditMode"
+              :placeholder="isEditMode ? 'Leave blank to keep current username' : 'Enter username'"
+            />
+            <p v-if="isEditMode" class="text-xs text-gray-500 -mt-2">Leave blank to keep existing username</p>
 
             <!-- Email (Create only or Edit mode) -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
-                Email {{ !isEditMode ? '*' : '' }}
-              </label>
-              <input
-                v-model="formData.email"
-                type="email"
-                :required="!isEditMode"
-                :placeholder="isEditMode ? 'Leave blank to keep current email' : 'Enter email'"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-              <p v-if="isEditMode" class="mt-1 text-xs text-gray-500">Leave blank to keep existing email</p>
-            </div>
+            <BaseInput
+              v-bind="getFieldProps('email')"
+              type="email"
+              label="Email"
+              :required="!isEditMode"
+              :placeholder="isEditMode ? 'Leave blank to keep current email' : 'Enter email'"
+            />
+            <p v-if="isEditMode" class="text-xs text-gray-500 -mt-2">Leave blank to keep existing email</p>
 
             <!-- Password -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">
-                Password {{ !isEditMode ? '*' : '' }}
-              </label>
-              <input
-                v-model="formData.password"
-                type="password"
-                :required="!isEditMode"
-                :placeholder="isEditMode ? 'Leave blank to keep current password' : 'Enter password'"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-              <p v-if="isEditMode" class="mt-1 text-xs text-gray-500">Leave blank to keep existing password</p>
-            </div>
+            <BaseInput
+              v-bind="getFieldProps('password')"
+              type="password"
+              label="Password"
+              :required="!isEditMode"
+              :placeholder="isEditMode ? 'Leave blank to keep current password' : 'Enter password'"
+            />
+            <p v-if="isEditMode" class="text-xs text-gray-500 -mt-2">Leave blank to keep existing password</p>
           </div>
         </div>
 
@@ -73,51 +57,35 @@
           
           <div class="space-y-4">
             <!-- Full Name -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
-              <input
-                v-model="formData.fullname"
-                type="text"
-                required
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Enter full name"
-              />
-            </div>
+            <BaseInput
+              v-bind="getFieldProps('fullname')"
+              label="Full Name"
+              required
+              placeholder="Enter full name"
+            />
 
             <!-- Gender -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Gender *</label>
-              <select
-                v-model="formData.gender"
-                required
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="">Select gender</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-              </select>
-            </div>
+            <BaseSelect
+              v-bind="getFieldProps('gender')"
+              label="Gender"
+              required
+              :options="['Male', 'Female']"
+              placeholder="Select gender"
+            />
 
             <!-- Birth Date -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Birth Date</label>
-              <input
-                v-model="formData.birthdate"
-                type="date"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
+            <BaseInput
+              v-bind="getFieldProps('birthdate')"
+              type="date"
+              label="Birth Date"
+            />
 
             <!-- Birth Place -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Birth Place</label>
-              <input
-                v-model="formData.birthplace"
-                type="text"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Enter birth place"
-              />
-            </div>
+            <BaseInput
+              v-bind="getFieldProps('birthplace')"
+              label="Birth Place"
+              placeholder="Enter birth place"
+            />
           </div>
         </div>
       </div>
@@ -135,26 +103,21 @@
           
           <div class="space-y-4">
             <!-- Phone -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-              <input
-                v-model="formData.phone"
-                type="tel"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Enter phone number"
-              />
-            </div>
+            <BaseInput
+              v-bind="getFieldProps('phone')"
+              type="tel"
+              label="Phone"
+              placeholder="Enter phone number"
+            />
 
             <!-- Address -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
-              <textarea
-                v-model="formData.address"
-                rows="3"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                placeholder="Enter address"
-              ></textarea>
-            </div>
+            <BaseTextarea
+              v-bind="getFieldProps('address')"
+              label="Address"
+              :rows="3"
+              placeholder="Enter address"
+              resize="none"
+            />
           </div>
         </div>
 
@@ -169,26 +132,19 @@
           
           <div class="space-y-4">
             <!-- Parent Name -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Parent Name</label>
-              <input
-                v-model="formData.parentname"
-                type="text"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Enter parent name"
-              />
-            </div>
+            <BaseInput
+              v-bind="getFieldProps('parentname')"
+              label="Parent Name"
+              placeholder="Enter parent name"
+            />
 
             <!-- Parent Phone -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Parent Phone</label>
-              <input
-                v-model="formData.parentphone"
-                type="tel"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Enter parent phone"
-              />
-            </div>
+            <BaseInput
+              v-bind="getFieldProps('parentphone')"
+              type="tel"
+              label="Parent Phone"
+              placeholder="Enter parent phone"
+            />
           </div>
         </div>
 
@@ -203,31 +159,23 @@
           
           <div class="space-y-4">
             <!-- Class Assignment -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Class</label>
-              <select
-                v-model="formData.classid"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option :value="null">No class assigned</option>
-                <option v-for="cls in classes" :key="cls.classid" :value="cls.classid">
-                  {{ cls.class_code }} - {{ cls.level?.level_name || 'Unknown Level' }}
-                </option>
-              </select>
-            </div>
+            <BaseSelect
+              v-bind="getFieldProps('classid')"
+              label="Class"
+            >
+              <option :value="null">No class assigned</option>
+              <option v-for="cls in classes" :key="cls.classid" :value="cls.classid">
+                {{ cls.class_code }} - {{ cls.level?.level_name || 'Unknown Level' }}
+              </option>
+            </BaseSelect>
 
             <!-- Payment Type -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Payment Type</label>
-              <select
-                v-model="formData.payment_type"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="">Select payment type</option>
-                <option value="Monthly">Monthly</option>
-                <option value="Full">Full Payment</option>
-              </select>
-            </div>
+            <BaseSelect
+              v-bind="getFieldProps('payment_type')"
+              label="Payment Type"
+              :options="['Monthly', 'Full']"
+              placeholder="Select payment type"
+            />
           </div>
         </div>
 
@@ -269,7 +217,7 @@
       <BaseButton type="button" variant="secondary" @click="$emit('cancel')">
         Cancel
       </BaseButton>
-      <BaseButton type="submit" variant="primary">
+      <BaseButton type="submit" variant="primary" :loading="isSubmitting">
         <template #icon>
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
@@ -283,7 +231,11 @@
 
 <script setup>
 import { ref, watch } from 'vue';
+import { useForm } from '../../composables/useForm';
 import BaseButton from '../../components/ui/BaseButton.vue';
+import BaseInput from '../../components/form/BaseInput.vue';
+import BaseSelect from '../../components/form/BaseSelect.vue';
+import BaseTextarea from '../../components/form/BaseTextarea.vue';
 
 const props = defineProps({
   /** Student data for edit mode */
@@ -296,62 +248,56 @@ const props = defineProps({
 
 const emit = defineEmits(['submit', 'cancel']);
 
-const formData = ref({
-  username: '',
-  email: '',
-  password: '',
-  fullname: '',
-  gender: '',
-  birthdate: '',
-  birthplace: '',
-  phone: '',
-  address: '',
-  parentname: '',
-  parentphone: '',
-  classid: null,
-  payment_type: ''
-});
+const { formData, errors, isSubmitting, submit, getFieldProps, reset } = useForm(
+  {
+    username: '',
+    email: '',
+    password: '',
+    fullname: '',
+    gender: '',
+    birthdate: '',
+    birthplace: '',
+    phone: '',
+    address: '',
+    parentname: '',
+    parentphone: '',
+    classid: null,
+    payment_type: ''
+  },
+  {
+    username: props.isEditMode ? [] : ['required'],
+    email: props.isEditMode ? [] : ['required', 'email'],
+    password: props.isEditMode ? [] : ['required', { type: 'minLength', min: 6 }],
+    fullname: ['required'],
+    gender: ['required']
+  }
+);
 
 /** Populate form when editing */
 watch(() => props.student, (newStudent) => {
   if (newStudent) {
-    formData.value = {
-      username: '',
-      email: '',
-      password: '',
-      fullname: newStudent.fullname || '',
-      gender: newStudent.gender || '',
-      birthdate: newStudent.birthdate || '',
-      birthplace: newStudent.birthplace || '',
-      phone: newStudent.phone || '',
-      address: newStudent.address || '',
-      parentname: newStudent.parentname || '',
-      parentphone: newStudent.parentphone || '',
-      classid: newStudent.classid || null,
-      payment_type: newStudent.payment_type || ''
-    };
+    formData.username = '';
+    formData.email = '';
+    formData.password = '';
+    formData.fullname = newStudent.fullname || '';
+    formData.gender = newStudent.gender || '';
+    formData.birthdate = newStudent.birthdate ? newStudent.birthdate.split('T')[0] : '';
+    formData.birthplace = newStudent.birthplace || '';
+    formData.phone = newStudent.phone || '';
+    formData.address = newStudent.address || '';
+    formData.parentname = newStudent.parentname || '';
+    formData.parentphone = newStudent.parentphone || '';
+    formData.classid = newStudent.classid || null;
+    formData.payment_type = newStudent.payment_type || '';
   } else {
-    // Reset form for create mode
-    formData.value = {
-      username: '',
-      email: '',
-      password: '',
-      fullname: '',
-      gender: '',
-      birthdate: '',
-      birthplace: '',
-      phone: '',
-      address: '',
-      parentname: '',
-      parentphone: '',
-      classid: null,
-      payment_type: ''
-    };
+    reset();
   }
 }, { immediate: true });
 
 /** Submit form data */
-const handleSubmit = () => {
-  emit('submit', formData.value);
+const handleSave = async () => {
+  await submit(async (data) => {
+    emit('submit', data);
+  });
 };
 </script>

@@ -41,110 +41,82 @@
       </div>
 
       <!-- Grade Form Card -->
-      <form @submit.prevent="handleSubmit" class="bg-white rounded-2xl shadow-lg p-6">
+      <form @submit.prevent="handleSave" class="bg-white rounded-2xl shadow-lg p-6">
         <h2 class="text-xl font-bold text-gray-900 mb-6">Grade Details</h2>
 
         <div class="space-y-4">
           <!-- Test Type -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Test Type *</label>
-            <select
-              v-model="formData.test_type"
-              required
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="">Select test type</option>
-              <option value="Final Test">Final Test</option>
-              <option value="Midterm Exam">Midterm Exam</option>
-              <option value="Final Exam">Final Exam</option>
-              <option value="Completion">Completion</option>
-            </select>
-          </div>
+          <BaseSelect
+            v-bind="getFieldProps('test_type')"
+            label="Test Type"
+            required
+            :options="['Final Test', 'Midterm Exam', 'Final Exam', 'Completion']"
+            placeholder="Select test type"
+          />
 
           <!-- Skill Scores -->
           <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Listening Score</label>
-              <input
-                v-model.number="formData.listening_score"
-                type="number"
-                min="0"
-                max="100"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="0-100"
-              />
-            </div>
+            <BaseInput
+              v-bind="getFieldProps('listening_score')"
+              type="number"
+              label="Listening Score"
+              placeholder="0-100"
+              min="0"
+              max="100"
+            />
 
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Speaking Score</label>
-              <input
-                v-model.number="formData.speaking_score"
-                type="number"
-                min="0"
-                max="100"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="0-100"
-              />
-            </div>
+            <BaseInput
+              v-bind="getFieldProps('speaking_score')"
+              type="number"
+              label="Speaking Score"
+              placeholder="0-100"
+              min="0"
+              max="100"
+            />
 
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Reading Score</label>
-              <input
-                v-model.number="formData.reading_score"
-                type="number"
-                min="0"
-                max="100"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="0-100"
-              />
-            </div>
+            <BaseInput
+              v-bind="getFieldProps('reading_score')"
+              type="number"
+              label="Reading Score"
+              placeholder="0-100"
+              min="0"
+              max="100"
+            />
 
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Writing Score</label>
-              <input
-                v-model.number="formData.writing_score"
-                type="number"
-                min="0"
-                max="100"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="0-100"
-              />
-            </div>
+            <BaseInput
+              v-bind="getFieldProps('writing_score')"
+              type="number"
+              label="Writing Score"
+              placeholder="0-100"
+              min="0"
+              max="100"
+            />
           </div>
 
           <!-- Final Score -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Final Score</label>
-            <input
-              v-model.number="formData.final_score"
-              type="number"
-              min="0"
-              max="100"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="0-100"
-            />
-          </div>
+          <BaseInput
+            v-bind="getFieldProps('final_score')"
+            type="number"
+            label="Final Score"
+            placeholder="0-100"
+            min="0"
+            max="100"
+          />
 
           <!-- Date Taken -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Date Taken</label>
-            <input
-              v-model="formData.date_taken"
-              type="date"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
+          <BaseInput
+            v-bind="getFieldProps('date_taken')"
+            type="date"
+            label="Date Taken"
+          />
 
           <!-- Description -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-            <textarea
-              v-model="formData.description"
-              rows="3"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Optional notes about this grade"
-            ></textarea>
-          </div>
+          <BaseTextarea
+            v-bind="getFieldProps('description')"
+            label="Description"
+            :rows="3"
+            placeholder="Optional notes about this grade"
+          />
 
           <!-- File Upload -->
           <BaseFileUpload
@@ -201,7 +173,11 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { studentAPI, gradeAPI } from '../../services/api';
+import { useForm } from '../../composables/useForm';
 import BaseFileUpload from '../../components/form/BaseFileUpload.vue';
+import BaseInput from '../../components/form/BaseInput.vue';
+import BaseSelect from '../../components/form/BaseSelect.vue';
+import BaseTextarea from '../../components/form/BaseTextarea.vue';
 import LoadingBar from '../../components/ui/LoadingBar.vue';
 
 const route = useRoute();
@@ -212,22 +188,26 @@ const gradeid = route.params.gradeid;
 const student = ref(null);
 const grade = ref(null);
 const isLoading = ref(true);
-const isSubmitting = ref(false);
 const isDeleting = ref(false);
 const errorMessage = ref('');
 const successMessage = ref('');
 const submitError = ref('');
 
-const formData = ref({
-  test_type: '',
-  listening_score: null,
-  speaking_score: null,
-  reading_score: null,
-  writing_score: null,
-  final_score: null,
-  description: '',
-  date_taken: ''
-});
+const { formData, errors, isSubmitting, submit, getFieldProps } = useForm(
+  {
+    test_type: '',
+    listening_score: null,
+    speaking_score: null,
+    reading_score: null,
+    writing_score: null,
+    final_score: null,
+    description: '',
+    date_taken: ''
+  },
+  {
+    test_type: ['required']
+  }
+);
 
 const uploadFiles = ref([]);
 
@@ -277,84 +257,61 @@ const fetchData = async () => {
 };
 
 /** Submit grade update */
-const handleSubmit = async () => {
-  console.log('=== EDIT GRADE SUBMISSION STARTED ===');
-  console.log('📝 Grade ID:', gradeid);
-  
-  if (!student.value?.studentid) {
-    submitError.value = 'Invalid student data';
-    console.error('❌ Invalid student data:', student.value);
-    return;
-  }
-
-  try {
-    isSubmitting.value = true;
-    submitError.value = '';
-    successMessage.value = '';
-
-    // Log file upload information
-    console.log('📁 Upload Files:', uploadFiles.value);
-    console.log('📁 Is File object?', uploadFiles.value instanceof File);
-    console.log('📁 Upload Files Type:', typeof uploadFiles.value);
+const handleSave = async () => {
+  await submit(async (data) => {
+    console.log('=== EDIT GRADE SUBMISSION STARTED ===');
+    console.log('📝 Grade ID:', gradeid);
     
-    if (uploadFiles.value && uploadFiles.value instanceof File) {
-      console.log('📄 New File Details:', {
-        name: uploadFiles.value.name,
-        size: uploadFiles.value.size,
-        type: uploadFiles.value.type,
-        lastModified: uploadFiles.value.lastModified,
-        isFile: uploadFiles.value instanceof File,
-        isBlob: uploadFiles.value instanceof Blob
-      });
-    } else {
-      console.log('⚠️ No new file to upload (uploadFiles is not a File object, keeping existing file if any)');
+    if (!student.value?.studentid) {
+      submitError.value = 'Invalid student data';
+      console.error('❌ Invalid student data:', student.value);
+      return;
     }
 
-    const payload = {
-      studentid: student.value.studentid,
-      test_type: formData.value.test_type,
-      listening_score: formData.value.listening_score || null,
-      speaking_score: formData.value.speaking_score || null,
-      reading_score: formData.value.reading_score || null,
-      writing_score: formData.value.writing_score || null,
-      final_score: formData.value.final_score ? Math.round(formData.value.final_score) : null,
-      description: formData.value.description || null,
-      date_taken: formData.value.date_taken || null
-    };
+    try {
+      submitError.value = '';
+      successMessage.value = '';
 
-    console.log('📤 Payload to send:', payload);
+      // Log file upload information
+      console.log('📁 Upload Files:', uploadFiles.value);
+      
+      const payload = {
+        studentid: student.value.studentid,
+        test_type: data.test_type,
+        listening_score: data.listening_score || null,
+        speaking_score: data.speaking_score || null,
+        reading_score: data.reading_score || null,
+        writing_score: data.writing_score || null,
+        final_score: data.final_score ? Math.round(data.final_score) : null,
+        description: data.description || null,
+        date_taken: data.date_taken || null
+      };
 
-    // Fix: uploadFiles.value is a File object, not an array
-    const fileToUpload = uploadFiles.value instanceof File ? uploadFiles.value : null;
-    console.log('📤 File being sent to API:', fileToUpload ? {
-      name: fileToUpload.name,
-      size: fileToUpload.size,
-      type: fileToUpload.type
-    } : 'No file');
+      console.log('📤 Payload to send:', payload);
 
-    console.log('🚀 Calling gradeAPI.updateGrade...');
-    const response = await gradeAPI.updateGrade(gradeid, payload, fileToUpload);
-    console.log('✅ API Response:', response.data);
+      const fileToUpload = uploadFiles.value instanceof File ? uploadFiles.value : null;
+      
+      console.log('🚀 Calling gradeAPI.updateGrade...');
+      const response = await gradeAPI.updateGrade(gradeid, payload, fileToUpload);
+      console.log('✅ API Response:', response.data);
 
-    if (response.data.success) {
-      successMessage.value = 'Grade updated successfully!';
-      console.log('✅ Grade updated successfully');
-      setTimeout(() => {
-        router.push({ name: 'StudentDetail', params: { id: userid } });
-      }, 1000);
-    } else {
-      submitError.value = response.data.message || 'Failed to update grade';
-      console.error('❌ Failed to update grade:', response.data);
+      if (response.data.success) {
+        successMessage.value = 'Grade updated successfully!';
+        console.log('✅ Grade updated successfully');
+        setTimeout(() => {
+          router.push({ name: 'StudentDetail', params: { id: userid } });
+        }, 1000);
+      } else {
+        submitError.value = response.data.message || 'Failed to update grade';
+        console.error('❌ Failed to update grade:', response.data);
+      }
+    } catch (error) {
+      submitError.value = error.response?.data?.message || 'Error updating grade';
+      console.error('❌ Error during submission:', error);
+    } finally {
+      console.log('=== EDIT GRADE SUBMISSION ENDED ===');
     }
-  } catch (error) {
-    submitError.value = error.response?.data?.message || 'Error updating grade';
-    console.error('❌ Error during submission:', error);
-    console.error('❌ Error response:', error.response?.data);
-    console.error('❌ Error status:', error.response?.status);
-  } finally {
-    isSubmitting.value = false;
-    console.log('=== EDIT GRADE SUBMISSION ENDED ===');
-  }
+  });
 };
 
 /** Delete grade */

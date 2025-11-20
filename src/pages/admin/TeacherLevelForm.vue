@@ -1,41 +1,35 @@
 <template>
-  <form @submit.prevent="handleSubmit" class="space-y-4">
+  <form @submit.prevent="handleSave" class="space-y-4">
     <!-- Lecturer Selection -->
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Lecturer *</label>
-      <select
-        v-model="formData.lecturerid"
-        required
-        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-      >
-        <option value="">Select lecturer</option>
-        <option v-for="lecturer in lecturers" :key="lecturer.lecturerid" :value="lecturer.lecturerid">
-          {{ lecturer.fullname }}
-        </option>
-      </select>
-    </div>
+    <BaseSelect
+      v-bind="getFieldProps('lecturerid')"
+      label="Lecturer"
+      required
+      placeholder="Select lecturer"
+    >
+      <option v-for="lecturer in lecturers" :key="lecturer.lecturerid" :value="lecturer.lecturerid">
+        {{ lecturer.fullname }}
+      </option>
+    </BaseSelect>
 
     <!-- Level Selection -->
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Level *</label>
-      <select
-        v-model="formData.levelid"
-        required
-        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-      >
-        <option value="">Select level</option>
-        <option v-for="level in levels" :key="level.levelid" :value="level.levelid">
-          {{ level.name }}
-        </option>
-      </select>
-    </div>
+    <BaseSelect
+      v-bind="getFieldProps('levelid')"
+      label="Level"
+      required
+      placeholder="Select level"
+    >
+      <option v-for="level in levels" :key="level.levelid" :value="level.levelid">
+        {{ level.name }}
+      </option>
+    </BaseSelect>
 
     <!-- Actions -->
     <div class="flex justify-end gap-3 pt-4">
       <BaseButton type="button" variant="secondary" @click="$emit('cancel')">
         Cancel
       </BaseButton>
-      <BaseButton type="submit" variant="primary">
+      <BaseButton type="submit" variant="primary" :loading="isSubmitting">
         {{ isEditMode ? 'Update' : 'Assign' }}
       </BaseButton>
     </div>
@@ -44,7 +38,9 @@
 
 <script setup>
 import { ref, watch } from 'vue';
+import { useForm } from '../../composables/useForm';
 import BaseButton from '../../components/ui/BaseButton.vue';
+import BaseSelect from '../../components/form/BaseSelect.vue';
 
 const props = defineProps({
   /** Teacher level data for edit mode */
@@ -59,23 +55,31 @@ const props = defineProps({
 
 const emit = defineEmits(['submit', 'cancel']);
 
-const formData = ref({
-  lecturerid: '',
-  levelid: ''
-});
+const { formData, errors, isSubmitting, submit, getFieldProps, reset } = useForm(
+  {
+    lecturerid: '',
+    levelid: ''
+  },
+  {
+    lecturerid: ['required'],
+    levelid: ['required']
+  }
+);
 
 /** Populate form when editing */
 watch(() => props.teacherLevel, (newData) => {
   if (newData) {
-    formData.value = {
-      lecturerid: newData.lecturerid || '',
-      levelid: newData.levelid || ''
-    };
+    formData.lecturerid = newData.lecturerid || '';
+    formData.levelid = newData.levelid || '';
+  } else {
+    reset();
   }
 }, { immediate: true });
 
 /** Submit form data */
-const handleSubmit = () => {
-  emit('submit', formData.value);
+const handleSave = async () => {
+  await submit(async (data) => {
+    emit('submit', data);
+  });
 };
 </script>

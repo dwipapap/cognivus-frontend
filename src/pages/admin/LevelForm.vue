@@ -1,34 +1,27 @@
 <template>
-  <form @submit.prevent="handleSubmit" class="space-y-4">
+  <form @submit.prevent="handleSave" class="space-y-4">
     <!-- Name -->
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Level Name *</label>
-      <input
-        v-model="formData.name"
-        type="text"
-        required
-        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        placeholder="Enter level name (e.g., Beginner, Intermediate)"
-      />
-    </div>
+    <BaseInput
+      v-bind="getFieldProps('name')"
+      label="Level Name"
+      required
+      placeholder="Enter level name (e.g., Beginner, Intermediate)"
+    />
 
     <!-- Description -->
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-      <textarea
-        v-model="formData.description"
-        rows="3"
-        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        placeholder="Enter level description"
-      ></textarea>
-    </div>
+    <BaseTextarea
+      v-bind="getFieldProps('description')"
+      label="Description"
+      :rows="3"
+      placeholder="Enter level description"
+    />
 
     <!-- Actions -->
     <div class="flex justify-end gap-3 pt-4">
       <BaseButton type="button" variant="secondary" @click="$emit('cancel')">
         Cancel
       </BaseButton>
-      <BaseButton type="submit" variant="primary">
+      <BaseButton type="submit" variant="primary" :loading="isSubmitting">
         {{ isEditMode ? 'Update' : 'Create' }}
       </BaseButton>
     </div>
@@ -37,7 +30,10 @@
 
 <script setup>
 import { ref, watch } from 'vue';
+import { useForm } from '../../composables/useForm';
 import BaseButton from '../../components/ui/BaseButton.vue';
+import BaseInput from '../../components/form/BaseInput.vue';
+import BaseTextarea from '../../components/form/BaseTextarea.vue';
 
 const props = defineProps({
   /** Level data for edit mode */
@@ -48,23 +44,30 @@ const props = defineProps({
 
 const emit = defineEmits(['submit', 'cancel']);
 
-const formData = ref({
-  name: '',
-  description: ''
-});
+const { formData, errors, isSubmitting, submit, getFieldProps, reset } = useForm(
+  {
+    name: '',
+    description: ''
+  },
+  {
+    name: ['required']
+  }
+);
 
 /** Populate form when editing */
 watch(() => props.level, (newLevel) => {
   if (newLevel) {
-    formData.value = {
-      name: newLevel.name || '',
-      description: newLevel.description || ''
-    };
+    formData.name = newLevel.name || '';
+    formData.description = newLevel.description || '';
+  } else {
+    reset();
   }
 }, { immediate: true });
 
 /** Submit form data */
-const handleSubmit = () => {
-  emit('submit', formData.value);
+const handleSave = async () => {
+  await submit(async (data) => {
+    emit('submit', data);
+  });
 };
 </script>
