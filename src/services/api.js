@@ -308,10 +308,17 @@ export const dashboardAPI = {
 export const paymentAPI = {
   /**
    * Generate Midtrans Snap payment token
-   * @param {Object} paymentData - { email, amount, name }
-   * @returns {Promise} - { success, redirect_url, token }
+   * @param {Object} paymentData - { email, amount, name, studentid, payment_type }
+   * @returns {Promise} - { success, redirect_url, token, order_id }
    */
   generateToken: (paymentData) => apiClient.post('/payment/generate', paymentData),
+  
+  /**
+   * Get payment history for a student
+   * @param {number} studentid - Student ID
+   * @returns {Promise} - { success, data: [] }
+   */
+  getPaymentHistory: (studentid) => apiClient.get(`/payment/history/${studentid}`),
   
   /**
    * Webhook endpoint (handled by backend, not typically called from frontend)

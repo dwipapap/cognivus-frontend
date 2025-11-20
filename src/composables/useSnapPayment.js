@@ -44,13 +44,11 @@ export function useSnapPayment() {
       
       script.onload = () => {
         isSnapLoaded.value = true;
-        console.log('✅ Midtrans Snap.js loaded successfully');
         resolve(true);
       };
 
       script.onerror = (err) => {
         error.value = 'Failed to load Midtrans payment script';
-        console.error('❌ Failed to load Snap.js:', err);
         reject(new Error('Failed to load Midtrans script'));
       };
 
@@ -81,23 +79,19 @@ export function useSnapPayment() {
       // Default callbacks with user overrides
       const defaultCallbacks = {
         onSuccess: (result) => {
-          console.log('✅ Payment success:', result);
           paymentStatus.value = 'success';
           callbacks.onSuccess?.(result);
         },
         onPending: (result) => {
-          console.log('⏳ Payment pending:', result);
           paymentStatus.value = 'pending';
           callbacks.onPending?.(result);
         },
         onError: (result) => {
-          console.error('❌ Payment error:', result);
           paymentStatus.value = 'error';
           error.value = result.status_message || 'Payment failed';
           callbacks.onError?.(result);
         },
         onClose: () => {
-          console.log('🚪 Payment popup closed');
           if (!paymentStatus.value) {
             paymentStatus.value = 'closed';
           }

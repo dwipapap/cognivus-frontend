@@ -80,18 +80,14 @@ const fetchPrices = async () => {
     isPricesLoading.value = true;
     const response = await priceAPI.getAllPrices();
     
-    console.log('📊 Price API response:', response.data);
-    
     if (response.data?.success && response.data?.data) {
       prices.value = response.data.data;
-      console.log('✅ Prices loaded:', prices.value);
     } else if (response.data) {
       // Handle case where data might be directly in response.data
       prices.value = Array.isArray(response.data) ? response.data : [response.data];
-      console.log('✅ Prices loaded (alt format):', prices.value);
     }
   } catch (err) {
-    console.error('❌ Failed to fetch prices:', err);
+    console.error('Failed to fetch prices:', err);
   } finally {
     isPricesLoading.value = false;
   }
@@ -119,10 +115,10 @@ const handlePayment = async () => {
     const paymentData = {
       email: studentEmail.value,
       amount: selectedAmount.value,
-      name: studentName.value
+      name: studentName.value,
+      studentid: studentProfile.value?.studentid || authStore.user?.userid,
+      payment_type: selectedPaymentType.value
     };
-
-    console.log('🚀 Initiating payment:', paymentData);
 
     // Generate token from backend
     const response = await paymentAPI.generateToken(paymentData);
@@ -131,47 +127,23 @@ const handlePayment = async () => {
       throw new Error('Failed to generate payment token');
     }
 
-    const { token } = response.data;
-    console.log('✅ Token received:', token);
+    const { token, order_id } = response.data;
 
     // Trigger Snap payment
     await pay(token, {
       onSuccess: (result) => {
-        console.log('Payment success:', result);
         showSuccessModal.value = true;
-        
-        // Add to payment history
-        paymentHistory.value.unshift({
-          id: result.order_id,
-          type: selectedPaymentType.value,
-          amount: selectedAmount.value,
-          status: 'success',
-          date: new Date().toISOString(),
-          transactionId: result.transaction_id
-        });
-        
-        // Reset selection
+        fetchPaymentHistory();
         selectedPaymentType.value = null;
       },
       onPending: (result) => {
-        console.log('Payment pending:', result);
-        
-        // Add to payment history
-        paymentHistory.value.unshift({
-          id: result.order_id,
-          type: selectedPaymentType.value,
-          amount: selectedAmount.value,
-          status: 'pending',
-          date: new Date().toISOString(),
-          transactionId: result.transaction_id
-        });
+        fetchPaymentHistory();
       },
       onError: (result) => {
-        console.error('Payment error:', result);
         showErrorModal.value = true;
       },
       onClose: () => {
-        console.log('Payment popup closed');
+        fetchPaymentHistory();
       }
     });
 
@@ -213,9 +185,31 @@ const formatDate = (dateString) => {
   });
 };
 
+const fetchPaymentHistory = async () => {
+  try {
+    // Wait for student profile to be available
+    const studentid = studentProfile.value?.studentid || authStore.user?.userid;
+    
+    if (!studentid) {
+      return;
+    }
+    
+    const response = await paymentAPI.getPaymentHistory(studentid);
+    
+    if (response.data?.success && response.data?.data) {
+      paymentHistory.value = response.data.data;
+    }
+  } catch (err) {
+    console.error('Failed to fetch payment history:', err);
+  }
+};
+
 // Lifecycle
-onMounted(() => {
+onMounted(async () => {
   fetchPrices();
+  // Wait a bit for student profile to load
+  await new Promise(resolve => setTimeout(resolve, 500));
+  fetchPaymentHistory();
 });
 </script>
 
@@ -324,10 +318,17 @@ onMounted(() => {
     </div>
 
     <!-- Payment History -->
-    <div v-if="paymentHistory.length > 0" class="payment-section-glass rounded-2xl p-6 shadow-lg border border-white/20">
+    <div class="payment-section-glass rounded-2xl p-6 shadow-lg border border-white/20">
       <h2 class="text-xl font-semibold text-gray-800 mb-4">Riwayat Pembayaran</h2>
       
-      <div class="overflow-x-auto">
+      <div v-if="paymentHistory.length === 0" class="text-center py-8">
+        <svg class="w-16 h-16 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        <p class="text-gray-500 text-sm">Belum ada riwayat pembayaran</p>
+      </div>
+      
+      <div v-else class="overflow-x-auto">
         <table class="w-full">
           <thead>
             <tr class="border-b border-gray-200">
@@ -339,9 +340,9 @@ onMounted(() => {
             </tr>
           </thead>
           <tbody>
-            <tr v-for="payment in paymentHistory" :key="payment.id" class="border-b border-gray-100 hover:bg-gray-50">
-              <td class="py-3 px-4 text-sm text-gray-600">{{ formatDate(payment.date) }}</td>
-              <td class="py-3 px-4 text-sm text-gray-800">{{ getPaymentTypeName(payment.type) }}</td>
+            <tr v-for="payment in paymentHistory" :key="payment.paymentid" class="border-b border-gray-100 hover:bg-gray-50">
+              <td class="py-3 px-4 text-sm text-gray-600">{{ formatDate(payment.created_at) }}</td>
+              <td class="py-3 px-4 text-sm text-gray-800">{{ getPaymentTypeName(payment.payment_type) }}</td>
               <td class="py-3 px-4 text-sm font-semibold text-gray-800">{{ formatCurrency(payment.amount) }}</td>
               <td class="py-3 px-4">
                 <span class="px-2 py-1 text-xs font-medium rounded-full border capitalize"
@@ -349,7 +350,7 @@ onMounted(() => {
                   {{ payment.status }}
                 </span>
               </td>
-              <td class="py-3 px-4 text-sm text-gray-600 font-mono">{{ payment.transactionId }}</td>
+              <td class="py-3 px-4 text-sm text-gray-600 font-mono">{{ payment.midtrans_transactionid || payment.midtrans_orderid }}</td>
             </tr>
           </tbody>
         </table>
