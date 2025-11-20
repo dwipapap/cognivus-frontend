@@ -304,4 +304,19 @@ export const dashboardAPI = {
   getRecentActivity: () => apiClient.get('/dashboard/recent-activity')
 };
 
+// Payment API endpoints
+export const paymentAPI = {
+  /**
+   * Generate Midtrans Snap payment token
+   * @param {Object} paymentData - { email, amount, name }
+   * @returns {Promise} - { success, redirect_url, token }
+   */
+  generateToken: (paymentData) => apiClient.post('/payment/generate', paymentData),
+  
+  /**
+   * Webhook endpoint (handled by backend, not typically called from frontend)
+   */
+  webhook: (notificationData) => apiClient.post('/payment/webhook', notificationData)
+};
+
 export default apiClient;

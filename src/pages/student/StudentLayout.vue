@@ -184,12 +184,13 @@ onUnmounted(() => {
               </router-link>
             </li>
             <li>
-              <router-link to="/student/profile-view"
+              <router-link to="/student/payment"
                 class="nav-item flex items-center px-3 py-2 text-sm font-medium rounded-lg group">
                 <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                  <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"></path>
+                  <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd"></path>
                 </svg>
-                <span class="sidebar-text ml-3 opacity-0 whitespace-nowrap overflow-hidden">PLACEHOLDER</span>
+                <span class="sidebar-text ml-3 opacity-0 whitespace-nowrap overflow-hidden">Pembayaran</span>
               </router-link>
             </li>
             <li>
@@ -226,11 +227,12 @@ onUnmounted(() => {
               </router-link>
             </li>
             <li>
-              <router-link to="/student/profile-view" class="mobile-nav-item flex flex-col items-center gap-1">
+              <router-link to="/student/payment" class="mobile-nav-item flex flex-col items-center gap-1">
                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                  <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"></path>
+                  <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd"></path>
                 </svg>
-                <span class="text-xs">PLACEHOLDER</span>
+                <span class="text-xs">Bayar</span>
               </router-link>
             </li>
             <li>
