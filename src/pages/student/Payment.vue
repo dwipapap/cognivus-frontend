@@ -2,12 +2,15 @@
 import { ref, computed, onMounted } from 'vue';
 import { authStore } from '../../store/auth';
 import { useStudentProfile } from '../../composables/useStudentProfile';
+import { useClassDetails } from '../../composables/useClassDetails';
 import { useSnapPayment } from '../../composables/useSnapPayment';
 import { paymentAPI } from '../../services/api';
 import { priceAPI } from '../../services/api';
 
 // Composables
 const { studentProfile, isLoading: isProfileLoading } = useStudentProfile();
+const classId = computed(() => studentProfile.value?.classid);
+const { classInfo, levelName, isLoading: isClassLoading } = useClassDetails(classId);
 const { pay, isLoading: isPaymentLoading, error: paymentError, paymentStatus, resetPaymentState } = useSnapPayment();
 
 // State
@@ -21,37 +24,41 @@ const paymentHistory = ref([]);
 // Payment types configuration
 const paymentTypes = [
   {
+    id: 'semester',
+    name: 'Bayar Per Semester',
+    description: 'Pembayaran penuh untuk satu semester',
+    icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
+    category: 'regular',
+    priceKey: 'semester'
+  },
+  {
     id: 'monthly',
-    name: 'Tagihan Bulanan',
-    description: 'Pembayaran biaya kursus bulanan',
+    name: 'Bayar Per Bulan',
+    description: 'Pembayaran untuk satu bulan ini',
     icon: 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z',
-    priceKey: 'monthly_fee'
+    category: 'regular',
+    priceKey: 'monthly'
   },
   {
     id: 'final_exam',
-    name: 'Final Exam',
+    name: 'Ujian Akhir',
     description: 'Pembayaran biaya ujian akhir',
     icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
-    priceKey: 'exam_fee'
+    category: 'exam',
+    priceKey: 'final_exam'
   }
 ];
 
 // Computed
 const selectedAmount = computed(() => {
-  if (!selectedPaymentType.value || prices.value.length === 0) return 0;
+  if (!selectedPaymentType.value) return 0;
   
-  if (selectedPaymentType.value === 'monthly') {
-    // Get monthly price from tbprice table
-    // Use the first price item's monthlyprice or harga field
-    const priceItem = prices.value[0];
-    return priceItem?.monthlyprice || priceItem?.harga || 0;
+  if (selectedPaymentType.value === 'semester') {
+    return currentSemesterFee.value;
+  } else if (selectedPaymentType.value === 'monthly') {
+    return currentMonthlyFee.value;
   } else if (selectedPaymentType.value === 'final_exam') {
-    // For final exam, use a fixed price or the harga field
-    // You can adjust this based on your business logic
-    const priceItem = prices.value[0];
-    const basePrice = priceItem?.monthlyprice || priceItem?.harga || 0;
-    // Exam fee could be 50% of monthly price, or a fixed amount
-    return Math.floor(basePrice * 0.5); // Example: 50% of monthly fee
+    return finalExamFee.value;
   }
   
   return 0;
@@ -68,6 +75,43 @@ const studentEmail = computed(() => {
   return studentProfile.value?.email || 
          authStore.user?.email || 
          '';
+});
+
+const currentSemesterFee = computed(() => {
+  if (!classInfo.value?.levelid || prices.value.length === 0) {
+    return prices.value[0]?.harga || 0;
+  }
+  
+  // Find price matching the student's level
+  const matchingPrice = prices.value.find(p => p.levelid === classInfo.value.levelid);
+  
+  if (matchingPrice) {
+    return matchingPrice.harga || 0;
+  }
+  
+  // Fallback to first available price
+  return prices.value[0]?.harga || 0;
+});
+
+const currentMonthlyFee = computed(() => {
+  if (!classInfo.value?.levelid || prices.value.length === 0) {
+    return prices.value[0]?.monthlyprice || 0;
+  }
+  
+  // Find price matching the student's level
+  const matchingPrice = prices.value.find(p => p.levelid === classInfo.value.levelid);
+  
+  if (matchingPrice) {
+    return matchingPrice.monthlyprice || 0;
+  }
+  
+  // Fallback to first available price
+  return prices.value[0]?.monthlyprice || 0;
+});
+
+const finalExamFee = computed(() => {
+  // Fixed price for Final Exam
+  return 150000;
 });
 
 const canPay = computed(() => {
@@ -223,47 +267,212 @@ onMounted(async () => {
       </div>
     </div>
 
-    <!-- Payment Type Selection -->
+    <!-- Program & Billing Information -->
     <div class="payment-section-glass rounded-2xl p-6 shadow-lg border border-white/20">
-      <h2 class="text-xl font-semibold text-gray-800 mb-4">Pilih Jenis Pembayaran</h2>
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">Informasi Program & Tagihan</h2>
       
-      <div v-if="isPricesLoading" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div v-for="i in 2" :key="i" class="animate-pulse">
-          <div class="h-32 bg-gray-200 rounded-xl"></div>
+      <!-- Loading State -->
+      <div v-if="isClassLoading || isPricesLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div v-for="i in 4" :key="i" class="animate-pulse">
+          <div class="h-24 bg-gray-200 rounded-xl"></div>
         </div>
       </div>
 
-      <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div
-          v-for="type in paymentTypes"
-          :key="type.id"
-          @click="selectPaymentType(type.id)"
-          class="payment-type-card cursor-pointer rounded-xl p-6 border-2 transition-all duration-300"
-          :class="selectedPaymentType === type.id 
-            ? 'border-blue-500 bg-blue-50 shadow-lg scale-105' 
-            : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-md'"
-        >
-          <div class="flex items-start gap-4">
-            <div class="flex-shrink-0">
-              <div class="w-12 h-12 rounded-lg flex items-center justify-center"
-                   :class="selectedPaymentType === type.id ? 'bg-blue-500' : 'bg-gray-200'">
-                <svg class="w-6 h-6" :class="selectedPaymentType === type.id ? 'text-white' : 'text-gray-600'" 
-                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="type.icon"></path>
+      <!-- Content -->
+      <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- 1. Program Saat Ini -->
+        <div class="bg-white/60 rounded-xl p-4 border border-blue-100">
+          <div class="flex flex-col gap-3">
+            <div class="flex items-center gap-3">
+              <div class="flex-shrink-0">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center">
+                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-medium text-gray-600 mb-0.5">Program Saat Ini</p>
+              </div>
+            </div>
+            <div>
+              <p class="text-base font-bold text-gray-800 truncate">{{ classInfo?.class_code || '-' }}</p>
+              <p class="text-xs text-gray-500 mt-0.5">Kode Kelas</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Level Siswa -->
+        <div class="bg-white/60 rounded-xl p-4 border border-purple-100">
+          <div class="flex flex-col gap-3">
+            <div class="flex items-center gap-3">
+              <div class="flex-shrink-0">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-medium text-gray-600 mb-0.5">Level Siswa</p>
+              </div>
+            </div>
+            <div>
+              <p class="text-base font-bold text-gray-800 truncate">{{ levelName || 'Loading...' }}</p>
+              <p class="text-xs text-gray-500 mt-0.5">Tingkat</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Biaya Per Semester -->
+        <div class="bg-white/60 rounded-xl p-4 border border-green-100">
+          <div class="flex flex-col gap-3">
+            <div class="flex items-center gap-3">
+              <div class="flex-shrink-0">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center">
+                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-medium text-gray-600 mb-0.5">Biaya Semester</p>
+              </div>
+            </div>
+            <div>
+              <p class="text-base font-bold text-green-600 truncate">{{ formatCurrency(currentSemesterFee) }}</p>
+              <p class="text-xs text-gray-500 mt-0.5">Per Semester</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Biaya Per Bulan -->
+        <div class="bg-white/60 rounded-xl p-4 border border-orange-100">
+          <div class="flex flex-col gap-3">
+            <div class="flex items-center gap-3">
+              <div class="flex-shrink-0">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
+                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-medium text-gray-600 mb-0.5">Biaya Bulanan</p>
+              </div>
+            </div>
+            <div>
+              <p class="text-base font-bold text-orange-600 truncate">{{ formatCurrency(currentMonthlyFee) }}</p>
+              <p class="text-xs text-gray-500 mt-0.5">Per Bulan</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Info Note -->
+      <div class="mt-4 flex items-start gap-2 bg-blue-50 rounded-lg p-3 border border-blue-100">
+        <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <p class="text-sm text-blue-800">Informasi biaya di atas sesuai dengan level program Anda. Pilih jenis pembayaran di bawah untuk melanjutkan.</p>
+      </div>
+    </div>
+
+    <!-- Payment Type Selection -->
+    <div class="space-y-6">
+      <!-- Regular Payments (Semester & Monthly) -->
+      <div class="payment-section-glass rounded-2xl p-6 shadow-lg border border-white/20">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Pembayaran Reguler</h2>
+        
+        <div v-if="isPricesLoading" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div v-for="i in 2" :key="i" class="animate-pulse">
+            <div class="h-32 bg-gray-200 rounded-xl"></div>
+          </div>
+        </div>
+
+        <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div
+            v-for="type in paymentTypes.filter(t => t.category === 'regular')"
+            :key="type.id"
+            @click="selectPaymentType(type.id)"
+            class="payment-type-card cursor-pointer rounded-xl p-6 border-2 transition-all duration-300"
+            :class="selectedPaymentType === type.id 
+              ? 'border-blue-500 bg-blue-50 shadow-lg scale-105' 
+              : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-md'"
+          >
+            <div class="flex items-start gap-4">
+              <div class="flex-shrink-0">
+                <div class="w-12 h-12 rounded-lg flex items-center justify-center"
+                     :class="selectedPaymentType === type.id ? 'bg-blue-500' : 'bg-gray-200'">
+                  <svg class="w-6 h-6" :class="selectedPaymentType === type.id ? 'text-white' : 'text-gray-600'" 
+                       fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="type.icon"></path>
+                  </svg>
+                </div>
+              </div>
+              <div class="flex-1 min-w-0">
+                <h3 class="text-lg font-semibold text-gray-800">{{ type.name }}</h3>
+                <p class="text-sm text-gray-600 mt-1">{{ type.description }}</p>
+                <p class="text-xl font-bold text-blue-600 mt-2">
+                  {{ formatCurrency(selectedPaymentType === type.id ? selectedAmount : (type.id === 'semester' ? currentSemesterFee : currentMonthlyFee)) }}
+                </p>
+              </div>
+              <div v-if="selectedPaymentType === type.id" class="flex-shrink-0">
+                <svg class="w-6 h-6 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                 </svg>
               </div>
             </div>
-            <div class="flex-1 min-w-0">
-              <h3 class="text-lg font-semibold text-gray-800">{{ type.name }}</h3>
-              <p class="text-sm text-gray-600 mt-1">{{ type.description }}</p>
-              <p class="text-xl font-bold text-blue-600 mt-2">
-                {{ formatCurrency(selectedPaymentType === type.id ? selectedAmount : 0) }}
-              </p>
-            </div>
-            <div v-if="selectedPaymentType === type.id" class="flex-shrink-0">
-              <svg class="w-6 h-6 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-              </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Final Exam Payment -->
+      <div class="payment-section-glass rounded-2xl p-6 shadow-lg border border-white/20">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Pembayaran Ujian Akhir</h2>
+        
+        <div v-if="isPricesLoading" class="animate-pulse">
+          <div class="h-32 bg-gray-200 rounded-xl"></div>
+        </div>
+
+        <div v-else>
+          <div
+            v-for="type in paymentTypes.filter(t => t.category === 'exam')"
+            :key="type.id"
+            @click="selectPaymentType(type.id)"
+            class="payment-type-card cursor-pointer rounded-xl p-6 border-2 transition-all duration-300"
+            :class="selectedPaymentType === type.id 
+              ? 'border-purple-500 bg-purple-50 shadow-lg scale-105' 
+              : 'border-gray-200 bg-white hover:border-purple-300 hover:shadow-md'"
+          >
+            <div class="flex items-start gap-4">
+              <div class="flex-shrink-0">
+                <div class="w-12 h-12 rounded-lg flex items-center justify-center"
+                     :class="selectedPaymentType === type.id ? 'bg-purple-500' : 'bg-gray-200'">
+                  <svg class="w-6 h-6" :class="selectedPaymentType === type.id ? 'text-white' : 'text-gray-600'" 
+                       fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="type.icon"></path>
+                  </svg>
+                </div>
+              </div>
+              <div class="flex-1 min-w-0">
+                <h3 class="text-lg font-semibold text-gray-800">{{ type.name }}</h3>
+                <p class="text-sm text-gray-600 mt-1">{{ type.description }}</p>
+                <p class="text-xl font-bold text-purple-600 mt-2">
+                  {{ formatCurrency(finalExamFee) }}
+                </p>
+                <div class="mt-3 flex items-start gap-2 bg-purple-50 rounded-lg p-2 border border-purple-100">
+                  <svg class="w-4 h-4 text-purple-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  <p class="text-xs text-purple-800">Biaya ini terpisah dari pembayaran reguler dan hanya diperlukan saat mengikuti ujian akhir.</p>
+                </div>
+              </div>
+              <div v-if="selectedPaymentType === type.id" class="flex-shrink-0">
+                <svg class="w-6 h-6 text-purple-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+              </div>
             </div>
           </div>
         </div>
