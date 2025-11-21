@@ -523,96 +523,127 @@ onMounted(() => {
             </div>
 
             <!-- Modal Body - Scrollable -->
-            <div class="flex-1 overflow-y-auto px-8 py-6 space-y-6 bg-gradient-to-b from-gray-50/50 to-white">
-              <!-- Title Input -->
-              <BaseInput
-                v-model="formData.title"
-                label="Title"
-                placeholder="Enter material title"
-                required
-                size="lg"
-              />
-
-              <!-- Course Code Input -->
-              <BaseInput
-                v-model="formData.course_code"
-                label="Course Code"
-                placeholder="e.g., ENG-101"
-                size="lg"
-              />
-
-              <!-- Description Textarea -->
-              <BaseTextarea
-                v-model="formData.description"
-                label="Description"
-                placeholder="Describe the course material..."
-                :rows="3"
-              />
-
-              <!-- Existing Files (Edit Mode) -->
-              <div v-if="editingCourse && existingFiles.length > 0" class="space-y-3">
-                <label class="block text-sm font-semibold text-gray-700">Existing Files</label>
-                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-4 space-y-3">
-                  <div
-                    v-for="file in existingFiles"
-                    :key="file.cfid"
-                    class="flex items-center justify-between bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-all"
-                  >
-                    <div class="flex items-center gap-3 flex-1 min-w-0">
-                      <div class="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-sm">
-                        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/>
-                        </svg>
-                      </div>
-                      <div class="flex-1 min-w-0">
-                        <a 
-                          :href="file.url || file.path" 
-                          target="_blank"
-                          class="text-sm font-semibold text-blue-600 hover:text-blue-800 truncate block transition-colors"
-                        >
-                          File {{ file.cfid }}
-                        </a>
-                        <p class="text-xs text-gray-500 mt-0.5">Uploaded: {{ formatDate(file.upload_date) }}</p>
-                      </div>
-                    </div>
-                    <button
-                      @click="deleteExistingFile(file.cfid)"
-                      :disabled="isDeletingFile"
-                      class="ml-3 flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-red-50 to-rose-50 text-red-600 hover:from-red-100 hover:to-rose-100 border-2 border-red-200 hover:border-red-300 rounded-full text-sm font-semibold transition-all hover:scale-105 active:scale-95 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                    >
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            <div class="flex-1 overflow-y-auto px-8 py-6 bg-gradient-to-b from-gray-50/50 to-white">
+              <!-- Two Column Grid Layout -->
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                
+                <!-- Left Column: Material Details -->
+                <div class="space-y-6">
+                  <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <h3 class="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                      <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                       </svg>
-                      Delete
-                    </button>
+                      Material Details
+                    </h3>
+                    
+                    <div class="space-y-4">
+                      <!-- Title Input -->
+                      <BaseInput
+                        v-model="formData.title"
+                        label="Title"
+                        placeholder="Enter material title"
+                        required
+                      />
+
+                      <!-- Course Code Input -->
+                      <BaseInput
+                        v-model="formData.course_code"
+                        label="Course Code"
+                        placeholder="e.g., ENG-101"
+                      />
+
+                      <!-- Description Textarea -->
+                      <BaseTextarea
+                        v-model="formData.description"
+                        label="Description"
+                        placeholder="Describe the course material..."
+                        :rows="4"
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <!-- File Upload -->
-              <BaseFileUpload
-                v-model="uploadFiles"
-                label="Upload New Files (Optional)"
-                accept=".pdf,.doc,.docx,.ppt,.pptx"
-                :max-size="50"
-                :multiple="true"
-                hint="Optional: PDF, Word, or PowerPoint (max 50MB each). Multiple files allowed."
-              />
+                <!-- Right Column: Files & Media -->
+                <div class="space-y-6">
+                  <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <h3 class="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                      <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                      </svg>
+                      Files & Media
+                    </h3>
 
-              <!-- Video Link Input -->
-              <div>
-                <BaseInput
-                  v-model="formData.video_link"
-                  label="Video Link (Optional)"
-                  placeholder="https://youtube.com/watch?v=..."
-                  type="url"
-                />
-                <div class="flex items-start gap-2 mt-2">
-                  <svg class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-                  </svg>
-                  <p class="text-xs text-gray-500">YouTube, Vimeo, or other video platform link</p>
+                    <div class="space-y-4">
+                      <!-- Existing Files (Edit Mode) -->
+                      <div v-if="editingCourse && existingFiles.length > 0" class="space-y-3">
+                        <label class="block text-sm font-medium text-gray-700">Existing Files</label>
+                        <div class="bg-white border border-gray-200 rounded-lg p-3 space-y-2 max-h-48 overflow-y-auto">
+                          <div
+                            v-for="file in existingFiles"
+                            :key="file.cfid"
+                            class="flex items-center justify-between bg-gray-50 border border-gray-100 rounded-lg p-3 hover:bg-gray-100 transition-all"
+                          >
+                            <div class="flex items-center gap-2 flex-1 min-w-0">
+                              <div class="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-md flex items-center justify-center">
+                                <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/>
+                                </svg>
+                              </div>
+                              <div class="flex-1 min-w-0">
+                                <a 
+                                  :href="file.url || file.path" 
+                                  target="_blank"
+                                  class="text-xs font-semibold text-blue-600 hover:text-blue-800 truncate block transition-colors"
+                                >
+                                  File {{ file.cfid }}
+                                </a>
+                                <p class="text-xs text-gray-500">{{ formatDate(file.upload_date) }}</p>
+                              </div>
+                            </div>
+                            <button
+                              @click="deleteExistingFile(file.cfid)"
+                              :disabled="isDeletingFile"
+                              class="ml-2 flex-shrink-0 inline-flex items-center gap-1 px-2 py-1 bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 rounded-md text-xs font-semibold transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                            >
+                              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- File Upload -->
+                      <BaseFileUpload
+                        v-model="uploadFiles"
+                        label="Upload New Files"
+                        accept=".pdf,.doc,.docx,.ppt,.pptx"
+                        :max-size="50"
+                        :multiple="true"
+                        hint="PDF, Word, or PowerPoint (max 50MB each)"
+                      />
+
+                      <!-- Video Link Input -->
+                      <div>
+                        <BaseInput
+                          v-model="formData.video_link"
+                          label="Video Link (Optional)"
+                          placeholder="https://youtube.com/watch?v=..."
+                          type="url"
+                        />
+                        <div class="flex items-start gap-2 mt-2">
+                          <svg class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                          </svg>
+                          <p class="text-xs text-gray-500">YouTube, Vimeo, or other platform</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
+
               </div>
             </div>
 
