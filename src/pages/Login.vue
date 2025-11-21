@@ -71,7 +71,7 @@ const handleLogin = async () => {
 
         const targetRoute = roleRoutes[role] || '/student/dashboard';
         
-        openModal('success', 'Login Berhasil!', `Selamat datang! Anda akan diarahkan ke dashboard ${role}.`);
+        openModal('success', 'Login Successful!', `Welcome! You will be redirected to the ${role} dashboard.`);
         
         setTimeout(() => {
           closeModal();
@@ -80,8 +80,8 @@ const handleLogin = async () => {
       }
     });
   } catch (error) {
-    const errorMsg = error.response?.data?.message || 'Login gagal. Silahkan periksa kembali data Anda.';
-    openModal('error', 'Login Gagal', errorMsg);
+    const errorMsg = error.response?.data?.message || 'Login failed. Please check your credentials.';
+    openModal('error', 'Login Failed', errorMsg);
   }
 };
 
@@ -172,14 +172,14 @@ const handleGoogleLogin = () => {
               block
               :loading="isSubmitting"
             >
-              Masuk
+              Login
             </BaseButton>
           </form>
 
           <!-- Divider -->
           <div class="flex items-center my-4">
             <div class="flex-grow border-t border-gray-300"></div>
-            <span class="flex-shrink mx-4 text-gray-500 text-sm">Atau</span>
+            <span class="flex-shrink mx-4 text-gray-500 text-sm">Or</span>
             <div class="flex-grow border-t border-gray-300"></div>
           </div>
 
@@ -198,17 +198,17 @@ const handleGoogleLogin = () => {
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
               </svg>
             </template>
-            Masuk dengan Google
+            Login with Google
           </BaseButton>
 
           <!-- Footer text -->
           <div class="mt-6 text-center">
             <p class="text-xs text-gray-500">
-              Butuh informasi lebih lanjut? 
-              <a href="#" class="text-blue-600 hover:underline">WhatsApp</a> atau 
+              Need more information? 
+              <a href="#" class="text-blue-600 hover:underline">WhatsApp</a> or 
               <a href="#" class="text-blue-600 hover:underline">Email</a>
             </p>
-            <p class="text-xs text-gray-400 mt-2">2024 ITTR English Course. Hak cipta dilindungi</p>
+            <p class="text-xs text-gray-400 mt-2">2024 ITTR English Course. All rights reserved</p>
           </div>
         </BaseCard>
       </div>

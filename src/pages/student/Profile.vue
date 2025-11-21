@@ -1,13 +1,13 @@
 <script setup>
 import { ref, onMounted, nextTick } from 'vue';
-import apiClient from '../../services/api';
+import { studentAPI } from '../../services/api';
 import { authStore } from '../../store/auth';
 import Modal from '../../components/ui/Modal.vue';
 
 // Gender mapping helper
 const mapGenderToBackend = (frontendGender) => {
-  if (frontendGender === 'Laki-laki') return 'L';
-  if (frontendGender === 'Perempuan') return 'P';
+  if (frontendGender === 'Male') return 'L';
+  if (frontendGender === 'Female') return 'P';
   return frontendGender; // Already in backend format
 };
 
@@ -38,8 +38,8 @@ const errors = ref({});
 
 // Gender options for select
 const genderOptions = [
-  { value: 'Laki-laki', label: 'Laki-laki' },
-  { value: 'Perempuan', label: 'Perempuan' }
+  { value: 'Male', label: 'Male' },
+  { value: 'Female', label: 'Female' }
 ];
 
 // Basic validation
@@ -84,7 +84,7 @@ const fetchProfile = async () => {
   }
 
   try {
-    const response = await apiClient.get(`/students/${userId}`);
+    const response = await studentAPI.getStudentById(userId);
     if (response.data.success) {
       // Assign backend data directly to form
       Object.assign(formData.value, response.data.data);
@@ -120,7 +120,7 @@ const handleUpdateProfile = async () => {
       gender: mapGenderToBackend(formData.value.gender)
     };
     
-    const response = await apiClient.put(`/students/${userId}`, updateData);
+    const response = await studentAPI.updateStudent(userId, updateData);
     if (response.data.success) {
       modalType.value = 'success';
       modalMessage.value = "Profile updated successfully!";
@@ -211,7 +211,7 @@ onMounted(fetchProfile);
 
           <!-- Place Date (Birth Place) -->
           <div>
-            <label class="block text-base font-bold text-blue-600 mb-3">Place Date</label>
+            <label class="block text-base font-bold text-blue-600 mb-3">Birth Place</label>
             <input
               v-model="formData.birthplace"
               type="text"
@@ -293,7 +293,7 @@ onMounted(fetchProfile);
             :disabled="isSubmitting"
           >
             <span v-if="isSubmitting">Saving...</span>
-            <span v-else>Save Change</span>
+            <span v-else>Save Changes</span>
           </button>
         </div>
       </form>

@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, nextTick } from 'vue';
-import apiClient from '../services/api';
+import { studentAPI, userAPI } from '../services/api';
 import { authStore } from '../store/auth';
 import { useRouter } from 'vue-router';
 import { useForm } from '../composables/useForm';
@@ -14,8 +14,8 @@ const router = useRouter();
 
 // Gender mapping helper
 const mapGenderToBackend = (frontendGender) => {
-  if (frontendGender === 'Laki-laki') return 'L';
-  if (frontendGender === 'Perempuan') return 'P';
+  if (frontendGender === 'Male') return 'L';
+  if (frontendGender === 'Female') return 'P';
   return frontendGender; // Already in backend format
 };
 
@@ -26,8 +26,8 @@ const modalMessage = ref('');
 
 // Gender options for select
 const genderOptions = [
-  { value: 'Laki-laki', label: 'Laki-laki' },
-  { value: 'Perempuan', label: 'Perempuan' }
+  { value: 'Male', label: 'Male' },
+  { value: 'Female', label: 'Female' }
 ];
 
 const { formData, errors, isSubmitting, submit, getFieldProps, reset, validate } = useForm(
@@ -74,7 +74,7 @@ const fetchProfile = async () => {
   }
 
   try {
-    const response = await apiClient.get(`/students/${userId}`);
+    const response = await studentAPI.getStudentById(userId);
     if (response.data.success) {
       // Assign backend data to form (excluding password fields)
       const studentData = response.data.data;
@@ -114,7 +114,7 @@ const handleCompleteProfile = async () => {
         password: data.password
       };
       
-      await apiClient.put(`/users/${userId}`, userUpdateData);
+      await userAPI.updateUser(userId, userUpdateData);
       
       // Step 2: Update student profile
       const studentUpdateData = {
@@ -128,7 +128,7 @@ const handleCompleteProfile = async () => {
         birthplace: data.birthplace
       };
       
-      const response = await apiClient.put(`/students/${userId}`, studentUpdateData);
+      const response = await studentAPI.updateStudent(userId, studentUpdateData);
       
       if (response.data.success) {
         modalType.value = 'success';

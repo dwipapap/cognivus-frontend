@@ -73,7 +73,7 @@ onUnmounted(() => {
           <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M3 3a1 1 0 011 1v12a1 1 0 11-2 0V4a1 1 0 011-1zm7.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L12.586 9H5a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"></path>
           </svg>
-          <span>Masuk</span>
+          <span>Login</span>
         </router-link>
       </div>
     </div>
