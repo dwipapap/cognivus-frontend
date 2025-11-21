@@ -13,7 +13,7 @@ const { studentProfile, isLoading } = useStudentProfile();
 
 // Fetch class details (level and lecturer info)
 const classId = computed(() => studentProfile.value?.classid);
-const { levelName, lecturerName, isLoading: classLoading } = useClassDetails(classId);
+const { classInfo, levelName, lecturerName, isLoading: classLoading } = useClassDetails(classId);
 
 const user = computed(() => ({
   name: studentProfile.value?.nama_lengkap || studentProfile.value?.fullname || authStore.user?.username || authStore.user?.email?.split('@')[0] || 'Student',
@@ -32,6 +32,42 @@ const greeting = ref(getGreeting());
 const courses = ref([]);
 const coursesLoading = ref(false);
 const coursesError = ref(null);
+
+/** Format class schedule for display */
+const formattedSchedule = computed(() => {
+  if (!classInfo.value) return 'Schedule not set';
+  
+  const schedules = [];
+  
+  // Primary schedule
+  if (classInfo.value.schedule_day && classInfo.value.schedule_time) {
+    const time = formatTime(classInfo.value.schedule_time);
+    schedules.push(`${classInfo.value.schedule_day}, ${time}`);
+  }
+  
+  // Secondary schedule
+  if (classInfo.value.schedule_day_2 && classInfo.value.schedule_time_2) {
+    const time = formatTime(classInfo.value.schedule_time_2);
+    schedules.push(`${classInfo.value.schedule_day_2}, ${time}`);
+  }
+  
+  return schedules.length > 0 ? schedules.join(' & ') : 'Schedule not set';
+});
+
+/** Format time from 24h to 12h format */
+const formatTime = (time) => {
+  if (!time) return '';
+  
+  try {
+    const [hours, minutes] = time.split(':');
+    const hour = parseInt(hours, 10);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const formattedHour = hour % 12 || 12;
+    return `${formattedHour}:${minutes} ${ampm}`;
+  } catch {
+    return time;
+  }
+};
 
 /** Default placeholder images */
 const placeholderImages = [
@@ -127,6 +163,11 @@ const stats = computed(() => {
       title: 'Assigned Teacher', 
       value: classLoading.value ? 'Loading...' : (lecturerName.value || '-'),
       icon: 'teacher'
+    },
+    { 
+      title: 'Class Schedule', 
+      value: classLoading.value ? 'Loading...' : formattedSchedule.value,
+      icon: 'schedule'
     }
   ];
 });
@@ -282,7 +323,7 @@ watchEffect(() => {
   </div>
 
   <!-- Quick Stats Section -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
     <div
       v-for="stat in stats"
       :key="stat.title"
@@ -299,8 +340,12 @@ watchEffect(() => {
             <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"></path>
           </svg>
           <!-- Teacher Icon -->
-          <svg v-else class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+          <svg v-else-if="stat.icon === 'teacher'" class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
             <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"></path>
+          </svg>
+          <!-- Schedule Icon -->
+          <svg v-else class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
           </svg>
         </div>
         <div class="flex-1 min-w-0">

@@ -54,6 +54,29 @@ const getStudentCount = (classid) => {
   return allStudents.value.filter(s => s.classid === classid).length;
 };
 
+/** Format class schedule for display */
+const formatSchedule = (cls) => {
+  if (!cls) return null;
+  
+  const schedules = [];
+  
+  // Primary schedule
+  if (cls.schedule_day && cls.schedule_time) {
+    const day = cls.schedule_day.substring(0, 3); // Mon, Tue, etc.
+    const time = cls.schedule_time.substring(0, 5); // HH:MM
+    schedules.push(`${day} ${time}`);
+  }
+  
+  // Secondary schedule
+  if (cls.schedule_day_2 && cls.schedule_time_2) {
+    const day = cls.schedule_day_2.substring(0, 3);
+    const time = cls.schedule_time_2.substring(0, 5);
+    schedules.push(`${day} ${time}`);
+  }
+  
+  return schedules.length > 0 ? schedules.join(' & ') : null;
+};
+
 /** Fetch lecturer's classes and related data */
 const fetchDashboardData = async () => {
   if (!lecturerProfile.value?.lecturerid) return;
@@ -263,7 +286,17 @@ onMounted(() => {
                       </span>
                     </div>
                     <p class="text-xs text-gray-600 mb-2 line-clamp-1">{{ cls.description || 'No description' }}</p>
-                    <span class="text-xs text-blue-600 font-medium">{{ getStudentCount(cls.classid) }} students</span>
+                    <div class="flex items-center gap-3">
+                      <!-- Schedule -->
+                      <div v-if="formatSchedule(cls)" class="flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span class="text-xs text-gray-700 font-medium">{{ formatSchedule(cls) }}</span>
+                      </div>
+                      <!-- Student Count -->
+                      <span class="text-xs text-blue-600 font-medium">{{ getStudentCount(cls.classid) }} students</span>
+                    </div>
                   </div>
                 </div>
                 <button 

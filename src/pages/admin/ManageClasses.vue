@@ -49,6 +49,27 @@ const getLecturerName = (lecturerId) => {
   return lecturer?.fullname || 'Unassigned';
 };
 
+/** Format class schedule for display */
+const formatSchedule = (classItem) => {
+  const schedules = [];
+  
+  // Primary schedule
+  if (classItem.schedule_day && classItem.schedule_time) {
+    const day = classItem.schedule_day.substring(0, 3); // Mon, Tue, etc.
+    const time = classItem.schedule_time.substring(0, 5); // HH:MM
+    schedules.push(`${day} ${time}`);
+  }
+  
+  // Secondary schedule
+  if (classItem.schedule_day_2 && classItem.schedule_time_2) {
+    const day = classItem.schedule_day_2.substring(0, 3);
+    const time = classItem.schedule_time_2.substring(0, 5);
+    schedules.push(`${day} ${time}`);
+  }
+  
+  return schedules.length > 0 ? schedules.join(' & ') : null;
+};
+
 /** Fetch all classes from API */
 const fetchClasses = async () => {
   try {
@@ -168,6 +189,7 @@ onMounted(() => {
             <tr class="bg-gray-50 border-b border-gray-200">
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider w-16">#</th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Class Code</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Schedule</th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Level</th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Lecturer</th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Description</th>
@@ -189,6 +211,17 @@ onMounted(() => {
               <!-- Class Code -->
               <td class="px-6 py-4">
                 <div class="text-sm font-medium text-gray-900">{{ classItem.class_code }}</div>
+              </td>
+
+              <!-- Schedule -->
+              <td class="px-6 py-4">
+                <div v-if="formatSchedule(classItem)" class="flex items-center gap-1.5">
+                  <svg class="w-4 h-4 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  <span class="text-sm text-gray-700 font-medium">{{ formatSchedule(classItem) }}</span>
+                </div>
+                <span v-else class="text-sm text-gray-400 italic">No schedule</span>
               </td>
 
               <!-- Level -->
@@ -229,7 +262,7 @@ onMounted(() => {
               </td>
             </tr>
             <tr v-if="classes.length === 0">
-              <td colspan="6" class="px-6 py-12 text-center">
+              <td colspan="7" class="px-6 py-12 text-center">
                 <div class="flex flex-col items-center justify-center text-gray-500">
                   <svg class="w-12 h-12 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>

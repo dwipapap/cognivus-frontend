@@ -27,12 +27,27 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'save']);
 
+/** Days of the week for schedule selection */
+const daysOfWeek = [
+  { value: 'Monday', label: 'Monday' },
+  { value: 'Tuesday', label: 'Tuesday' },
+  { value: 'Wednesday', label: 'Wednesday' },
+  { value: 'Thursday', label: 'Thursday' },
+  { value: 'Friday', label: 'Friday' },
+  { value: 'Saturday', label: 'Saturday' },
+  { value: 'Sunday', label: 'Sunday' }
+];
+
 const { formData, errors, isSubmitting, submit, getFieldProps, reset } = useForm(
   {},
   {
     class_code: ['required'],
     levelid: ['required'],
-    description: []
+    description: [],
+    schedule_day: [],
+    schedule_time: [],
+    schedule_day_2: [],
+    schedule_time_2: []
   }
 );
 
@@ -43,6 +58,10 @@ watch(() => props.classItem, (newVal) => {
     formData.description = newVal.description || '';
     formData.levelid = newVal.levelid ? Number(newVal.levelid) : '';
     formData.lecturerid = newVal.lecturerid ? Number(newVal.lecturerid) : '';
+    formData.schedule_day = newVal.schedule_day || '';
+    formData.schedule_time = newVal.schedule_time || '';
+    formData.schedule_day_2 = newVal.schedule_day_2 || '';
+    formData.schedule_time_2 = newVal.schedule_time_2 || '';
   } else {
     reset();
   }
@@ -143,6 +162,74 @@ const handleSave = async () => {
                 <div class="text-sm text-blue-800">
                   <p class="font-medium">Assignment Info</p>
                   <p class="text-xs mt-1">You can assign a lecturer to this class now or leave it unassigned and assign one later.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Class Schedule Section -->
+        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+          <h3 class="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            Class Schedule
+          </h3>
+          
+          <div class="space-y-4">
+            <!-- Primary Schedule -->
+            <div class="space-y-3">
+              <p class="text-xs font-medium text-gray-700">Primary Schedule</p>
+              <div class="grid grid-cols-2 gap-3">
+                <BaseSelect 
+                  v-bind="getFieldProps('schedule_day')" 
+                  label="Day"
+                >
+                  <option value="">Select Day</option>
+                  <option v-for="day in daysOfWeek" :key="day.value" :value="day.value">
+                    {{ day.label }}
+                  </option>
+                </BaseSelect>
+                
+                <BaseInput 
+                  v-bind="getFieldProps('schedule_time')" 
+                  label="Start Time"
+                  type="time"
+                />
+              </div>
+            </div>
+
+            <!-- Secondary Schedule (Optional) -->
+            <div class="space-y-3">
+              <p class="text-xs font-medium text-gray-700">Secondary Schedule (Optional)</p>
+              <div class="grid grid-cols-2 gap-3">
+                <BaseSelect 
+                  v-bind="getFieldProps('schedule_day_2')" 
+                  label="Day"
+                >
+                  <option value="">Select Day</option>
+                  <option v-for="day in daysOfWeek" :key="day.value" :value="day.value">
+                    {{ day.label }}
+                  </option>
+                </BaseSelect>
+                
+                <BaseInput 
+                  v-bind="getFieldProps('schedule_time_2')" 
+                  label="Start Time"
+                  type="time"
+                />
+              </div>
+            </div>
+
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <div class="flex items-start gap-2">
+                <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <div class="text-sm text-blue-800">
+                  <p class="font-medium">Schedule Info</p>
+                  <p class="text-xs mt-1">You can set up to two weekly schedules for this class. Both schedules are optional.</p>
                 </div>
               </div>
             </div>
