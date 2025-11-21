@@ -173,8 +173,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="max-w-7xl mx-auto px-4 py-8">
-    <h1 class="text-4xl font-bold text-gray-900 mb-8">Manage Students</h1>
+  <h1 class="text-4xl font-bold text-gray-900 mb-8">Manage Students</h1>
 
     <!-- Error Message -->
     <div v-if="errorMessage" class="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
@@ -372,5 +371,4 @@ onMounted(() => {
     <div v-else class="bg-white rounded-2xl shadow-lg p-12 text-center">
       <p class="text-gray-500 text-lg">You are not assigned to any classes yet.</p>
     </div>
-  </div>
 </template>

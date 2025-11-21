@@ -317,8 +317,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="max-w-7xl mx-auto px-4 py-8">
-    <h1 class="text-4xl font-bold text-gray-900 mb-8">Manage Materials</h1>
+  <h1 class="text-4xl font-bold text-gray-900 mb-8">Manage Materials</h1>
 
     <!-- Messages -->
     <div v-if="successMessage" class="mb-6 bg-green-50 border border-green-200 rounded-xl p-4">
@@ -689,7 +688,6 @@ onMounted(() => {
       @cancel="handleCancel"
       @close="handleCancel"
     />
-  </div>
 </template>
 
 <style scoped>

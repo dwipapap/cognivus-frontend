@@ -94,10 +94,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50/50 pb-12">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      
-      <!-- Loading State -->
+  <!-- Loading State -->
       <div v-if="isProfileLoading || isLoadingGrades || classLoading" class="max-w-2xl mx-auto py-20">
         <LoadingBar :loading="true" color="blue" :duration="2000" />
         <p class="text-center text-gray-500 mt-4">Loading your grades...</p>
@@ -120,7 +117,7 @@ onMounted(() => {
         </button>
       </div>
 
-      <div v-else class="space-y-6">
+      <div v-else class="space-y-8 mb-8">
         <!-- Header Card (MyCourses Style) -->
         <div class="relative bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-lg overflow-hidden">
           <!-- Diagonal Book Graphics -->
@@ -343,6 +340,4 @@ onMounted(() => {
           </div>
         </div>
       </div>
-    </div>
-  </div>
 </template>

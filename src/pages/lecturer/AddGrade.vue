@@ -1,17 +1,16 @@
 <template>
-  <div class="max-w-4xl mx-auto px-4 py-8">
-    <!-- Back Button -->
-    <button
-      @click="goBack"
-      class="mb-6 inline-flex items-center text-blue-600 hover:text-blue-800 font-medium"
-    >
-      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-      </svg>
-      Back to Student
-    </button>
+  <!-- Back Button -->
+  <button
+    @click="goBack"
+    class="mb-6 inline-flex items-center text-blue-600 hover:text-blue-800 font-medium"
+  >
+    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+    </svg>
+    Back to Student
+  </button>
 
-    <h1 class="text-4xl font-bold text-gray-900 mb-8">Add Grade</h1>
+  <h1 class="text-4xl font-bold text-gray-900 mb-8">Add Grade</h1>
 
     <!-- Loading -->
     <div v-if="isLoading" class="max-w-2xl mx-auto py-20">
@@ -158,7 +157,6 @@
         </div>
       </form>
     </div>
-  </div>
 </template>
 
 <script setup>
