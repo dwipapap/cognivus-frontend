@@ -25,24 +25,24 @@ const paymentHistory = ref([]);
 const paymentTypes = [
   {
     id: 'semester',
-    name: 'Bayar Per Semester',
-    description: 'Pembayaran penuh untuk satu semester',
+    name: 'Pay Per Semester',
+    description: 'Full payment for one semester',
     icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
     category: 'regular',
     priceKey: 'semester'
   },
   {
     id: 'monthly',
-    name: 'Bayar Per Bulan',
-    description: 'Pembayaran untuk satu bulan ini',
+    name: 'Pay Per Month',
+    description: 'Payment for this month',
     icon: 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z',
     category: 'regular',
     priceKey: 'monthly'
   },
   {
     id: 'final_exam',
-    name: 'Ujian Akhir',
-    description: 'Pembayaran biaya ujian akhir',
+    name: 'Final Exam',
+    description: 'Final exam fee payment',
     icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
     category: 'exam',
     priceKey: 'final_exam'
@@ -262,14 +262,14 @@ onMounted(async () => {
     <!-- Page Header -->
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-3xl font-bold text-gray-800">Pembayaran</h1>
-        <p class="text-gray-600 mt-1">Kelola pembayaran kursus Anda</p>
+        <h1 class="text-3xl font-bold text-gray-800">Payment</h1>
+        <p class="text-gray-600 mt-1">Manage your course payments</p>
       </div>
     </div>
 
     <!-- Program & Billing Information -->
     <div class="payment-section-glass rounded-2xl p-6 shadow-lg border border-white/20">
-      <h2 class="text-xl font-semibold text-gray-800 mb-4">Informasi Program & Tagihan</h2>
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">Program & Billing Information</h2>
       
       <!-- Loading State -->
       <div v-if="isClassLoading || isPricesLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -292,12 +292,12 @@ onMounted(async () => {
                 </div>
               </div>
               <div class="flex-1 min-w-0">
-                <p class="text-xs font-medium text-gray-600 mb-0.5">Program Saat Ini</p>
+                <p class="text-xs font-medium text-gray-600 mb-0.5">Current Program</p>
               </div>
             </div>
             <div>
               <p class="text-base font-bold text-gray-800 truncate">{{ classInfo?.class_code || '-' }}</p>
-              <p class="text-xs text-gray-500 mt-0.5">Kode Kelas</p>
+              <p class="text-xs text-gray-500 mt-0.5">Class Code</p>
             </div>
           </div>
         </div>
@@ -314,12 +314,12 @@ onMounted(async () => {
                 </div>
               </div>
               <div class="flex-1 min-w-0">
-                <p class="text-xs font-medium text-gray-600 mb-0.5">Level Siswa</p>
+                <p class="text-xs font-medium text-gray-600 mb-0.5">Student Level</p>
               </div>
             </div>
             <div>
               <p class="text-base font-bold text-gray-800 truncate">{{ levelName || 'Loading...' }}</p>
-              <p class="text-xs text-gray-500 mt-0.5">Tingkat</p>
+              <p class="text-xs text-gray-500 mt-0.5">Level</p>
             </div>
           </div>
         </div>
@@ -336,7 +336,7 @@ onMounted(async () => {
                 </div>
               </div>
               <div class="flex-1 min-w-0">
-                <p class="text-xs font-medium text-gray-600 mb-0.5">Biaya Semester</p>
+                <p class="text-xs font-medium text-gray-600 mb-0.5">Semester Fee</p>
               </div>
             </div>
             <div>
@@ -358,12 +358,12 @@ onMounted(async () => {
                 </div>
               </div>
               <div class="flex-1 min-w-0">
-                <p class="text-xs font-medium text-gray-600 mb-0.5">Biaya Bulanan</p>
+                <p class="text-xs font-medium text-gray-600 mb-0.5">Monthly Fee</p>
               </div>
             </div>
             <div>
               <p class="text-base font-bold text-orange-600 truncate">{{ formatCurrency(currentMonthlyFee) }}</p>
-              <p class="text-xs text-gray-500 mt-0.5">Per Bulan</p>
+              <p class="text-xs text-gray-500 mt-0.5">Per Month</p>
             </div>
           </div>
         </div>
@@ -374,7 +374,7 @@ onMounted(async () => {
         <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
         </svg>
-        <p class="text-sm text-blue-800">Informasi biaya di atas sesuai dengan level program Anda. Pilih jenis pembayaran di bawah untuk melanjutkan.</p>
+        <p class="text-sm text-blue-800">The fee information above is based on your program level. Select a payment type below to continue.</p>
       </div>
     </div>
 
@@ -382,7 +382,7 @@ onMounted(async () => {
     <div class="space-y-6">
       <!-- Regular Payments (Semester & Monthly) -->
       <div class="payment-section-glass rounded-2xl p-6 shadow-lg border border-white/20">
-        <h2 class="text-xl font-semibold text-gray-800 mb-4">Pembayaran Reguler</h2>
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Regular Payments</h2>
         
         <div v-if="isPricesLoading" class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div v-for="i in 2" :key="i" class="animate-pulse">
@@ -429,7 +429,7 @@ onMounted(async () => {
 
       <!-- Final Exam Payment -->
       <div class="payment-section-glass rounded-2xl p-6 shadow-lg border border-white/20">
-        <h2 class="text-xl font-semibold text-gray-800 mb-4">Pembayaran Ujian Akhir</h2>
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Final Exam Payment</h2>
         
         <div v-if="isPricesLoading" class="animate-pulse">
           <div class="h-32 bg-gray-200 rounded-xl"></div>
@@ -465,7 +465,7 @@ onMounted(async () => {
                   <svg class="w-4 h-4 text-purple-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                   </svg>
-                  <p class="text-xs text-purple-800">Biaya ini terpisah dari pembayaran reguler dan hanya diperlukan saat mengikuti ujian akhir.</p>
+                  <p class="text-xs text-purple-800">This fee is separate from regular payments and only required when taking the final exam.</p>
                 </div>
               </div>
               <div v-if="selectedPaymentType === type.id" class="flex-shrink-0">
@@ -481,11 +481,11 @@ onMounted(async () => {
 
     <!-- Payment Summary & Action -->
     <div v-if="selectedPaymentType" class="payment-section-glass rounded-2xl p-6 shadow-lg border border-white/20">
-      <h2 class="text-xl font-semibold text-gray-800 mb-4">Ringkasan Pembayaran</h2>
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">Payment Summary</h2>
       
       <div class="space-y-3 mb-6">
         <div class="flex justify-between items-center">
-          <span class="text-gray-600">Nama</span>
+          <span class="text-gray-600">Name</span>
           <span class="font-semibold text-gray-800">{{ studentName }}</span>
         </div>
         <div class="flex justify-between items-center">
@@ -493,7 +493,7 @@ onMounted(async () => {
           <span class="font-semibold text-gray-800">{{ studentEmail }}</span>
         </div>
         <div class="flex justify-between items-center">
-          <span class="text-gray-600">Jenis Pembayaran</span>
+          <span class="text-gray-600">Payment Type</span>
           <span class="font-semibold text-gray-800">{{ getPaymentTypeName(selectedPaymentType) }}</span>
         </div>
         <div class="h-px bg-gray-200 my-2"></div>
@@ -516,36 +516,36 @@ onMounted(async () => {
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          Memproses...
+          Processing...
         </span>
-        <span v-else>Bayar Sekarang</span>
+        <span v-else>Pay Now</span>
       </button>
 
       <p class="text-xs text-gray-500 text-center mt-3">
-        Anda akan diarahkan ke halaman pembayaran Midtrans yang aman
+        You will be redirected to secure Midtrans payment page
       </p>
     </div>
 
     <!-- Payment History -->
     <div class="payment-section-glass rounded-2xl p-6 shadow-lg border border-white/20">
-      <h2 class="text-xl font-semibold text-gray-800 mb-4">Riwayat Pembayaran</h2>
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">Payment History</h2>
       
       <div v-if="paymentHistory.length === 0" class="text-center py-8">
         <svg class="w-16 h-16 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
         </svg>
-        <p class="text-gray-500 text-sm">Belum ada riwayat pembayaran</p>
+        <p class="text-gray-500 text-sm">No payment history yet</p>
       </div>
       
       <div v-else class="overflow-x-auto">
         <table class="w-full">
           <thead>
             <tr class="border-b border-gray-200">
-              <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Tanggal</th>
-              <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Jenis</th>
-              <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Jumlah</th>
+              <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Date</th>
+              <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Type</th>
+              <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Amount</th>
               <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Status</th>
-              <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">ID Transaksi</th>
+              <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Transaction ID</th>
             </tr>
           </thead>
           <tbody>
@@ -576,10 +576,10 @@ onMounted(async () => {
                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
               </svg>
             </div>
-            <h3 class="text-2xl font-bold text-gray-800 mb-2">Pembayaran Berhasil!</h3>
-            <p class="text-gray-600 mb-6">Transaksi Anda telah berhasil diproses.</p>
+            <h3 class="text-2xl font-bold text-gray-800 mb-2">Payment Successful!</h3>
+            <p class="text-gray-600 mb-6">Your transaction has been processed successfully.</p>
             <button @click="closeSuccessModal" class="w-full py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-colors">
-              Tutup
+              Close
             </button>
           </div>
         </div>
@@ -596,10 +596,10 @@ onMounted(async () => {
                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
               </svg>
             </div>
-            <h3 class="text-2xl font-bold text-gray-800 mb-2">Pembayaran Gagal</h3>
-            <p class="text-gray-600 mb-6">{{ paymentError || 'Terjadi kesalahan saat memproses pembayaran.' }}</p>
+            <h3 class="text-2xl font-bold text-gray-800 mb-2">Payment Failed</h3>
+            <p class="text-gray-600 mb-6">{{ paymentError || 'An error occurred while processing the payment.' }}</p>
             <button @click="closeErrorModal" class="w-full py-3 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg transition-colors">
-              Tutup
+              Close
             </button>
           </div>
         </div>
