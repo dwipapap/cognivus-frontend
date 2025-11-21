@@ -185,20 +185,20 @@ watchEffect(() => {
   <div class="bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 rounded-3xl shadow-lg mb-8 overflow-hidden">
     <div class="flex flex-col lg:flex-row items-center">
       <!-- Left: Text Content -->
-      <div class="flex-1 p-8 lg:p-12">
-        <h1 class="text-2xl lg:text-3xl font-semibold text-white/90 mb-2">
+      <div class="flex-1 p-5 md:p-8 lg:p-12">
+        <h1 class="text-lg md:text-2xl lg:text-3xl font-semibold text-white/90 mb-2">
           Welcome, {{ greeting }}
         </h1>
-        <h2 class="text-4xl lg:text-6xl font-bold text-white mb-6 leading-tight">
+        <h2 class="text-2xl md:text-4xl lg:text-6xl font-bold text-white mb-6 leading-tight">
           {{ user.name }}
         </h2>
-        <p class="text-white/80 text-base lg:text-lg leading-relaxed max-w-lg">
+        <p class="text-white/80 text-sm md:text-base lg:text-lg leading-relaxed max-w-lg">
           Embrace each lesson with curiosity and dedication. Every step forward brings you closer to mastering new skills and unlocking your full potential.
         </p>
       </div>
 
       <!-- Right: SVG Illustration -->
-      <div class="w-full lg:w-1/2 p-8 lg:p-12 flex items-center justify-center">
+      <div class="w-full lg:w-1/2 p-8 lg:p-12 hidden md:flex items-center justify-center">
         <svg class="w-auto max-w-[16rem] h-40 text-gray-800 dark:text-white" aria-hidden="true" width="609" height="495" viewBox="0 0 609 495" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path fill-rule="evenodd" clip-rule="evenodd" d="M584.052 275.388C584.052 277.731 583.625 279.974 582.846 282.044C582.197 283.766 582.641 285.782 584.047 286.97C590.409 292.342 594.45 300.378 594.45 309.357C594.45 312.534 593.944 315.594 593.008 318.459C592.523 319.946 592.932 321.602 594.094 322.65C602.826 330.517 608.315 341.913 608.315 354.591C608.315 378.328 589.072 397.571 565.334 397.571C541.597 397.571 522.354 378.328 522.354 354.591C522.354 342.031 527.741 330.73 536.33 322.871C537.484 321.815 537.881 320.155 537.384 318.672C536.403 315.745 535.872 312.613 535.872 309.357C535.872 300.378 539.912 292.342 546.274 286.97C547.68 285.782 548.124 283.766 547.476 282.044C546.697 279.974 546.27 277.731 546.27 275.388C546.27 264.955 554.728 256.498 565.161 256.498C575.594 256.498 584.052 264.955 584.052 275.388Z" fill="#d6e2fb"/>
 <path fill-rule="evenodd" clip-rule="evenodd" d="M564.987 274.215C565.54 274.215 565.987 274.663 565.987 275.215L565.987 441.245C565.987 441.798 565.54 442.245 564.987 442.245C564.435 442.245 563.987 441.798 563.987 441.245L563.987 275.215C563.987 274.663 564.435 274.215 564.987 274.215Z" fill="#9ab7f6"/>
@@ -323,14 +323,14 @@ watchEffect(() => {
   </div>
 
   <!-- Quick Stats Section -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-8">
     <div
       v-for="stat in stats"
       :key="stat.title"
-      class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-200"
+      class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-4 md:p-6 shadow-sm hover:shadow-md transition-all duration-200"
     >
       <div class="flex items-center gap-4">
-        <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
+        <div class="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
           <!-- Level Icon -->
           <svg v-if="stat.icon === 'level'" class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 0l-2 2a1 1 0 101.414 1.414L8 10.414l1.293 1.293a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
@@ -411,7 +411,7 @@ watchEffect(() => {
           :key="course.courseid" 
           class="group bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200"
         >
-          <div class="h-44 md:h-48 w-full overflow-hidden bg-gray-100">
+          <div class="h-32 md:h-44 w-full overflow-hidden bg-gray-100">
             <img 
               :src="getPlaceholderImage(index)" 
               :alt="course.title" 
@@ -419,7 +419,7 @@ watchEffect(() => {
             />
           </div>
           <div class="p-4 md:p-5">
-            <h3 class="text-lg font-semibold text-gray-900 mb-1">{{ course.title }}</h3>
+            <h3 class="text-base md:text-lg font-semibold text-gray-900 mb-1">{{ course.title }}</h3>
             <p class="text-sm text-gray-600 mb-3 line-clamp-2">
               Course materials and resources for this topic.
             </p>
