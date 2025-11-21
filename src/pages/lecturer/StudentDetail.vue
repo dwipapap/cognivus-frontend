@@ -113,19 +113,15 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50/50 pb-12">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <!-- Header -->
-      <div class="mb-8">
+  <!-- Header -->
+  <div class="mb-8">
         <button
           @click="goBack"
-          class="group inline-flex items-center text-gray-500 hover:text-blue-600 font-medium transition-colors mb-4"
+          class="mb-6 inline-flex items-center gap-2 px-4 py-2 text-blue-600 hover:text-white bg-blue-50 hover:bg-gradient-to-r hover:from-blue-600 hover:to-indigo-600 rounded-full font-medium transition-all hover:shadow-md"
         >
-          <div class="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center mr-3 group-hover:border-blue-200 group-hover:bg-blue-50 transition-all">
-            <svg class="w-4 h-4 transition-transform group-hover:-translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-            </svg>
-          </div>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
           Back to Students
         </button>
       </div>
@@ -375,6 +371,4 @@ onMounted(() => {
           </div>
         </div>
       </div>
-    </div>
-  </div>
 </template>
