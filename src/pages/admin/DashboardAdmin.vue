@@ -1,12 +1,13 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { studentAPI, lecturerAPI, classAPI, dashboardAPI } from '@/services/api';
+import { studentAPI, lecturerAPI, classAPI, dashboardAPI, paymentAPI } from '@/services/api';
 import BaseCard from '@/components/ui/BaseCard.vue';
 import LoadingBar from '@/components/ui/LoadingBar.vue';
 
 const students = ref([]);
 const lecturers = ref([]);
 const classes = ref([]);
+const payments = ref([]);
 const recentActivities = ref([]);
 const isLoading = ref(true);
 
@@ -14,16 +15,18 @@ const isLoading = ref(true);
 const fetchDashboardData = async () => {
   try {
     isLoading.value = true;
-    const [studentsRes, lecturersRes, classesRes, activitiesRes] = await Promise.all([
+    const [studentsRes, lecturersRes, classesRes, paymentsRes, activitiesRes] = await Promise.all([
       studentAPI.getAllStudents(),
       lecturerAPI.getAllLecturers(),
       classAPI.getAllClasses(),
+      paymentAPI.getAllPayments(),
       dashboardAPI.getRecentActivity()
     ]);
 
     if (studentsRes.data.success) students.value = studentsRes.data.data;
     if (lecturersRes.data.success) lecturers.value = lecturersRes.data.data;
     if (classesRes.data.success) classes.value = classesRes.data.data;
+    if (paymentsRes.data.success) payments.value = paymentsRes.data.data;
     if (activitiesRes.data.success) recentActivities.value = activitiesRes.data.data;
   } catch (error) {
     console.error('Failed to fetch dashboard data:', error);
@@ -57,12 +60,27 @@ const getRelativeTime = (timestamp) => {
   return `${years} year${years !== 1 ? 's' : ''} ago`;
 };
 
+/** Format currency (Indonesian Rupiah) */
+const formatCurrency = (amount) => {
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0
+  }).format(amount);
+};
+
+/** Calculate total revenue from successful payments */
+const totalRevenue = computed(() => {
+  return payments.value
+    .filter(payment => payment.status === 'success')
+    .reduce((sum, payment) => sum + (payment.amount || 0), 0);
+});
+
 /** Computed stats */
 const stats = computed(() => [
   { title: 'Total Students', value: students.value.length.toString(), icon: 'users', color: 'blue' },
   { title: 'Total Lecturers', value: lecturers.value.length.toString(), icon: 'teacher', color: 'green' },
   { title: 'Total Classes', value: classes.value.length.toString(), icon: 'class', color: 'purple' },
-  { title: 'Revenue', value: 'Coming Soon', icon: 'money', color: 'yellow' },
 ]);
 
 onMounted(() => {
@@ -82,18 +100,22 @@ onMounted(() => {
       <p class="text-center text-gray-600 mt-4">Loading dashboard...</p>
     </div>
 
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div v-else class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
       <div 
         v-for="stat in stats" 
         :key="stat.title"
         class="stat-card bg-white/60 backdrop-blur-sm border border-white/50 p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
       >
         <div class="flex items-center justify-between">
-          <div>
+          <div class="flex-1 min-w-0 mr-4">
             <p class="text-sm font-medium text-gray-600 mb-1">{{ stat.title }}</p>
-            <h3 class="text-3xl font-bold text-gray-800">{{ stat.value }}</h3>
+            <h3 
+              :class="stat.icon === 'money' ? 'text-xl md:text-2xl font-bold text-gray-800' : 'text-3xl font-bold text-gray-800'"
+            >
+              {{ stat.value }}
+            </h3>
           </div>
-          <div :class="`w-14 h-14 rounded-2xl flex items-center justify-center bg-${stat.color}-100`">
+          <div :class="`w-14 h-14 flex-shrink-0 rounded-2xl flex items-center justify-center bg-${stat.color}-100`">
             <svg class="w-7 h-7" :class="`text-${stat.color}-600`" fill="currentColor" viewBox="0 0 20 20">
               <path v-if="stat.icon === 'users'" d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"></path>
               <path v-else-if="stat.icon === 'teacher'" d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"></path>
