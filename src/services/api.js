@@ -321,6 +321,12 @@ export const paymentAPI = {
   getPaymentHistory: (studentid) => apiClient.get(`/payment/history/${studentid}`),
   
   /**
+   * Get all payments (admin only)
+   * @returns {Promise} - { success, data: [] }
+   */
+  getAllPayments: () => apiClient.get('/payment/history'),
+  
+  /**
    * Webhook endpoint (handled by backend, not typically called from frontend)
    */
   webhook: (notificationData) => apiClient.post('/payment/webhook', notificationData)
