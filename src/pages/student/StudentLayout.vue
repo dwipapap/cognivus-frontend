@@ -85,10 +85,10 @@ onUnmounted(() => {
   <div class="flex flex-col min-h-screen bg-white">
     <!-- Header -->
     <header class="header-glass backdrop-blur-lg bg-gradient-to-r from-white via-blue-50 to-indigo-100 shadow-lg border-b border-white/20 sticky top-0 z-40">
-      <div class="flex items-center justify-between px-6 py-4 min-w-0">
+      <div class="flex items-center justify-between px-4 py-3 md:px-6 md:py-4 min-w-0">
         <!-- Left: ITTR Logo -->
         <div class="flex items-center">
-          <img src="/src/assets/ittrlogo.png" alt="ITTR Logo" class="h-10 w-auto object-contain" />
+          <img src="/src/assets/ittrlogo.png" alt="ITTR Logo" class="h-8 md:h-10 w-auto object-contain" />
         </div>
 
         <!-- Right: User Profile -->
@@ -99,9 +99,9 @@ onUnmounted(() => {
             <div 
               id="profile-button"
               @click.stop="toggleDropdown()"
-              class="flex items-center gap-2 sm:gap-3 h-10 sm:h-12 px-2 xs:px-3 sm:px-4 rounded-full sm:rounded-[28px] bg-white/30 backdrop-blur-sm border border-white/50 shadow-sm overflow-hidden whitespace-nowrap max-w-[50vw] xs:max-w-[60vw] sm:max-w-[200px] md:max-w-[240px] min-w-0 hover:bg-white/40 transition-all duration-200 cursor-pointer active:scale-95"
+              class="flex items-center gap-2 sm:gap-3 h-8 sm:h-10 md:h-12 px-2 xs:px-3 sm:px-4 rounded-full sm:rounded-[28px] bg-white/30 backdrop-blur-sm border border-white/50 shadow-sm overflow-hidden whitespace-nowrap max-w-[50vw] xs:max-w-[60vw] sm:max-w-[200px] md:max-w-[240px] min-w-0 hover:bg-white/40 transition-all duration-200 cursor-pointer active:scale-95"
             >
-              <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden border-2 border-white/50">
+              <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden border-2 border-white/50">
                 <!-- Skeleton while avatar loading -->
                 <div v-if="isProfileLoading" class="avatar-skeleton bg-blue-100 w-full h-full rounded-full"></div>
 
@@ -250,7 +250,7 @@ onUnmounted(() => {
       </nav>
 
       <!-- Main Content Area -->
-      <main class="main-content flex-1 p-6 lg:p-8 overflow-auto md:ml-24 mb-20 md:mb-0 transition-all duration-300 ease-in-out">
+      <main class="main-content flex-1 p-4 md:p-6 lg:p-8 overflow-auto md:ml-24 mb-20 md:mb-0 transition-all duration-300 ease-in-out">
         <router-view />
       </main>
     </div>

@@ -131,10 +131,10 @@ onMounted(() => {
           </div>
 
           <!-- Content -->
-          <div class="relative p-8 z-10">
+          <div class="relative p-5 md:p-8 z-10">
             <div class="mb-6">
-              <h2 class="text-3xl font-bold text-white mb-2">Academic Performance</h2>
-              <h3 class="text-xl font-semibold text-white/90 mb-3">
+              <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">Academic Performance</h2>
+              <h3 class="text-lg md:text-xl font-semibold text-white/90 mb-3">
                 {{ levelName || 'Loading...' }} 
                 <span v-if="classInfo?.class_code" class="opacity-75 mx-2">•</span> 
                 {{ classInfo?.class_code }}
@@ -165,9 +165,9 @@ onMounted(() => {
         </div>
 
         <!-- Grades Table Container -->
-        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-200">
-          <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <h2 class="text-2xl font-bold text-gray-900">Test Results</h2>
+        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-4 md:p-6 shadow-sm hover:shadow-md transition-all duration-200">
+          <div class="mb-4 md:mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <h2 class="text-xl md:text-2xl font-bold text-gray-900">Test Results</h2>
           </div>
           
           <!-- Empty State -->
@@ -181,8 +181,81 @@ onMounted(() => {
             <p class="text-gray-500 mt-1 max-w-sm mx-auto">Your test scores and grades will appear here once they are recorded by your instructor.</p>
           </div>
           
-          <!-- Grades Table -->
-          <div v-else class="overflow-x-auto bg-white rounded-xl shadow-sm border border-gray-100">
+          <template v-else>
+            <!-- Mobile Card View -->
+            <div class="block md:hidden space-y-4">
+            <div 
+              v-for="grade in grades" 
+              :key="grade.gradeid"
+              class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all"
+            >
+              <!-- Card Header -->
+              <div class="bg-gradient-to-r from-blue-500 to-indigo-600 px-4 py-3">
+                <h3 class="text-base font-semibold text-white">{{ grade.test_type || 'Standard Test' }}</h3>
+                <p class="text-xs text-white/80 mt-1 flex items-center gap-1.5">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  {{ formatDate(grade.date_taken) }}
+                </p>
+              </div>
+
+              <!-- Card Body -->
+              <div class="p-4 space-y-3">
+                <!-- Final Score Highlight -->
+                <div class="flex items-center justify-between bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-3">
+                  <span class="text-sm font-medium text-gray-700">Final Score</span>
+                  <span class="inline-flex items-center justify-center min-w-[3rem] h-10 px-3 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-bold text-lg shadow-md">
+                    {{ getAverageScore(grade) }}
+                  </span>
+                </div>
+
+                <!-- Individual Scores Grid -->
+                <div class="grid grid-cols-2 gap-3">
+                  <div class="bg-blue-50 rounded-lg p-3">
+                    <p class="text-xs font-medium text-gray-600 mb-1">Listening</p>
+                    <p class="text-lg font-bold text-blue-700">{{ grade.listening_score ?? '-' }}</p>
+                  </div>
+                  <div class="bg-green-50 rounded-lg p-3">
+                    <p class="text-xs font-medium text-gray-600 mb-1">Speaking</p>
+                    <p class="text-lg font-bold text-green-700">{{ grade.speaking_score ?? '-' }}</p>
+                  </div>
+                  <div class="bg-purple-50 rounded-lg p-3">
+                    <p class="text-xs font-medium text-gray-600 mb-1">Reading</p>
+                    <p class="text-lg font-bold text-purple-700">{{ grade.reading_score ?? '-' }}</p>
+                  </div>
+                  <div class="bg-orange-50 rounded-lg p-3">
+                    <p class="text-xs font-medium text-gray-600 mb-1">Writing</p>
+                    <p class="text-lg font-bold text-orange-700">{{ grade.writing_score ?? '-' }}</p>
+                  </div>
+                </div>
+
+                <!-- Certificate Download -->
+                <div class="pt-2 border-t border-gray-100">
+                  <a
+                    v-if="grade.tbreport_files && grade.tbreport_files.length > 0"
+                    :href="grade.tbreport_files[0].url"
+                    target="_blank"
+                    class="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 hover:text-blue-700 transition-all border border-blue-100 shadow-sm"
+                  >
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/>
+                    </svg>
+                    Download Certificate
+                  </a>
+                  <div v-else class="flex items-center justify-center gap-2 text-sm text-gray-400 py-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    <span>No certificate available</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Desktop Table View -->
+          <div class="hidden md:block overflow-x-auto bg-white rounded-xl shadow-sm border border-gray-100">
             <table class="min-w-full divide-y divide-gray-100">
               <thead class="bg-gray-50">
                 <tr>
@@ -257,11 +330,12 @@ onMounted(() => {
               </tbody>
             </table>
           </div>
+          </template>
 
           <!-- Summary Footer (optional) -->
-          <div v-if="grades.length > 0" class="mt-4 flex items-center justify-between text-sm px-2">
+          <div v-if="grades.length > 0" class="mt-4 flex items-center justify-between text-xs md:text-sm px-2">
             <div class="flex items-center gap-2 text-gray-600">
-              <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-4 h-4 md:w-5 md:h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <span>Scores are updated by your instructor</span>

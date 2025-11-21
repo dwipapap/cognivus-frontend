@@ -74,8 +74,8 @@ watchEffect(async () => {
     </div>
 
     <!-- Content -->
-    <div class="relative p-8 lg:p-12 z-10">
-      <h1 class="text-4xl lg:text-6xl font-bold text-white mb-6 leading-tight">
+    <div class="relative p-5 md:p-8 lg:p-12 z-10">
+      <h1 class="text-2xl md:text-4xl lg:text-6xl font-bold text-white mb-6 leading-tight">
         My Profile
       </h1>
       <p class="text-white/80 text-base lg:text-lg leading-relaxed max-w-lg">
@@ -97,14 +97,14 @@ watchEffect(async () => {
       </div>
 
       <!-- Profile Content -->
-      <div v-else-if="studentProfile" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div v-else-if="studentProfile" class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8">
         <!-- Left Profile Card -->
         <div class="lg:col-span-1">
               <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-3xl p-10 text-white text-center shadow-lg h-full flex flex-col justify-between">
                 <img 
                   :src="authStore.user?.user_metadata?.avatar_url || 'https://media1.tenor.com/m/JyHMlpMxRKwAAAAC/arisbm.gif'" 
                   :alt="studentProfile.fullname"
-                  class="w-48 h-48 rounded-full mx-auto object-cover border-4 border-white shadow-xl mb-6"
+                  class="w-24 h-24 md:w-48 md:h-48 rounded-full mx-auto object-cover border-4 border-white shadow-xl mb-6"
                   @error="handleImageError"
                 />
                 
