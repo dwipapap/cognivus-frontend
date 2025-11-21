@@ -109,19 +109,23 @@ const handleGoogleLogin = () => {
             </div>
           </template>
 
-          <form @submit.prevent="handleLogin" class="space-y-4" autocomplete="off" novalidate>
+          <form @submit.prevent="handleLogin" class="space-y-5" autocomplete="off" novalidate>
             <!-- Hidden fields to prevent browser autofill/autocomplete popups -->
             <input type="text" name="fakeusernameremembered" id="fakeusernameremembered" style="position: absolute; left: -9999px; top: -9999px; width: 1px; height: 1px; opacity: 0;" autocomplete="username" />
             <input type="password" name="fakepasswordremembered" id="fakepasswordremembered" style="position: absolute; left: -9999px; top: -9999px; width: 1px; height: 1px; opacity: 0;" autocomplete="new-password" />
-            <!-- Username Input with Addon -->
+            
+            <!-- Username Input -->
             <div>
-              <label for="username" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Username</label>
-              <div class="flex">
-                <span class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border border-e-0 border-gray-300 rounded-s-lg dark:bg-gray-600 dark:text-gray-400 dark:border-gray-600">
-                  <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+              <label for="username" class="block mb-2 text-sm font-medium text-gray-900">
+                Username
+                <span class="text-red-500 ml-1">*</span>
+              </label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                  <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
                   </svg>
-                </span>
+                </div>
                 <input 
                   type="text" 
                   id="username"
@@ -131,23 +135,26 @@ const handleGoogleLogin = () => {
                   autocapitalize="none"
                   spellcheck="false"
                   v-model="formData.username"
-                  class="rounded-none rounded-e-lg bg-gray-50 border border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                  :class="{ 'border-red-500 dark:border-red-500': errors.username }"
-                  placeholder="Username"
+                  class="block w-full !bg-white pl-11 pr-4 py-2.5 text-gray-900 placeholder-gray-400 border rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  :class="errors.username ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'"
+                  placeholder="Enter your username"
                 />
               </div>
-              <p v-if="errors.username" class="mt-1 text-sm text-red-600 dark:text-red-500">{{ errors.username }}</p>
+              <p v-if="errors.username" class="mt-2 text-sm text-red-600">{{ errors.username }}</p>
             </div>
 
-            <!-- Password Input with Addon -->
+            <!-- Password Input -->
             <div>
-              <label for="password" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Password</label>
-              <div class="flex">
-                <span class="inline-flex items-center px-3 text-sm text-gray-900 bg-gray-200 border border-e-0 border-gray-300 rounded-s-lg dark:bg-gray-600 dark:text-gray-400 dark:border-gray-600">
-                  <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+              <label for="password" class="block mb-2 text-sm font-medium text-gray-900">
+                Password
+                <span class="text-red-500 ml-1">*</span>
+              </label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                  <svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
                   </svg>
-                </span>
+                </div>
                 <input 
                   type="password" 
                   id="password"
@@ -157,12 +164,12 @@ const handleGoogleLogin = () => {
                   autocapitalize="none"
                   spellcheck="false"
                   v-model="formData.password"
-                  class="rounded-none rounded-e-lg bg-gray-50 border border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 block flex-1 min-w-0 w-full text-sm p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                  :class="{ 'border-red-500 dark:border-red-500': errors.password }"
-                  placeholder="Password"
+                  class="block w-full !bg-white pl-11 pr-4 py-2.5 text-gray-900 placeholder-gray-400 border rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  :class="errors.password ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'"
+                  placeholder="Enter your password"
                 />
               </div>
-              <p v-if="errors.password" class="mt-1 text-sm text-red-600 dark:text-red-500">{{ errors.password }}</p>
+              <p v-if="errors.password" class="mt-2 text-sm text-red-600">{{ errors.password }}</p>
             </div>
 
             <BaseButton
@@ -208,7 +215,7 @@ const handleGoogleLogin = () => {
               <a href="#" class="text-blue-600 hover:underline">WhatsApp</a> or 
               <a href="#" class="text-blue-600 hover:underline">Email</a>
             </p>
-            <p class="text-xs text-gray-400 mt-2">2024 ITTR English Course. All rights reserved</p>
+            <p class="text-xs text-gray-400 mt-2">2025 ITTR English Course. All rights reserved</p>
           </div>
         </BaseCard>
       </div>
