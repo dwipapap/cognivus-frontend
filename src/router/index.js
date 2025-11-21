@@ -20,6 +20,7 @@ const ProfileView = () => import(/* webpackChunkName: "student" */ '../pages/stu
 const MyCourses = () => import(/* webpackChunkName: "student" */ '../pages/student/MyCourses.vue');
 const CourseDetail = () => import(/* webpackChunkName: "student" */ '../pages/student/CourseDetail.vue');
 const Payment = () => import(/* webpackChunkName: "student" */ '../pages/student/Payment.vue');
+const Grades = () => import(/* webpackChunkName: "student" */ '../pages/student/Grades.vue');
 
 // Lecturer pages - grouped in 'lecturer' chunk
 const LecturerLayout = () => import(/* webpackChunkName: "lecturer" */ '../pages/lecturer/LecturerLayout.vue');
@@ -94,6 +95,11 @@ const routes = [
         path: 'courses/:id',
         name: 'StudentCourseDetail',
         component: CourseDetail,
+      },
+      {
+        path: 'grades',
+        name: 'StudentGrades',
+        component: Grades,
       },
       {
         path: 'payment',
