@@ -116,6 +116,39 @@ const goToMaterials = () => {
   router.push({ name: 'LecturerMaterials' });
 };
 
+/** Navigate to manage students page */
+const goToManageStudents = () => {
+  router.push({ name: 'LecturerStudents' });
+};
+
+/** Quick action items */
+const quickActions = computed(() => [
+  {
+    title: 'Input Nilai',
+    description: 'Add student grades',
+    icon: 'grade',
+    color: 'from-blue-500 to-indigo-500',
+    bgColor: 'from-blue-50 to-indigo-50',
+    action: () => router.push({ name: 'LecturerStudents' })
+  },
+  {
+    title: 'Upload Materi',
+    description: 'Add course materials',
+    icon: 'upload',
+    color: 'from-purple-500 to-pink-500',
+    bgColor: 'from-purple-50 to-pink-50',
+    action: () => router.push({ name: 'LecturerMaterials' })
+  },
+  {
+    title: 'Lihat Jadwal',
+    description: 'View class schedules',
+    icon: 'schedule',
+    color: 'from-emerald-500 to-teal-500',
+    bgColor: 'from-emerald-50 to-teal-50',
+    action: () => {} // Will show schedules from classes
+  }
+]);
+
 const handleLogout = () => {
   authStore.clearAuth();
   router.push('/login');
@@ -311,22 +344,80 @@ onMounted(() => {
         </div>
 
         <!-- Recent Activity Section -->
-        <div class="bg-gradient-to-r from-blue-50 to-indigo-100 rounded-2xl p-6 shadow-sm">
-          <div class="flex items-center justify-between mb-6">
-            <div>
-              <h2 class="text-xl font-bold text-gray-900">Recent Activity</h2>
-              <p class="text-sm text-gray-500 mt-1">Latest updates from your classes</p>
-            </div>
+        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-6 shadow-sm">
+          <div class="mb-6">
+            <h2 class="text-xl font-bold text-gray-900">Quick Actions</h2>
+            <p class="text-sm text-gray-500 mt-1">Shortcuts to your frequent tasks</p>
           </div>
 
-          <div class="bg-white rounded-xl p-12 text-center shadow-sm border border-gray-100">
-            <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            <h3 class="text-lg font-semibold text-gray-900 mb-2">Coming Soon</h3>
-            <p class="text-sm text-gray-500">
-              Activity tracking will be available in a future update.
-            </p>
+          <div class="space-y-3">
+            <button
+              v-for="action in quickActions"
+              :key="action.title"
+              @click="action.action"
+              class="w-full group"
+            >
+              <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:border-blue-200 transition-all duration-200">
+                <div class="flex items-center gap-4">
+                  <!-- Icon -->
+                  <div :class="`w-12 h-12 bg-gradient-to-r ${action.color} rounded-xl flex items-center justify-center shadow-sm flex-shrink-0 group-hover:scale-110 transition-transform duration-200`">
+                    <!-- Grade Icon -->
+                    <svg v-if="action.icon === 'grade'" class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <!-- Upload Icon -->
+                    <svg v-else-if="action.icon === 'upload'" class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                    <!-- Schedule Icon -->
+                    <svg v-else-if="action.icon === 'schedule'" class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+
+                  <!-- Content -->
+                  <div class="flex-1 text-left">
+                    <h3 class="text-base font-semibold text-gray-900 mb-0.5 group-hover:text-blue-600 transition-colors">
+                      {{ action.title }}
+                    </h3>
+                    <p class="text-sm text-gray-500">{{ action.description }}</p>
+                  </div>
+
+                  <!-- Arrow Icon -->
+                  <svg class="w-5 h-5 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all duration-200 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </div>
+            </button>
+          </div>
+
+          <!-- Class Schedules Info (for Lihat Jadwal action) -->
+          <div v-if="myClasses.length > 0" class="mt-6 pt-6 border-t border-blue-200">
+            <h3 class="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+              <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              Today's Schedule
+            </h3>
+            <div class="space-y-2">
+              <div 
+                v-for="cls in myClasses.slice(0, 3)" 
+                :key="cls.classid"
+                class="bg-white rounded-lg p-3 text-sm border border-gray-100"
+              >
+                <div class="flex items-center justify-between">
+                  <div class="flex-1">
+                    <p class="font-medium text-gray-900">{{ cls.class_code }}</p>
+                    <p v-if="formatSchedule(cls)" class="text-xs text-gray-500 mt-0.5">{{ formatSchedule(cls) }}</p>
+                    <p v-else class="text-xs text-gray-400 mt-0.5">No schedule set</p>
+                  </div>
+                  <span class="text-xs px-2 py-1 rounded-full bg-blue-50 text-blue-600 font-medium">
+                    {{ getLevelName(cls.levelid) }}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

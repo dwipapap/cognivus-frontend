@@ -6,9 +6,6 @@ import { useRouter } from 'vue-router';
 import { useForm } from '../composables/useForm';
 import Modal from '../components/ui/Modal.vue';
 import LoadingBar from '../components/ui/LoadingBar.vue';
-import BaseInput from '../components/form/BaseInput.vue';
-import BaseSelect from '../components/form/BaseSelect.vue';
-import BaseButton from '../components/ui/BaseButton.vue';
 
 const router = useRouter();
 
@@ -30,7 +27,7 @@ const genderOptions = [
   { value: 'Female', label: 'Female' }
 ];
 
-const { formData, errors, isSubmitting, submit, getFieldProps, reset, validate } = useForm(
+const { formData, errors, isSubmitting, submit, getFieldProps, reset, validate, validateSingleField } = useForm(
   {
     // User credentials (top section)
     username: '',
@@ -164,139 +161,263 @@ onMounted(fetchProfile);
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-blue-400 via-purple-500 to-cyan-400 flex items-center justify-center px-4 py-8">
-    <div class="w-full max-w-5xl">
-      <div class="bg-white/95 backdrop-blur-md rounded-3xl p-10 shadow-2xl">
-        <h1 class="text-4xl font-bold text-gray-900 mb-3 text-center">Complete Your Profile</h1>
-        <p class="text-gray-600 text-center mb-8">Welcome! Please set up your account and complete your profile information.</p>
-
-        <!-- Loading State -->
-        <div v-if="isLoading" class="max-w-2xl mx-auto py-20">
-          <LoadingBar :loading="true" color="blue" :duration="2000" />
-          <p class="text-center text-gray-600 mt-4">Loading...</p>
+  <div class="min-h-screen bg-gradient-to-br from-blue-600 via-blue-500 to-blue-400 flex items-center justify-center p-4 font-sans">
+    <!-- Loading State -->
+    <div v-if="isLoading" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full">
+            <LoadingBar :loading="true" color="blue" :duration="2000" />
+            <p class="text-center text-gray-600 mt-4 font-medium">Loading profile data...</p>
         </div>
+    </div>
 
-        <!-- Form Content -->
-        <div v-else>
-          <form @submit.prevent="handleCompleteProfile">
-            <!-- Account Credentials Section -->
-            <div class="bg-blue-50 rounded-3xl p-8 mb-8">
-              <h2 class="text-2xl font-bold text-blue-600 mb-6">Account Credentials</h2>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                <!-- Username -->
-                <BaseInput
-                  v-bind="getFieldProps('username')"
-                  label="Username"
-                  required
-                  placeholder="Choose a username"
-                />
+    <!-- Main Card -->
+    <div v-else class="bg-white w-full max-w-6xl rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col lg:flex-row">
+      
+      <!-- Left Side: Form -->
+      <div class="w-full lg:w-[65%] p-6 md:p-8 bg-blue-50/30 flex flex-col justify-center">
+        <div class="max-w-3xl mx-auto w-full">
+          <!-- Header -->
+          <div class="text-center mb-6">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Complete Your Profile</h1>
+            <p class="text-gray-600 text-sm">Set up your account and profile information</p>
+          </div>
 
-                <div></div>
-
-                <!-- Password -->
-                <BaseInput
-                  v-bind="getFieldProps('password')"
-                  type="password"
-                  label="Password"
-                  required
-                  placeholder="Minimum 6 characters"
-                />
-
-                <!-- Confirm Password -->
-                <BaseInput
-                  v-bind="getFieldProps('confirmPassword')"
-                  type="password"
-                  label="Confirm Password"
-                  required
-                  placeholder="Re-enter password"
-                />
-              </div>
-            </div>
-
+          <form @submit.prevent="handleCompleteProfile" class="space-y-6">
             <!-- Personal Information Section -->
-            <div class="bg-purple-50 rounded-3xl p-8">
-              <h2 class="text-2xl font-bold text-purple-600 mb-6">Personal Information</h2>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+            <div>
+              <h2 class="text-lg font-semibold text-blue-600 mb-4">Personal Information</h2>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <!-- Full Name -->
-                <BaseInput
-                  v-bind="getFieldProps('fullname')"
-                  label="Full Name"
-                  required
-                  placeholder="Full Name"
-                />
+                <div class="md:col-span-2">
+                  <label class="block text-sm font-medium text-gray-900 mb-2">
+                    Full Name <span class="text-red-500">*</span>
+                  </label>
+                  <input 
+                    v-model="formData.fullname"
+                    @blur="validateSingleField('fullname')"
+                    type="text" 
+                    placeholder="Enter your full name"
+                    class="block w-full !bg-white px-4 py-2.5 text-gray-900 placeholder-gray-400 border rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    :class="errors.fullname ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'"
+                  >
+                  <p v-if="errors.fullname" class="text-red-600 text-xs mt-1.5">{{ errors.fullname }}</p>
+                </div>
 
                 <!-- Birth Date -->
-                <BaseInput
-                  v-bind="getFieldProps('birthdate')"
-                  type="date"
-                  label="Birth Date"
-                />
-
-                <!-- Address -->
-                <BaseInput
-                  v-bind="getFieldProps('address')"
-                  label="Address"
-                  required
-                  placeholder="Complete address"
-                />
+                <div class="col-span-1">
+                  <label class="block text-sm font-medium text-gray-900 mb-2">Birth Date</label>
+                  <input 
+                    v-model="formData.birthdate"
+                    @blur="validateSingleField('birthdate')"
+                    type="date" 
+                    class="block w-full !bg-white px-4 py-2.5 text-gray-900 border rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    :class="errors.birthdate ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'"
+                  >
+                  <p v-if="errors.birthdate" class="text-red-600 text-xs mt-1.5">{{ errors.birthdate }}</p>
+                </div>
 
                 <!-- Birth Place -->
-                <BaseInput
-                  v-bind="getFieldProps('birthplace')"
-                  label="Birth Place"
-                  placeholder="Birth Place"
-                />
+                <div class="col-span-1">
+                  <label class="block text-sm font-medium text-gray-900 mb-2">Birth Place</label>
+                  <input 
+                    v-model="formData.birthplace"
+                    @blur="validateSingleField('birthplace')"
+                    type="text" 
+                    placeholder="City"
+                    class="block w-full !bg-white px-4 py-2.5 text-gray-900 placeholder-gray-400 border rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    :class="errors.birthplace ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'"
+                  >
+                  <p v-if="errors.birthplace" class="text-red-600 text-xs mt-1.5">{{ errors.birthplace }}</p>
+                </div>
+
+                <!-- Address -->
+                <div class="md:col-span-2">
+                  <label class="block text-sm font-medium text-gray-900 mb-2">
+                    Address <span class="text-red-500">*</span>
+                  </label>
+                  <input 
+                    v-model="formData.address"
+                    @blur="validateSingleField('address')"
+                    type="text" 
+                    placeholder="Complete address"
+                    class="block w-full !bg-white px-4 py-2.5 text-gray-900 placeholder-gray-400 border rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    :class="errors.address ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'"
+                  >
+                  <p v-if="errors.address" class="text-red-600 text-xs mt-1.5">{{ errors.address }}</p>
+                </div>
 
                 <!-- Gender -->
-                <BaseSelect
-                  v-bind="getFieldProps('gender')"
-                  label="Gender"
-                  required
-                  :options="genderOptions"
-                  placeholder="Select Gender"
-                />
+                <div class="col-span-1">
+                  <label class="block text-sm font-medium text-gray-900 mb-2">
+                    Gender <span class="text-red-500">*</span>
+                  </label>
+                  <div class="relative">
+                    <select 
+                      v-model="formData.gender"
+                      @blur="validateSingleField('gender')"
+                      class="block w-full !bg-white px-4 py-2.5 text-gray-900 border rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
+                      :class="errors.gender ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'"
+                    >
+                      <option value="" disabled>Select</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4 text-gray-500">
+                      <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                    </div>
+                  </div>
+                  <p v-if="errors.gender" class="text-red-600 text-xs mt-1.5">{{ errors.gender }}</p>
+                </div>
 
                 <!-- Phone -->
-                <BaseInput
-                  v-bind="getFieldProps('phone')"
-                  type="tel"
-                  label="Phone"
-                  required
-                  placeholder="08xxxxxxxxxx"
-                />
+                <div class="col-span-1">
+                  <label class="block text-sm font-medium text-gray-900 mb-2">
+                    Phone <span class="text-red-500">*</span>
+                  </label>
+                  <input 
+                    v-model="formData.phone"
+                    @blur="validateSingleField('phone')"
+                    type="tel" 
+                    placeholder="08xxxxxxxxx"
+                    class="block w-full !bg-white px-4 py-2.5 text-gray-900 placeholder-gray-400 border rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    :class="errors.phone ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'"
+                  >
+                  <p v-if="errors.phone" class="text-red-600 text-xs mt-1.5">{{ errors.phone }}</p>
+                </div>
 
                 <!-- Parent Name -->
-                <BaseInput
-                  v-bind="getFieldProps('parentname')"
-                  label="Parent Name"
-                  required
-                  placeholder="Parent Name"
-                />
+                <div class="col-span-1">
+                  <label class="block text-sm font-medium text-gray-900 mb-2">
+                    Parent Name <span class="text-red-500">*</span>
+                  </label>
+                  <input 
+                    v-model="formData.parentname"
+                    @blur="validateSingleField('parentname')"
+                    type="text" 
+                    placeholder="Parent's full name"
+                    class="block w-full !bg-white px-4 py-2.5 text-gray-900 placeholder-gray-400 border rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    :class="errors.parentname ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'"
+                  >
+                  <p v-if="errors.parentname" class="text-red-600 text-xs mt-1.5">{{ errors.parentname }}</p>
+                </div>
 
                 <!-- Parent Phone -->
-                <BaseInput
-                  v-bind="getFieldProps('parentphone')"
-                  type="tel"
-                  label="Parent Phone"
-                  placeholder="08xxxxxxxxxx"
-                />
+                <div class="col-span-1">
+                  <label class="block text-sm font-medium text-gray-900 mb-2">Parent Phone</label>
+                  <input 
+                    v-model="formData.parentphone"
+                    @blur="validateSingleField('parentphone')"
+                    type="tel" 
+                    placeholder="08xxxxxxxxx"
+                    class="block w-full !bg-white px-4 py-2.5 text-gray-900 placeholder-gray-400 border rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    :class="errors.parentphone ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'"
+                  >
+                  <p v-if="errors.parentphone" class="text-red-600 text-xs mt-1.5">{{ errors.parentphone }}</p>
+                </div>
               </div>
             </div>
 
-            <!-- Action Button -->
-            <div class="flex justify-center mt-8">
-              <button
+            <!-- Account Credentials Section -->
+            <div>
+              <h2 class="text-lg font-semibold text-blue-600 mb-4">Account Credentials</h2>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Username -->
+                <div class="md:col-span-2">
+                  <label class="block text-sm font-medium text-gray-900 mb-2">
+                    Username <span class="text-red-500">*</span>
+                  </label>
+                  <input 
+                    v-model="formData.username"
+                    @blur="validateSingleField('username')"
+                    type="text" 
+                    placeholder="Choose a username"
+                    class="block w-full !bg-white px-4 py-2.5 text-gray-900 placeholder-gray-400 border rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    :class="errors.username ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'"
+                  >
+                  <p v-if="errors.username" class="text-red-600 text-xs mt-1.5">{{ errors.username }}</p>
+                </div>
+
+                <!-- Password -->
+                <div class="col-span-1">
+                  <label class="block text-sm font-medium text-gray-900 mb-2">
+                    Password <span class="text-red-500">*</span>
+                  </label>
+                  <input 
+                    v-model="formData.password"
+                    @blur="validateSingleField('password')"
+                    type="password" 
+                    placeholder="Min. 6 characters"
+                    class="block w-full !bg-white px-4 py-2.5 text-gray-900 placeholder-gray-400 border rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    :class="errors.password ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'"
+                  >
+                  <p v-if="errors.password" class="text-red-600 text-xs mt-1.5">{{ errors.password }}</p>
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="col-span-1">
+                  <label class="block text-sm font-medium text-gray-900 mb-2">
+                    Confirm Password <span class="text-red-500">*</span>
+                  </label>
+                  <input 
+                    v-model="formData.confirmPassword"
+                    @blur="validateSingleField('confirmPassword')"
+                    type="password" 
+                    placeholder="Re-enter password"
+                    class="block w-full !bg-white px-4 py-2.5 text-gray-900 placeholder-gray-400 border rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    :class="errors.confirmPassword ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'"
+                  >
+                  <p v-if="errors.confirmPassword" class="text-red-600 text-xs mt-1.5">{{ errors.confirmPassword }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="flex justify-end pt-2">
+              <button 
                 type="submit"
-                class="px-12 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold text-lg rounded-full hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 :disabled="isSubmitting"
+                class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-10 rounded-full shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <span v-if="isSubmitting">Completing Profile...</span>
-                <span v-else>Complete Profile & Continue</span>
+                <span v-if="isSubmitting">Saving...</span>
+                <span v-else>Complete Profile</span>
               </button>
             </div>
           </form>
         </div>
       </div>
+
+      <!-- Right Side: Illustration Area -->
+      <div class="hidden lg:flex lg:w-[35%] bg-blue-100 relative items-center justify-center overflow-hidden">
+        <!-- Decorative Background Elements -->
+        <div class="absolute top-[-10%] right-[-10%] w-64 h-64 bg-blue-200/50 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-[-5%] left-[-5%] w-48 h-48 bg-blue-200/50 rounded-full blur-3xl"></div>
+
+        <!-- CSS Composition for Speech Bubble -->
+        <div class="relative z-10 flex flex-col items-center">
+          <div class="relative bg-blue-500 text-white px-12 py-8 rounded-3xl shadow-xl transform -rotate-2 mb-32 mx-8">
+             <h1 class="text-6xl font-extrabold tracking-tight">Hello!</h1>
+             <!-- Triangle pointer for speech bubble -->
+             <div class="absolute -bottom-4 left-12 w-8 h-8 bg-blue-500 transform rotate-45"></div>
+          </div>
+
+          <!-- Abstract Character Representations (CSS Only) -->
+          <div class="absolute bottom-0 w-full flex justify-between px-12 opacity-90">
+             <!-- Left Figure -->
+             <div class="flex flex-col items-center transform translate-y-4">
+                <div class="w-16 h-16 bg-blue-900 rounded-full mb-2"></div>
+                <div class="w-24 h-48 bg-blue-800 rounded-t-[3rem]"></div>
+             </div>
+             <!-- Right Figure -->
+             <div class="flex flex-col items-center transform translate-y-4">
+                <div class="w-16 h-16 bg-gray-800 rounded-full mb-2"></div>
+                <div class="w-24 h-56 bg-gray-900 rounded-t-[3rem]"></div>
+             </div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <!-- Modal Component -->
@@ -308,3 +429,13 @@ onMounted(fetchProfile);
     />
   </div>
 </template>
+
+<style scoped>
+/* Custom scrollbar if needed */
+input::-webkit-calendar-picker-indicator {
+  opacity: 0.5;
+}
+input:focus::-webkit-calendar-picker-indicator {
+  opacity: 1;
+}
+</style>
