@@ -86,8 +86,15 @@ const fetchProfile = async () => {
   try {
     const response = await studentAPI.getStudentById(userId);
     if (response.data.success) {
+      // Handle both array and single object responses
+      let data = response.data.data;
+      if (Array.isArray(data)) {
+        data = data[0]; // Take first element if array
+      }
       // Assign backend data directly to form
-      Object.assign(formData.value, response.data.data);
+      if (data) {
+        Object.assign(formData.value, data);
+      }
     }
   } catch (error) {
     modalType.value = 'error';

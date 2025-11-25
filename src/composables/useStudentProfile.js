@@ -48,11 +48,19 @@ export function useStudentProfile() {
       const response = await studentAPI.getStudentById(userId);
       if (response.data.success) {
         // Transform backend gender to frontend display
-        const data = response.data.data;
-        studentProfile.value = {
-          ...data,
-          gender: mapGenderToFrontend(data.gender)
-        };
+        // Handle both array and single object responses
+        let data = response.data.data;
+        if (Array.isArray(data)) {
+          data = data[0]; // Take first element if array
+        }
+        if (data) {
+          studentProfile.value = {
+            ...data,
+            gender: mapGenderToFrontend(data.gender)
+          };
+        } else {
+          errorMessage.value = "Profile not found.";
+        }
       } else {
         errorMessage.value = response.data.message || "Profile not found.";
       }

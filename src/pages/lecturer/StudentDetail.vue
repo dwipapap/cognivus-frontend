@@ -74,7 +74,18 @@ const fetchStudentData = async () => {
       return;
     }
     
-    student.value = studentResponse.data.data;
+    // Handle both array and single object responses
+    let studentData = studentResponse.data.data;
+    if (Array.isArray(studentData)) {
+      studentData = studentData[0]; // Take first element if array
+    }
+    
+    if (!studentData) {
+      errorMessage.value = 'Student not found';
+      return;
+    }
+    
+    student.value = studentData;
     
     // Fetch grades (student can have multiple test attempts)
     if (student.value.studentid) {
@@ -209,7 +220,7 @@ onMounted(() => {
                   <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Payment Type</label>
                   <p class="text-gray-900 font-medium">
                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                      {{ student.payment_type || 'Standard' }}
+                      {{ student.payment_type || 'Not Set' }}
                     </span>
                   </p>
                 </div>
