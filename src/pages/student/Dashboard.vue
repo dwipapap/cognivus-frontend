@@ -186,13 +186,13 @@ watchEffect(() => {
     <div class="flex flex-col lg:flex-row items-center">
       <!-- Left: Text Content -->
       <div class="flex-1 p-5 md:p-8 lg:p-12">
-        <h1 class="text-lg md:text-2xl lg:text-3xl font-semibold text-white/90 mb-2">
+        <h1 class="text-lg md:text-2xl lg:text-2xl font-semibold text-white/90 mb-2">
           Welcome, {{ greeting }}
         </h1>
-        <h2 class="text-2xl md:text-4xl lg:text-6xl font-bold text-white mb-6 leading-tight">
+        <h2 class="text-2xl md:text-4xl lg:text-4xl font-bold text-white mb-6 leading-tight">
           {{ user.name }}
         </h2>
-        <p class="text-white/80 text-sm md:text-base lg:text-lg leading-relaxed max-w-lg">
+        <p class="text-white/80 text-sm md:text-base lg:text-2x1 leading-relaxed max-w-lg">
           Embrace each lesson with curiosity and dedication. Every step forward brings you closer to mastering new skills and unlocking your full potential.
         </p>
       </div>

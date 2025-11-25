@@ -259,310 +259,301 @@ onMounted(async () => {
 
 <template>
   <div class="space-y-6">
-    <!-- Page Header -->
-    <div class="flex items-center justify-between">
-      <div>
-        <h1 class="text-3xl font-bold text-gray-800">Payment</h1>
-        <p class="text-gray-600 mt-1">Manage your course payments</p>
-      </div>
-    </div>
-
-    <!-- Program & Billing Information -->
-    <div class="payment-section-glass rounded-2xl p-6 shadow-lg border border-white/20">
-      <h2 class="text-xl font-semibold text-gray-800 mb-4">Program & Billing Information</h2>
-      
-      <!-- Loading State -->
-      <div v-if="isClassLoading || isPricesLoading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div v-for="i in 4" :key="i" class="animate-pulse">
-          <div class="h-24 bg-gray-200 rounded-xl"></div>
-        </div>
+    <!-- Page Header - Info Card Style -->
+    <div class="relative bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-lg overflow-hidden">
+      <!-- Diagonal Graphics -->
+      <div class="absolute top-0 right-0 w-1/2 h-full pointer-events-none overflow-hidden">
+        <div class="absolute -top-10 -right-10 w-40 h-48 bg-blue-400/30 rounded-lg transform rotate-12"></div>
+        <div class="absolute top-20 -right-5 w-32 h-40 bg-blue-300/40 rounded-lg transform rotate-12"></div>
+        <div class="absolute top-40 right-10 w-28 h-36 bg-white/20 rounded-lg transform rotate-12"></div>
       </div>
 
       <!-- Content -->
-      <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <!-- 1. Program Saat Ini -->
-        <div class="bg-white/60 rounded-xl p-4 border border-blue-100">
-          <div class="flex flex-col gap-3">
-            <div class="flex items-center gap-3">
-              <div class="flex-shrink-0">
-                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center">
-                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="relative p-5 md:p-5 z-10">
+        <div class="mb-4">
+          <h1 class="text-2xl md:text-3xl font-bold text-white mb-2">Payment</h1>
+          <p class="text-sm text-white/80">Manage your course payments</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Grid Layout: 2 columns on desktop -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- LEFT COLUMN: Payment Types & History (spans 2 cols on desktop) -->
+      <div class="lg:col-span-2 space-y-6">
+        
+        <!-- MERGED Payment Options Card (Regular + Final Exam) -->
+        <div class="payment-section-glass rounded-2xl p-6 shadow-lg border border-white/20">
+          <h2 class="text-lg font-semibold text-gray-800 mb-4">Payment Options</h2>
+          
+          <!-- Regular Payments Section -->
+          <div class="mb-4">
+            <h3 class="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Regular Payments</h3>
+            
+            <div v-if="isPricesLoading" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div v-for="i in 2" :key="i" class="animate-pulse">
+                <div class="h-24 bg-gray-200 rounded-lg"></div>
+              </div>
+            </div>
+
+            <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div
+                v-for="type in paymentTypes.filter(t => t.category === 'regular')"
+                :key="type.id"
+                @click="selectPaymentType(type.id)"
+                class="payment-type-card cursor-pointer rounded-lg p-3 border-2 transition-all duration-300"
+                :class="selectedPaymentType === type.id 
+                  ? 'border-blue-500 bg-blue-50 shadow-md' 
+                  : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-sm'"
+              >
+                <div class="flex items-start gap-2">
+                  <div class="flex-shrink-0">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center"
+                         :class="selectedPaymentType === type.id ? 'bg-blue-500' : 'bg-gray-200'">
+                      <svg class="w-4 h-4" :class="selectedPaymentType === type.id ? 'text-white' : 'text-gray-600'" 
+                           fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="type.icon"></path>
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <h4 class="text-sm font-semibold text-gray-800">{{ type.name }}</h4>
+                    <p class="text-xs text-gray-500 mt-0.5">{{ type.description }}</p>
+                    <p class="text-base font-bold text-blue-600 mt-1">
+                      {{ formatCurrency(type.id === 'semester' ? currentSemesterFee : currentMonthlyFee) }}
+                    </p>
+                  </div>
+                  <div v-if="selectedPaymentType === type.id" class="flex-shrink-0">
+                    <svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Divider -->
+          <div class="border-t border-gray-200 my-3"></div>
+
+          <!-- Final Exam Payment Section -->
+          <div>
+            <h3 class="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">Final Exam Payment</h3>
+            
+            <div v-if="isPricesLoading" class="animate-pulse">
+              <div class="h-24 bg-gray-200 rounded-lg"></div>
+            </div>
+
+            <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div
+                v-for="type in paymentTypes.filter(t => t.category === 'exam')"
+                :key="type.id"
+                @click="selectPaymentType(type.id)"
+                class="payment-type-card cursor-pointer rounded-lg p-3 border-2 transition-all duration-300"
+                :class="selectedPaymentType === type.id 
+                  ? 'border-purple-500 bg-purple-50 shadow-md' 
+                  : 'border-gray-200 bg-white hover:border-purple-300 hover:shadow-sm'"
+              >
+                <div class="flex items-start gap-2">
+                  <div class="flex-shrink-0">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center"
+                         :class="selectedPaymentType === type.id ? 'bg-purple-500' : 'bg-gray-200'">
+                      <svg class="w-4 h-4" :class="selectedPaymentType === type.id ? 'text-white' : 'text-gray-600'" 
+                           fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="type.icon"></path>
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <h4 class="text-sm font-semibold text-gray-800">{{ type.name }}</h4>
+                    <p class="text-xs text-gray-500 mt-0.5">{{ type.description }}</p>
+                    <p class="text-base font-bold text-purple-600 mt-1">
+                      {{ formatCurrency(finalExamFee) }}
+                    </p>
+                    <div class="mt-1.5 flex items-start gap-1 bg-purple-50 rounded p-1.5 border border-purple-100">
+                      <svg class="w-3 h-3 text-purple-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                      </svg>
+                      <p class="text-xs text-purple-800">Required only when taking final exam</p>
+                    </div>
+                  </div>
+                  <div v-if="selectedPaymentType === type.id" class="flex-shrink-0">
+                    <svg class="w-4 h-4 text-purple-500" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment History -->
+        <div class="payment-section-glass rounded-2xl p-6 shadow-lg border border-white/20">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4">Payment History</h2>
+          
+          <div v-if="paymentHistory.length === 0" class="text-center py-8">
+            <svg class="w-16 h-16 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <p class="text-gray-500 text-sm">No payment history yet</p>
+          </div>
+          
+          <div v-else class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr class="border-b border-gray-200">
+                  <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Date</th>
+                  <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Type</th>
+                  <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Amount</th>
+                  <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Status</th>
+                  <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Order ID</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="payment in paymentHistory" :key="payment.paymentid" class="border-b border-gray-100 hover:bg-gray-50">
+                  <td class="py-3 px-4 text-sm text-gray-600">{{ formatDate(payment.created_at) }}</td>
+                  <td class="py-3 px-4 text-sm text-gray-800">{{ getPaymentTypeName(payment.payment_type) }}</td>
+                  <td class="py-3 px-4 text-sm font-semibold text-gray-800">{{ formatCurrency(payment.amount) }}</td>
+                  <td class="py-3 px-4">
+                    <span class="px-2 py-1 text-xs font-medium rounded-full border capitalize"
+                          :class="getStatusBadgeClass(payment.status)">
+                      {{ payment.status }}
+                    </span>
+                  </td>
+                  <td class="py-3 px-4 text-sm text-gray-600 font-mono">{{ payment.midtrans_transactionid || payment.midtrans_orderid }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: Program Info & Payment Summary (spans 1 col on desktop) -->
+      <div class="lg:col-span-1 space-y-6">
+        
+        <!-- Program & Billing Information (2x2 Grid) -->
+        <div class="payment-section-glass rounded-2xl p-5 shadow-lg border border-white/20">
+          <h2 class="text-lg font-semibold text-gray-800 mb-4">Program & Billing Info</h2>
+          
+          <!-- Loading State -->
+          <div v-if="isClassLoading || isPricesLoading" class="grid grid-cols-2 gap-3">
+            <div v-for="i in 4" :key="i" class="animate-pulse">
+              <div class="h-20 bg-gray-200 rounded-lg"></div>
+            </div>
+          </div>
+
+          <!-- Content - 2x2 Grid -->
+          <div v-else class="grid grid-cols-2 gap-3">
+            <!-- 1. Current Program -->
+            <div class="bg-white/60 rounded-lg p-3 border border-blue-100">
+              <div class="flex items-center gap-2 mb-2">
+                <div class="w-8 h-8 rounded-md bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
                   </svg>
                 </div>
+                <p class="text-xs font-medium text-gray-600">Program</p>
               </div>
-              <div class="flex-1 min-w-0">
-                <p class="text-xs font-medium text-gray-600 mb-0.5">Current Program</p>
-              </div>
+              <p class="text-sm font-bold text-gray-800 truncate">{{ classInfo?.class_code || '-' }}</p>
             </div>
-            <div>
-              <p class="text-base font-bold text-gray-800 truncate">{{ classInfo?.class_code || '-' }}</p>
-              <p class="text-xs text-gray-500 mt-0.5">Class Code</p>
-            </div>
-          </div>
-        </div>
 
-        <!-- 2. Level Siswa -->
-        <div class="bg-white/60 rounded-xl p-4 border border-purple-100">
-          <div class="flex flex-col gap-3">
-            <div class="flex items-center gap-3">
-              <div class="flex-shrink-0">
-                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <!-- 2. Student Level -->
+            <div class="bg-white/60 rounded-lg p-3 border border-purple-100">
+              <div class="flex items-center gap-2 mb-2">
+                <div class="w-8 h-8 rounded-md bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
                   </svg>
                 </div>
+                <p class="text-xs font-medium text-gray-600">Level</p>
               </div>
-              <div class="flex-1 min-w-0">
-                <p class="text-xs font-medium text-gray-600 mb-0.5">Student Level</p>
-              </div>
+              <p class="text-sm font-bold text-gray-800 truncate">{{ levelName || 'Loading...' }}</p>
             </div>
-            <div>
-              <p class="text-base font-bold text-gray-800 truncate">{{ levelName || 'Loading...' }}</p>
-              <p class="text-xs text-gray-500 mt-0.5">Level</p>
-            </div>
-          </div>
-        </div>
 
-        <!-- 3. Biaya Per Semester -->
-        <div class="bg-white/60 rounded-xl p-4 border border-green-100">
-          <div class="flex flex-col gap-3">
-            <div class="flex items-center gap-3">
-              <div class="flex-shrink-0">
-                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center">
-                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <!-- 3. Semester Fee -->
+            <div class="bg-white/60 rounded-lg p-3 border border-green-100">
+              <div class="flex items-center gap-2 mb-2">
+                <div class="w-8 h-8 rounded-md bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
                   </svg>
                 </div>
+                <p class="text-xs font-medium text-gray-600">Semester</p>
               </div>
-              <div class="flex-1 min-w-0">
-                <p class="text-xs font-medium text-gray-600 mb-0.5">Semester Fee</p>
-              </div>
+              <p class="text-sm font-bold text-green-600 truncate">{{ formatCurrency(currentSemesterFee) }}</p>
             </div>
-            <div>
-              <p class="text-base font-bold text-green-600 truncate">{{ formatCurrency(currentSemesterFee) }}</p>
-              <p class="text-xs text-gray-500 mt-0.5">Per Semester</p>
-            </div>
-          </div>
-        </div>
 
-        <!-- 4. Biaya Per Bulan -->
-        <div class="bg-white/60 rounded-xl p-4 border border-orange-100">
-          <div class="flex flex-col gap-3">
-            <div class="flex items-center gap-3">
-              <div class="flex-shrink-0">
-                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
-                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <!-- 4. Monthly Fee -->
+            <div class="bg-white/60 rounded-lg p-3 border border-orange-100">
+              <div class="flex items-center gap-2 mb-2">
+                <div class="w-8 h-8 rounded-md bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                   </svg>
                 </div>
+                <p class="text-xs font-medium text-gray-600">Monthly</p>
               </div>
-              <div class="flex-1 min-w-0">
-                <p class="text-xs font-medium text-gray-600 mb-0.5">Monthly Fee</p>
-              </div>
-            </div>
-            <div>
-              <p class="text-base font-bold text-orange-600 truncate">{{ formatCurrency(currentMonthlyFee) }}</p>
-              <p class="text-xs text-gray-500 mt-0.5">Per Month</p>
+              <p class="text-sm font-bold text-orange-600 truncate">{{ formatCurrency(currentMonthlyFee) }}</p>
             </div>
           </div>
-        </div>
-      </div>
 
-      <!-- Info Note -->
-      <div class="mt-4 flex items-start gap-2 bg-blue-50 rounded-lg p-3 border border-blue-100">
-        <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
-        <p class="text-sm text-blue-800">The fee information above is based on your program level. Select a payment type below to continue.</p>
-      </div>
-    </div>
-
-    <!-- Payment Type Selection -->
-    <div class="space-y-6">
-      <!-- Regular Payments (Semester & Monthly) -->
-      <div class="payment-section-glass rounded-2xl p-6 shadow-lg border border-white/20">
-        <h2 class="text-xl font-semibold text-gray-800 mb-4">Regular Payments</h2>
-        
-        <div v-if="isPricesLoading" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div v-for="i in 2" :key="i" class="animate-pulse">
-            <div class="h-32 bg-gray-200 rounded-xl"></div>
+          <!-- Info Note -->
+          <div class="mt-4 flex items-start gap-2 bg-blue-50 rounded-lg p-2.5 border border-blue-100">
+            <svg class="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <p class="text-xs text-blue-800">Fees based on your program level</p>
           </div>
         </div>
 
-        <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div
-            v-for="type in paymentTypes.filter(t => t.category === 'regular')"
-            :key="type.id"
-            @click="selectPaymentType(type.id)"
-            class="payment-type-card cursor-pointer rounded-xl p-6 border-2 transition-all duration-300"
-            :class="selectedPaymentType === type.id 
-              ? 'border-blue-500 bg-blue-50 shadow-lg scale-105' 
-              : 'border-gray-200 bg-white hover:border-blue-300 hover:shadow-md'"
+        <!-- Payment Summary (ALWAYS VISIBLE - Persistent) -->
+        <div class="payment-section-glass rounded-2xl p-5 shadow-lg border border-white/20">
+          <h2 class="text-lg font-semibold text-gray-800 mb-4">Payment Summary</h2>
+          
+          <div class="space-y-2.5 mb-5">
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">Name</span>
+              <span class="text-sm font-semibold text-gray-800 truncate ml-2">{{ studentName }}</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">Email</span>
+              <span class="text-sm font-semibold text-gray-800 truncate ml-2">{{ studentEmail }}</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-sm text-gray-600">Payment Type</span>
+              <span class="text-sm font-semibold text-gray-800">{{ selectedPaymentType ? getPaymentTypeName(selectedPaymentType) : '-' }}</span>
+            </div>
+            <div class="h-px bg-gray-200 my-2"></div>
+            <div class="flex justify-between items-center">
+              <span class="text-base font-semibold text-gray-800">Total</span>
+              <span class="text-xl font-bold text-blue-600">{{ selectedPaymentType ? formatCurrency(selectedAmount) : 'Rp 0' }}</span>
+            </div>
+          </div>
+
+          <button
+            @click="handlePayment"
+            :disabled="!canPay"
+            class="w-full py-2.5 px-5 rounded-full font-semibold text-white transition-all duration-300"
+            :class="canPay 
+              ? 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-md hover:shadow-lg active:scale-95 cursor-pointer' 
+              : 'bg-gray-400 cursor-not-allowed opacity-60'"
           >
-            <div class="flex items-start gap-4">
-              <div class="flex-shrink-0">
-                <div class="w-12 h-12 rounded-lg flex items-center justify-center"
-                     :class="selectedPaymentType === type.id ? 'bg-blue-500' : 'bg-gray-200'">
-                  <svg class="w-6 h-6" :class="selectedPaymentType === type.id ? 'text-white' : 'text-gray-600'" 
-                       fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="type.icon"></path>
-                  </svg>
-                </div>
-              </div>
-              <div class="flex-1 min-w-0">
-                <h3 class="text-lg font-semibold text-gray-800">{{ type.name }}</h3>
-                <p class="text-sm text-gray-600 mt-1">{{ type.description }}</p>
-                <p class="text-xl font-bold text-blue-600 mt-2">
-                  {{ formatCurrency(selectedPaymentType === type.id ? selectedAmount : (type.id === 'semester' ? currentSemesterFee : currentMonthlyFee)) }}
-                </p>
-              </div>
-              <div v-if="selectedPaymentType === type.id" class="flex-shrink-0">
-                <svg class="w-6 h-6 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                </svg>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+            <span v-if="isPaymentLoading" class="flex items-center justify-center">
+              <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Processing...
+            </span>
+            <span v-else>{{ canPay ? 'Pay Now' : 'Select Payment Type' }}</span>
+          </button>
 
-      <!-- Final Exam Payment -->
-      <div class="payment-section-glass rounded-2xl p-6 shadow-lg border border-white/20">
-        <h2 class="text-xl font-semibold text-gray-800 mb-4">Final Exam Payment</h2>
-        
-        <div v-if="isPricesLoading" class="animate-pulse">
-          <div class="h-32 bg-gray-200 rounded-xl"></div>
+          <p class="text-xs text-gray-500 text-center mt-2.5">
+            {{ canPay ? 'Secure payment via Midtrans' : 'Choose a payment option to continue' }}
+          </p>
         </div>
-
-        <div v-else>
-          <div
-            v-for="type in paymentTypes.filter(t => t.category === 'exam')"
-            :key="type.id"
-            @click="selectPaymentType(type.id)"
-            class="payment-type-card cursor-pointer rounded-xl p-6 border-2 transition-all duration-300"
-            :class="selectedPaymentType === type.id 
-              ? 'border-purple-500 bg-purple-50 shadow-lg scale-105' 
-              : 'border-gray-200 bg-white hover:border-purple-300 hover:shadow-md'"
-          >
-            <div class="flex items-start gap-4">
-              <div class="flex-shrink-0">
-                <div class="w-12 h-12 rounded-lg flex items-center justify-center"
-                     :class="selectedPaymentType === type.id ? 'bg-purple-500' : 'bg-gray-200'">
-                  <svg class="w-6 h-6" :class="selectedPaymentType === type.id ? 'text-white' : 'text-gray-600'" 
-                       fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="type.icon"></path>
-                  </svg>
-                </div>
-              </div>
-              <div class="flex-1 min-w-0">
-                <h3 class="text-lg font-semibold text-gray-800">{{ type.name }}</h3>
-                <p class="text-sm text-gray-600 mt-1">{{ type.description }}</p>
-                <p class="text-xl font-bold text-purple-600 mt-2">
-                  {{ formatCurrency(finalExamFee) }}
-                </p>
-                <div class="mt-3 flex items-start gap-2 bg-purple-50 rounded-lg p-2 border border-purple-100">
-                  <svg class="w-4 h-4 text-purple-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                  </svg>
-                  <p class="text-xs text-purple-800">This fee is separate from regular payments and only required when taking the final exam.</p>
-                </div>
-              </div>
-              <div v-if="selectedPaymentType === type.id" class="flex-shrink-0">
-                <svg class="w-6 h-6 text-purple-500" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                </svg>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Payment Summary & Action -->
-    <div v-if="selectedPaymentType" class="payment-section-glass rounded-2xl p-6 shadow-lg border border-white/20">
-      <h2 class="text-xl font-semibold text-gray-800 mb-4">Payment Summary</h2>
-      
-      <div class="space-y-3 mb-6">
-        <div class="flex justify-between items-center">
-          <span class="text-gray-600">Name</span>
-          <span class="font-semibold text-gray-800">{{ studentName }}</span>
-        </div>
-        <div class="flex justify-between items-center">
-          <span class="text-gray-600">Email</span>
-          <span class="font-semibold text-gray-800">{{ studentEmail }}</span>
-        </div>
-        <div class="flex justify-between items-center">
-          <span class="text-gray-600">Payment Type</span>
-          <span class="font-semibold text-gray-800">{{ getPaymentTypeName(selectedPaymentType) }}</span>
-        </div>
-        <div class="h-px bg-gray-200 my-2"></div>
-        <div class="flex justify-between items-center">
-          <span class="text-lg font-semibold text-gray-800">Total</span>
-          <span class="text-2xl font-bold text-blue-600">{{ formatCurrency(selectedAmount) }}</span>
-        </div>
-      </div>
-
-      <button
-        @click="handlePayment"
-        :disabled="!canPay"
-        class="w-full py-3 px-6 rounded-lg font-semibold text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-        :class="canPay 
-          ? 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-lg hover:shadow-xl active:scale-95' 
-          : 'bg-gray-400'"
-      >
-        <span v-if="isPaymentLoading" class="flex items-center justify-center">
-          <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-          Processing...
-        </span>
-        <span v-else>Pay Now</span>
-      </button>
-
-      <p class="text-xs text-gray-500 text-center mt-3">
-        You will be redirected to secure Midtrans payment page
-      </p>
-    </div>
-
-    <!-- Payment History -->
-    <div class="payment-section-glass rounded-2xl p-6 shadow-lg border border-white/20">
-      <h2 class="text-xl font-semibold text-gray-800 mb-4">Payment History</h2>
-      
-      <div v-if="paymentHistory.length === 0" class="text-center py-8">
-        <svg class="w-16 h-16 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-        </svg>
-        <p class="text-gray-500 text-sm">No payment history yet</p>
-      </div>
-      
-      <div v-else class="overflow-x-auto">
-        <table class="w-full">
-          <thead>
-            <tr class="border-b border-gray-200">
-              <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Date</th>
-              <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Type</th>
-              <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Amount</th>
-              <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Status</th>
-              <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Transaction ID</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="payment in paymentHistory" :key="payment.paymentid" class="border-b border-gray-100 hover:bg-gray-50">
-              <td class="py-3 px-4 text-sm text-gray-600">{{ formatDate(payment.created_at) }}</td>
-              <td class="py-3 px-4 text-sm text-gray-800">{{ getPaymentTypeName(payment.payment_type) }}</td>
-              <td class="py-3 px-4 text-sm font-semibold text-gray-800">{{ formatCurrency(payment.amount) }}</td>
-              <td class="py-3 px-4">
-                <span class="px-2 py-1 text-xs font-medium rounded-full border capitalize"
-                      :class="getStatusBadgeClass(payment.status)">
-                  {{ payment.status }}
-                </span>
-              </td>
-              <td class="py-3 px-4 text-sm text-gray-600 font-mono">{{ payment.midtrans_transactionid || payment.midtrans_orderid }}</td>
-            </tr>
-          </tbody>
-        </table>
       </div>
     </div>
 
