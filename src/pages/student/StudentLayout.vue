@@ -5,6 +5,8 @@ import { authStore } from '../../store/auth';
 import { useStudentProfile } from '../../composables/useStudentProfile';
 import IconHome from '~icons/solar/home-smile-bold';
 import IconBook from '~icons/solar/book-bookmark-bold';
+import iconBoyImage from '../../assets/iconboy.webp';
+import iconGirlImage from '../../assets/icongirl.webp';
 import IconGrade from '~icons/solar/graph-bold';
 import IconWallet from '~icons/solar/money-bag-bold';
 import IconUser from '~icons/basil/user-solid';
@@ -74,8 +76,27 @@ const displayName = computed(() => {
   return studentProfile.value?.nama_lengkap || studentProfile.value?.fullname || authStore.user?.username || authStore.user?.email?.split('@')[0] || 'Student';
 });
 
+// Gender-based avatar computed property
+const avatarUrl = computed(() => {
+  // Check if user has OAuth avatar from Google
+  if (authStore.user?.user_metadata?.avatar_url) {
+    return authStore.user.user_metadata.avatar_url;
+  }
+  
+  // Use gender-based icon from student profile
+  const gender = studentProfile.value?.jenis_kelamin;
+  if (gender === 'L') {
+    return iconBoyImage;
+  } else if (gender === 'P') {
+    return iconGirlImage;
+  }
+  
+  // Default fallback
+  return iconBoyImage;
+});
+
 const handleImageError = (event) => {
-  event.target.src = 'https://media1.tenor.com/m/JyHMlpMxRKwAAAAC/arisbm.gif';
+  event.target.src = iconBoyImage;
 };
 
 const handleLogout = async () => {
@@ -113,8 +134,8 @@ onUnmounted(() => {
                 <div v-if="isProfileLoading" class="avatar-skeleton bg-blue-100 w-full h-full rounded-full"></div>
 
                 <!-- Avatar image -->
-                <img v-else :src="authStore.user?.user_metadata?.avatar_url || 'https://media1.tenor.com/m/JyHMlpMxRKwAAAAC/arisbm.gif'"
-                  :alt="displayName" class="w-full h-full object-cover rounded-full" @error="handleAvatarError" />
+                <img v-else :src="avatarUrl"
+                  :alt="displayName" class="w-full h-full object-cover rounded-full" @error="handleImageError" />
               </div>
               <div class="text-left min-w-0 flex-1">
                 <p class="text-xs font-semibold text-gray-600 hidden sm:block">Student</p>

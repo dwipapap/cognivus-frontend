@@ -1,16 +1,37 @@
 <script setup>
-import { ref, watchEffect } from 'vue';
+import { ref, computed, watchEffect } from 'vue';
 import { authStore } from '../../store/auth';
 import { useStudentProfile } from '../../composables/useStudentProfile';
 import { classAPI, levelAPI } from '../../services/api';
+import iconBoyImage from '../../assets/iconboy.webp';
+import iconGirlImage from '../../assets/icongirl.webp';
 
 const { studentProfile, isLoading, errorMessage } = useStudentProfile();
 const classCode = ref('-');
 const levelName = ref('-');
 
+/** Gender-based avatar computed property */
+const avatarUrl = computed(() => {
+  // Check if user has OAuth avatar from Google
+  if (authStore.user?.user_metadata?.avatar_url) {
+    return authStore.user.user_metadata.avatar_url;
+  }
+  
+  // Use gender-based icon from student profile
+  const gender = studentProfile.value?.jenis_kelamin;
+  if (gender === 'L') {
+    return iconBoyImage;
+  } else if (gender === 'P') {
+    return iconGirlImage;
+  }
+  
+  // Default fallback
+  return iconBoyImage;
+});
+
 /** Handle avatar image loading errors */
 const handleImageError = (event) => {
-  event.target.src = 'https://media1.tenor.com/m/JyHMlpMxRKwAAAAC/arisbm.gif';
+  event.target.src = iconBoyImage;
 };
 
 /** Format date to DD-MM-YYYY */
@@ -102,7 +123,7 @@ watchEffect(async () => {
         <div class="lg:col-span-1">
               <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-3xl p-10 text-white text-center shadow-lg h-full flex flex-col justify-between">
                 <img 
-                  :src="authStore.user?.user_metadata?.avatar_url || 'https://media1.tenor.com/m/JyHMlpMxRKwAAAAC/arisbm.gif'" 
+                  :src="avatarUrl" 
                   :alt="studentProfile.fullname"
                   class="w-24 h-24 md:w-48 md:h-48 rounded-full mx-auto object-cover border-4 border-white shadow-xl mb-6"
                   @error="handleImageError"

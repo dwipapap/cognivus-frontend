@@ -1,13 +1,35 @@
 <script setup>
+import { computed } from 'vue';
 import { authStore } from '../../store/auth';
 import { useLecturerProfile } from '../../composables/useLecturerProfile';
 import LoadingBar from '../../components/ui/LoadingBar.vue';
+import iconBoyImage from '../../assets/iconboy.webp';
+import iconGirlImage from '../../assets/icongirl.webp';
 
 const { lecturerProfile, isLoading, errorMessage } = useLecturerProfile();
 
+/** Gender-based avatar computed property */
+const avatarUrl = computed(() => {
+  // Check if user has OAuth avatar from Google
+  if (authStore.user?.user_metadata?.avatar_url) {
+    return authStore.user.user_metadata.avatar_url;
+  }
+  
+  // Use gender-based icon from lecturer profile
+  const gender = lecturerProfile.value?.gender;
+  if (gender === 'Laki-laki' || gender === 'L') {
+    return iconBoyImage;
+  } else if (gender === 'Perempuan' || gender === 'P') {
+    return iconGirlImage;
+  }
+  
+  // Default fallback
+  return iconBoyImage;
+});
+
 /** Handle avatar image loading errors */
 const handleImageError = (event) => {
-  event.target.src = 'https://media1.tenor.com/m/JyHMlpMxRKwAAAAC/arisbm.gif';
+  event.target.src = iconBoyImage;
 };
 
 /** Format date to DD-MM-YYYY */
@@ -58,7 +80,7 @@ const formatDate = (dateString) => {
         <div class="flex flex-col md:flex-row items-center gap-8">
           <!-- Avatar -->
           <img 
-            :src="authStore.user?.user_metadata?.avatar_url || 'https://media1.tenor.com/m/JyHMlpMxRKwAAAAC/arisbm.gif'" 
+            :src="avatarUrl" 
             :alt="lecturerProfile.fullname"
             class="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-4 border-white shadow-xl flex-shrink-0"
             @error="handleImageError"

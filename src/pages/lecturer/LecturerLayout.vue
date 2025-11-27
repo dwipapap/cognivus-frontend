@@ -2,14 +2,18 @@
 import { computed, ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { authStore } from '../../store/auth';
+import { useLecturerProfile } from '../../composables/useLecturerProfile';
 import IconHome from '~icons/solar/home-smile-bold';
 import IconBook from '~icons/solar/book-bookmark-bold';
+import iconBoyImage from '../../assets/iconboy.webp';
+import iconGirlImage from '../../assets/icongirl.webp';
 import IconStudents from '~icons/solar/users-group-rounded-bold';
 import IconUser from '~icons/basil/user-solid';
 import IconLogout from '~icons/basil/logout-solid';
 import IconCaret from '~icons/basil/caret-down-outline';
 
 const router = useRouter();
+const { lecturerProfile, isLoading: isProfileLoading } = useLecturerProfile();
 
 // Click-based dropdown state
 const showDropdown = ref(false);
@@ -68,11 +72,30 @@ onUnmounted(() => {
 });
 
 const displayName = computed(() => {
-  return authStore.user?.username || authStore.user?.email?.split('@')[0] || 'Lecturer';
+  return lecturerProfile.value?.nama_lengkap || authStore.user?.username || authStore.user?.email?.split('@')[0] || 'Lecturer';
+});
+
+// Gender-based avatar computed property
+const avatarUrl = computed(() => {
+  // Check if user has OAuth avatar from Google
+  if (authStore.user?.user_metadata?.avatar_url) {
+    return authStore.user.user_metadata.avatar_url;
+  }
+  
+  // Use gender-based icon from lecturer profile
+  const gender = lecturerProfile.value?.gender;
+  if (gender === 'Laki-laki' || gender === 'L') {
+    return iconBoyImage;
+  } else if (gender === 'Perempuan' || gender === 'P') {
+    return iconGirlImage;
+  }
+  
+  // Default fallback
+  return iconBoyImage;
 });
 
 const handleImageError = (event) => {
-  event.target.src = 'https://media1.tenor.com/m/JyHMlpMxRKwAAAAC/arisbm.gif';
+  event.target.src = iconBoyImage;
 };
 
 const handleLogout = async () => {
@@ -106,9 +129,12 @@ onUnmounted(() => {
               class="flex items-center gap-2 sm:gap-3 h-10 sm:h-12 px-2 xs:px-3 sm:px-4 rounded-full bg-white/30 backdrop-blur-sm border border-white/50 shadow-sm overflow-hidden whitespace-nowrap max-w-[50vw] xs:max-w-[60vw] sm:max-w-[200px] md:max-w-[240px] min-w-0 hover:bg-white/40 transition-all duration-200 cursor-pointer active:scale-95"
             >
               <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden border-2 border-white/50">
+                <!-- Skeleton while avatar loading -->
+                <div v-if="isProfileLoading" class="avatar-skeleton bg-blue-100 w-full h-full rounded-full"></div>
+                
                 <!-- Avatar image -->
-                <img :src="authStore.user?.user_metadata?.avatar_url || 'https://media1.tenor.com/m/JyHMlpMxRKwAAAAC/arisbm.gif'"
-                  :alt="displayName" class="w-full h-full object-cover rounded-full" @error="handleAvatarError" />
+                <img v-else :src="avatarUrl"
+                  :alt="displayName" class="w-full h-full object-cover rounded-full" @error="handleImageError" />
               </div>
               <div class="text-left min-w-0 flex-1">
                 <p class="text-xs font-semibold text-gray-600 hidden sm:block">Lecturer</p>
