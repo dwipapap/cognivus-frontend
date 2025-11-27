@@ -8,6 +8,8 @@ import BaseTextarea from '../../components/form/BaseTextarea.vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
 import LoadingBar from '../../components/ui/LoadingBar.vue';
 import ConfirmDialog from '../../components/ui/ConfirmDialog.vue';
+import IconArrowLeft from '~icons/basil/arrow-left-solid';
+import IconArrowRight from '~icons/basil/arrow-right-solid';
 
 const { lecturerProfile, isLoading: profileLoading } = useLecturerProfile();
 
@@ -20,6 +22,10 @@ const errorMessage = ref('');
 const successMessage = ref('');
 const currentPage = ref(1);
 const itemsPerPage = 5;
+
+/** Class selector pagination */
+const classCurrentPage = ref(1);
+const classItemsPerPage = 5;
 
 /** Modal and form state */
 const showModal = ref(false);
@@ -42,6 +48,25 @@ const confirmConfig = ref({
   title: '',
   message: '',
   variant: 'danger'
+});
+
+/** Class selector pagination computed properties */
+const classTotalPages = computed(() => {
+  if (myClasses.value.length === 0) return 1;
+  return Math.ceil(myClasses.value.length / classItemsPerPage);
+});
+
+const shouldShowClassNavigation = computed(() => myClasses.value.length > classItemsPerPage);
+
+const paginatedClasses = computed(() => {
+  if (!shouldShowClassNavigation.value) return myClasses.value;
+  const start = (classCurrentPage.value - 1) * classItemsPerPage;
+  return myClasses.value.slice(start, start + classItemsPerPage);
+});
+
+const classJustifyMode = computed(() => {
+  const count = paginatedClasses.value.length;
+  return count <= 3 ? 'justify-center gap-4' : 'justify-start gap-3';
 });
 
 /** Get courses for selected class with file count */
@@ -291,6 +316,12 @@ const goToPage = (page) => {
   }
 };
 
+const goToClassPage = (page) => {
+  if (page >= 1 && page <= classTotalPages.value) {
+    classCurrentPage.value = page;
+  }
+};
+
 watch(() => selectedClass.value?.classid, () => {
   currentPage.value = 1;
 });
@@ -299,6 +330,10 @@ watch(classCourses, () => {
   if (currentPage.value > totalPages.value) {
     currentPage.value = totalPages.value;
   }
+});
+
+watch(myClasses, () => {
+  classCurrentPage.value = 1;
 });
 
 /** Auto-fetch classes when profile loads */
@@ -345,21 +380,48 @@ onMounted(() => {
       <!-- Class Selection -->
       <div class="bg-white rounded-2xl shadow-lg p-6">
         <h2 class="text-xl font-bold text-gray-900 mb-4">Select Class</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        
+        <!-- Horizontal Card Selector with Pagination -->
+        <div class="flex items-center gap-3">
+          <!-- Previous Button -->
           <button
-            v-for="cls in myClasses"
-            :key="cls.classid"
-            @click="selectedClass = cls"
-            :class="[
-              'p-4 rounded-2xl border-2 text-left transition-all shadow-sm hover:shadow-lg',
-              selectedClass?.classid === cls.classid
-                ? 'border-blue-600 bg-gradient-to-br from-blue-50 to-indigo-50 scale-105'
-                : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50/30'
-            ]"
+            v-if="shouldShowClassNavigation"
+            @click="goToClassPage(classCurrentPage - 1)"
+            :disabled="classCurrentPage === 1"
+            class="flex-shrink-0 w-10 h-10 rounded-full border-2 border-gray-300 bg-white flex items-center justify-center text-gray-600 transition-all hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:border-blue-400 hover:text-blue-700 hover:scale-110 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-sm hover:shadow-md"
+            aria-label="Previous classes"
           >
-            <h3 class="font-bold text-lg text-gray-900">{{ cls.class_code }}</h3>
-            <p class="text-sm text-gray-600">{{ getLevelName(cls.levelid) }}</p>
-            <p class="text-xs text-gray-500 mt-2">{{ cls.description || 'No description' }}</p>
+            <IconArrowLeft class="w-5 h-5" />
+          </button>
+
+          <!-- Cards Container -->
+          <div class="flex-1 flex flex-wrap" :class="classJustifyMode">
+            <button
+              v-for="cls in paginatedClasses"
+              :key="cls.classid"
+              @click="selectedClass = cls"
+              :class="[
+                'flex-shrink-0 min-w-[160px] max-w-[220px] p-3 rounded-xl border-2 text-left transition-all shadow-sm hover:shadow-md',
+                selectedClass?.classid === cls.classid
+                  ? 'border-blue-600 bg-gradient-to-br from-blue-50 to-indigo-50 scale-105'
+                  : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50/30'
+              ]"
+            >
+              <h3 class="font-bold text-base text-gray-900 truncate">{{ cls.class_code }}</h3>
+              <p class="text-xs text-gray-600 mt-1">{{ getLevelName(cls.levelid) }}</p>
+              <p class="text-xs text-gray-500 mt-1 line-clamp-2">{{ cls.description || 'No description' }}</p>
+            </button>
+          </div>
+
+          <!-- Next Button -->
+          <button
+            v-if="shouldShowClassNavigation"
+            @click="goToClassPage(classCurrentPage + 1)"
+            :disabled="classCurrentPage === classTotalPages"
+            class="flex-shrink-0 w-10 h-10 rounded-full border-2 border-gray-300 bg-white flex items-center justify-center text-gray-600 transition-all hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:border-blue-400 hover:text-blue-700 hover:scale-110 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-sm hover:shadow-md"
+            aria-label="Next classes"
+          >
+            <IconArrowRight class="w-5 h-5" />
           </button>
         </div>
       </div>

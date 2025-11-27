@@ -3,6 +3,13 @@ import { computed, ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { authStore } from '../../store/auth';
 import { useStudentProfile } from '../../composables/useStudentProfile';
+import IconHome from '~icons/solar/home-smile-bold';
+import IconBook from '~icons/solar/book-bookmark-bold';
+import IconGrade from '~icons/solar/graph-bold';
+import IconWallet from '~icons/solar/money-bag-bold';
+import IconUser from '~icons/basil/user-solid';
+import IconLogout from '~icons/basil/logout-solid';
+import IconCaret from '~icons/basil/caret-down-outline';
 
 const router = useRouter();
 const { studentProfile, isLoading: isProfileLoading } = useStudentProfile();
@@ -114,9 +121,7 @@ onUnmounted(() => {
                 <h3 class="text-base sm:text-lg font-medium text-gray-800 truncate">{{ displayName }}</h3>
               </div>
               <!-- Dropdown arrow indicator -->
-              <svg class="w-4 h-4 text-gray-600 transition-transform duration-300" :class="{ 'rotate-180': isDropdownVisible }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-              </svg>
+              <IconCaret class="w-4 h-4 text-gray-600 transition-transform duration-300" :class="{ 'rotate-180': isDropdownVisible }" />
             </div>
 
             <!-- Dropdown Menu with animation classes -->
@@ -137,15 +142,11 @@ onUnmounted(() => {
               <!-- Dropdown Items -->
               <div class="py-1">
                 <router-link to="/student/profile-view" class="profile-dropdown-item">
-                  <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
-                  </svg>
+                  <IconUser class="w-5 h-5 mr-3" />
                   View Profile
                 </router-link>
                 <a @click="handleLogout" class="profile-dropdown-item hover:text-red-600">
-                  <svg class="w-5 h-5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"></path>
-                  </svg>
+                  <IconLogout class="w-5 h-5 mr-3" />
                   Logout
                 </a>
               </div>
@@ -168,38 +169,28 @@ onUnmounted(() => {
             <li>
               <router-link to="/student/dashboard"
                 class="nav-item flex items-center px-3 py-2 text-sm font-medium rounded-lg group">
-                <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
-                </svg>
+                <IconHome class="w-5 h-5 flex-shrink-0" />
                 <span class="sidebar-text ml-3 opacity-0 whitespace-nowrap overflow-hidden">Dashboard</span>
               </router-link>
             </li>
             <li>
               <router-link to="/student/courses"
                 class="nav-item flex items-center px-3 py-2 text-sm font-medium rounded-lg group">
-                <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"></path>
-                </svg>
+                <IconBook class="w-5 h-5 flex-shrink-0" />
                 <span class="sidebar-text ml-3 opacity-0 whitespace-nowrap overflow-hidden">My Courses</span>
               </router-link>
             </li>
             <li>
               <router-link to="/student/grades"
                 class="nav-item flex items-center px-3 py-2 text-sm font-medium rounded-lg group">
-                <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
-                  <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path>
-                </svg>
+                <IconGrade class="w-5 h-5 flex-shrink-0" />
                 <span class="sidebar-text ml-3 opacity-0 whitespace-nowrap overflow-hidden">Grades</span>
               </router-link>
             </li>
             <li>
               <router-link to="/student/payment"
                 class="nav-item flex items-center px-3 py-2 text-sm font-medium rounded-lg group">
-                <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"></path>
-                  <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd"></path>
-                </svg>
+                <IconWallet class="w-5 h-5 flex-shrink-0" />
                 <span class="sidebar-text ml-3 opacity-0 whitespace-nowrap overflow-hidden">Payment</span>
               </router-link>
             </li>
@@ -213,35 +204,25 @@ onUnmounted(() => {
           <ul class="h-full flex justify-around items-center px-6">
             <li>
               <router-link to="/student/dashboard" class="mobile-nav-item flex flex-col items-center gap-1">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
-                </svg>
+                <IconHome class="w-5 h-5" />
                 <span class="text-xs">Dashboard</span>
               </router-link>
             </li>
             <li>
               <router-link to="/student/courses" class="mobile-nav-item flex flex-col items-center gap-1">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"></path>
-                </svg>
+                <IconBook class="w-5 h-5" />
                 <span class="text-xs">Courses</span>
               </router-link>
             </li>
             <li>
               <router-link to="/student/grades" class="mobile-nav-item flex flex-col items-center gap-1">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
-                  <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path>
-                </svg>
+                <IconGrade class="w-5 h-5" />
                 <span class="text-xs">Grades</span>
               </router-link>
             </li>
             <li>
               <router-link to="/student/payment" class="mobile-nav-item flex flex-col items-center gap-1">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"></path>
-                  <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd"></path>
-                </svg>
+                <IconWallet class="w-5 h-5" />
                 <span class="text-xs">Bayar</span>
               </router-link>
             </li>

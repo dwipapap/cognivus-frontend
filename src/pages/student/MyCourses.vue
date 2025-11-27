@@ -4,6 +4,7 @@ import { useStudentProfile } from '../../composables/useStudentProfile';
 import { useClassDetails } from '../../composables/useClassDetails';
 import { courseAPI } from '../../services/api';
 import LoadingBar from '../../components/ui/LoadingBar.vue';
+import IconArrowRight from '~icons/basil/arrow-right-solid';
 
 const { studentProfile, isLoading: profileLoading } = useStudentProfile();
 
@@ -156,9 +157,7 @@ const formatDate = (dateString) => {
 
             <!-- Arrow Icon -->
             <div class="flex-shrink-0">
-              <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-              </svg>
+              <IconArrowRight class="w-6 h-6 text-white" />
             </div>
           </div>
         </router-link>

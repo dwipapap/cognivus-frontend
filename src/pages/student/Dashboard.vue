@@ -7,6 +7,12 @@ import { useClassDetails } from '../../composables/useClassDetails';
 import { courseAPI } from '../../services/api';
 import LoadingBar from '../../components/ui/LoadingBar.vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
+import IconChart from '~icons/solar/round-graph-bold';
+import IconBook from '~icons/solar/book-bookmark-bold';
+import IconUser from '~icons/solar/user-bold';
+import IconClock from '~icons/basil/clock-solid';
+import IconArrowRight from '~icons/basil/arrow-right-solid';
+import IconBookSolid from '~icons/basil/book-solid';
 
 const router = useRouter();
 const { studentProfile, isLoading } = useStudentProfile();
@@ -331,22 +337,10 @@ watchEffect(() => {
     >
       <div class="flex items-center gap-4">
         <div class="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
-          <!-- Level Icon -->
-          <svg v-if="stat.icon === 'level'" class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 0l-2 2a1 1 0 101.414 1.414L8 10.414l1.293 1.293a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-          </svg>
-          <!-- Course Icon -->
-          <svg v-else-if="stat.icon === 'course'" class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"></path>
-          </svg>
-          <!-- Teacher Icon -->
-          <svg v-else-if="stat.icon === 'teacher'" class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"></path>
-          </svg>
-          <!-- Schedule Icon -->
-          <svg v-else class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
+          <IconChart v-if="stat.icon === 'level'" class="w-6 h-6 text-white" />
+          <IconBook v-else-if="stat.icon === 'course'" class="w-6 h-6 text-white" />
+          <IconUser v-else-if="stat.icon === 'teacher'" class="w-6 h-6 text-white" />
+          <IconClock v-else class="w-6 h-6 text-white" />
         </div>
         <div class="flex-1 min-w-0">
           <p class="text-sm font-medium text-gray-600 mb-1">{{ stat.title }}</p>
@@ -371,9 +365,7 @@ watchEffect(() => {
         >
           View All Courses
           <template #icon>
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-            </svg>
+            <IconArrowRight class="w-5 h-5" />
           </template>
         </BaseButton>
       </div>
@@ -398,9 +390,7 @@ watchEffect(() => {
 
       <!-- Empty State -->
       <div v-else-if="courses.length === 0" class="text-center py-12">
-        <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-        </svg>
+        <IconBookSolid class="w-16 h-16 mx-auto text-gray-400 mb-4" />
         <p class="text-gray-500">No course materials available yet.</p>
       </div>
 
