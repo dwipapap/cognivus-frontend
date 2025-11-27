@@ -113,7 +113,18 @@ const handleCompleteProfile = async () => {
       
       await userAPI.updateUser(userId, userUpdateData);
       
-      // Step 2: Update student profile
+      // Step 2: Check if student record exists first
+      let studentExists = false;
+      try {
+        const checkResponse = await studentAPI.getStudentById(userId);
+        // Backend returns array, check if it has data
+        studentExists = checkResponse.data.success && checkResponse.data.data && checkResponse.data.data.length > 0;
+      } catch (checkError) {
+        console.log('Student check error:', checkError);
+        studentExists = false;
+      }
+      
+      // Step 3: Update or create student profile
       const studentUpdateData = {
         fullname: data.fullname,
         gender: mapGenderToBackend(data.gender),
@@ -125,7 +136,18 @@ const handleCompleteProfile = async () => {
         birthplace: data.birthplace
       };
       
-      const response = await studentAPI.updateStudent(userId, studentUpdateData);
+      let response;
+      if (studentExists) {
+        // Update existing student record
+        response = await studentAPI.updateStudent(userId, studentUpdateData);
+      } else {
+        // Create new student record if it doesn't exist
+        response = await studentAPI.createStudent({
+          ...studentUpdateData,
+          userid: userId,
+          classid: 4 // Default class
+        });
+      }
       
       if (response.data.success) {
         modalType.value = 'success';
