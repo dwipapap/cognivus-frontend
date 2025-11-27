@@ -1,5 +1,5 @@
 <script setup>
-import { watch } from 'vue';
+import { watch, computed } from 'vue';
 import { useForm } from '../../composables/useForm';
 import BaseInput from '../../components/form/BaseInput.vue';
 import BaseSelect from '../../components/form/BaseSelect.vue';
@@ -21,6 +21,10 @@ const props = defineProps({
   programs: {
     type: Array,
     default: () => []
+  },
+  prices: {
+    type: Array,
+    default: () => []
   }
 });
 
@@ -31,7 +35,10 @@ const { formData, errors, isSubmitting, submit, getFieldProps, reset } = useForm
   {
     levelid: [],
     programid: [],
-    harga: ['required']
+    name: [],
+    description: [],
+    harga: ['required'],
+    monthlyprice: []
   }
 );
 
@@ -40,11 +47,28 @@ watch(() => props.priceItem, (newVal) => {
   if (newVal) {
     formData.levelid = newVal.levelid ? Number(newVal.levelid) : '';
     formData.programid = newVal.programid ? Number(newVal.programid) : '';
+    formData.name = newVal.name || '';
+    formData.description = newVal.description || '';
     formData.harga = newVal.harga || '';
+    formData.monthlyprice = newVal.monthlyprice || '';
   } else {
     reset();
   }
 }, { immediate: true });
+
+/** Check if the selected level/program combination already exists */
+const isDuplicateCombination = computed(() => {
+  if (!formData.levelid || !formData.programid) return false;
+  
+  return props.prices.some(price => {
+    // Skip the current item when editing
+    if (props.isEditMode && price.priceid === props.priceItem?.priceid) {
+      return false;
+    }
+    return price.levelid === Number(formData.levelid) && 
+           price.programid === Number(formData.programid);
+  });
+});
 
 /** Handle form submission */
 const handleSave = async () => {
@@ -93,6 +117,33 @@ const handleSave = async () => {
               </option>
             </BaseSelect>
 
+            <!-- Name -->
+            <BaseInput 
+              v-bind="getFieldProps('name')" 
+              label="Price Name" 
+              placeholder="e.g., Regular Plan"
+            />
+
+            <!-- Description -->
+            <BaseInput 
+              v-bind="getFieldProps('description')" 
+              label="Description" 
+              placeholder="Brief description of this pricing"
+            />
+
+            <!-- Duplicate Warning -->
+            <div v-if="isDuplicateCombination" class="bg-red-50 border border-red-300 rounded-lg p-3">
+              <div class="flex items-start gap-2">
+                <svg class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                </svg>
+                <div class="text-sm text-red-800">
+                  <p class="font-medium">Duplicate Combination Detected!</p>
+                  <p class="text-xs mt-1">A price already exists for this Level + Program combination. Please choose a different combination or edit the existing price.</p>
+                </div>
+              </div>
+            </div>
+
             <div class="bg-amber-50 border border-amber-200 rounded-lg p-3">
               <div class="flex items-start gap-2">
                 <svg class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -117,13 +168,21 @@ const handleSave = async () => {
           </h3>
           
           <div class="space-y-4">
-            <!-- Price -->
+            <!-- Total Price -->
             <BaseInput 
               v-bind="getFieldProps('harga')" 
               label="Total Price" 
               type="number"
               placeholder="e.g., 5000000"
               required 
+            />
+
+            <!-- Monthly Price -->
+            <BaseInput 
+              v-bind="getFieldProps('monthlyprice')" 
+              label="Monthly Price" 
+              type="number"
+              placeholder="e.g., 500000"
             />
 
             <div class="bg-green-50 border border-green-200 rounded-lg p-3">
@@ -155,6 +214,13 @@ const handleSave = async () => {
               <p class="text-xs text-gray-600 mb-1">Total Price</p>
               <p class="text-2xl font-bold text-green-600">
                 {{ formData.harga ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(formData.harga) : 'Rp 0' }}
+              </p>
+            </div>
+            
+            <div class="bg-white rounded-lg p-3 border border-blue-300">
+              <p class="text-xs text-gray-600 mb-1">Monthly Price</p>
+              <p class="text-xl font-bold text-blue-600">
+                {{ formData.monthlyprice ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(formData.monthlyprice) : 'Rp 0' }}
               </p>
             </div>
             
@@ -212,7 +278,12 @@ const handleSave = async () => {
       <BaseButton type="button" variant="secondary" @click="$emit('close')">
         Cancel
       </BaseButton>
-      <BaseButton type="submit" variant="primary" :loading="isSubmitting">
+      <BaseButton 
+        type="submit" 
+        variant="primary" 
+        :loading="isSubmitting"
+        :disabled="isDuplicateCombination"
+      >
         <template #icon>
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>

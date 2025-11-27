@@ -325,6 +325,7 @@ onMounted(() => {
           :is-edit-mode="isEditMode"
           :levels="levels"
           :programs="programs"
+          :prices="prices"
           @close="showFormModal = false"
           @save="handleSave"
         />

@@ -10,7 +10,14 @@ const props = defineProps({
   type: {
     type: String,
     default: 'text',
-    validator: (value) => ['text', 'email', 'password', 'tel', 'number', 'url', 'search', 'date'].includes(value)
+    validator: (value) => {
+      const allowed = ['text', 'email', 'password', 'tel', 'number', 'url', 'search', 'date', 'time', 'datetime-local'];
+      if (!allowed.includes(value)) {
+        console.error(`Invalid input type "${value}". Allowed types:`, allowed);
+        return false;
+      }
+      return true;
+    }
   },
   label: {
     type: String,
