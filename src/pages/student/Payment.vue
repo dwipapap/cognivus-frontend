@@ -15,11 +15,12 @@ import IconInfo from '~icons/basil/info-circle-outline';
 import IconClose from '~icons/basil/cross-solid';
 import IconClipboard from '~icons/basil/clipboard-solid';
 import IconLoading from '~icons/svg-spinners/pulse-rings-multiple';
+import IconQuestionCircle from '~icons/solar/question-circle-broken';
 
 // Composables
 const { studentProfile, isLoading: isProfileLoading } = useStudentProfile();
 const classId = computed(() => studentProfile.value?.classid);
-const { classInfo, levelName, isLoading: isClassLoading } = useClassDetails(classId);
+const { classInfo, levelName, programName, isLoading: isClassLoading } = useClassDetails(classId);
 const { pay, isLoading: isPaymentLoading, error: paymentError, paymentStatus, resetPaymentState } = useSnapPayment();
 
 // State
@@ -28,6 +29,7 @@ const prices = ref([]);
 const isPricesLoading = ref(true);
 const showSuccessModal = ref(false);
 const showErrorModal = ref(false);
+const showGuideModal = ref(false);
 const isHistoryLoading = ref(false);
 const paymentHistory = ref([]);
 
@@ -215,6 +217,14 @@ const closeErrorModal = () => {
   showErrorModal.value = false;
 };
 
+const openGuideModal = () => {
+  showGuideModal.value = true;
+};
+
+const closeGuideModal = () => {
+  showGuideModal.value = false;
+};
+
 const getPaymentTypeName = (typeId) => {
   return paymentTypes.find(t => t.id === typeId)?.name || typeId;
 };
@@ -307,9 +317,18 @@ onMounted(async () => {
 
       <!-- Content -->
       <div class="relative p-5 md:p-5 z-10">
-        <div class="mb-4">
-          <h1 class="text-2xl md:text-3xl font-bold text-white mb-2">Payment</h1>
-          <p class="text-sm text-white/80">Manage your course payments</p>
+        <div class="flex justify-between items-start mb-4">
+          <div>
+            <h1 class="text-2xl md:text-3xl font-bold text-white mb-2">Payment</h1>
+            <p class="text-sm text-white/80">Manage your course payments</p>
+          </div>
+          <button
+            @click="openGuideModal"
+            class="flex items-center gap-2 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-4 py-2 rounded-full transition-all duration-300 hover:shadow-lg border border-white/30"
+          >
+            <IconQuestionCircle class="w-5 h-5" />
+            <span class="text-sm font-medium">Payment Guide</span>
+          </button>
         </div>
       </div>
     </div>
@@ -496,7 +515,7 @@ onMounted(async () => {
                 </div>
                 <p class="text-xs font-medium text-gray-600">Program</p>
               </div>
-              <p class="text-sm font-bold text-gray-800 truncate">{{ classInfo?.class_code || '-' }}</p>
+              <p class="text-sm font-bold text-gray-800 truncate">{{ programName || 'Loading...' }}</p>
             </div>
 
             <!-- 2. Student Level -->
@@ -618,6 +637,84 @@ onMounted(async () => {
               Close
             </button>
           </div>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- Payment Guide Modal -->
+    <Teleport to="body">
+      <div v-if="showGuideModal" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl p-8 max-w-2xl w-full shadow-2xl transform transition-all max-h-[90vh] overflow-y-auto">
+          <div class="mb-6">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                <IconQuestionCircle class="w-6 h-6 text-blue-600" />
+              </div>
+              <h3 class="text-2xl font-bold text-gray-800">Payment Guide</h3>
+            </div>
+            <p class="text-gray-600 text-sm">Important information about the payment process</p>
+          </div>
+
+          <div class="space-y-4 mb-6">
+            <!-- Guide Point 1 -->
+            <div class="flex items-start gap-4 p-4 bg-blue-50 rounded-xl border border-blue-100">
+              <div class="flex-shrink-0 w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                1
+              </div>
+              <div class="flex-1">
+                <h4 class="font-semibold text-gray-800 mb-1">Payment Confirmation Time</h4>
+                <p class="text-sm text-gray-600">Payment confirmation takes approximately 5-10 minutes to process</p>
+              </div>
+            </div>
+
+            <!-- Guide Point 2 -->
+            <div class="flex items-start gap-4 p-4 bg-amber-50 rounded-xl border border-amber-100">
+              <div class="flex-shrink-0 w-8 h-8 bg-amber-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                2
+              </div>
+              <div class="flex-1">
+                <h4 class="font-semibold text-gray-800 mb-1">Changing Payment Method</h4>
+                <p class="text-sm text-gray-600">To change payment method, you must wait until the current transaction becomes invalid before creating a new payment (Built-in Midtrans feature)</p>
+              </div>
+            </div>
+
+            <!-- Guide Point 3 -->
+            <div class="flex items-start gap-4 p-4 bg-green-50 rounded-xl border border-green-100">
+              <div class="flex-shrink-0 w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                3
+              </div>
+              <div class="flex-1">
+                <h4 class="font-semibold text-gray-800 mb-1">Course Fee Calculation</h4>
+                <p class="text-sm text-gray-600">Course fees are calculated based on your student level and program</p>
+              </div>
+            </div>
+
+            <!-- Guide Point 4 -->
+            <div class="flex items-start gap-4 p-4 bg-purple-50 rounded-xl border border-purple-100">
+              <div class="flex-shrink-0 w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                4
+              </div>
+              <div class="flex-1">
+                <h4 class="font-semibold text-gray-800 mb-1">Refresh Payment History</h4>
+                <p class="text-sm text-gray-600">If the payment status doesn't update automatically, use the refresh button in the payment history section</p>
+              </div>
+            </div>
+
+            <!-- Guide Point 5 -->
+            <div class="flex items-start gap-4 p-4 bg-red-50 rounded-xl border border-red-100">
+              <div class="flex-shrink-0 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                5
+              </div>
+              <div class="flex-1">
+                <h4 class="font-semibold text-gray-800 mb-1">Payment Status Discrepancy</h4>
+                <p class="text-sm text-gray-600">If your payment was successful but is still marked as pending/failed after some time, please contact the admin immediately for confirmation</p>
+              </div>
+            </div>
+          </div>
+
+          <button @click="closeGuideModal" class="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-full transition-colors">
+            Got it, Thanks!
+          </button>
         </div>
       </div>
     </Teleport>

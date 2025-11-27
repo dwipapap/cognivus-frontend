@@ -1,17 +1,18 @@
 import { ref, watchEffect, toValue } from 'vue';
-import { classAPI, levelAPI, lecturerAPI } from '../services/api';
+import { classAPI, levelAPI, lecturerAPI, priceAPI, programAPI } from '../services/api';
 
 /**
- * Fetch class details with level and lecturer info.
+ * Fetch class details with level, lecturer, and program info.
  * Loads data in parallel. Auto-fetches when classId changes.
  * 
  * @param {import('vue').Ref<number> | number} classId - Class ID (can be ref or number)
- * @returns {{ classInfo: import('vue').Ref, levelName: import('vue').Ref<string>, lecturerName: import('vue').Ref<string>, isLoading: import('vue').Ref<boolean>, error: import('vue').Ref<string|null>, retry: Function }}
+ * @returns {{ classInfo: import('vue').Ref, levelName: import('vue').Ref<string>, lecturerName: import('vue').Ref<string>, programName: import('vue').Ref<string>, isLoading: import('vue').Ref<boolean>, error: import('vue').Ref<string|null>, retry: Function }}
  */
 export function useClassDetails(classId) {
   const classInfo = ref(null);
   const levelName = ref('');
   const lecturerName = ref('');
+  const programName = ref('');
   const isLoading = ref(false);
   const error = ref(null);
 
@@ -55,6 +56,28 @@ export function useClassDetails(classId) {
         );
         lecturerName.value = lecturer?.fullname || '-';
       }
+
+      // Fetch program name based on level
+      if (classInfo.value.levelid) {
+        try {
+          const priceRes = await priceAPI.getAllPrices();
+          if (priceRes.data?.success && priceRes.data?.data) {
+            const matchingPrice = priceRes.data.data.find(
+              p => p.levelid === classInfo.value.levelid
+            );
+            
+            if (matchingPrice?.programid) {
+              const programRes = await programAPI.getProgramById(matchingPrice.programid);
+              if (programRes.data?.success) {
+                programName.value = programRes.data.data.name || '-';
+              }
+            }
+          }
+        } catch (err) {
+          console.error('Error fetching program:', err);
+          programName.value = '-';
+        }
+      }
     } catch (err) {
       error.value = err.message || 'Failed to load class details';
       console.error('Error fetching class details:', err);
@@ -72,6 +95,7 @@ export function useClassDetails(classId) {
     classInfo,
     levelName,
     lecturerName,
+    programName,
     isLoading,
     error,
     retry: fetchDetails
