@@ -6,6 +6,15 @@ import { useClassDetails } from '../../composables/useClassDetails';
 import { useSnapPayment } from '../../composables/useSnapPayment';
 import { paymentAPI } from '../../services/api';
 import { priceAPI } from '../../services/api';
+import IconWallet from '~icons/basil/wallet-outline';
+import IconCheck from '~icons/basil/check-solid';
+import IconBook from '~icons/basil/book-solid';
+import IconBadge from '~icons/basil/award-solid';
+import IconMoney from '~icons/solar/wallet-money-bold-duotone';
+import IconInfo from '~icons/basil/info-circle-outline';
+import IconClose from '~icons/basil/cross-solid';
+import IconClipboard from '~icons/basil/clipboard-solid';
+import IconLoading from '~icons/svg-spinners/pulse-rings-multiple';
 
 // Composables
 const { studentProfile, isLoading: isProfileLoading } = useStudentProfile();
@@ -325,9 +334,7 @@ onMounted(async () => {
                     </p>
                   </div>
                   <div v-if="selectedPaymentType === type.id" class="flex-shrink-0">
-                    <svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                    </svg>
+                    <IconCheck class="w-4 h-4 text-blue-500" />
                   </div>
                 </div>
               </div>
@@ -372,16 +379,12 @@ onMounted(async () => {
                       {{ formatCurrency(finalExamFee) }}
                     </p>
                     <div class="mt-1.5 flex items-start gap-1 bg-purple-50 rounded p-1.5 border border-purple-100">
-                      <svg class="w-3 h-3 text-purple-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                      </svg>
+                      <IconInfo class="w-3 h-3 text-purple-600 flex-shrink-0 mt-0.5" />
                       <p class="text-xs text-purple-800">Required only when taking final exam</p>
                     </div>
                   </div>
                   <div v-if="selectedPaymentType === type.id" class="flex-shrink-0">
-                    <svg class="w-4 h-4 text-purple-500" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                    </svg>
+                    <IconCheck class="w-4 h-4 text-purple-500" />
                   </div>
                 </div>
               </div>
@@ -394,9 +397,7 @@ onMounted(async () => {
           <h2 class="text-xl font-semibold text-gray-800 mb-4">Payment History</h2>
           
           <div v-if="paymentHistory.length === 0" class="text-center py-8">
-            <svg class="w-16 h-16 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-            </svg>
+            <IconClipboard class="w-16 h-16 mx-auto text-gray-300 mb-3" />
             <p class="text-gray-500 text-sm">No payment history yet</p>
           </div>
           
@@ -450,9 +451,7 @@ onMounted(async () => {
             <div class="bg-white/60 rounded-lg p-3 border border-blue-100">
               <div class="flex items-center gap-2 mb-2">
                 <div class="w-8 h-8 rounded-md bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center">
-                  <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                  </svg>
+                  <IconBook class="w-4 h-4 text-white" />
                 </div>
                 <p class="text-xs font-medium text-gray-600">Program</p>
               </div>
@@ -463,9 +462,7 @@ onMounted(async () => {
             <div class="bg-white/60 rounded-lg p-3 border border-purple-100">
               <div class="flex items-center gap-2 mb-2">
                 <div class="w-8 h-8 rounded-md bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                  <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
-                  </svg>
+                  <IconBadge class="w-4 h-4 text-white" />
                 </div>
                 <p class="text-xs font-medium text-gray-600">Level</p>
               </div>
@@ -476,9 +473,7 @@ onMounted(async () => {
             <div class="bg-white/60 rounded-lg p-3 border border-green-100">
               <div class="flex items-center gap-2 mb-2">
                 <div class="w-8 h-8 rounded-md bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center">
-                  <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
-                  </svg>
+                  <IconWallet class="w-4 h-4 text-white" />
                 </div>
                 <p class="text-xs font-medium text-gray-600">Semester</p>
               </div>
@@ -489,9 +484,7 @@ onMounted(async () => {
             <div class="bg-white/60 rounded-lg p-3 border border-orange-100">
               <div class="flex items-center gap-2 mb-2">
                 <div class="w-8 h-8 rounded-md bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center">
-                  <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                  </svg>
+                  <IconMoney class="w-4 h-4 text-white" />
                 </div>
                 <p class="text-xs font-medium text-gray-600">Monthly</p>
               </div>
@@ -501,9 +494,7 @@ onMounted(async () => {
 
           <!-- Info Note -->
           <div class="mt-4 flex items-start gap-2 bg-blue-50 rounded-lg p-2.5 border border-blue-100">
-            <svg class="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
+            <IconInfo class="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
             <p class="text-xs text-blue-800">Fees based on your program level</p>
           </div>
         </div>
@@ -541,10 +532,7 @@ onMounted(async () => {
               : 'bg-gray-400 cursor-not-allowed opacity-60'"
           >
             <span v-if="isPaymentLoading" class="flex items-center justify-center">
-              <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
+              <IconLoading class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" />
               Processing...
             </span>
             <span v-else>{{ canPay ? 'Pay Now' : 'Select Payment Type' }}</span>
@@ -563,9 +551,7 @@ onMounted(async () => {
         <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl transform transition-all">
           <div class="text-center">
             <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg class="w-8 h-8 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-              </svg>
+              <IconCheck class="w-8 h-8 text-green-500" />
             </div>
             <h3 class="text-2xl font-bold text-gray-800 mb-2">Payment Successful!</h3>
             <p class="text-gray-600 mb-6">Your transaction has been processed successfully.</p>
@@ -583,9 +569,7 @@ onMounted(async () => {
         <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl transform transition-all">
           <div class="text-center">
             <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg class="w-8 h-8 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
-              </svg>
+              <IconClose class="w-8 h-8 text-red-500" />
             </div>
             <h3 class="text-2xl font-bold text-gray-800 mb-2">Payment Failed</h3>
             <p class="text-gray-600 mb-6">{{ paymentError || 'An error occurred while processing the payment.' }}</p>

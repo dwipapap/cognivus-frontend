@@ -4,6 +4,13 @@ import { useStudentProfile } from '../../composables/useStudentProfile';
 import { useClassDetails } from '../../composables/useClassDetails';
 import { gradeAPI } from '../../services/api';
 import LoadingBar from '../../components/ui/LoadingBar.vue';
+import IconWarning from '~icons/basil/info-triangle-outline';
+import IconUser from '~icons/basil/user-solid';
+import IconChart from '~icons/basil/chart-pie-solid';
+import IconCalendar from '~icons/basil/calendar-outline';
+import IconDocument from '~icons/basil/document-solid';
+import IconClose from '~icons/basil/cross-outline';
+import IconInfo from '~icons/basil/info-circle-outline';
 
 const { studentProfile, isLoading: isProfileLoading } = useStudentProfile();
 
@@ -103,9 +110,7 @@ onMounted(() => {
       <!-- Error State -->
       <div v-else-if="errorMessage" class="bg-red-50 border border-red-100 rounded-2xl p-6 text-center max-w-2xl mx-auto">
         <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
+          <IconWarning class="w-6 h-6 text-red-600" />
         </div>
         <h3 class="text-lg font-semibold text-red-900 mb-2">Error Loading Grades</h3>
         <p class="text-red-600 mb-6">{{ errorMessage }}</p>
@@ -144,17 +149,13 @@ onMounted(() => {
             <div class="flex flex-wrap gap-3">
               <!-- Lecturer Badge -->
               <div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 border border-white/10">
-                <svg class="w-4 h-4 text-white/90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
+                <IconUser class="w-4 h-4 text-white/90" />
                 <p class="text-white text-sm font-medium">{{ lecturerName || 'Instructor' }}</p>
               </div>
 
               <!-- Stats Badge -->
               <div v-if="grades.length > 0" class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 border border-white/10">
-                <svg class="w-4 h-4 text-white/90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
+                <IconChart class="w-4 h-4 text-white/90" />
                 <p class="text-white text-sm font-medium">{{ grades.length }} Tests Recorded</p>
               </div>
             </div>
@@ -170,9 +171,7 @@ onMounted(() => {
           <!-- Empty State -->
           <div v-if="grades.length === 0" class="text-center py-12 px-4">
             <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
-              <svg class="w-10 h-10 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
+              <IconDocument class="w-10 h-10 text-blue-200" />
             </div>
             <h3 class="text-lg font-medium text-gray-900">No Grades Recorded Yet</h3>
             <p class="text-gray-500 mt-1 max-w-sm mx-auto">Your test scores and grades will appear here once they are recorded by your instructor.</p>
@@ -190,9 +189,7 @@ onMounted(() => {
               <div class="bg-gradient-to-r from-blue-500 to-indigo-600 px-4 py-3">
                 <h3 class="text-base font-semibold text-white">{{ grade.test_type || 'Standard Test' }}</h3>
                 <p class="text-xs text-white/80 mt-1 flex items-center gap-1.5">
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
+                  <IconCalendar class="w-3.5 h-3.5" />
                   {{ formatDate(grade.date_taken) }}
                 </p>
               </div>
@@ -235,15 +232,11 @@ onMounted(() => {
                     target="_blank"
                     class="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 hover:text-blue-700 transition-all border border-blue-100 shadow-sm"
                   >
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/>
-                    </svg>
+                    <IconDocument class="w-4 h-4" />
                     Download Certificate
                   </a>
                   <div v-else class="flex items-center justify-center gap-2 text-sm text-gray-400 py-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                    <IconClose class="w-4 h-4" />
                     <span>No certificate available</span>
                   </div>
                 </div>
@@ -298,9 +291,7 @@ onMounted(() => {
                   </td>
                   <td class="px-6 py-4 text-sm text-gray-500">
                     <div class="flex items-center gap-2">
-                      <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
+                      <IconCalendar class="w-4 h-4 text-gray-400" />
                       {{ formatDate(grade.date_taken) }}
                     </div>
                   </td>
@@ -311,15 +302,11 @@ onMounted(() => {
                       target="_blank"
                       class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 hover:text-blue-700 transition-all border border-blue-100 shadow-sm hover:shadow"
                     >
-                      <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/>
-                      </svg>
+                      <IconDocument class="w-4 h-4" />
                       Download
                     </a>
                     <span v-else class="inline-flex items-center gap-1.5 text-xs text-gray-400 italic">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                      </svg>
+                      <IconClose class="w-4 h-4" />
                       No file
                     </span>
                   </td>
@@ -332,9 +319,7 @@ onMounted(() => {
           <!-- Summary Footer (optional) -->
           <div v-if="grades.length > 0" class="mt-4 flex items-center justify-between text-xs md:text-sm px-2">
             <div class="flex items-center gap-2 text-gray-600">
-              <svg class="w-4 h-4 md:w-5 md:h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+              <IconInfo class="w-4 h-4 md:w-5 md:h-5 text-gray-400" />
               <span>Scores are updated by your instructor</span>
             </div>
           </div>
