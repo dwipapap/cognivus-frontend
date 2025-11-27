@@ -40,7 +40,6 @@ const ManagePrices = () => import(/* webpackChunkName: "admin" */ '../pages/admi
 const AdminManageStudents = () => import(/* webpackChunkName: "admin" */ '../pages/admin/ManageStudents.vue');
 const ManagePrograms = () => import(/* webpackChunkName: "admin" */ '../pages/admin/ManagePrograms.vue');
 const ManageLevels = () => import(/* webpackChunkName: "admin" */ '../pages/admin/ManageLevels.vue');
-const ManageTeacherLevels = () => import(/* webpackChunkName: "admin" */ '../pages/admin/ManageTeacherLevels.vue');
 const ManageGrades = () => import(/* webpackChunkName: "admin" */ '../pages/admin/ManageGrades.vue');
 const ManagePayments = () => import(/* webpackChunkName: "admin" */ '../pages/admin/ManagePayments.vue');
 
@@ -217,11 +216,6 @@ const routes = [
         path: 'levels',
         name: 'AdminManageLevels',
         component: ManageLevels,
-      },
-      {
-        path: 'teacher-levels',
-        name: 'AdminManageTeacherLevels',
-        component: ManageTeacherLevels,
       },
       {
         path: 'grades',
