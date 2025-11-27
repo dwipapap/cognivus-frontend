@@ -1,11 +1,13 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { studentAPI, userAPI, classAPI, levelAPI } from '../../services/api';
 import Modal from '../../components/ui/Modal.vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
 import BaseSelect from '../../components/form/BaseSelect.vue';
 import StudentForm from './StudentForm.vue';
 
+const router = useRouter();
 const students = ref([]);
 const classes = ref([]);
 const levels = ref([]);
@@ -94,11 +96,10 @@ const openAddModal = () => {
   showFormModal.value = true;
 };
 
-/** Open edit modal */
-const openEditModal = (student) => {
-  isEditMode.value = true;
-  selectedStudent.value = student;
-  showFormModal.value = true;
+/** Navigate to student detail page */
+const viewStudentDetail = (student) => {
+  const userId = student.tbuser?.userid || student.userid;
+  router.push({ name: 'AdminStudentDetail', params: { id: userId } });
 };
 
 /** Handle save */
@@ -288,11 +289,11 @@ onMounted(() => {
               <td class="px-4 py-3">
                 <div class="flex justify-center gap-2">
                   <BaseButton 
-                    @click="openEditModal(student)" 
-                    variant="secondary" 
+                    @click="viewStudentDetail(student)" 
+                    variant="primary" 
                     size="sm"
                   >
-                    Edit
+                    View
                   </BaseButton>
                   <BaseButton 
                     @click="handleDelete(student)" 
