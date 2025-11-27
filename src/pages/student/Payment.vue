@@ -28,6 +28,7 @@ const prices = ref([]);
 const isPricesLoading = ref(true);
 const showSuccessModal = ref(false);
 const showErrorModal = ref(false);
+const isHistoryLoading = ref(false);
 const paymentHistory = ref([]);
 
 // Payment types configuration
@@ -240,6 +241,7 @@ const formatDate = (dateString) => {
 
 const fetchPaymentHistory = async () => {
   try {
+    isHistoryLoading.value = true;
     // Wait for student profile to be available
     const studentid = studentProfile.value?.studentid || authStore.user?.userid;
     
@@ -250,11 +252,20 @@ const fetchPaymentHistory = async () => {
     const response = await paymentAPI.getPaymentHistory(studentid);
     
     if (response.data?.success && response.data?.data) {
-      paymentHistory.value = response.data.data;
+      paymentHistory.value = Array.isArray(response.data.data) ? response.data.data : [];
+    } else {
+      paymentHistory.value = [];
     }
   } catch (err) {
     console.error('Failed to fetch payment history:', err);
+    paymentHistory.value = [];
+  } finally {
+    isHistoryLoading.value = false;
   }
+};
+
+const handleRefreshHistory = () => {
+  fetchPaymentHistory();
 };
 
 // Lifecycle
@@ -394,7 +405,20 @@ onMounted(async () => {
 
         <!-- Payment History -->
         <div class="payment-section-glass rounded-2xl p-6 shadow-lg border border-white/20">
-          <h2 class="text-xl font-semibold text-gray-800 mb-4">Payment History</h2>
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold text-gray-800">Payment History</h2>
+            <button 
+              @click="handleRefreshHistory" 
+              :disabled="isHistoryLoading"
+              class="p-2 rounded-full hover:bg-gray-100 text-gray-500 hover:text-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Refresh History"
+            >
+              <IconLoading v-if="isHistoryLoading" class="w-5 h-5 animate-spin text-blue-600" />
+              <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </button>
+          </div>
           
           <div v-if="paymentHistory.length === 0" class="text-center py-8">
             <IconClipboard class="w-16 h-16 mx-auto text-gray-300 mb-3" />
@@ -525,9 +549,9 @@ onMounted(async () => {
 
           <button
             @click="handlePayment"
-            :disabled="!canPay"
+            :disabled="!canPay || isPaymentLoading"
             class="w-full py-2.5 px-5 rounded-full font-semibold text-white transition-all duration-300"
-            :class="canPay 
+            :class="canPay && !isPaymentLoading
               ? 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-md hover:shadow-lg active:scale-95 cursor-pointer' 
               : 'bg-gray-400 cursor-not-allowed opacity-60'"
           >

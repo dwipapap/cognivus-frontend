@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { studentAPI, gradeAPI } from '../../services/api';
+import { studentAPI, gradeAPI, paymentAPI } from '../../services/api';
 import LoadingBar from '../../components/ui/LoadingBar.vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
 
@@ -101,10 +101,21 @@ const fetchStudentData = async () => {
         // Don't block page load if grades fail
         grades.value = [];
       }
+
+      // Fetch payment history
+      try {
+        const paymentResponse = await paymentAPI.getPaymentHistory(student.value.studentid);
+        if (paymentResponse.data.success) {
+          transactions.value = Array.isArray(paymentResponse.data.data)
+            ? paymentResponse.data.data
+            : [];
+        }
+      } catch (error) {
+        console.error('Error fetching payment history:', error);
+        transactions.value = [];
+      }
     }
     
-    // TODO: Fetch transactions when endpoint is available
-    transactions.value = [];
   } catch (error) {
     errorMessage.value = 'Failed to load student data';
     console.error('Error fetching student:', error);
@@ -276,13 +287,13 @@ onMounted(() => {
                     </tr>
                   </thead>
                   <tbody class="bg-white divide-y divide-gray-100">
-                    <tr v-for="transaction in transactions" :key="transaction.transactionid" class="hover:bg-gray-50 transition-colors">
-                      <td class="px-6 py-4 text-sm font-medium text-gray-900 font-mono">#{{ transaction.transactionid }}</td>
-                      <td class="px-6 py-4 text-sm text-gray-600">{{ formatDate(transaction.transaction_date) }}</td>
+                    <tr v-for="transaction in transactions" :key="transaction.paymentid" class="hover:bg-gray-50 transition-colors">
+                      <td class="px-6 py-4 text-sm font-medium text-gray-900 font-mono">#{{ transaction.paymentid }}</td>
+                      <td class="px-6 py-4 text-sm text-gray-600">{{ formatDate(transaction.created_at) }}</td>
                       <td class="px-6 py-4">
                         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-green-50 text-green-700 border border-green-100">
                           <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                          Completed
+                          {{ transaction.status }}
                         </span>
                       </td>
                     </tr>
