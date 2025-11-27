@@ -102,16 +102,6 @@ const handleLogout = () => {
                 <span>Manage Levels</span>
               </router-link>
             </li>
-            <li>
-              <router-link to="/admin/teacher-levels"
-                class="flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-700 rounded-lg transition-all duration-200 hover:bg-blue-50 hover:text-blue-700 hover:translate-x-1"
-                active-class="bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md hover:from-blue-600 hover:to-blue-700 hover:translate-x-0">
-                <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"></path>
-                </svg>
-                <span>Teacher Levels</span>
-              </router-link>
-            </li>
             <li class="pt-4 mt-4 border-t border-gray-200">
               <button @click="handleLogout"
                 class="w-full flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-700 rounded-lg transition-all duration-200 hover:bg-red-50 hover:text-red-600 hover:translate-x-1">
