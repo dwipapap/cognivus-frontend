@@ -60,14 +60,21 @@ watch(() => props.level, (newLevel) => {
     formData.name = newLevel.name || '';
     formData.description = newLevel.description || '';
   } else {
-    reset();
+    // Explicitly reset to initial values in create mode
+    formData.name = '';
+    formData.description = '';
   }
 }, { immediate: true });
 
 /** Submit form data */
 const handleSave = async () => {
   await submit(async (data) => {
-    emit('submit', data);
+    // Only send name and description, never send levelid
+    const cleanData = {
+      name: data.name,
+      description: data.description || ''
+    };
+    emit('submit', cleanData);
   });
 };
 </script>
