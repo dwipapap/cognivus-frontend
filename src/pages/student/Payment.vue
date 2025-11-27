@@ -264,8 +264,25 @@ const fetchPaymentHistory = async () => {
   }
 };
 
-const handleRefreshHistory = () => {
-  fetchPaymentHistory();
+const handleRefreshHistory = async () => {
+  try {
+    isHistoryLoading.value = true;
+    const studentid = studentProfile.value?.studentid || authStore.user?.userid;
+    
+    if (!studentid) {
+      return;
+    }
+    
+    // First, refresh payment status from Midtrans
+    await paymentAPI.refreshPaymentStatus(studentid);
+    
+    // Then fetch updated payment history
+    await fetchPaymentHistory();
+  } catch (err) {
+    console.error('Failed to refresh payment history:', err);
+    // Still try to fetch history even if refresh fails
+    await fetchPaymentHistory();
+  }
 };
 
 // Lifecycle

@@ -327,6 +327,13 @@ export const paymentAPI = {
   getAllPayments: () => apiClient.get('/payment/history'),
   
   /**
+   * Refresh payment status for a student
+   * @param {number} studentid - Student ID
+   * @returns {Promise} - { success, message }
+   */
+  refreshPaymentStatus: (studentid) => apiClient.put(`/payment/refresh/${studentid}`),
+  
+  /**
    * Webhook endpoint (handled by backend, not typically called from frontend)
    */
   webhook: (notificationData) => apiClient.post('/payment/webhook', notificationData)
