@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { lecturerAPI } from '../../services/api';
+import { lecturerAPI, userAPI } from '../../services/api';
 import Modal from '../../components/ui/Modal.vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
 import LecturerForm from './LecturerForm.vue';
@@ -67,14 +67,24 @@ const openEditModal = (lecturer) => {
   showFormModal.value = true;
 };
 
-const handleSave = async (formData) => {
+const handleSave = async ({ lecturerData, userData }) => {
   try {
     if (isEditMode.value) {
-      const lecturerId = selectedLecturer.value.userid;
-      await lecturerAPI.updateLecturer(lecturerId, formData);
+      const lecturerId = selectedLecturer.value.tbuser?.userid || selectedLecturer.value.userid;
+      
+      // Update lecturer data
+      await lecturerAPI.updateLecturer(lecturerId, lecturerData);
+      
+      // Update user data (email/password) if provided
+      if (userData && Object.keys(userData).length > 0) {
+        await userAPI.updateUser(lecturerId, userData);
+      }
+      
       showNotification('success', 'Lecturer data has been successfully updated.');
     } else {
-      await lecturerAPI.createLecturer(formData);
+      // In create mode, all data goes to lecturer endpoint
+      const allData = { ...lecturerData, ...userData };
+      await lecturerAPI.createLecturer(allData);
       showNotification('success', 'New lecturer has been successfully created.');
     }
     showFormModal.value = false;

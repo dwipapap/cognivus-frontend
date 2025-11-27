@@ -104,11 +104,40 @@ const openEditModal = (student) => {
 /** Handle save */
 const handleSave = async (formData) => {
   try {
+    // Transform and validate form data
+    const transformedData = {
+      ...formData,
+      // Map gender: Male -> L, Female -> P
+      gender: formData.gender === 'Male' ? 'L' : formData.gender === 'Female' ? 'P' : formData.gender,
+      // Ensure classid is number or null
+      classid: formData.classid ? Number(formData.classid) : null,
+      // Clean up empty strings to null
+      birthdate: formData.birthdate || null,
+      birthplace: formData.birthplace || null,
+      phone: formData.phone || null,
+      address: formData.address || null,
+      parentname: formData.parentname || null,
+      parentphone: formData.parentphone || null,
+      payment_type: formData.payment_type || null
+    };
+
+    // Remove credentials fields if they're empty in edit mode
     if (isEditMode.value) {
-      await studentAPI.updateStudent(selectedStudent.value.studentid, formData);
+      if (!transformedData.username) delete transformedData.username;
+      if (!transformedData.email) delete transformedData.email;
+      if (!transformedData.password) delete transformedData.password;
+    }
+
+    if (isEditMode.value) {
+      // Use userid for update, not studentid
+      const userId = selectedStudent.value.tbuser?.userid || selectedStudent.value.userid;
+      if (!userId) {
+        throw new Error('User ID not found for update operation');
+      }
+      await studentAPI.updateStudent(userId, transformedData);
       showNotification('success', 'Student updated successfully!');
     } else {
-      await studentAPI.createStudent(formData);
+      await studentAPI.createStudent(transformedData);
       showNotification('success', 'Student created successfully!');
     }
     showFormModal.value = false;

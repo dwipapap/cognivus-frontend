@@ -50,7 +50,31 @@ watch(() => props.lecturer, (newVal) => {
 
 const handleSave = async () => {
   await submit(async (data) => {
-    emit('save', data);
+    const lecturerData = {};
+    const userData = {};
+    
+    // Lecturer fields
+    if (data.fullname) lecturerData.fullname = data.fullname;
+    if (data.gender) lecturerData.gender = data.gender;
+    if (data.address !== undefined) lecturerData.address = data.address || '';
+    if (data.phone) lecturerData.phone = data.phone;
+    if (data.birthdate !== undefined) lecturerData.birthdate = data.birthdate || null;
+    if (data.birthplace !== undefined) lecturerData.birthplace = data.birthplace || '';
+    if (data.lasteducation !== undefined) lecturerData.lasteducation = data.lasteducation || '';
+    if (data.photo !== undefined) lecturerData.photo = data.photo;
+    
+    // User fields (for edit mode, only if provided)
+    if (props.isEditMode) {
+      if (data.email && data.email.trim()) userData.email = data.email;
+      if (data.password && data.password.trim()) userData.password = data.password;
+    } else {
+      // In create mode, always send user fields
+      if (data.username) lecturerData.username = data.username;
+      if (data.email) lecturerData.email = data.email;
+      if (data.password) lecturerData.password = data.password;
+    }
+    
+    emit('save', { lecturerData, userData });
   });
 };
 </script>
