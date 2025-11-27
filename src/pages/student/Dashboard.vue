@@ -77,9 +77,9 @@ const formatTime = (time) => {
 
 /** Default placeholder images */
 const placeholderImages = [
-  'https://media1.tenor.com/m/JyHMlpMxRKwAAAAC/arisbm.gif',
-  'https://media1.tenor.com/m/L1DyVjuyLqEAAAAd/uma-musume-dance.gif',
-  'https://media1.tenor.com/m/wdgDOrbSkiwAAAAd/satono-diamond-diamond-satono.gif'
+  'https://semilir.co/wp-content/uploads/2023/01/buku-buku.jpg',
+  'https://www.pertuni.or.id/wp-content/uploads/2021/01/books-690219_1920.jpg',
+  'https://ichef.bbci.co.uk/ace/ws/640/amz/worldservice/live/assets/images/2016/03/26/160326125304_libreria_bookstore_1_640x360_iwanbaan_nocredit.jpg.webp'
 ];
 
 /** Get placeholder image by index */
