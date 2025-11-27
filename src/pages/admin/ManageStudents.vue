@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { studentAPI, classAPI, levelAPI } from '../../services/api';
+import { studentAPI, userAPI, classAPI, levelAPI } from '../../services/api';
 import Modal from '../../components/ui/Modal.vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
 import BaseSelect from '../../components/form/BaseSelect.vue';
@@ -104,42 +104,61 @@ const openEditModal = (student) => {
 /** Handle save */
 const handleSave = async (formData) => {
   try {
-    // Transform and validate form data
-    const transformedData = {
-      ...formData,
-      // Map gender: Male -> L, Female -> P
-      gender: formData.gender === 'Male' ? 'L' : formData.gender === 'Female' ? 'P' : formData.gender,
-      // Ensure classid is number or null
-      classid: formData.classid ? Number(formData.classid) : null,
-      // Clean up empty strings to null
-      birthdate: formData.birthdate || null,
-      birthplace: formData.birthplace || null,
-      phone: formData.phone || null,
-      address: formData.address || null,
-      parentname: formData.parentname || null,
-      parentphone: formData.parentphone || null,
-      payment_type: formData.payment_type || null
-    };
-
-    // Remove credentials fields if they're empty in edit mode
     if (isEditMode.value) {
-      if (!transformedData.username) delete transformedData.username;
-      if (!transformedData.email) delete transformedData.email;
-      if (!transformedData.password) delete transformedData.password;
-    }
-
-    if (isEditMode.value) {
-      // Use userid for update, not studentid
+      // Get userid for update operations
       const userId = selectedStudent.value.tbuser?.userid || selectedStudent.value.userid;
       if (!userId) {
         throw new Error('User ID not found for update operation');
       }
-      await studentAPI.updateStudent(userId, transformedData);
+
+      // Prepare student data (fields that go to tbstudent)
+      const studentData = {
+        fullname: formData.fullname,
+        gender: formData.gender === 'Male' ? 'L' : formData.gender === 'Female' ? 'P' : formData.gender,
+        birthdate: formData.birthdate || null,
+        birthplace: formData.birthplace || null,
+        phone: formData.phone || null,
+        address: formData.address || null,
+        parentname: formData.parentname || null,
+        parentphone: formData.parentphone || null,
+        classid: formData.classid ? Number(formData.classid) : null,
+        payment_type: formData.payment_type || null
+      };
+
+      // Prepare user data (fields that go to tbuser) - only if provided
+      const userData = {};
+      if (formData.email && formData.email.trim()) userData.email = formData.email;
+      if (formData.password && formData.password.trim()) userData.password = formData.password;
+      if (formData.username && formData.username.trim()) userData.username = formData.username;
+
+      // Update student data
+      await studentAPI.updateStudent(userId, studentData);
+      
+      // Update user credentials if any were provided
+      if (Object.keys(userData).length > 0) {
+        await userAPI.updateUser(userId, userData);
+      }
+
       showNotification('success', 'Student updated successfully!');
     } else {
-      await studentAPI.createStudent(transformedData);
+      // Create mode: combine all data
+      const createData = {
+        ...formData,
+        gender: formData.gender === 'Male' ? 'L' : formData.gender === 'Female' ? 'P' : formData.gender,
+        classid: formData.classid ? Number(formData.classid) : null,
+        birthdate: formData.birthdate || null,
+        birthplace: formData.birthplace || null,
+        phone: formData.phone || null,
+        address: formData.address || null,
+        parentname: formData.parentname || null,
+        parentphone: formData.parentphone || null,
+        payment_type: formData.payment_type || null
+      };
+      
+      await studentAPI.createStudent(createData);
       showNotification('success', 'Student created successfully!');
     }
+    
     showFormModal.value = false;
     fetchStudents();
   } catch (error) {
@@ -149,14 +168,23 @@ const handleSave = async (formData) => {
 
 /** Handle delete */
 const handleDelete = async (student) => {
-  if (!confirm(`Delete student "${student.fullname}"?`)) return;
+  if (!confirm(`Delete student "${student.fullname}"? This will permanently remove all student and user account data.`)) return;
 
   try {
-    await studentAPI.deleteStudent(student.studentid);
-    showNotification('success', 'Student deleted successfully!');
+    // Get userid for deletion (backend expects userid, not studentid)
+    const userId = student.tbuser?.userid || student.userid;
+    if (!userId) {
+      throw new Error('User ID not found for delete operation');
+    }
+
+    // Delete from both tbstudent and tbuser tables
+    await studentAPI.deleteStudent(userId);
+    await userAPI.deleteUser(userId);
+    
+    showNotification('success', 'Student and user account deleted successfully!');
     fetchStudents();
   } catch (error) {
-    showNotification('error', 'Failed to delete student.');
+    showNotification('error', error.response?.data?.message || 'Failed to delete student.');
   }
 };
 
