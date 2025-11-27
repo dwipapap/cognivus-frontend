@@ -5,6 +5,14 @@ import { authStore } from '../../store/auth';
 import { useLecturerProfile } from '../../composables/useLecturerProfile';
 import { classAPI, studentAPI, levelAPI } from '../../services/api';
 import LoadingBar from '../../components/ui/LoadingBar.vue';
+import IconCheckCircle from '~icons/solar/check-circle-bold';
+import IconUsersGroup from '~icons/solar/users-group-rounded-bold';
+import IconBook from '~icons/basil/book-solid';
+import IconUpload from '~icons/solar/upload-bold';
+import IconCalendar from '~icons/solar/calendar-bold';
+import IconDocument from '~icons/solar/document-text-bold';
+import IconArrowRight from '~icons/basil/arrow-right-solid';
+import IconClock from '~icons/basil/clock-solid';
 
 const router = useRouter();
 const { lecturerProfile, isLoading, errorMessage, fetchLecturerProfile } = useLecturerProfile();
@@ -224,13 +232,13 @@ onMounted(() => {
       <div class="flex flex-col lg:flex-row items-center">
         <!-- Left: Text Content -->
         <div class="flex-1 p-8 lg:p-12">
-          <h1 class="text-2xl lg:text-3xl font-semibold text-white/90 mb-2">
+          <h1 class="text-lg md:text-2xl lg:text-2xl text-white/90 mb-2">
             {{ greeting }},
           </h1>
-          <h2 class="text-4xl lg:text-6xl font-bold text-white mb-6 leading-tight">
+          <h2 class="text-2xl md:text-4xl lg:text-4xl font-bold text-white mb-6 leading-tight">
             {{ user.name }}
           </h2>
-          <p class="text-white/80 text-base lg:text-lg leading-relaxed max-w-lg">
+          <p class="text-white/80 text-sm md:text-base lg:text-2x1 leading-relaxed max-w-lg">
             Ready to inspire and educate your students today. Your dedication shapes their future success.
           </p>
         </div>
@@ -252,175 +260,143 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- Quick Stats Section -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-      <div
-        v-for="stat in stats"
-        :key="stat.title"
-        class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-200"
-      >
-        <div class="flex items-center gap-4">
-          <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
-            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-              <path v-if="stat.title === 'Active Classes'" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              <path v-else d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"></path>
-            </svg>
+    <!-- New Grid Layout Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 lg:grid-rows-[auto_auto] gap-6">
+      
+      <!-- Top-Left Large Card: Active Classes & Today's Schedule (Span 2 cols, 1 row) -->
+      <div class="lg:col-span-2 lg:row-span-1 bg-white/60 backdrop-blur-sm border border-white/50 shadow-lg rounded-3xl p-6 hover:shadow-xl transition-all duration-300">
+        <div class="flex items-start justify-between mb-6">
+          <div>
+            <p class="text-sm font-medium text-gray-500 mb-2">Active Classes</p>
+            <p class="text-5xl font-bold text-gray-900 mb-2">{{ myClasses.length }}</p>
+            <p class="text-sm text-gray-400">Total teaching assignments</p>
           </div>
-          <div class="flex-1">
-            <p class="text-sm font-medium text-gray-600 mb-1">{{ stat.title }}</p>
-            <p class="text-2xl font-bold text-gray-900">{{ stat.value }}</p>
+          <div class="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center">
+            <IconCheckCircle class="w-7 h-7 text-blue-600" />
           </div>
         </div>
-      </div>
-    </div>
-
-    <!-- Classes and Recent Activity Section -->
-    <section class="mt-6">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- My Classes Section -->
-        <div class="bg-gradient-to-r from-blue-50 to-indigo-100 rounded-2xl p-6 shadow-sm">
-          <div class="flex items-center justify-between mb-6">
-            <div>
-              <h2 class="text-xl font-bold text-gray-900">My Classes</h2>
-              <p class="text-sm text-gray-500 mt-1">Your teaching assignments</p>
-            </div>
+        
+        <!-- Today's Schedule Section -->
+        <div class="mt-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-base font-bold text-gray-900 flex items-center gap-2">
+              <IconClock class="w-4 h-4 text-blue-600" />
+              Today's Schedule
+            </h3>
             <button 
               @click="goToMaterials"
-              class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full hover:from-blue-700 hover:to-indigo-700 hover:scale-105 active:scale-95 focus:ring-2 focus:ring-blue-300 transition-all shadow-md hover:shadow-lg"
+              class="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full hover:from-blue-700 hover:to-indigo-700 hover:scale-105 active:scale-95 focus:ring-2 focus:ring-blue-300 transition-all shadow-md hover:shadow-lg"
             >
               View All
             </button>
           </div>
 
           <!-- No Classes -->
-          <div v-if="myClasses.length === 0" class="text-center py-12 text-gray-500">
-            No classes assigned yet.
+          <div v-if="myClasses.length === 0" class="text-center py-6 text-gray-500">
+            <IconCalendar class="w-10 h-10 mx-auto mb-2 text-gray-300" />
+            <p class="text-sm">No classes scheduled today</p>
           </div>
 
-          <!-- Classes List -->
-          <div v-else class="space-y-3">
+          <!-- Schedule Grid -->
+          <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             <div 
-              v-for="cls in myClasses" 
-              :key="cls.classid" 
-              class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200"
+              v-for="cls in myClasses.slice(0, 6)" 
+              :key="cls.classid"
+              class="bg-white/80 backdrop-blur-sm rounded-2xl p-3 border border-gray-100 hover:border-blue-200 hover:shadow-md transition-all duration-200"
             >
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3 flex-1 min-w-0">
-                  <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"></path>
-                    </svg>
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-2 mb-1">
-                      <h3 class="text-sm font-semibold text-gray-900 truncate">{{ cls.class_code }}</h3>
-                      <span class="text-xs px-2 py-1 rounded-full text-blue-600 bg-blue-50">
-                        {{ getLevelName(cls.levelid) }}
-                      </span>
-                    </div>
-                    <p class="text-xs text-gray-600 mb-2 line-clamp-1">{{ cls.description || 'No description' }}</p>
-                    <div class="flex items-center gap-3">
-                      <!-- Schedule -->
-                      <div v-if="formatSchedule(cls)" class="flex items-center gap-1.5">
-                        <svg class="w-4 h-4 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        <span class="text-xs text-gray-700 font-medium">{{ formatSchedule(cls) }}</span>
-                      </div>
-                      <!-- Student Count -->
-                      <span class="text-xs text-blue-600 font-medium">{{ getStudentCount(cls.classid) }} students</span>
-                    </div>
-                  </div>
+              <div class="flex items-start gap-2">
+                <div class="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <IconBook class="w-4 h-4 text-white" />
                 </div>
-                <button 
-                  @click="goToMaterials"
-                  class="ml-3 inline-flex items-center px-4 py-2 text-xs font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-full focus:ring-2 focus:ring-blue-300 transition-all shadow-sm hover:shadow-md hover:scale-105 active:scale-95 flex-shrink-0"
-                >
-                  Manage
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Recent Activity Section -->
-        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-6 shadow-sm">
-          <div class="mb-6">
-            <h2 class="text-xl font-bold text-gray-900">Quick Actions</h2>
-            <p class="text-sm text-gray-500 mt-1">Shortcuts to your frequent tasks</p>
-          </div>
-
-          <div class="space-y-3">
-            <button
-              v-for="action in quickActions"
-              :key="action.title"
-              @click="action.action"
-              class="w-full group"
-            >
-              <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:border-blue-200 transition-all duration-200">
-                <div class="flex items-center gap-4">
-                  <!-- Icon -->
-                  <div :class="`w-12 h-12 bg-gradient-to-r ${action.color} rounded-xl flex items-center justify-center shadow-sm flex-shrink-0 group-hover:scale-110 transition-transform duration-200`">
-                    <!-- Grade Icon -->
-                    <svg v-if="action.icon === 'grade'" class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    <!-- Upload Icon -->
-                    <svg v-else-if="action.icon === 'upload'" class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                    </svg>
-                    <!-- Schedule Icon -->
-                    <svg v-else-if="action.icon === 'schedule'" class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-1 mb-1">
+                    <h4 class="text-xs font-semibold text-gray-900 truncate">{{ cls.class_code }}</h4>
+                    <span class="text-xs px-1.5 py-0.5 rounded-full text-blue-600 bg-blue-50">
+                      {{ getLevelName(cls.levelid) }}
+                    </span>
                   </div>
-
-                  <!-- Content -->
-                  <div class="flex-1 text-left">
-                    <h3 class="text-base font-semibold text-gray-900 mb-0.5 group-hover:text-blue-600 transition-colors">
-                      {{ action.title }}
-                    </h3>
-                    <p class="text-sm text-gray-500">{{ action.description }}</p>
+                  <div v-if="formatSchedule(cls)" class="flex items-center gap-1 mt-1">
+                    <IconClock class="w-3 h-3 text-blue-600 flex-shrink-0" />
+                    <span class="text-xs text-gray-700 font-medium">{{ formatSchedule(cls) }}</span>
                   </div>
-
-                  <!-- Arrow Icon -->
-                  <svg class="w-5 h-5 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all duration-200 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                  </svg>
-                </div>
-              </div>
-            </button>
-          </div>
-
-          <!-- Class Schedules Info (for Lihat Jadwal action) -->
-          <div v-if="myClasses.length > 0" class="mt-6 pt-6 border-t border-blue-200">
-            <h3 class="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-              <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-              Today's Schedule
-            </h3>
-            <div class="space-y-2">
-              <div 
-                v-for="cls in myClasses.slice(0, 3)" 
-                :key="cls.classid"
-                class="bg-white rounded-lg p-3 text-sm border border-gray-100"
-              >
-                <div class="flex items-center justify-between">
-                  <div class="flex-1">
-                    <p class="font-medium text-gray-900">{{ cls.class_code }}</p>
-                    <p v-if="formatSchedule(cls)" class="text-xs text-gray-500 mt-0.5">{{ formatSchedule(cls) }}</p>
-                    <p v-else class="text-xs text-gray-400 mt-0.5">No schedule set</p>
-                  </div>
-                  <span class="text-xs px-2 py-1 rounded-full bg-blue-50 text-blue-600 font-medium">
-                    {{ getLevelName(cls.levelid) }}
-                  </span>
+                  <span class="text-xs text-gray-500 mt-0.5 block">{{ getStudentCount(cls.classid) }} students</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </section>
+
+      <!-- Top-Right Tall Card: Quick Actions (Span 1 col, 2 rows) -->
+      <div class="lg:col-span-1 lg:row-span-2 bg-white/60 backdrop-blur-sm border border-white/50 shadow-lg rounded-3xl p-6">
+        <div class="mb-6">
+          <h2 class="text-xl font-bold text-gray-900">Quick Actions</h2>
+          <p class="text-sm text-gray-500 mt-1">Shortcuts to tasks</p>
+        </div>
+
+        <div class="space-y-4">
+          <button
+            v-for="action in quickActions"
+            :key="action.title"
+            @click="action.action"
+            class="w-full group"
+          >
+            <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-blue-200 transition-all duration-200">
+              <div class="flex items-center gap-4">
+                <!-- Icon -->
+                <div :class="`w-14 h-14 bg-gradient-to-r ${action.color} rounded-2xl flex items-center justify-center shadow-sm flex-shrink-0 group-hover:scale-110 transition-transform duration-200`">
+                  <!-- Grade Icon -->
+                  <IconDocument v-if="action.icon === 'grade'" class="w-7 h-7 text-white" />
+                  <!-- Upload Icon -->
+                  <IconUpload v-else-if="action.icon === 'upload'" class="w-7 h-7 text-white" />
+                  <!-- Schedule Icon -->
+                  <IconCalendar v-else-if="action.icon === 'schedule'" class="w-7 h-7 text-white" />
+                </div>
+
+                <!-- Content -->
+                <div class="flex-1 text-left">
+                  <h3 class="text-base font-semibold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
+                    {{ action.title }}
+                  </h3>
+                  <p class="text-sm text-gray-500">{{ action.description }}</p>
+                </div>
+
+                <!-- Arrow Icon -->
+                <IconArrowRight class="w-5 h-5 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all duration-200 flex-shrink-0" />
+              </div>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Bottom-Left Small Card 1: Total Students (Span 1 col, 1 row) -->
+      <div class="lg:col-span-1 lg:row-span-1 bg-white/60 backdrop-blur-sm border border-white/50 shadow-lg rounded-3xl p-6 hover:shadow-xl transition-all duration-300">
+        <div class="absolute top-4 right-4">
+          <div class="w-10 h-10 bg-purple-500/10 rounded-xl flex items-center justify-center">
+            <IconUsersGroup class="w-6 h-6 text-purple-600" />
+          </div>
+        </div>
+        <div class="text-center mt-6">
+          <p class="text-sm font-medium text-gray-500 mb-2">Total Students</p>
+          <p class="text-5xl font-bold text-gray-900 mb-1">{{ totalStudents }}</p>
+          <p class="text-sm text-gray-400">students</p>
+        </div>
+      </div>
+
+      <!-- Bottom-Left Small Card 2: Total Classes (Span 1 col, 1 row) -->
+      <div class="lg:col-span-1 lg:row-span-1 bg-white/60 backdrop-blur-sm border border-white/50 shadow-lg rounded-3xl p-6 hover:shadow-xl transition-all duration-300">
+        <div class="absolute top-4 right-4">
+          <div class="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center">
+            <IconBook class="w-6 h-6 text-emerald-600" />
+          </div>
+        </div>
+        <div class="text-center mt-6">
+          <p class="text-sm font-medium text-gray-500 mb-2">Total Classes</p>
+          <p class="text-5xl font-bold text-gray-900 mb-1">{{ myClasses.length }}</p>
+          <p class="text-sm text-gray-400">classes</p>
+        </div>
+      </div>
+
+    </div>
   </div>
 </template>

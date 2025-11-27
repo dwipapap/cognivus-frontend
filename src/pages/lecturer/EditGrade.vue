@@ -1,172 +1,261 @@
 <template>
-  <div class="max-w-4xl mx-auto px-4 py-8">
-    <!-- Back Button -->
-    <button
-      @click="goBack"
-      class="mb-6 inline-flex items-center text-blue-600 hover:text-blue-800 font-medium"
-    >
-      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+  <!-- Back Button -->
+  <button
+    @click="goBack"
+    class="mb-6 inline-flex items-center gap-2 px-4 py-2 text-blue-600 hover:text-white bg-blue-50 hover:bg-gradient-to-r hover:from-blue-600 hover:to-indigo-600 rounded-full font-medium transition-all hover:shadow-md hover:scale-105 active:scale-95"
+  >
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+    </svg>
+    Back to Student
+  </button>
+
+  <!-- Loading -->
+  <div v-if="isLoading" class="max-w-2xl mx-auto py-20">
+    <LoadingBar :loading="true" color="blue" :duration="2000" />
+  </div>
+
+  <!-- Error -->
+  <div v-else-if="errorMessage" class="bg-red-50 border border-red-200 rounded-2xl p-6 text-center max-w-2xl mx-auto mb-8">
+    <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+      <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
       </svg>
-      Back to Student
-    </button>
-
-    <h1 class="text-4xl font-bold text-gray-900 mb-8">Edit Grade</h1>
-
-    <!-- Loading -->
-    <div v-if="isLoading" class="max-w-2xl mx-auto py-20">
-      <LoadingBar :loading="true" color="blue" :duration="2000" />
     </div>
+    <h3 class="text-lg font-semibold text-red-900 mb-2">Error Loading Data</h3>
+    <p class="text-red-600">{{ errorMessage }}</p>
+  </div>
 
-    <!-- Error -->
-    <div v-else-if="errorMessage" class="bg-red-50 border border-red-200 rounded-xl p-4">
-      <p class="text-red-800">{{ errorMessage }}</p>
-    </div>
+  <!-- Content -->
+  <div v-else-if="student && grade" class="space-y-8 mb-8">
+    <!-- Header Card with Student Info -->
+    <div class="relative bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-lg overflow-hidden">
+      <!-- Decorative Graphics -->
+      <div class="absolute top-0 right-0 w-1/2 h-full pointer-events-none overflow-hidden">
+        <div class="absolute -top-10 -right-10 w-40 h-48 bg-blue-400/30 rounded-lg transform rotate-12 flex items-center justify-center">
+          <svg class="w-20 h-20 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+        <div class="absolute top-20 -right-5 w-32 h-40 bg-blue-300/40 rounded-lg transform rotate-12"></div>
+        <div class="absolute top-40 right-10 w-28 h-36 bg-white/20 rounded-lg transform rotate-12"></div>
+      </div>
 
-    <!-- Content -->
-    <div v-else-if="student && grade" class="space-y-6">
-      <!-- Student Info Card -->
-      <div class="bg-white rounded-2xl shadow-lg p-6">
-        <h2 class="text-xl font-bold text-gray-900 mb-4">Student Information</h2>
-        <div class="grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <span class="text-gray-500">Name:</span>
-            <span class="ml-2 font-medium text-gray-900">{{ student.fullname }}</span>
+      <!-- Content -->
+      <div class="relative p-5 md:p-8 z-10">
+        <div class="mb-6">
+          <h1 class="text-2xl md:text-3xl font-bold text-white mb-2">Edit Grade</h1>
+          <p class="text-sm text-white/80 max-w-2xl">
+            Update test scores and assessment results for the student.
+          </p>
+        </div>
+
+        <div class="flex flex-wrap gap-3">
+          <!-- Student Name Badge -->
+          <div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 border border-white/10">
+            <svg class="w-4 h-4 text-white/90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            <p class="text-white text-sm font-medium">{{ student.fullname }}</p>
           </div>
-          <div>
-            <span class="text-gray-500">Email:</span>
-            <span class="ml-2 font-medium text-gray-900">{{ student.tbuser?.email }}</span>
+
+          <!-- Email Badge -->
+          <div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 border border-white/10">
+            <svg class="w-4 h-4 text-white/90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            <p class="text-white text-sm font-medium">{{ student.tbuser?.email }}</p>
           </div>
         </div>
       </div>
+    </div>
 
-      <!-- Grade Form Card -->
-      <form @submit.prevent="handleSave" class="bg-white rounded-2xl shadow-lg p-6">
-        <h2 class="text-xl font-bold text-gray-900 mb-6">Grade Details</h2>
+    <!-- Grade Form Card -->
+    <form @submit.prevent="handleSave" class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-6 md:p-8 shadow-sm hover:shadow-md transition-all duration-200">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-sm">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+        </div>
+        <h2 class="text-xl md:text-2xl font-bold text-gray-900">Grade Details</h2>
+      </div>
 
-        <div class="space-y-4">
+        <div class="space-y-6">
           <!-- Test Type -->
-          <BaseSelect
-            v-bind="getFieldProps('test_type')"
-            label="Test Type"
-            required
-            :options="['Final Test', 'Midterm Exam', 'Final Exam', 'Completion']"
-            placeholder="Select test type"
-          />
-
-          <!-- Skill Scores -->
-          <div class="grid grid-cols-2 gap-4">
-            <BaseInput
-              v-bind="getFieldProps('listening_score')"
-              type="number"
-              label="Listening Score"
-              placeholder="0-100"
-              min="0"
-              max="100"
-            />
-
-            <BaseInput
-              v-bind="getFieldProps('speaking_score')"
-              type="number"
-              label="Speaking Score"
-              placeholder="0-100"
-              min="0"
-              max="100"
-            />
-
-            <BaseInput
-              v-bind="getFieldProps('reading_score')"
-              type="number"
-              label="Reading Score"
-              placeholder="0-100"
-              min="0"
-              max="100"
-            />
-
-            <BaseInput
-              v-bind="getFieldProps('writing_score')"
-              type="number"
-              label="Writing Score"
-              placeholder="0-100"
-              min="0"
-              max="100"
+          <div class="bg-white rounded-xl p-5 shadow-sm border border-blue-100/50">
+            <BaseSelect
+              v-bind="getFieldProps('test_type')"
+              label="Test Type"
+              required
+              :options="['Final Test', 'Midterm Exam', 'Final Exam', 'Completion']"
+              placeholder="Select test type"
             />
           </div>
 
-          <!-- Final Score -->
-          <BaseInput
-            v-bind="getFieldProps('final_score')"
-            type="number"
-            label="Final Score"
-            placeholder="0-100"
-            min="0"
-            max="100"
-          />
+          <!-- Skill Scores Section -->
+          <div class="bg-white rounded-xl p-5 shadow-sm border border-blue-100/50">
+            <div class="flex items-center gap-2 mb-4">
+              <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              <h3 class="font-semibold text-gray-900">Skill Scores</h3>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <BaseInput
+                v-bind="getFieldProps('listening_score')"
+                type="number"
+                label="Listening Score"
+                placeholder="0-100"
+                min="0"
+                max="100"
+              />
 
-          <!-- Date Taken -->
-          <BaseInput
-            v-bind="getFieldProps('date_taken')"
-            type="date"
-            label="Date Taken"
-          />
+              <BaseInput
+                v-bind="getFieldProps('speaking_score')"
+                type="number"
+                label="Speaking Score"
+                placeholder="0-100"
+                min="0"
+                max="100"
+              />
+
+              <BaseInput
+                v-bind="getFieldProps('reading_score')"
+                type="number"
+                label="Reading Score"
+                placeholder="0-100"
+                min="0"
+                max="100"
+              />
+
+              <BaseInput
+                v-bind="getFieldProps('writing_score')"
+                type="number"
+                label="Writing Score"
+                placeholder="0-100"
+                min="0"
+                max="100"
+              />
+            </div>
+          </div>
+
+          <!-- Final Score & Date -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-white rounded-xl p-5 shadow-sm border border-blue-100/50">
+              <BaseInput
+                v-bind="getFieldProps('final_score')"
+                type="number"
+                label="Final Score"
+                placeholder="0-100"
+                min="0"
+                max="100"
+              />
+            </div>
+
+            <div class="bg-white rounded-xl p-5 shadow-sm border border-blue-100/50">
+              <BaseInput
+                v-bind="getFieldProps('date_taken')"
+                type="date"
+                label="Date Taken"
+              />
+            </div>
+          </div>
 
           <!-- Description -->
-          <BaseTextarea
-            v-bind="getFieldProps('description')"
-            label="Description"
-            :rows="3"
-            placeholder="Optional notes about this grade"
-          />
+          <div class="bg-white rounded-xl p-5 shadow-sm border border-blue-100/50">
+            <BaseTextarea
+              v-bind="getFieldProps('description')"
+              label="Description"
+              :rows="3"
+              placeholder="Optional notes about this grade"
+            />
+          </div>
 
           <!-- File Upload -->
-          <BaseFileUpload
-            v-model="uploadFiles"
-            label="Upload New Report File (Optional)"
-            accept=".pdf,.doc,.docx"
-            :max-size="10"
-            :multiple="false"
-            hint="PDF or Word document (max 10MB)"
-          />
+          <div class="bg-white rounded-xl p-5 shadow-sm border border-blue-100/50">
+            <BaseFileUpload
+              v-model="uploadFiles"
+              label="Upload New Report File (Optional)"
+              accept=".pdf,.doc,.docx"
+              :max-size="10"
+              :multiple="false"
+              hint="PDF or Word document (max 10MB)"
+            />
+          </div>
         </div>
 
         <!-- Action Buttons -->
-        <div class="flex gap-3 mt-6">
+        <div class="flex flex-col sm:flex-row gap-3 mt-8 pt-6 border-t border-blue-200">
           <button
             type="submit"
             :disabled="isSubmitting"
-            class="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-full hover:from-blue-700 hover:to-indigo-700 hover:scale-105 active:scale-95 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all shadow-md hover:shadow-lg"
+            class="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-full hover:from-blue-700 hover:to-indigo-700 hover:shadow-lg disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed transition-all shadow-md"
           >
-            {{ isSubmitting ? 'Updating...' : 'Update Grade' }}
+            <svg v-if="!isSubmitting" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <svg v-else class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            {{ isSubmitting ? 'Updating Grade...' : 'Update Grade' }}
           </button>
+          
           <button
             type="button"
             @click="handleDelete"
             :disabled="isDeleting"
-            class="px-6 py-3 bg-gradient-to-r from-red-600 to-rose-600 text-white font-semibold rounded-full hover:from-red-700 hover:to-rose-700 hover:scale-105 active:scale-95 disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all shadow-md hover:shadow-lg"
+            class="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-rose-600 text-white font-semibold rounded-full hover:from-red-700 hover:to-rose-700 hover:shadow-lg disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed transition-all shadow-md"
           >
+            <svg v-if="!isDeleting" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            <svg v-else class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
             {{ isDeleting ? 'Deleting...' : 'Delete' }}
           </button>
+
           <button
             type="button"
             @click="goBack"
-            class="px-6 py-3 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 font-semibold rounded-full hover:from-gray-200 hover:to-gray-300 hover:scale-105 active:scale-95 transition-all shadow-sm hover:shadow-md"
+            :disabled="isSubmitting || isDeleting"
+            class="flex-1 inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-gray-700 font-semibold rounded-full border-2 border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
             Cancel
           </button>
         </div>
 
         <!-- Success Message -->
-        <div v-if="successMessage" class="mt-4 bg-green-50 border border-green-200 rounded-lg p-3">
-          <p class="text-green-800 text-sm">{{ successMessage }}</p>
+        <div v-if="successMessage" class="mt-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <p class="text-green-800 font-medium">{{ successMessage }}</p>
+          </div>
         </div>
 
         <!-- Error Message -->
-        <div v-if="submitError" class="mt-4 bg-red-50 border border-red-200 rounded-lg p-3">
-          <p class="text-red-800 text-sm">{{ submitError }}</p>
+        <div v-if="submitError" class="mt-4 bg-gradient-to-r from-red-50 to-rose-50 border border-red-200 rounded-xl p-4">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </div>
+            <p class="text-red-800 font-medium">{{ submitError }}</p>
+          </div>
         </div>
       </form>
     </div>
-  </div>
 </template>
 
 <script setup>
@@ -219,15 +308,21 @@ const fetchData = async () => {
     const studentRes = await studentAPI.getStudentById(userid);
 
     if (studentRes.data.success) {
-      student.value = studentRes.data.data;
+      // Handle both array and single object responses
+      let studentData = studentRes.data.data;
+      if (Array.isArray(studentData)) {
+        studentData = studentData[0];
+      }
+      student.value = studentData;
       
       // Fetch grades by studentid
-      if (student.value.studentid) {
+      if (student.value && student.value.studentid) {
         const gradesRes = await gradeAPI.getGradeById(student.value.studentid);
         
         if (gradesRes.data.success) {
           const grades = gradesRes.data.data;
-          grade.value = grades.find(g => g.gradeid === parseInt(gradeid));
+          // Use string comparison to handle both string and number types safely
+          grade.value = grades.find(g => String(g.gradeid) === String(gradeid));
           
           if (grade.value) {
             formData.value = {
@@ -241,9 +336,13 @@ const fetchData = async () => {
               date_taken: grade.value.date_taken ? new Date(grade.value.date_taken).toISOString().split('T')[0] : ''
             };
           } else {
-            errorMessage.value = 'Grade not found';
+            errorMessage.value = `Grade with ID ${gradeid} not found for this student`;
           }
+        } else {
+          errorMessage.value = 'Failed to fetch grades list';
         }
+      } else {
+        errorMessage.value = 'Student ID is missing from student data';
       }
     } else {
       errorMessage.value = 'Student not found';
@@ -289,7 +388,9 @@ const handleSave = async () => {
 
       console.log('📤 Payload to send:', payload);
 
-      const fileToUpload = uploadFiles.value instanceof File ? uploadFiles.value : null;
+      // Extract file from array (BaseFileUpload returns array even with multiple=false)
+      const fileToUpload = uploadFiles.value && uploadFiles.value.length > 0 ? uploadFiles.value[0] : null;
+      console.log('📁 File to upload:', fileToUpload);
       
       console.log('🚀 Calling gradeAPI.updateGrade...');
       const response = await gradeAPI.updateGrade(gradeid, payload, fileToUpload);

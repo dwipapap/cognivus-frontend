@@ -287,7 +287,12 @@ const fetchStudent = async () => {
     const response = await studentAPI.getStudentById(userid);
 
     if (response.data.success) {
-      student.value = response.data.data;
+      // Handle both array and single object responses
+      let studentData = response.data.data;
+      if (Array.isArray(studentData)) {
+        studentData = studentData[0];
+      }
+      student.value = studentData;
     } else {
       errorMessage.value = 'Student not found';
     }
