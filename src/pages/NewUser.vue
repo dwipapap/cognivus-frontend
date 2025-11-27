@@ -193,10 +193,10 @@ onMounted(fetchProfile);
     </div>
 
     <!-- Main Card -->
-    <div v-else class="bg-white w-full max-w-6xl rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col lg:flex-row">
+    <div v-else class="bg-white w-full max-w-4xl rounded-[2.5rem] shadow-2xl overflow-hidden">
       
-      <!-- Left Side: Form -->
-      <div class="w-full lg:w-[65%] p-6 md:p-8 bg-blue-50/30 flex flex-col justify-center">
+      <!-- Form -->
+      <div class="w-full p-6 md:p-8 bg-blue-50/30 flex flex-col justify-center">
         <div class="max-w-3xl mx-auto w-full">
           <!-- Header -->
           <div class="text-center mb-6">
@@ -407,36 +407,6 @@ onMounted(fetchProfile);
               </button>
             </div>
           </form>
-        </div>
-      </div>
-
-      <!-- Right Side: Illustration Area -->
-      <div class="hidden lg:flex lg:w-[35%] bg-blue-100 relative items-center justify-center overflow-hidden">
-        <!-- Decorative Background Elements -->
-        <div class="absolute top-[-10%] right-[-10%] w-64 h-64 bg-blue-200/50 rounded-full blur-3xl"></div>
-        <div class="absolute bottom-[-5%] left-[-5%] w-48 h-48 bg-blue-200/50 rounded-full blur-3xl"></div>
-
-        <!-- CSS Composition for Speech Bubble -->
-        <div class="relative z-10 flex flex-col items-center">
-          <div class="relative bg-blue-500 text-white px-12 py-8 rounded-3xl shadow-xl transform -rotate-2 mb-32 mx-8">
-             <h1 class="text-6xl font-extrabold tracking-tight">Hello!</h1>
-             <!-- Triangle pointer for speech bubble -->
-             <div class="absolute -bottom-4 left-12 w-8 h-8 bg-blue-500 transform rotate-45"></div>
-          </div>
-
-          <!-- Abstract Character Representations (CSS Only) -->
-          <div class="absolute bottom-0 w-full flex justify-between px-12 opacity-90">
-             <!-- Left Figure -->
-             <div class="flex flex-col items-center transform translate-y-4">
-                <div class="w-16 h-16 bg-blue-900 rounded-full mb-2"></div>
-                <div class="w-24 h-48 bg-blue-800 rounded-t-[3rem]"></div>
-             </div>
-             <!-- Right Figure -->
-             <div class="flex flex-col items-center transform translate-y-4">
-                <div class="w-16 h-16 bg-gray-800 rounded-full mb-2"></div>
-                <div class="w-24 h-56 bg-gray-900 rounded-t-[3rem]"></div>
-             </div>
-          </div>
         </div>
       </div>
 
