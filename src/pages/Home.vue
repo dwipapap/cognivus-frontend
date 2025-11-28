@@ -113,7 +113,7 @@ onUnmounted(() => {
   <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
     <!-- Navbar -->
     <header class="header-glass backdrop-blur-lg sticky top-0 z-50">
-      <div class="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto">
+      <div class="flex items-center justify-between px-6 lg:px-12 py-4">
         <!-- Left: Logo + Desktop Links -->
         <div class="flex items-center gap-8">
           <!-- Logo -->
@@ -171,15 +171,6 @@ onUnmounted(() => {
     <!-- Hero Section -->
     <section class="max-w-7xl mx-auto px-6 pt-16 pb-20 md:pt-24 md:pb-32">
       <div class="text-center">
-        <!-- Badge -->
-        <div
-          class="inline-flex items-center gap-2 bg-white/60 backdrop-blur-sm px-4 py-2 rounded-full text-sm mb-8 border border-white/40 shadow-sm">
-          <span class="relative flex h-2 w-2">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-            <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-          </span>
-          <span class="text-gray-700 font-medium">Made with Love by Cognivus</span>
-        </div>
 
         <!-- Main Heading -->
         <h1
@@ -411,6 +402,20 @@ onUnmounted(() => {
         </div>
       </div>
     </section>
+
+                <!-- Badge -->
+             <section class="flex justify-center">
+        <div
+          class="inline-flex items-center gap-2 bg-white/60 backdrop-blur-sm px-4 py-2 rounded-full text-sm mb-8 border border-white/40 shadow-sm">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+          </span>
+          <span class="text-gray-700 font-medium">Made with Love by Cognivus</span>
+        </div>
+      </section>
+
+
 
     <!-- Footer -->
     <footer class="bg-gray-900 text-gray-300 py-12">
