@@ -15,6 +15,16 @@ const scale = ref(1);
 const isLoading = ref(true);
 const error = ref(null);
 
+// Watermark configuration
+const watermarkText = 'Property of ITTREnglish Course';
+const watermarkOptions = {
+  columns: 3,
+  rows: 4,
+  rotation: 45,
+  fontSize: 15,
+  color: 'rgba(100, 100, 100, 0.15)'
+};
+
 const { pdf, pages } = usePDF(props.src, {
   onProgress: ({ loaded, total }) => {
     if (loaded === total) {
@@ -121,6 +131,8 @@ watch(() => props.src, () => {
             :pdf="pdf" 
             :page="page" 
             :scale="scale"
+            :watermark-text="watermarkText"
+            :watermark-options="watermarkOptions"
             class="w-full"
           />
         </div>
