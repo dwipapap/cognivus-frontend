@@ -329,24 +329,44 @@ watchEffect(() => {
   </div>
 
   <!-- Quick Stats Section -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-8">
-    <div
-      v-for="stat in stats"
-      :key="stat.title"
-      class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-4 md:p-6 shadow-sm hover:shadow-md transition-all duration-200"
-    >
-      <div class="flex items-center gap-4">
-        <div class="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
-          <IconChart v-if="stat.icon === 'level'" class="w-6 h-6 text-white" />
-          <IconBook v-else-if="stat.icon === 'course'" class="w-6 h-6 text-white" />
-          <IconUser v-else-if="stat.icon === 'teacher'" class="w-6 h-6 text-white" />
-          <IconClock v-else class="w-6 h-6 text-white" />
+  <div class="bg-gradient-to-r from-blue-50 to-indigo-100 rounded-2xl shadow-sm border border-gray-100 p-4 md:p-6 mb-8">
+    <!-- Mobile: 2x2 Grid -->
+    <div class="grid grid-cols-2 gap-3 md:hidden">
+      <div
+        v-for="stat in stats"
+        :key="stat.title"
+        class="flex items-center gap-2 py-2"
+      >
+        <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+          <IconChart v-if="stat.icon === 'level'" class="w-4 h-4 text-blue-600" />
+          <IconBook v-else-if="stat.icon === 'course'" class="w-4 h-4 text-blue-600" />
+          <IconUser v-else-if="stat.icon === 'teacher'" class="w-4 h-4 text-blue-600" />
+          <IconClock v-else class="w-4 h-4 text-blue-600" />
         </div>
         <div class="flex-1 min-w-0">
-          <p class="text-sm font-medium text-gray-600 mb-1">{{ stat.title }}</p>
-          <p class="text-xl font-bold text-gray-900 truncate" :title="stat.value">{{ stat.value }}</p>
+          <p class="text-[10px] text-gray-500 leading-tight">{{ stat.title }}</p>
+          <p class="text-xs font-semibold text-gray-900 truncate" :title="stat.value">{{ stat.value }}</p>
         </div>
       </div>
+    </div>
+
+    <!-- Desktop: Horizontal with Dividers -->
+    <div class="hidden md:flex items-center">
+      <template v-for="(stat, index) in stats" :key="stat.title">
+        <div class="flex items-center gap-4 flex-1 py-2" :class="index === 0 ? 'justify-start' : 'justify-center'">
+          <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
+            <IconChart v-if="stat.icon === 'level'" class="w-6 h-6 text-blue-600" />
+            <IconBook v-else-if="stat.icon === 'course'" class="w-6 h-6 text-blue-600" />
+            <IconUser v-else-if="stat.icon === 'teacher'" class="w-6 h-6 text-blue-600" />
+            <IconClock v-else class="w-6 h-6 text-blue-600" />
+          </div>
+          <div class="min-w-0">
+            <p class="text-sm text-gray-500">{{ stat.title }}</p>
+            <p class="text-base font-semibold text-gray-900 truncate max-w-[160px]" :title="stat.value">{{ stat.value }}</p>
+          </div>
+        </div>
+        <div v-if="index < stats.length - 1" class="h-12 w-px bg-gray-300 mx-2 flex-shrink-0"></div>
+      </template>
     </div>
   </div>
 
