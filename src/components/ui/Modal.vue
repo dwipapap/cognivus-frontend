@@ -27,7 +27,7 @@ const props = defineProps({
   size: {
     type: String,
     default: 'md',
-    validator: (value) => ['sm', 'md', 'lg', 'xl', '2xl', '3xl', '4xl', '5xl', '6xl', '7xl'].includes(value)
+    validator: (value) => ['sm', 'md', 'lg', 'xl', '2xl', '3xl', '4xl', '5xl', '6xl', '7xl', 'fullscreen'].includes(value)
   },
   variant: {
     type: String,
@@ -106,7 +106,8 @@ const sizeClass = computed(() => {
     '4xl': 'max-w-4xl',
     '5xl': 'max-w-5xl',
     '6xl': 'max-w-6xl',
-    '7xl': 'max-w-7xl'
+    '7xl': 'max-w-7xl',
+    'fullscreen': 'w-[95vw]'
   };
   return sizes[props.size];
 });
@@ -168,15 +169,17 @@ watch(() => props.show, async (newValue) => {
     <transition name="modal" appear>
       <div
         v-if="show"
-        class="modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto"
+        class="modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm overflow-y-auto"
+        :class="size === 'fullscreen' ? 'p-2' : 'p-4'"
         @click.self="handleBackdropClick"
       >
         <!-- Modal content -->
         <div
           ref="modalRef"
           :class="[
-            'modal-content relative w-full my-8 rounded-3xl shadow-2xl overflow-hidden flex flex-col',
+            'modal-content relative w-full rounded-3xl shadow-2xl overflow-hidden flex flex-col',
             isGradientVariant ? 'bg-white max-h-[90vh]' : 'bg-white bg-opacity-90 backdrop-blur-lg border border-white border-opacity-20',
+            size === 'fullscreen' ? 'h-[96vh] my-2' : 'my-8 max-h-[90vh]',
             sizeClass
           ]"
           tabindex="-1"
@@ -188,38 +191,38 @@ watch(() => props.show, async (newValue) => {
           <div
             v-if="isGradientVariant"
             :class="[
-              'sticky top-0 px-8 py-6 flex justify-between items-center shadow-lg',
+              'sticky top-0 px-4 py-3 flex justify-between items-center shadow-lg',
               gradientClass
             ]"
           >
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
                 <slot name="icon">
                   <!-- Default gradient icon based on type -->
-                  <svg v-if="type === 'success'" class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg v-if="type === 'success'" class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                   </svg>
-                  <svg v-else-if="type === 'error'" class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg v-else-if="type === 'error'" class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                   </svg>
-                  <svg v-else-if="type === 'warning'" class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg v-else-if="type === 'warning'" class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                   </svg>
-                  <svg v-else class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg v-else class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </slot>
               </div>
-              <h3 class="text-2xl font-bold text-white">
+              <h3 class="text-lg font-bold text-white">
                 {{ modalTitle }}
               </h3>
             </div>
             <button
               v-if="!persistent"
               @click="handleClose"
-              class="text-white/80 hover:text-white hover:bg-white/10 rounded-full p-2 transition-all hover:scale-110 active:scale-95"
+              class="text-white/80 hover:text-white hover:bg-white/10 rounded-full p-1.5 transition-all hover:scale-110 active:scale-95"
             >
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -279,8 +282,9 @@ watch(() => props.show, async (newValue) => {
           <!-- Modal body -->
           <div 
             :class="[
-              'p-6 sm:p-8 overflow-y-auto',
-              isGradientVariant ? 'flex-1 bg-gradient-to-b from-gray-50/50 to-white' : 'max-h-[60vh]'
+              'overflow-y-auto',
+              size === 'fullscreen' ? 'flex-1 p-0' : 'p-6 sm:p-8',
+              isGradientVariant ? 'flex-1 bg-gradient-to-b from-gray-50/50 to-white' : size === 'fullscreen' ? 'flex-1' : 'max-h-[60vh]'
             ]"
           >
             <slot name="content">

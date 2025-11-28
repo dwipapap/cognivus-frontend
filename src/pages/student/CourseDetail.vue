@@ -12,6 +12,8 @@ import IconPlay from '~icons/basil/play-solid';
 import IconArrowLeft from '~icons/basil/arrow-left-outline';
 import IconUpload from '~icons/basil/upload-outline';
 import LoadingBar from '../../components/ui/LoadingBar.vue';
+import Modal from '../../components/ui/Modal.vue';
+import PDFViewer from '../../components/ui/PDFViewer.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -19,6 +21,11 @@ const router = useRouter();
 const course = ref(null);
 const courseLoading = ref(false);
 const courseError = ref(null);
+
+// PDF Modal States
+const showPdfModal = ref(false);
+const selectedPdfUrl = ref('');
+const selectedPdfTitle = ref('');
 
 // Use composable for class details
 const classId = computed(() => course.value?.classid);
@@ -55,6 +62,20 @@ const formatDate = (dateString) => {
   } catch {
     return dateString;
   }
+};
+
+/** Open PDF in Modal */
+const openMaterial = (url, title) => {
+  selectedPdfUrl.value = url;
+  selectedPdfTitle.value = title;
+  showPdfModal.value = true;
+};
+
+/** Close PDF Modal */
+const closePdfModal = () => {
+  showPdfModal.value = false;
+  selectedPdfUrl.value = '';
+  selectedPdfTitle.value = '';
 };
 
 /** Fetch course details */
@@ -167,13 +188,11 @@ watchEffect(() => {
       <!-- Materials Grid -->
       <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
         <!-- Course Files (PDF/Documents) -->
-        <a 
+        <button
           v-for="file in courseFiles" 
           :key="file.cfid"
-          :href="getFileUrl(file)" 
-          target="_blank"
-          rel="noopener noreferrer"
-          class="flex items-center gap-3 md:gap-4 p-3 md:p-4 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5"
+          @click="openMaterial(getFileUrl(file), 'Learning Materials')"
+          class="flex items-center gap-3 md:gap-4 p-3 md:p-4 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 cursor-pointer text-left"
         >
           <!-- PDF Thumbnail -->
           <div class="flex-shrink-0 w-14 h-16 md:w-16 md:h-16 bg-white rounded-lg flex items-center justify-center">
@@ -191,8 +210,8 @@ watchEffect(() => {
           </div>
           
           <!-- Open Icon -->
-          <IconUpload class="w-5 h-5 md:w-6 md:h-6 text-white/80 flex-shrink-0" />
-        </a>
+          <IconDocument class="w-5 h-5 md:w-6 md:h-6 text-white/80 flex-shrink-0" />
+        </button>
 
         <!-- YouTube Video -->
         <a 
@@ -242,5 +261,26 @@ watchEffect(() => {
         <span>Back</span>
       </button>
     </div>
+
+    <!-- PDF Viewer Modal -->
+    <Modal
+      :show="showPdfModal"
+      @close="closePdfModal"
+      size="fullscreen"
+      :hide-footer="true"
+      title="Course Material"
+      type="info"
+      variant="gradient"
+      gradient-from="blue-500"
+      gradient-via="blue-600"
+      gradient-to="indigo-600"
+    >
+      <template #content>
+        <PDFViewer 
+          v-if="selectedPdfUrl"
+          :src="selectedPdfUrl"
+        />
+      </template>
+    </Modal>
   </div>
 </template>
