@@ -12,12 +12,29 @@ import IconLockPassword from '~icons/solar/lock-password-bold';
 import Modal from '../components/ui/Modal.vue';
 import BaseButton from '../components/ui/BaseButton.vue';
 import BaseCard from '../components/ui/BaseCard.vue';
+import OtpFlow from '../components/ui/OtpFlow.vue';
 
 // Modal state
 const showModal = ref(false);
 const modalType = ref('info');
 const modalTitle = ref('');
 const modalMessage = ref('');
+
+// Forgot Password state
+const showForgotPassword = ref(false);
+
+const openForgotPassword = () => {
+  showForgotPassword.value = true;
+};
+
+const closeForgotPassword = () => {
+  showForgotPassword.value = false;
+};
+
+const handleForgotPasswordSuccess = () => {
+  closeForgotPassword();
+  openModal('success', 'Password Reset', 'Your password has been successfully changed. You can now log in with your new password.');
+};
 
 const router = useRouter();
 
@@ -167,7 +184,16 @@ const handleGoogleLogin = () => {
                   placeholder="Enter your password"
                 />
               </div>
-              <p v-if="errors.password" class="mt-2 text-sm text-red-600">{{ errors.password }}</p>
+              <div class="flex justify-between items-center mt-2">
+                <p v-if="errors.password" class="text-sm text-red-600">{{ errors.password }}</p>
+                <button
+                  type="button"
+                  @click="openForgotPassword"
+                  class="text-sm text-blue-600 hover:text-blue-800 hover:underline transition-colors ml-auto"
+                >
+                  Forgot Password?
+                </button>
+              </div>
             </div>
 
             <BaseButton
@@ -232,6 +258,14 @@ const handleGoogleLogin = () => {
       :message="modalMessage"
       variant="gradient"
       @close="closeModal"
+    />
+
+    <!-- Forgot Password OTP Flow -->
+    <OtpFlow
+      :show="showForgotPassword"
+      title="Reset Password"
+      @close="closeForgotPassword"
+      @success="handleForgotPasswordSuccess"
     />
   </div>
 </template>

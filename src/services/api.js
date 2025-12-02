@@ -179,7 +179,28 @@ export const authAPI = {
   login: (credentials) => apiClient.post('/auth/login', credentials),
   register: (userData) => apiClient.post('/auth/register', userData),
   getProfile: () => apiClient.get('/auth/profile'),
-  logout: () => apiClient.post('/auth/logout')
+  logout: () => apiClient.post('/auth/logout'),
+  
+  /**
+   * Request OTP for password reset or change
+   * @param {Object} data - { address: string, phone: string, channel: 'email' | 'whatsapp' }
+   * @returns {Promise} - { success: boolean, message: string }
+   */
+  requestOtp: (data) => apiClient.post('/auth/request-otp', data),
+  
+  /**
+   * Verify OTP code
+   * @param {Object} data - { address: string, phone: string, channel: 'email' | 'whatsapp', otp: string }
+   * @returns {Promise} - { success: boolean, resetToken: string }
+   */
+  verifyOtp: (data) => apiClient.post('/auth/verify-otp', data),
+  
+  /**
+   * Change password using reset token
+   * @param {Object} data - { resetToken: string, newPassword: string }
+   * @returns {Promise} - { success: boolean, message: string }
+   */
+  changePassword: (data) => apiClient.post('/auth/change-password', data)
 };
 
 // Report Files API endpoints
