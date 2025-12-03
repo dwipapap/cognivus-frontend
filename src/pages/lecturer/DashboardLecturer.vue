@@ -135,24 +135,24 @@ const quickActions = computed(() => [
     title: 'Input Nilai',
     description: 'Add student grades',
     icon: 'grade',
-    color: 'from-blue-500 to-indigo-500',
-    bgColor: 'from-blue-50 to-indigo-50',
+    color: 'from-blue-500 to-blue-600',
+    bgColor: 'from-blue-50 to-blue-100',
     action: () => router.push({ name: 'LecturerStudents' })
   },
   {
     title: 'Upload Materi',
     description: 'Add course materials',
     icon: 'upload',
-    color: 'from-purple-500 to-pink-500',
-    bgColor: 'from-purple-50 to-pink-50',
+    color: 'from-sky-500 to-cyan-500',
+    bgColor: 'from-sky-50 to-cyan-50',
     action: () => router.push({ name: 'LecturerMaterials' })
   },
   {
     title: 'Lihat Jadwal',
     description: 'View class schedules',
     icon: 'schedule',
-    color: 'from-emerald-500 to-teal-500',
-    bgColor: 'from-emerald-50 to-teal-50',
+    color: 'from-indigo-500 to-blue-500',
+    bgColor: 'from-indigo-50 to-blue-50',
     action: () => {} // Will show schedules from classes
   }
 ]);
@@ -327,24 +327,55 @@ onMounted(() => {
         </div>
       </div>
 
-      <!-- Top-Right Tall Card: Quick Actions (Span 1 col, 2 rows) -->
-      <div class="lg:col-span-1 lg:row-span-2 bg-white/60 backdrop-blur-sm border border-white/50 shadow-lg rounded-3xl p-6">
-        <div class="mb-6">
-          <h2 class="text-xl font-bold text-gray-900">Quick Actions</h2>
-          <p class="text-sm text-gray-500 mt-1">Shortcuts to tasks</p>
+      <!-- Top-Right: Stats Cards (Total Students & Total Classes) -->
+      <div class="lg:col-span-1 lg:row-span-1 grid grid-cols-1 gap-4">
+        <!-- Total Students Card -->
+        <div class="relative bg-white/60 backdrop-blur-sm border border-white/50 shadow-lg rounded-3xl p-5 hover:shadow-xl transition-all duration-300">
+          <div class="absolute top-4 right-4">
+            <div class="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center">
+              <IconUsersGroup class="w-6 h-6 text-blue-600" />
+            </div>
+          </div>
+          <div>
+            <p class="text-sm font-medium text-gray-500 mb-1">Total Students</p>
+            <p class="text-4xl font-bold text-gray-900">{{ totalStudents }}</p>
+            <p class="text-xs text-gray-400 mt-1">across all classes</p>
+          </div>
         </div>
 
-        <div class="space-y-4">
+        <!-- Total Classes Card -->
+        <div class="relative bg-white/60 backdrop-blur-sm border border-white/50 shadow-lg rounded-3xl p-5 hover:shadow-xl transition-all duration-300">
+          <div class="absolute top-4 right-4">
+            <div class="w-10 h-10 bg-indigo-500/10 rounded-xl flex items-center justify-center">
+              <IconBook class="w-6 h-6 text-indigo-600" />
+            </div>
+          </div>
+          <div>
+            <p class="text-sm font-medium text-gray-500 mb-1">Total Classes</p>
+            <p class="text-4xl font-bold text-gray-900">{{ myClasses.length }}</p>
+            <p class="text-xs text-gray-400 mt-1">teaching assignments</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom: Quick Actions (Span 2 cols, 1 row) -->
+      <div class="lg:col-span-2 lg:row-span-1 bg-white/60 backdrop-blur-sm border border-white/50 shadow-lg rounded-3xl p-6">
+        <div class="mb-5">
+          <h2 class="text-xl font-bold text-gray-900">Quick Actions</h2>
+          <p class="text-sm text-gray-500 mt-1">Shortcuts to common tasks</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <button
             v-for="action in quickActions"
             :key="action.title"
             @click="action.action"
-            class="w-full group"
+            class="group"
           >
-            <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-blue-200 transition-all duration-200">
-              <div class="flex items-center gap-4">
+            <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md hover:border-blue-200 transition-all duration-200 h-full">
+              <div class="flex flex-col items-center text-center gap-3">
                 <!-- Icon -->
-                <div :class="`w-14 h-14 bg-gradient-to-r ${action.color} rounded-2xl flex items-center justify-center shadow-sm flex-shrink-0 group-hover:scale-110 transition-transform duration-200`">
+                <div :class="`w-14 h-14 bg-gradient-to-r ${action.color} rounded-2xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform duration-200`">
                   <!-- Grade Icon -->
                   <IconDocument v-if="action.icon === 'grade'" class="w-7 h-7 text-white" />
                   <!-- Upload Icon -->
@@ -354,48 +385,20 @@ onMounted(() => {
                 </div>
 
                 <!-- Content -->
-                <div class="flex-1 text-left">
+                <div>
                   <h3 class="text-base font-semibold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
                     {{ action.title }}
                   </h3>
                   <p class="text-sm text-gray-500">{{ action.description }}</p>
                 </div>
-
-                <!-- Arrow Icon -->
-                <IconArrowRight class="w-5 h-5 text-gray-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all duration-200 flex-shrink-0" />
               </div>
             </div>
           </button>
         </div>
       </div>
 
-      <!-- Bottom-Left Small Card 1: Total Students (Span 1 col, 1 row) -->
-      <div class="lg:col-span-1 lg:row-span-1 bg-white/60 backdrop-blur-sm border border-white/50 shadow-lg rounded-3xl p-6 hover:shadow-xl transition-all duration-300">
-        <div class="absolute top-4 right-4">
-          <div class="w-10 h-10 bg-purple-500/10 rounded-xl flex items-center justify-center">
-            <IconUsersGroup class="w-6 h-6 text-purple-600" />
-          </div>
-        </div>
-        <div class="text-center mt-6">
-          <p class="text-sm font-medium text-gray-500 mb-2">Total Students</p>
-          <p class="text-5xl font-bold text-gray-900 mb-1">{{ totalStudents }}</p>
-          <p class="text-sm text-gray-400">students</p>
-        </div>
-      </div>
-
-      <!-- Bottom-Left Small Card 2: Total Classes (Span 1 col, 1 row) -->
-      <div class="lg:col-span-1 lg:row-span-1 bg-white/60 backdrop-blur-sm border border-white/50 shadow-lg rounded-3xl p-6 hover:shadow-xl transition-all duration-300">
-        <div class="absolute top-4 right-4">
-          <div class="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center">
-            <IconBook class="w-6 h-6 text-emerald-600" />
-          </div>
-        </div>
-        <div class="text-center mt-6">
-          <p class="text-sm font-medium text-gray-500 mb-2">Total Classes</p>
-          <p class="text-5xl font-bold text-gray-900 mb-1">{{ myClasses.length }}</p>
-          <p class="text-sm text-gray-400">classes</p>
-        </div>
-      </div>
+      <!-- Bottom-Right: Empty placeholder for grid balance -->
+      <div class="lg:col-span-1 lg:row-span-1 hidden lg:block"></div>
 
     </div>
   </div>

@@ -210,17 +210,17 @@ onMounted(() => {
                     <p class="text-xs font-medium text-gray-600 mb-1">Listening</p>
                     <p class="text-lg font-bold text-blue-700">{{ grade.listening_score ?? '-' }}</p>
                   </div>
-                  <div class="bg-green-50 rounded-lg p-3">
+                  <div class="bg-sky-50 rounded-lg p-3">
                     <p class="text-xs font-medium text-gray-600 mb-1">Speaking</p>
-                    <p class="text-lg font-bold text-green-700">{{ grade.speaking_score ?? '-' }}</p>
+                    <p class="text-lg font-bold text-sky-700">{{ grade.speaking_score ?? '-' }}</p>
                   </div>
-                  <div class="bg-purple-50 rounded-lg p-3">
+                  <div class="bg-indigo-50 rounded-lg p-3">
                     <p class="text-xs font-medium text-gray-600 mb-1">Reading</p>
-                    <p class="text-lg font-bold text-purple-700">{{ grade.reading_score ?? '-' }}</p>
+                    <p class="text-lg font-bold text-indigo-700">{{ grade.reading_score ?? '-' }}</p>
                   </div>
-                  <div class="bg-orange-50 rounded-lg p-3">
+                  <div class="bg-cyan-50 rounded-lg p-3">
                     <p class="text-xs font-medium text-gray-600 mb-1">Writing</p>
-                    <p class="text-lg font-bold text-orange-700">{{ grade.writing_score ?? '-' }}</p>
+                    <p class="text-lg font-bold text-cyan-700">{{ grade.writing_score ?? '-' }}</p>
                   </div>
                 </div>
 
@@ -270,17 +270,17 @@ onMounted(() => {
                     </span>
                   </td>
                   <td class="px-6 py-4 text-center text-sm text-gray-600">
-                    <span class="inline-flex items-center justify-center w-12 h-8 rounded-lg bg-green-50 text-green-700 font-medium">
+                    <span class="inline-flex items-center justify-center w-12 h-8 rounded-lg bg-sky-50 text-sky-700 font-medium">
                       {{ grade.speaking_score ?? '-' }}
                     </span>
                   </td>
                   <td class="px-6 py-4 text-center text-sm text-gray-600">
-                    <span class="inline-flex items-center justify-center w-12 h-8 rounded-lg bg-purple-50 text-purple-700 font-medium">
+                    <span class="inline-flex items-center justify-center w-12 h-8 rounded-lg bg-indigo-50 text-indigo-700 font-medium">
                       {{ grade.reading_score ?? '-' }}
                     </span>
                   </td>
                   <td class="px-6 py-4 text-center text-sm text-gray-600">
-                    <span class="inline-flex items-center justify-center w-12 h-8 rounded-lg bg-orange-50 text-orange-700 font-medium">
+                    <span class="inline-flex items-center justify-center w-12 h-8 rounded-lg bg-cyan-50 text-cyan-700 font-medium">
                       {{ grade.writing_score ?? '-' }}
                     </span>
                   </td>

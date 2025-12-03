@@ -197,7 +197,7 @@ watchEffect(() => {
           <!-- PDF Thumbnail -->
           <div class="flex-shrink-0 w-14 h-16 md:w-16 md:h-16 bg-white rounded-lg flex items-center justify-center">
             <div class="text-center">
-              <IconDocument class="w-7 h-7 md:w-8 md:h-8 mx-auto text-red-600" />
+              <IconDocument class="w-7 h-7 md:w-8 md:h-8 mx-auto text-blue-600" />
               <p class="text-[10px] md:text-xs font-bold text-gray-700 mt-0.5">PDF</p>
             </div>
           </div>
@@ -241,7 +241,7 @@ watchEffect(() => {
     <!-- Description Section -->
     <section v-if="course.description" class="bg-white rounded-xl shadow-lg p-4 md:p-6">
       <div class="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
-        <div class="p-1.5 md:p-2 bg-purple-100 rounded-lg text-purple-600">
+        <div class="p-1.5 md:p-2 bg-blue-100 rounded-lg text-blue-600">
           <IconDocument class="w-5 h-5 md:w-6 md:h-6" />
         </div>
         <h2 class="text-lg md:text-2xl font-bold text-gray-900">Class Notes</h2>
