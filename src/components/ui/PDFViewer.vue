@@ -121,7 +121,7 @@ watch(() => props.src, () => {
         <p class="text-gray-600 text-sm">{{ error }}</p>
       </div>
 
-      <div v-else class="flex flex-col items-center gap-4">
+      <div v-else class="flex flex-col items-center gap-4" @contextmenu.prevent>
         <div 
           v-for="page in pages" 
           :key="page"
