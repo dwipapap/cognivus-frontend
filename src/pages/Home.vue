@@ -1,6 +1,18 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 
+// Hero images
+import heroStudentImg from '../assets/images/home/hero_student.png';
+import heroProfessionalImg from '../assets/images/home/hero_professional.png';
+import heroTeacherImg from '../assets/images/home/hero_teacher.png';
+
+// Hero images for bento grid
+const heroImages = ref({
+  student: heroStudentImg,
+  professional: heroProfessionalImg,
+  teacher: heroTeacherImg
+});
+
 // Mobile menu state
 const isMobileMenuOpen = ref(false);
 
@@ -56,25 +68,25 @@ const programLevels = ref([
     title: 'Pre Elementary',
     description: 'Pre-Elementary English class for young learners. Maximum class size: 10 students.',
     icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12"><path stroke-linecap="round" stroke-linejoin="round" d="M15.182 15.182a4.5 4.5 0 0 1-6.364 0M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75Zm-.375 0h.008v.015h-.008V9.75Z" /></svg>`,
-    gradient: 'from-blue-600 to-blue-800'
+    gradient: 'from-blue-500 to-blue-700'
   },
   {
     title: 'Elementary',
     description: 'Elementary English class for beginners. Maximum class size: 10 students.',
     icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 0 0 3.741-.479 3 3 0 0 0-4.682-2.72m.94 3.198.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0 1 12 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 0 1 6 18.719m12 0a5.971 5.971 0 0 0-.941-3.197m0 0A5.995 5.995 0 0 0 12 12.75a5.995 5.995 0 0 0-5.058 2.772m0 0a3 3 0 0 0-4.681 2.72 8.986 8.986 0 0 0 3.74.477m.94-3.197a5.971 5.971 0 0 0-.94 3.197M15 6.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm6 3a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Zm-13.5 0a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0Z" /></svg>`,
-    gradient: 'from-purple-500 to-purple-700'
+    gradient: 'from-blue-600 to-blue-800'
   },
   {
     title: 'Intermediate',
     description: 'Intermediate English class to build fluency. Maximum class size: 10 students.',
     icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>`,
-    gradient: 'from-indigo-700 to-indigo-900'
+    gradient: 'from-blue-700 to-blue-900'
   },
   {
     title: 'Advanced',
     description: 'Advanced English class for expert learners. Maximum class size: 10 students.',
     icon: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12"><path stroke-linecap="round" stroke-linejoin="round" d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z" /></svg>`,
-    gradient: 'from-pink-500 to-pink-700'
+    gradient: 'from-blue-800 to-blue-950'
   }
 ]);
 
@@ -99,13 +111,48 @@ const closeMobileMenuOnOutsideClick = (event) => {
   }
 };
 
-// Setup click outside listener
+// Intersection Observer for scroll-triggered animations
+let observer = null;
+
+const setupScrollAnimations = () => {
+  // Check for reduced motion preference
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (prefersReducedMotion) return;
+
+  observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('scroll-visible');
+          // Stop observing once animated
+          observer.unobserve(entry.target);
+        }
+      });
+    },
+    {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    }
+  );
+
+  // Observe all elements with scroll-animate class
+  document.querySelectorAll('.scroll-animate').forEach((el) => {
+    observer.observe(el);
+  });
+};
+
+// Setup click outside listener and scroll animations
 onMounted(() => {
   document.addEventListener('click', closeMobileMenuOnOutsideClick);
+  // Delay to ensure DOM is ready
+  setTimeout(setupScrollAnimations, 100);
 });
 
 onUnmounted(() => {
   document.removeEventListener('click', closeMobileMenuOnOutsideClick);
+  if (observer) {
+    observer.disconnect();
+  }
 });
 </script>
 
@@ -169,36 +216,114 @@ onUnmounted(() => {
     </header>
 
     <!-- Hero Section -->
-    <section class="max-w-7xl mx-auto px-6 pt-16 pb-20 md:pt-24 md:pb-32">
-      <div class="text-center">
+    <section class="max-w-7xl mx-auto px-6 pt-12 pb-16 md:pt-20 md:pb-24">
+      <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <!-- Left Column: Content -->
+        <div class="order-2 lg:order-1">
+          <h1
+            class="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight mb-6 text-blue-900 animate-fade-up"
+            style="animation-delay: 0.1s">
+            The Best English<br />
+            <span class="text-blue-600">Learning Solution</span><br />
+            for You
+          </h1>
 
-        <!-- Main Heading -->
-        <h1
-          class="text-5xl md:text-7xl font-bold tracking-tight leading-tight mb-6 bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent">
-          Modern Learning<br />
-          Management System
-        </h1>
+          <p class="text-lg md:text-xl text-gray-600 mb-8 leading-relaxed max-w-lg animate-fade-up"
+            style="animation-delay: 0.2s">
+            An intuitive learning platform to enhance your team's performance exponentially.
+          </p>
 
-        <p class="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto mb-10 leading-relaxed">
-          Empowering education through technology. Complete platform for students, lecturers, and administrators.
-        </p>
+          <!-- CTA Buttons -->
+          <div class="flex flex-col sm:flex-row items-start gap-4 animate-fade-up" style="animation-delay: 0.3s">
+            <router-link to="/login"
+              class="inline-flex items-center justify-center px-8 py-4 rounded-full bg-blue-600 text-white font-semibold shadow-lg shadow-blue-500/30 hover:bg-blue-700 hover:shadow-xl transition-all duration-300">
+              Login
+            </router-link>
+            <a href="#features"
+              class="inline-flex items-center justify-center px-8 py-4 rounded-full border-2 border-blue-600 text-blue-600 font-semibold hover:bg-blue-50 transition-all duration-300">
+              View Features
+            </a>
+          </div>
+        </div>
 
-        <!-- CTA Buttons -->
-        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <router-link to="/login"
-            class="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-full text-lg font-semibold shadow-xl shadow-blue-500/30 hover:shadow-2xl hover:shadow-blue-500/40 transition-all duration-300 hover:scale-105">
-            Start Learning Today
-          </router-link>
+        <!-- Right Column: Bento Grid -->
+        <div class="order-1 lg:order-2 animate-fade-in" style="animation-delay: 0.2s">
+          <div class="grid grid-cols-3 grid-rows-4 gap-3 md:gap-4 h-[420px] md:h-[480px]">
+            <!-- Stats Card: Learning Activities (Top Left) -->
+            <div
+              class="col-span-2 row-span-1 bg-white/80 backdrop-blur-sm rounded-2xl p-4 md:p-5 border border-white/50 shadow-lg flex flex-col justify-center">
+              <span class="text-2xl md:text-3xl font-bold text-blue-600">30,000+</span>
+              <span class="text-sm text-gray-600">Learning Materials</span>
+            </div>
+
+            <!-- Image Card: Professional (Top Right) - spans 2 rows -->
+            <div class="col-span-1 row-span-2 rounded-2xl overflow-hidden shadow-lg">
+              <img :src="heroImages.professional" alt="Professional" class="w-full h-full object-cover" />
+            </div>
+
+            <!-- Map Card (Second Row Left) -->
+            <div
+              class="col-span-2 row-span-1 bg-white/80 backdrop-blur-sm rounded-2xl p-4 border border-white/50 shadow-lg relative overflow-hidden flex items-center">
+              <div class="absolute inset-0 opacity-10">
+                <svg viewBox="0 0 400 200" class="w-full h-full" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path class="text-blue-600"
+                    d="M50,100 Q100,50 150,80 T250,70 T350,100 Q300,150 250,120 T150,130 T50,100" />
+                </svg>
+              </div>
+              <div class="relative z-10">
+                <p class="text-sm text-gray-600 leading-relaxed">Great Learning Experience<br />for All Ages</p>
+              </div>
+            </div>
+
+            <!-- Stats Card: Partners (Third Row Left) -->
+            <div
+              class="col-span-1 row-span-1 bg-white/80 backdrop-blur-sm rounded-2xl p-3 md:p-4 border border-white/50 shadow-lg flex flex-col justify-center">
+              <span class="text-xl md:text-2xl font-bold text-blue-600">500+</span>
+              <span class="text-xs text-gray-600">Students Enrolled</span>
+            </div>
+
+            <!-- Stats Card: Active Users (Third Row Center) -->
+            <div
+              class="col-span-1 row-span-1 bg-white/80 backdrop-blur-sm rounded-2xl p-3 md:p-4 border border-white/50 shadow-lg flex items-center gap-2">
+              <div class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+                <img :src="heroImages.teacher" alt="User" class="w-full h-full object-cover" />
+              </div>
+              <div>
+                <span class="text-lg md:text-xl font-bold text-blue-600">4000+</span>
+                <p class="text-xs text-gray-600">Graduates</p>
+              </div>
+            </div>
+
+            <!-- Image Card: Student (Third Row Right) - spans 2 rows -->
+            <div class="col-span-1 row-span-2 rounded-2xl overflow-hidden shadow-lg">
+              <img :src="heroImages.student" alt="Student" class="w-full h-full object-cover" />
+            </div>
+
+            <!-- Stats Card: Certified Teachers (Bottom Left) -->
+            <div
+              class="col-span-1 row-span-1 bg-blue-600 rounded-2xl p-3 md:p-4 shadow-lg flex flex-col justify-center">
+              <span class="text-xl md:text-2xl font-bold text-white">100+</span>
+              <span class="text-xs text-blue-100">Certified Teachers</span>
+            </div>
+
+            <!-- Stats Card: Years Experience (Bottom Center) -->
+            <div
+              class="col-span-1 row-span-1 bg-white/80 backdrop-blur-sm rounded-2xl p-3 md:p-4 border border-white/50 shadow-lg flex flex-col justify-center">
+              <span class="text-xl md:text-2xl font-bold text-blue-600">60+</span>
+              <span class="text-xs text-gray-600">Years Experience</span>
+            </div>
+          </div>
         </div>
       </div>
 
       <!-- LMS Features Section -->
       <div id="stats" class="mt-20 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <div v-for="(feature, index) in lmsFeatures" :key="index"
-          class="bg-white/60 backdrop-blur-sm p-6 rounded-2xl border border-white/40 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 group">
+          class="bg-white/80 backdrop-blur-sm p-6 rounded-2xl border border-white/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group scroll-animate"
+          :data-delay="index + 1">
           <div class="flex items-start gap-4">
             <div
-              class="w-14 h-14 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center text-white flex-shrink-0 group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-blue-500/30">
+              class="w-14 h-14 bg-blue-600 rounded-xl flex items-center justify-center text-white flex-shrink-0 group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-blue-500/30">
               <div v-html="feature.icon"></div>
             </div>
             <div class="flex-1 min-w-0">
@@ -213,9 +338,8 @@ onUnmounted(() => {
     <!-- User Roles Section -->
     <section id="features" class="py-20 bg-white/30 backdrop-blur-sm">
       <div class="max-w-7xl mx-auto px-6">
-        <div class="text-center mb-16">
-          <h2
-            class="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent">
+        <div class="text-center mb-16 scroll-animate">
+          <h2 class="text-4xl md:text-5xl font-bold mb-4 text-blue-900">
             Built for Everyone
           </h2>
           <p class="text-xl text-gray-600 max-w-2xl mx-auto">
@@ -225,10 +349,11 @@ onUnmounted(() => {
 
         <div class="grid md:grid-cols-3 gap-8">
           <div v-for="(role, index) in userRoles" :key="index"
-            class="group bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:shadow-2xl hover:border-blue-200 transition-all duration-500 hover:-translate-y-2">
+            class="group bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:shadow-2xl hover:border-blue-200 transition-all duration-500 hover:-translate-y-2 scroll-animate"
+            :data-delay="index + 1">
             <!-- Icon -->
             <div
-              class="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mb-6 text-white group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-blue-500/30">
+              class="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center mb-6 text-white group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-blue-500/30">
               <div v-html="role.icon"></div>
             </div>
 
@@ -267,9 +392,8 @@ onUnmounted(() => {
 
     <!-- Program Levels Section -->
     <section class="py-20 max-w-7xl mx-auto px-6">
-      <div class="text-center mb-16">
-        <h2
-          class="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent">
+      <div class="text-center mb-16 scroll-animate">
+        <h2 class="text-4xl md:text-5xl font-bold mb-4 text-blue-900">
           Choose Your Program Level
         </h2>
         <p class="text-xl text-gray-600 max-w-2xl mx-auto">
@@ -279,7 +403,8 @@ onUnmounted(() => {
 
       <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <div v-for="(level, index) in programLevels" :key="index"
-          class="group relative bg-white rounded-3xl p-8 shadow-lg border border-gray-100 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 overflow-hidden">
+          class="group relative bg-white rounded-3xl p-8 shadow-lg border border-gray-100 hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 overflow-hidden scroll-animate"
+          :data-delay="index + 1">
           <!-- Gradient Background Overlay -->
           <div
             :class="['absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-100 transition-opacity duration-500', level.gradient]">
@@ -307,16 +432,17 @@ onUnmounted(() => {
     </section>
 
     <h1
-      class="text-5xl md:text-7xl font-bold tracking-tight leading-tight mb-6 bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent">
+      class="text-5xl md:text-7xl font-bold tracking-tight leading-tight mb-6 text-blue-900 text-center max-w-7xl mx-auto px-6 scroll-animate">
       We Used This<br />
       Website!
     </h1>
 
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-7xl mx-auto px-6 scroll-animate" data-delay="1">
       <div class="grid gap-4">
         <div>
           <img class="h-auto max-w-full rounded-base"
-            src="https://i0.wp.com/moegamer.net/wp-content/uploads/2020/09/ninomae_ina_nis_hololive_and_1_more_drawn_by_umemaro_siona0908__sample-99ef09dfc772dd914f0af158f6fd02a5-6614649.jpg?resize=474%2C448&ssl=1" alt="">
+            src="https://i0.wp.com/moegamer.net/wp-content/uploads/2020/09/ninomae_ina_nis_hololive_and_1_more_drawn_by_umemaro_siona0908__sample-99ef09dfc772dd914f0af158f6fd02a5-6614649.jpg?resize=474%2C448&ssl=1"
+            alt="">
         </div>
         <div>
           <img class="h-auto max-w-full rounded-base"
@@ -330,7 +456,8 @@ onUnmounted(() => {
       <div class="grid gap-4">
         <div>
           <img class="h-auto max-w-full rounded-base"
-            src="https://hips.hearstapps.com/hmg-prod/images/ryan-gosling-attends-the-world-premiere-of-barbie-at-shrine-news-photo-1689099557.jpg?crop=0.669xw:1.00xh;0.290xw,0&resize=640:*" alt="">
+            src="https://hips.hearstapps.com/hmg-prod/images/ryan-gosling-attends-the-world-premiere-of-barbie-at-shrine-news-photo-1689099557.jpg?crop=0.669xw:1.00xh;0.290xw,0&resize=640:*"
+            alt="">
         </div>
         <div>
           <img class="h-auto max-w-full rounded-base"
@@ -338,21 +465,25 @@ onUnmounted(() => {
         </div>
         <div>
           <img class="h-auto max-w-full rounded-base"
-            src="https://awsimages.detik.net.id/community/media/visual/2025/08/10/merah-putih-one-for-all-1754811559068_34.webp?w=700&q=90" alt="">
+            src="https://awsimages.detik.net.id/community/media/visual/2025/08/10/merah-putih-one-for-all-1754811559068_34.webp?w=700&q=90"
+            alt="">
         </div>
       </div>
       <div class="grid gap-4">
         <div>
           <img class="h-auto max-w-full rounded-base"
-            src="https://awsimages.detik.net.id/community/media/visual/2022/08/05/ilustrasi-anak-belajar-rumus-luas-dan-keliling-persegi-panjang.jpeg?w=600&q=90" alt="">
+            src="https://awsimages.detik.net.id/community/media/visual/2022/08/05/ilustrasi-anak-belajar-rumus-luas-dan-keliling-persegi-panjang.jpeg?w=600&q=90"
+            alt="">
         </div>
         <div>
           <img class="h-auto max-w-full rounded-base"
-            src="https://img.pikbest.com/backgrounds/20250320/-2a-2a-22orange-cat-with-glasses-reading-a-book_11613230.jpg!w700wp" alt="">
+            src="https://img.pikbest.com/backgrounds/20250320/-2a-2a-22orange-cat-with-glasses-reading-a-book_11613230.jpg!w700wp"
+            alt="">
         </div>
         <div>
           <img class="h-auto max-w-full rounded-base"
-            src="https://media.istockphoto.com/id/520129278/id/foto/kucing-lucu-terbang-di-langit.jpg?s=612x612&w=0&k=20&c=_84AabpPN9XPjgYvHS8kXlcgcZdFYcEhi2K4WjrPgmM=" alt="">
+            src="https://media.istockphoto.com/id/520129278/id/foto/kucing-lucu-terbang-di-langit.jpg?s=612x612&w=0&k=20&c=_84AabpPN9XPjgYvHS8kXlcgcZdFYcEhi2K4WjrPgmM="
+            alt="">
         </div>
       </div>
       <div class="grid gap-4">
@@ -366,7 +497,8 @@ onUnmounted(() => {
         </div>
         <div>
           <img class="h-auto max-w-full rounded-base"
-            src="https://i.namu.wiki/i/Wh33Jo92CkywkYMQ-J9BMiksh48mo6mOy3QGgyTAedieJh81aeOFlLwrfbRuZaZcGBOwGWD53yfHqcH5sCswig.webp" alt="">
+            src="https://i.namu.wiki/i/Wh33Jo92CkywkYMQ-J9BMiksh48mo6mOy3QGgyTAedieJh81aeOFlLwrfbRuZaZcGBOwGWD53yfHqcH5sCswig.webp"
+            alt="">
         </div>
       </div>
     </div>
@@ -375,7 +507,7 @@ onUnmounted(() => {
     <!-- CTA Section -->
     <section class="py-20 max-w-7xl mx-auto px-6">
       <div
-        class="bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 rounded-3xl p-12 md:p-16 text-center text-white shadow-2xl shadow-blue-500/30 relative overflow-hidden">
+        class="bg-blue-600 rounded-3xl p-12 md:p-16 text-center text-white shadow-2xl shadow-blue-500/30 relative overflow-hidden scroll-animate">
         <!-- Decorative elements -->
         <div
           class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2">
@@ -403,17 +535,17 @@ onUnmounted(() => {
       </div>
     </section>
 
-                <!-- Badge -->
-             <section class="flex justify-center">
-        <div
-          class="inline-flex items-center gap-2 bg-white/60 backdrop-blur-sm px-4 py-2 rounded-full text-sm mb-8 border border-white/40 shadow-sm">
-          <span class="relative flex h-2 w-2">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-            <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-          </span>
-          <span class="text-gray-700 font-medium">Made with Love by Cognivus</span>
-        </div>
-      </section>
+    <!-- Badge -->
+    <section class="flex justify-center scroll-animate">
+      <div
+        class="inline-flex items-center gap-2 bg-white/60 backdrop-blur-sm px-4 py-2 rounded-full text-sm mb-8 border border-white/40 shadow-sm">
+        <span class="relative flex h-2 w-2">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+        </span>
+        <span class="text-gray-700 font-medium">Made with Love by Cognivus</span>
+      </div>
+    </section>
 
 
 
@@ -468,10 +600,106 @@ onUnmounted(() => {
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
 }
 
+/* Entrance Animations */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-fade-up {
+  opacity: 0;
+  animation: fadeUp 0.7s ease-out forwards;
+}
+
+.animate-fade-in {
+  opacity: 0;
+  animation: fadeIn 0.8s ease-out forwards;
+}
+
+.animate-slide-right {
+  opacity: 0;
+  animation: slideInRight 0.7s ease-out forwards;
+}
+
+/* Scroll-triggered animations */
+.scroll-animate {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+}
+
+.scroll-animate.scroll-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Staggered delays for children */
+.scroll-animate[data-delay="1"] {
+  transition-delay: 0.1s;
+}
+
+.scroll-animate[data-delay="2"] {
+  transition-delay: 0.2s;
+}
+
+.scroll-animate[data-delay="3"] {
+  transition-delay: 0.3s;
+}
+
+.scroll-animate[data-delay="4"] {
+  transition-delay: 0.4s;
+}
+
+/* Reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
   .header-glass {
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
+  }
+
+  .animate-fade-up,
+  .animate-fade-in,
+  .animate-slide-right {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .scroll-animate {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 
   * {
