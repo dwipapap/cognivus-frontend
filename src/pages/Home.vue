@@ -284,14 +284,9 @@ onUnmounted(() => {
 
             <!-- Stats Card: Active Users (Third Row Center) -->
             <div
-              class="col-span-1 row-span-1 bg-white/80 backdrop-blur-sm rounded-2xl p-3 md:p-4 border border-white/50 shadow-lg flex items-center gap-2">
-              <div class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
-                <img :src="heroImages.teacher" alt="User" class="w-full h-full object-cover" />
-              </div>
-              <div>
-                <span class="text-lg md:text-xl font-bold text-blue-600">4000+</span>
-                <p class="text-xs text-gray-600">Graduates</p>
-              </div>
+              class="col-span-1 row-span-1 bg-white/80 backdrop-blur-sm rounded-2xl p-3 md:p-4 border border-white/50 shadow-lg flex flex-col justify-center">
+              <span class="text-xl md:text-2xl font-bold text-blue-600">4000+</span>
+              <span class="text-xs text-gray-600">Graduates</span>
             </div>
 
             <!-- Image Card: Student (Third Row Right) - spans 2 rows -->
