@@ -81,6 +81,33 @@ const fetchGrades = async () => {
   }
 };
 
+/**
+ * Download certificate for a specific grade
+ */
+const handleDownloadCertificate = async (gradeId, testType) => {
+  try {
+    const response = await gradeAPI.downloadCertificate(gradeId);
+    
+    // Create blob URL from response
+    const blob = new Blob([response.data], { type: 'application/pdf' });
+    const url = window.URL.createObjectURL(blob);
+    
+    // Create temporary link and trigger download
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Certificate_${testType || 'Test'}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    
+    // Cleanup
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Error downloading certificate:', error);
+    alert('Failed to download certificate. Please try again.');
+  }
+};
+
 // Watch for studentProfile to be loaded, then fetch grades
 watch(
   () => studentProfile.value?.studentid,
@@ -226,19 +253,13 @@ onMounted(() => {
 
                 <!-- Certificate Download -->
                 <div class="pt-2 border-t border-gray-100">
-                  <a
-                    v-if="grade.tbreport_files && grade.tbreport_files.length > 0"
-                    :href="grade.tbreport_files[0].url"
-                    target="_blank"
+                  <button
+                    @click="handleDownloadCertificate(grade.gradeid, grade.test_type)"
                     class="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 hover:text-blue-700 transition-all border border-blue-100 shadow-sm"
                   >
                     <IconDocument class="w-4 h-4" />
                     Download Certificate
-                  </a>
-                  <div v-else class="flex items-center justify-center gap-2 text-sm text-gray-400 py-2">
-                    <IconClose class="w-4 h-4" />
-                    <span>No certificate available</span>
-                  </div>
+                  </button>
                 </div>
               </div>
             </div>
@@ -296,19 +317,13 @@ onMounted(() => {
                     </div>
                   </td>
                   <td class="px-6 py-4">
-                    <a
-                      v-if="grade.tbreport_files && grade.tbreport_files.length > 0"
-                      :href="grade.tbreport_files[0].url"
-                      target="_blank"
+                    <button
+                      @click="handleDownloadCertificate(grade.gradeid, grade.test_type)"
                       class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 hover:text-blue-700 transition-all border border-blue-100 shadow-sm hover:shadow"
                     >
                       <IconDocument class="w-4 h-4" />
                       Download
-                    </a>
-                    <span v-else class="inline-flex items-center gap-1.5 text-xs text-gray-400 italic">
-                      <IconClose class="w-4 h-4" />
-                      No file
-                    </span>
+                    </button>
                   </td>
                 </tr>
               </tbody>

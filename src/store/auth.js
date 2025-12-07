@@ -27,13 +27,11 @@ export const authStore = reactive({
   async init() {
     // Prevent double initialization
     if (this.isInitialized) {
-      console.log('Auth store already initialized, skipping');
       return;
     }
 
     // Check if token is expired on initialization
     if (this.isTokenExpired()) {
-      console.log('Token expired on init, clearing auth');
       this.clearAuth();
       this.isInitialized = true;
       return;
@@ -56,19 +54,15 @@ export const authStore = reactive({
     this.expiryCheckInterval = setInterval(() => {
       const now = Date.now();
       if (now - lastCheckTime < 60000) {
-        console.log('Skipping redundant token check');
         return;
       }
       lastCheckTime = now;
 
       if (this.isTokenExpired()) {
-        console.log('Token expired, auto-logout');
         this.clearAuth();
         if (window.location.pathname.startsWith('/student')) {
           window.location.href = '/login';
         }
-      } else {
-        console.log('Token still valid, no action taken');
       }
     }, 60000);
   },
@@ -91,8 +85,6 @@ export const authStore = reactive({
    * @param {string} role - User role (student/lecturer/admin/etc)
    */
   setAuth(user, token, role = null) {
-    console.log('Setting auth:', { user, token: token ? 'present' : 'null', role });
-    
     // Determine role: prioritize explicit role, fallback to metadata
     const userRole = role || user?.user_metadata?.role || user?.app_metadata?.role || 'student';
     
@@ -109,14 +101,6 @@ export const authStore = reactive({
     secureStorage.setItem('role', userRole);
     secureStorage.setItem('tokenExpiry', expiryTime);
     secureStorage.setItem('user', user);
-    
-    console.log('Auth state after setAuth:', {
-      user: this.user,
-      token: this.token ? 'present' : 'null',
-      role: this.role,
-      expiry: new Date(expiryTime).toLocaleString(),
-      isAuthenticated: this.isAuthenticated()
-    });
   },
 
   /**
@@ -192,10 +176,5 @@ export const authStore = reactive({
 });
 
 document.addEventListener('visibilitychange', () => {
-  console.log('Document visibility changed:', document.visibilityState);
-  if (document.visibilityState === 'hidden') {
-    console.log('Tab became inactive');
-  } else if (document.visibilityState === 'visible') {
-    console.log('Tab became active');
-  }
+  // Visibility change handler - no action needed
 });

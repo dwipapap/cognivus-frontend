@@ -224,93 +224,43 @@ export const gradeAPI = {
   getAllGrades: () => apiClient.get('/grades'),
   getGradeById: (id) => apiClient.get(`/grades/${id}`),
   createGrade: (gradeData, file = null) => {
-    console.log('🔧 gradeAPI.createGrade called');
-    console.log('📦 Grade Data:', gradeData);
-    console.log('📄 File parameter:', file);
-    
     const formData = new FormData();
     
-    console.log('📋 Appending grade data to FormData...');
     Object.keys(gradeData).forEach(key => {
       if (gradeData[key] !== null && gradeData[key] !== undefined) {
         formData.append(key, gradeData[key]);
-        console.log(`  ✓ ${key}: ${gradeData[key]}`);
       }
     });
     
     if (file) {
-      console.log('📎 Appending file to FormData:', {
-        name: file.name,
-        size: file.size,
-        type: file.type,
-        isFile: file instanceof File,
-        isBlob: file instanceof Blob
-      });
       formData.append('file', file);
-    } else {
-      console.log('⚠️ No file to append to FormData');
     }
     
-    // Log FormData entries
-    console.log('📤 FormData entries:');
-    for (let pair of formData.entries()) {
-      if (pair[1] instanceof File) {
-        console.log(`  ${pair[0]}: [File] ${pair[1].name} (${pair[1].size} bytes)`);
-      } else {
-        console.log(`  ${pair[0]}: ${pair[1]}`);
-      }
-    }
-    
-    console.log('🌐 Sending POST request to /grades');
     return apiClient.post('/grades', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
   },
   updateGrade: (id, gradeData, file = null) => {
-    console.log('🔧 gradeAPI.updateGrade called');
-    console.log('🆔 Grade ID:', id);
-    console.log('📦 Grade Data:', gradeData);
-    console.log('📄 File parameter:', file);
-    
     const formData = new FormData();
     
-    console.log('📋 Appending grade data to FormData...');
     Object.keys(gradeData).forEach(key => {
       if (gradeData[key] !== null && gradeData[key] !== undefined) {
         formData.append(key, gradeData[key]);
-        console.log(`  ✓ ${key}: ${gradeData[key]}`);
       }
     });
     
     if (file) {
-      console.log('📎 Appending file to FormData:', {
-        name: file.name,
-        size: file.size,
-        type: file.type,
-        isFile: file instanceof File,
-        isBlob: file instanceof Blob
-      });
       formData.append('file', file);
-    } else {
-      console.log('⚠️ No file to append to FormData');
     }
     
-    // Log FormData entries
-    console.log('📤 FormData entries:');
-    for (let pair of formData.entries()) {
-      if (pair[1] instanceof File) {
-        console.log(`  ${pair[0]}: [File] ${pair[1].name} (${pair[1].size} bytes)`);
-      } else {
-        console.log(`  ${pair[0]}: ${pair[1]}`);
-      }
-    }
-    
-    console.log(`🌐 Sending PUT request to /grades/${id}`);
     return apiClient.put(`/grades/${id}`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
   },
-  deleteGrade: (id) => apiClient.delete(`/grades/${id}`)
+  deleteGrade: (id) => apiClient.delete(`/grades/${id}`),
+  downloadCertificate: (gradeId) => apiClient.get(`/grades/${gradeId}/certificate`, {
+    responseType: 'blob'
+  })
 };
 
 // Course Files API endpoints
@@ -352,12 +302,8 @@ export const paymentAPI = {
    * @param {number} studentid - Student ID
    * @returns {Promise} - { success, message }
    */
-  refreshPaymentStatus: (studentid) => apiClient.put(`/payment/refresh/${studentid}`),
-  
-  /**
-   * Webhook endpoint (handled by backend, not typically called from frontend)
-   */
-  webhook: (notificationData) => apiClient.post('/payment/webhook', notificationData)
+  refreshPaymentStatus: (studentid) => apiClient.put(`/payment/refresh/${studentid}`)
+  // Note: Webhook endpoint removed - payment webhooks should only be called by Midtrans to the backend directly
 };
 
 export default apiClient;
