@@ -19,10 +19,10 @@ const coursesError = ref(null);
 /** Fetch courses for the class */
 const fetchCourses = async () => {
   if (!classId.value) return;
-  
+
   coursesLoading.value = true;
   coursesError.value = null;
-  
+
   try {
     const courseRes = await courseAPI.getAllCourses();
     if (courseRes.data.success) {
@@ -71,23 +71,17 @@ const formatDate = (dateString) => {
   </div>
 
   <!-- Error State -->
-    <div v-else-if="errorMessage" class="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
-      <p class="text-red-800 mb-4">{{ errorMessage }}</p>
-      <button 
-        v-if="classError"
-        @click="retryClass"
-        class="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 rounded-full transition-all shadow-md hover:shadow-lg hover:scale-105 active:scale-95 mr-2"
-      >
-        Retry Class Details
-      </button>
-      <button 
-        v-if="coursesError"
-        @click="fetchCourses"
-        class="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 rounded-full transition-all shadow-md hover:shadow-lg hover:scale-105 active:scale-95"
-      >
-        Retry Courses
-      </button>
-    </div>
+  <div v-else-if="errorMessage" class="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+    <p class="text-red-800 mb-4">{{ errorMessage }}</p>
+    <button v-if="classError" @click="retryClass"
+      class="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 rounded-full transition-all shadow-md hover:shadow-lg hover:scale-105 active:scale-95 mr-2">
+      Retry Class Details
+    </button>
+    <button v-if="coursesError" @click="fetchCourses"
+      class="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 rounded-full transition-all shadow-md hover:shadow-lg hover:scale-105 active:scale-95">
+      Retry Courses
+    </button>
+  </div>
 
   <!-- Course Content -->
   <div v-else class="space-y-6">
@@ -104,7 +98,8 @@ const formatDate = (dateString) => {
       <div class="relative p-5 md:p-8 z-10">
         <div class="mb-6">
           <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">{{ levelName || 'Your Course Level' }}</h2>
-          <h3 class="text-lg md:text-xl font-semibold text-white/90 mb-3">{{ classInfo?.class_code || 'Class Code' }}</h3>
+          <h3 class="text-lg md:text-xl font-semibold text-white/90 mb-3">{{ classInfo?.class_code || 'Class Code' }}
+          </h3>
           <p class="text-sm text-white/80">
             {{ classInfo?.description || 'Access your course materials and learning resources' }}
           </p>
@@ -118,33 +113,35 @@ const formatDate = (dateString) => {
     </div>
 
     <!-- Course List -->
-    <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-4 md:p-6 shadow-sm hover:shadow-md transition-all duration-200">
+    <div
+      class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-4 md:p-6 shadow-sm hover:shadow-md transition-all duration-200">
       <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-4 md:mb-6">Course Materials</h2>
-      
+
       <div v-if="courses.length === 0" class="py-12 text-center text-gray-500">
         No course materials available yet.
       </div>
 
       <div v-else class="space-y-3 md:space-y-4">
-        <router-link 
-          v-for="course in courses" 
-          :key="course.courseid"
+        <router-link v-for="course in courses" :key="course.courseid"
           :to="{ name: 'StudentCourseDetail', params: { id: course.courseid } }"
-          class="block bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-lg overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-200"
-        >
+          class="block bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-md overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-transform duration-200">
           <div class="flex items-center gap-3 md:gap-4 p-4 md:p-5">
             <!-- Book Icon with styled background -->
             <div class="flex-shrink-0">
-              <div class="relative w-10 h-10 md:w-14 md:h-14 flex items-center justify-center rounded-lg bg-gradient-to-br from-white/10 to-blue-50/20 backdrop-blur-sm shadow-sm overflow-visible">
+              <div
+                class="relative w-10 h-10 md:w-14 md:h-14 flex items-center justify-center rounded-lg bg-gradient-to-br from-white/20 to-blue-100/40 shadow-sm overflow-visible">
                 <!-- Layered decorative shapes with a subtle bluish tint -->
-                <span class="absolute -left-2 -top-2 w-5 h-5 md:w-7 md:h-7 bg-blue-100/30 rounded-md transform rotate-12"></span>
-                <span class="absolute right-0 bottom-0 w-4 h-8 md:w-6 md:h-10 bg-blue-200/25 rounded-md transform rotate-6"></span>
+                <span
+                  class="absolute -left-2 -top-2 w-5 h-5 md:w-7 md:h-7 bg-blue-100/30 rounded-md transform rotate-12"></span>
+                <span
+                  class="absolute right-0 bottom-0 w-4 h-8 md:w-6 md:h-10 bg-blue-200/25 rounded-md transform rotate-6"></span>
 
                 <!-- Book SVG (kept visual weight but slightly smaller to fit the background) -->
-                <svg class="w-6 h-6 md:w-10 md:h-10 text-white z-10" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <rect x="4" y="4" width="4" height="16" rx="1" opacity="0.7"/>
-                  <rect x="10" y="2" width="4" height="18" rx="1" opacity="0.85"/>
-                  <rect x="16" y="6" width="4" height="14" rx="1"/>
+                <svg class="w-6 h-6 md:w-10 md:h-10 text-white z-10" fill="currentColor" viewBox="0 0 24 24"
+                  aria-hidden="true">
+                  <rect x="4" y="4" width="4" height="16" rx="1" opacity="0.7" />
+                  <rect x="10" y="2" width="4" height="18" rx="1" opacity="0.85" />
+                  <rect x="16" y="6" width="4" height="14" rx="1" />
                 </svg>
               </div>
             </div>
