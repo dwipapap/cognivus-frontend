@@ -227,6 +227,11 @@ const routes = [
         path: 'grades',
         name: 'AdminManageGrades',
         component: ManageGrades,
+      },
+      {
+        path: 'external-links',
+        name: 'AdminExternalLinks',
+        component: () => import(/* webpackChunkName: "admin" */ '../pages/admin/ExternalLinks.vue'),
       }
     ]
   },
