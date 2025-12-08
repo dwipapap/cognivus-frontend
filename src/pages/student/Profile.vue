@@ -24,7 +24,7 @@ const showChangePassword = ref(false);
 
 // Computed properties for prefilling OtpFlow
 const userEmail = computed(() => {
-  return formData.value.address || authStore.user?.email || '';
+  return authStore.user?.email || '';
 });
 
 const userPhone = computed(() => {
@@ -73,31 +73,31 @@ const genderOptions = [
 // Basic validation
 const validateForm = () => {
   errors.value = {};
-  
+
   if (!formData.value.fullname || formData.value.fullname.trim().length < 2) {
     errors.value.fullname = 'Full name must be at least 2 characters';
   }
-  
+
   if (!formData.value.gender) {
     errors.value.gender = 'Gender is required';
   }
-  
+
   if (!formData.value.address || formData.value.address.trim().length === 0) {
     errors.value.address = 'Address is required';
   }
-  
+
   if (!formData.value.phone || !/^08\d{8,11}$/.test(formData.value.phone)) {
     errors.value.phone = 'Phone must start with 08 and have 10-13 digits';
   }
-  
+
   if (!formData.value.parentname || formData.value.parentname.trim().length === 0) {
     errors.value.parentname = 'Parent name is required';
   }
-  
+
   if (formData.value.parentphone && !/^08\d{8,11}$/.test(formData.value.parentphone)) {
     errors.value.parentphone = 'Parent phone must start with 08 and have 10-13 digits';
   }
-  
+
   return Object.keys(errors.value).length === 0;
 };
 
@@ -139,22 +139,22 @@ const handleUpdateProfile = async () => {
   if (!validateForm()) {
     return;
   }
-  
+
   isSubmitting.value = true;
-  
+
   try {
     const userId = formData.value.userid || authStore.user?.id;
-    
+
     if (!userId) {
       throw new Error('Cannot update profile: User ID not found.');
     }
-    
+
     // Transform gender to backend format before sending
     const updateData = {
       ...formData.value,
       gender: mapGenderToBackend(formData.value.gender)
     };
-    
+
     const response = await studentAPI.updateStudent(userId, updateData);
     if (response.data.success) {
       modalType.value = 'success';
@@ -210,60 +210,43 @@ onMounted(fetchProfile);
           <!-- Full Name -->
           <div>
             <label class="block text-base font-bold text-blue-600 mb-3">Full Name</label>
-            <input
-              v-model="formData.fullname"
-              type="text"
-              placeholder="Full Name"
+            <input v-model="formData.fullname" type="text" placeholder="Full Name"
               class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors"
-              required
-            />
+              required />
             <p v-if="errors.fullname" class="mt-2 text-sm text-red-600">{{ errors.fullname }}</p>
           </div>
 
           <!-- Birth Date -->
           <div>
             <label class="block text-base font-bold text-blue-600 mb-3">Birth Date</label>
-            <input
-              v-model="formData.birthdate"
-              type="date"
-              class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors"
-            />
+            <input v-model="formData.birthdate" type="date"
+              class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors" />
             <p v-if="errors.birthdate" class="mt-2 text-sm text-red-600">{{ errors.birthdate }}</p>
           </div>
 
           <!-- Address -->
           <div>
             <label class="block text-base font-bold text-blue-600 mb-3">Address</label>
-            <input
-              v-model="formData.address"
-              type="text"
-              placeholder="Complete address"
+            <input v-model="formData.address" type="text" placeholder="Complete address"
               class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors"
-              required
-            />
+              required />
             <p v-if="errors.address" class="mt-2 text-sm text-red-600">{{ errors.address }}</p>
           </div>
 
           <!-- Place Date (Birth Place) -->
           <div>
             <label class="block text-base font-bold text-blue-600 mb-3">Birth Place</label>
-            <input
-              v-model="formData.birthplace"
-              type="text"
-              placeholder="Birth Place"
-              class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors"
-            />
+            <input v-model="formData.birthplace" type="text" placeholder="Birth Place"
+              class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors" />
             <p v-if="errors.birthplace" class="mt-2 text-sm text-red-600">{{ errors.birthplace }}</p>
           </div>
 
           <!-- Gender -->
           <div>
             <label class="block text-base font-bold text-blue-600 mb-3">Gender</label>
-            <select
-              v-model="formData.gender"
+            <select v-model="formData.gender"
               class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors"
-              required
-            >
+              required>
               <option value="" disabled>Select Gender</option>
               <option v-for="option in genderOptions" :key="option.value" :value="option.value">
                 {{ option.label }}
@@ -275,58 +258,41 @@ onMounted(fetchProfile);
           <!-- Phone -->
           <div>
             <label class="block text-base font-bold text-blue-600 mb-3">Phone</label>
-            <input
-              v-model="formData.phone"
-              type="tel"
-              placeholder="08xxxxxxxxxx"
+            <input v-model="formData.phone" type="tel" placeholder="08xxxxxxxxxx"
               class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors"
-              required
-            />
+              required />
             <p v-if="errors.phone" class="mt-2 text-sm text-red-600">{{ errors.phone }}</p>
           </div>
 
           <!-- Parent Name -->
           <div>
             <label class="block text-base font-bold text-blue-600 mb-3">Parent Name</label>
-            <input
-              v-model="formData.parentname"
-              type="text"
-              placeholder="Parent Name"
+            <input v-model="formData.parentname" type="text" placeholder="Parent Name"
               class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors"
-              required
-            />
+              required />
             <p v-if="errors.parentname" class="mt-2 text-sm text-red-600">{{ errors.parentname }}</p>
           </div>
 
           <!-- Parent Phone -->
           <div>
             <label class="block text-base font-bold text-blue-600 mb-3">Parent Phone</label>
-            <input
-              v-model="formData.parentphone"
-              type="tel"
-              placeholder="08xxxxxxxxxx"
-              class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors"
-            />
+            <input v-model="formData.parentphone" type="tel" placeholder="08xxxxxxxxxx"
+              class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors" />
             <p v-if="errors.parentphone" class="mt-2 text-sm text-red-600">{{ errors.parentphone }}</p>
           </div>
         </div>
 
         <!-- Action Buttons -->
         <div class="flex justify-end gap-4 mt-10">
-          <button
-            type="button"
-            @click="reset"
+          <button type="button" @click="reset"
             class="px-8 py-3 bg-white text-gray-700 font-semibold text-base rounded-full hover:bg-gray-100 border border-gray-300 transition-colors"
-            :disabled="isSubmitting"
-          >
+            :disabled="isSubmitting">
             Reset
           </button>
-          
-          <button
-            type="submit"
+
+          <button type="submit"
             class="px-8 py-3 bg-blue-600 text-white font-semibold text-base rounded-full hover:bg-blue-700 transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-            :disabled="isSubmitting"
-          >
+            :disabled="isSubmitting">
             <span v-if="isSubmitting">Saving...</span>
             <span v-else>Save Changes</span>
           </button>
@@ -340,13 +306,11 @@ onMounted(fetchProfile);
             <h3 class="text-lg font-bold text-blue-600">Security</h3>
             <p class="text-sm text-gray-500 mt-1">Manage your account password</p>
           </div>
-          <button
-            type="button"
-            @click="openChangePassword"
-            class="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-sm rounded-full hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg flex items-center gap-2"
-          >
+          <button type="button" @click="openChangePassword"
+            class="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-sm rounded-full hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
             Change Password
           </button>
@@ -355,21 +319,10 @@ onMounted(fetchProfile);
     </div>
 
     <!-- Modal Component -->
-    <Modal
-      :show="showModal"
-      :type="modalType"
-      :message="modalMessage"
-      @close="closeModal"
-    />
+    <Modal :show="showModal" :type="modalType" :message="modalMessage" @close="closeModal" />
 
     <!-- Change Password OTP Flow -->
-    <OtpFlow
-      :show="showChangePassword"
-      title="Change Password"
-      :prefill-email="userEmail"
-      :prefill-phone="userPhone"
-      @close="closeChangePassword"
-      @success="handleChangePasswordSuccess"
-    />
+    <OtpFlow :show="showChangePassword" title="Change Password" :prefill-email="userEmail" :prefill-phone="userPhone"
+      @close="closeChangePassword" @success="handleChangePasswordSuccess" />
   </div>
 </template>
