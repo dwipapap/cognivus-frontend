@@ -4,8 +4,7 @@ import { authStore } from '../../store/auth';
 import { useStudentProfile } from '../../composables/useStudentProfile';
 import { useClassDetails } from '../../composables/useClassDetails';
 import { useSnapPayment } from '../../composables/useSnapPayment';
-import { paymentAPI } from '../../services/api';
-import { priceAPI } from '../../services/api';
+import { paymentAPI, priceAPI, ancillaryPriceAPI } from '../../services/api';
 import IconWallet from '~icons/basil/wallet-outline';
 import IconCheck from '~icons/basil/check-solid';
 import IconBook from '~icons/basil/book-solid';
@@ -32,75 +31,80 @@ const showErrorModal = ref(false);
 const showGuideModal = ref(false);
 const isHistoryLoading = ref(false);
 const paymentHistory = ref([]);
+const ancillaryPrices = ref([]);
+const isAncillaryLoading = ref(true);
 
-// Payment types configuration
-const paymentTypes = [
+// Payment types: regular (semester, monthly) + dynamic ancillary
+const regularPaymentTypes = [
   {
     id: 'semester',
     name: 'Pay Per Semester',
     description: 'Full payment for one semester',
     icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4',
-    category: 'regular',
-    priceKey: 'semester'
+    category: 'regular'
   },
   {
     id: 'monthly',
     name: 'Pay Per Month',
     description: 'Payment for this month',
     icon: 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z',
-    category: 'regular',
-    priceKey: 'monthly'
-  },
-  {
-    id: 'final_exam',
-    name: 'Final Exam',
-    description: 'Final exam fee payment',
-    icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
-    category: 'exam',
-    priceKey: 'final_exam'
+    category: 'regular'
   }
 ];
+
+/** Ancillary payment types from database */
+const ancillaryPaymentTypes = computed(() => {
+  return ancillaryPrices.value.map(item => ({
+    id: `ancillary_${item.apid}`,
+    name: item.name,
+    description: item.description || '',
+    icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
+    category: 'ancillary',
+    price: item.price
+  }));
+});
 
 // Computed
 const selectedAmount = computed(() => {
   if (!selectedPaymentType.value) return 0;
-  
+
   if (selectedPaymentType.value === 'semester') {
     return currentSemesterFee.value;
   } else if (selectedPaymentType.value === 'monthly') {
     return currentMonthlyFee.value;
-  } else if (selectedPaymentType.value === 'final_exam') {
-    return finalExamFee.value;
+  } else if (selectedPaymentType.value.startsWith('ancillary_')) {
+    const item = ancillaryPaymentTypes.value.find(t => t.id === selectedPaymentType.value);
+    return item?.price || 0;
   }
-  
+
   return 0;
 });
 
 const studentName = computed(() => {
-  return studentProfile.value?.nama_lengkap || 
-         studentProfile.value?.fullname || 
-         authStore.user?.username || 
-         'Student';
+  return studentProfile.value?.nama_lengkap ||
+    studentProfile.value?.fullname ||
+    authStore.user?.username ||
+    'Student';
 });
 
 const studentEmail = computed(() => {
-  return studentProfile.value?.email || 
-         authStore.user?.email || 
-         '';
+  return studentProfile.value?.email ||
+    authStore.user?.email ||
+    '';
 });
 
 const currentSemesterFee = computed(() => {
   if (!classInfo.value?.levelid || prices.value.length === 0) {
     return prices.value[0]?.harga || 0;
   }
-  
+
   // Find price matching the student's level
   const matchingPrice = prices.value.find(p => p.levelid === classInfo.value.levelid);
-  
+
   if (matchingPrice) {
     return matchingPrice.harga || 0;
   }
-  
+
   // Fallback to first available price
   return prices.value[0]?.harga || 0;
 });
@@ -109,22 +113,32 @@ const currentMonthlyFee = computed(() => {
   if (!classInfo.value?.levelid || prices.value.length === 0) {
     return prices.value[0]?.monthlyprice || 0;
   }
-  
+
   // Find price matching the student's level
   const matchingPrice = prices.value.find(p => p.levelid === classInfo.value.levelid);
-  
+
   if (matchingPrice) {
     return matchingPrice.monthlyprice || 0;
   }
-  
+
   // Fallback to first available price
   return prices.value[0]?.monthlyprice || 0;
 });
 
-const finalExamFee = computed(() => {
-  // Fixed price for Final Exam
-  return 150000;
-});
+/** Fetch ancillary prices from API */
+const fetchAncillaryPrices = async () => {
+  try {
+    isAncillaryLoading.value = true;
+    const response = await ancillaryPriceAPI.getAll();
+    if (response.data?.success && response.data?.data) {
+      ancillaryPrices.value = response.data.data;
+    }
+  } catch (err) {
+    console.error('Failed to fetch ancillary prices:', err);
+  } finally {
+    isAncillaryLoading.value = false;
+  }
+};
 
 const canPay = computed(() => {
   return selectedPaymentType.value && selectedAmount.value > 0 && !isPaymentLoading.value;
@@ -135,7 +149,7 @@ const fetchPrices = async () => {
   try {
     isPricesLoading.value = true;
     const response = await priceAPI.getAllPrices();
-    
+
     if (response.data?.success && response.data?.data) {
       prices.value = response.data.data;
     } else if (response.data) {
@@ -167,7 +181,7 @@ const handlePayment = async () => {
 
   try {
     resetPaymentState();
-    
+
     const paymentData = {
       email: studentEmail.value,
       amount: selectedAmount.value,
@@ -178,7 +192,7 @@ const handlePayment = async () => {
 
     // Generate token from backend
     const response = await paymentAPI.generateToken(paymentData);
-    
+
     if (!response.data?.success || !response.data?.token) {
       throw new Error('Failed to generate payment token');
     }
@@ -226,7 +240,10 @@ const closeGuideModal = () => {
 };
 
 const getPaymentTypeName = (typeId) => {
-  return paymentTypes.find(t => t.id === typeId)?.name || typeId;
+  const regular = regularPaymentTypes.find(t => t.id === typeId);
+  if (regular) return regular.name;
+  const ancillary = ancillaryPaymentTypes.value.find(t => t.id === typeId);
+  return ancillary?.name || typeId;
 };
 
 const getStatusBadgeClass = (status) => {
@@ -254,13 +271,13 @@ const fetchPaymentHistory = async () => {
     isHistoryLoading.value = true;
     // Wait for student profile to be available
     const studentid = studentProfile.value?.studentid || authStore.user?.userid;
-    
+
     if (!studentid) {
       return;
     }
-    
+
     const response = await paymentAPI.getPaymentHistory(studentid);
-    
+
     if (response.data?.success && response.data?.data) {
       paymentHistory.value = Array.isArray(response.data.data) ? response.data.data : [];
     } else {
@@ -278,14 +295,14 @@ const handleRefreshHistory = async () => {
   try {
     isHistoryLoading.value = true;
     const studentid = studentProfile.value?.studentid || authStore.user?.userid;
-    
+
     if (!studentid) {
       return;
     }
-    
+
     // First, refresh payment status from Midtrans
     await paymentAPI.refreshPaymentStatus(studentid);
-    
+
     // Then fetch updated payment history
     await fetchPaymentHistory();
   } catch (err) {
@@ -298,7 +315,7 @@ const handleRefreshHistory = async () => {
 // Lifecycle
 onMounted(async () => {
   fetchPrices();
-  // Wait a bit for student profile to load
+  fetchAncillaryPrices();
   await new Promise(resolve => setTimeout(resolve, 500));
   fetchPaymentHistory();
 });
@@ -322,10 +339,8 @@ onMounted(async () => {
             <h1 class="text-2xl md:text-3xl font-bold text-white mb-1">Payment</h1>
             <p class="text-sm text-blue-100">Manage your course payments securely</p>
           </div>
-          <button
-            @click="openGuideModal"
-            class="flex items-center gap-2 bg-white/15 hover:bg-white/25 backdrop-blur-sm text-white px-5 py-2.5 rounded-full transition-all duration-300 hover:shadow-lg border border-white/20"
-          >
+          <button @click="openGuideModal"
+            class="flex items-center gap-2 bg-white/15 hover:bg-white/25 backdrop-blur-sm text-white px-5 py-2.5 rounded-full transition-all duration-300 hover:shadow-lg border border-white/20">
             <IconQuestionCircle class="w-5 h-5" />
             <span class="text-sm font-medium">Payment Guide</span>
           </button>
@@ -336,7 +351,7 @@ onMounted(async () => {
     <!-- Program & Billing Information (Mobile: Top, Desktop: Right) -->
     <div class="payment-section-glass rounded-3xl p-5 shadow-lg border border-white/40 lg:hidden">
       <h2 class="text-lg font-bold text-gray-800 mb-4">Program & Billing Info</h2>
-      
+
       <!-- Loading State -->
       <div v-if="isClassLoading || isPricesLoading" class="grid grid-cols-2 gap-3">
         <div v-for="i in 4" :key="i" class="animate-pulse">
@@ -400,18 +415,18 @@ onMounted(async () => {
 
     <!-- Main Grid Layout: 2 columns on desktop -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      
+
       <!-- LEFT COLUMN: Payment Types & History (spans 2 cols on desktop) -->
       <div class="lg:col-span-2 space-y-6">
-        
+
         <!-- Payment Options Card (Always first) -->
         <div class="payment-section-glass rounded-3xl p-6 shadow-lg border border-white/40">
           <h2 class="text-lg font-bold text-gray-800 mb-5">Payment Options</h2>
-          
+
           <!-- Regular Payments Section -->
           <div class="mb-5">
             <h3 class="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-3">Regular Payments</h3>
-            
+
             <div v-if="isPricesLoading" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div v-for="i in 2" :key="i" class="animate-pulse">
                 <div class="h-28 bg-gray-100 rounded-2xl"></div>
@@ -419,21 +434,17 @@ onMounted(async () => {
             </div>
 
             <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div
-                v-for="type in paymentTypes.filter(t => t.category === 'regular')"
-                :key="type.id"
-                @click="selectPaymentType(type.id)"
+              <div v-for="type in regularPaymentTypes" :key="type.id" @click="selectPaymentType(type.id)"
                 class="payment-type-card cursor-pointer rounded-2xl p-4 border-2 transition-all duration-300 bg-white"
-                :class="selectedPaymentType === type.id 
-                  ? 'border-blue-500 ring-2 ring-blue-200 shadow-lg' 
-                  : 'border-gray-100 hover:border-blue-200 hover:shadow-md'"
-              >
+                :class="selectedPaymentType === type.id
+                  ? 'border-blue-500 ring-2 ring-blue-200 shadow-lg'
+                  : 'border-gray-100 hover:border-blue-200 hover:shadow-md'">
                 <div class="flex items-start gap-3">
                   <div class="flex-shrink-0">
                     <div class="w-10 h-10 rounded-xl flex items-center justify-center transition-colors"
-                         :class="selectedPaymentType === type.id ? 'bg-blue-500' : 'bg-blue-50'">
-                      <svg class="w-5 h-5" :class="selectedPaymentType === type.id ? 'text-white' : 'text-blue-600'" 
-                           fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      :class="selectedPaymentType === type.id ? 'bg-blue-500' : 'bg-blue-50'">
+                      <svg class="w-5 h-5" :class="selectedPaymentType === type.id ? 'text-white' : 'text-blue-600'"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="type.icon"></path>
                       </svg>
                     </div>
@@ -458,44 +469,40 @@ onMounted(async () => {
           <!-- Divider -->
           <div class="border-t border-gray-100 my-5"></div>
 
-          <!-- Final Exam Payment Section -->
+          <!-- Additional Fees Section (Dynamic from database) -->
           <div>
-            <h3 class="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-3">Exam Payment</h3>
-            
-            <div v-if="isPricesLoading" class="animate-pulse">
+            <h3 class="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-3">Additional Fees</h3>
+
+            <div v-if="isAncillaryLoading" class="animate-pulse">
               <div class="h-28 bg-gray-100 rounded-2xl"></div>
             </div>
 
+            <div v-else-if="ancillaryPaymentTypes.length === 0" class="text-center py-6 text-gray-400 text-sm">
+              No additional fees available
+            </div>
+
             <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div
-                v-for="type in paymentTypes.filter(t => t.category === 'exam')"
-                :key="type.id"
-                @click="selectPaymentType(type.id)"
+              <div v-for="type in ancillaryPaymentTypes" :key="type.id" @click="selectPaymentType(type.id)"
                 class="payment-type-card cursor-pointer rounded-2xl p-4 border-2 transition-all duration-300 bg-white"
-                :class="selectedPaymentType === type.id 
-                  ? 'border-blue-600 ring-2 ring-blue-200 shadow-lg' 
-                  : 'border-gray-100 hover:border-blue-200 hover:shadow-md'"
-              >
+                :class="selectedPaymentType === type.id
+                  ? 'border-blue-600 ring-2 ring-blue-200 shadow-lg'
+                  : 'border-gray-100 hover:border-blue-200 hover:shadow-md'">
                 <div class="flex items-start gap-3">
                   <div class="flex-shrink-0">
                     <div class="w-10 h-10 rounded-xl flex items-center justify-center transition-colors"
-                         :class="selectedPaymentType === type.id ? 'bg-blue-600' : 'bg-slate-100'">
-                      <svg class="w-5 h-5" :class="selectedPaymentType === type.id ? 'text-white' : 'text-slate-600'" 
-                           fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      :class="selectedPaymentType === type.id ? 'bg-blue-600' : 'bg-slate-100'">
+                      <svg class="w-5 h-5" :class="selectedPaymentType === type.id ? 'text-white' : 'text-slate-600'"
+                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="type.icon"></path>
                       </svg>
                     </div>
                   </div>
                   <div class="flex-1 min-w-0">
                     <h4 class="text-sm font-bold text-gray-800">{{ type.name }}</h4>
-                    <p class="text-xs text-gray-500 mt-0.5">{{ type.description }}</p>
+                    <p v-if="type.description" class="text-xs text-gray-500 mt-0.5">{{ type.description }}</p>
                     <p class="text-lg font-bold text-blue-600 mt-2">
-                      {{ formatCurrency(finalExamFee) }}
+                      {{ formatCurrency(type.price) }}
                     </p>
-                    <div class="mt-2 flex items-start gap-1.5 bg-blue-50 rounded-full p-2 border border-blue-100">
-                      <IconInfo class="w-3.5 h-3.5 text-blue-600 flex-shrink-0 mt-0.5" />
-                      <p class="text-xs text-blue-700">Required only when taking final exam</p>
-                    </div>
                   </div>
                   <div v-if="selectedPaymentType === type.id" class="flex-shrink-0">
                     <div class="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
@@ -512,51 +519,54 @@ onMounted(async () => {
         <div class="hidden lg:block payment-section-glass rounded-3xl p-6 shadow-lg border border-white/40">
           <div class="flex justify-between items-center mb-5">
             <h2 class="text-lg font-bold text-gray-800">Payment History</h2>
-            <button 
-              @click="handleRefreshHistory" 
-              :disabled="isHistoryLoading"
+            <button @click="handleRefreshHistory" :disabled="isHistoryLoading"
               class="p-2.5 rounded-full hover:bg-blue-50 text-gray-400 hover:text-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              title="Refresh History"
-            >
+              title="Refresh History">
               <IconLoading v-if="isHistoryLoading" class="w-5 h-5 animate-spin text-blue-600" />
               <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
             </button>
           </div>
-          
+
           <div v-if="paymentHistory.length === 0" class="text-center py-12">
             <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
               <IconClipboard class="w-8 h-8 text-gray-300" />
             </div>
             <p class="text-gray-500 text-sm">No payment history yet</p>
           </div>
-          
+
           <div v-else class="overflow-x-auto rounded-xl">
             <table class="w-full">
               <thead>
                 <tr class="bg-gray-50/80">
-                  <th class="text-left py-3.5 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider first:rounded-tl-xl">Date</th>
+                  <th
+                    class="text-left py-3.5 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider first:rounded-tl-xl">
+                    Date</th>
                   <th class="text-left py-3.5 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider">Type</th>
                   <th class="text-left py-3.5 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider">Amount</th>
                   <th class="text-left py-3.5 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider">Status</th>
-                  <th class="text-left py-3.5 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider last:rounded-tr-xl">Order ID</th>
+                  <th
+                    class="text-left py-3.5 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider last:rounded-tr-xl">
+                    Order ID</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-50">
-                <tr v-for="(payment, index) in paymentHistory" :key="payment.paymentid" 
-                    class="hover:bg-blue-50/30 transition-colors"
-                    :class="index % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'">
+                <tr v-for="(payment, index) in paymentHistory" :key="payment.paymentid"
+                  class="hover:bg-blue-50/30 transition-colors" :class="index % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'">
                   <td class="py-3.5 px-4 text-sm text-gray-600">{{ formatDate(payment.created_at) }}</td>
-                  <td class="py-3.5 px-4 text-sm font-medium text-gray-800">{{ getPaymentTypeName(payment.payment_type) }}</td>
+                  <td class="py-3.5 px-4 text-sm font-medium text-gray-800">{{ getPaymentTypeName(payment.payment_type)
+                    }}</td>
                   <td class="py-3.5 px-4 text-sm font-bold text-gray-800">{{ formatCurrency(payment.amount) }}</td>
                   <td class="py-3.5 px-4">
                     <span class="px-3 py-1 text-xs font-semibold rounded-full capitalize"
-                          :class="getStatusBadgeClass(payment.status)">
+                      :class="getStatusBadgeClass(payment.status)">
                       {{ payment.status }}
                     </span>
                   </td>
-                  <td class="py-3.5 px-4 text-xs text-gray-500 font-mono">{{ payment.midtrans_transactionid || payment.midtrans_orderid }}</td>
+                  <td class="py-3.5 px-4 text-xs text-gray-500 font-mono">{{ payment.midtrans_transactionid ||
+                    payment.midtrans_orderid }}</td>
                 </tr>
               </tbody>
             </table>
@@ -566,11 +576,11 @@ onMounted(async () => {
 
       <!-- RIGHT COLUMN: Program Info & Payment Summary (spans 1 col on desktop) -->
       <div class="lg:col-span-1 space-y-6">
-        
+
         <!-- Program & Billing Information (Desktop Only) -->
         <div class="payment-section-glass rounded-3xl p-5 shadow-lg border border-white/40 hidden lg:block">
           <h2 class="text-lg font-bold text-gray-800 mb-4">Program & Billing Info</h2>
-          
+
           <!-- Loading State -->
           <div v-if="isClassLoading || isPricesLoading" class="grid grid-cols-2 gap-3">
             <div v-for="i in 4" :key="i" class="animate-pulse">
@@ -635,35 +645,35 @@ onMounted(async () => {
         <!-- Payment Summary -->
         <div class="payment-section-glass rounded-3xl p-5 shadow-lg border border-white/40">
           <h2 class="text-lg font-bold text-gray-800 mb-4">Payment Summary</h2>
-          
+
           <div class="space-y-3 mb-5">
             <div class="flex justify-between items-center">
               <span class="text-sm text-gray-500">Name</span>
-              <span class="text-sm font-semibold text-gray-800 truncate ml-2 max-w-[60%] text-right">{{ studentName }}</span>
+              <span class="text-sm font-semibold text-gray-800 truncate ml-2 max-w-[60%] text-right">{{ studentName
+                }}</span>
             </div>
             <div class="flex justify-between items-center">
               <span class="text-sm text-gray-500">Email</span>
-              <span class="text-sm font-semibold text-gray-800 truncate ml-2 max-w-[60%] text-right">{{ studentEmail }}</span>
+              <span class="text-sm font-semibold text-gray-800 truncate ml-2 max-w-[60%] text-right">{{ studentEmail
+                }}</span>
             </div>
             <div class="flex justify-between items-center">
               <span class="text-sm text-gray-500">Payment Type</span>
-              <span class="text-sm font-semibold text-gray-800">{{ selectedPaymentType ? getPaymentTypeName(selectedPaymentType) : '-' }}</span>
+              <span class="text-sm font-semibold text-gray-800">{{ selectedPaymentType ?
+                getPaymentTypeName(selectedPaymentType) : '-' }}</span>
             </div>
             <div class="h-px bg-gray-100 my-3"></div>
             <div class="flex justify-between items-center">
               <span class="text-base font-bold text-gray-800">Total</span>
-              <span class="text-2xl font-bold text-blue-600">{{ selectedPaymentType ? formatCurrency(selectedAmount) : 'Rp 0' }}</span>
+              <span class="text-2xl font-bold text-blue-600">{{ selectedPaymentType ? formatCurrency(selectedAmount) :
+                'Rp 0' }}</span>
             </div>
           </div>
 
-          <button
-            @click="handlePayment"
-            :disabled="!canPay || isPaymentLoading"
-            class="w-full py-3 px-5 rounded-full font-bold text-white transition-all duration-300 shadow-md"
-            :class="canPay && !isPaymentLoading
-              ? 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 hover:shadow-xl active:scale-[0.98] cursor-pointer' 
-              : 'bg-gray-300 cursor-not-allowed'"
-          >
+          <button @click="handlePayment" :disabled="!canPay || isPaymentLoading"
+            class="w-full py-3 px-5 rounded-full font-bold text-white transition-all duration-300 shadow-md" :class="canPay && !isPaymentLoading
+              ? 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 hover:shadow-xl active:scale-[0.98] cursor-pointer'
+              : 'bg-gray-300 cursor-not-allowed'">
             <span v-if="isPaymentLoading" class="flex items-center justify-center">
               <IconLoading class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" />
               Processing...
@@ -682,51 +692,54 @@ onMounted(async () => {
     <div class="lg:hidden payment-section-glass rounded-3xl p-6 shadow-lg border border-white/40">
       <div class="flex justify-between items-center mb-5">
         <h2 class="text-lg font-bold text-gray-800">Payment History</h2>
-        <button 
-          @click="handleRefreshHistory" 
-          :disabled="isHistoryLoading"
+        <button @click="handleRefreshHistory" :disabled="isHistoryLoading"
           class="p-2.5 rounded-full hover:bg-blue-50 text-gray-400 hover:text-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          title="Refresh History"
-        >
+          title="Refresh History">
           <IconLoading v-if="isHistoryLoading" class="w-5 h-5 animate-spin text-blue-600" />
           <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
         </button>
       </div>
-      
+
       <div v-if="paymentHistory.length === 0" class="text-center py-12">
         <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
           <IconClipboard class="w-8 h-8 text-gray-300" />
         </div>
         <p class="text-gray-500 text-sm">No payment history yet</p>
       </div>
-      
+
       <div v-else class="overflow-x-auto rounded-xl">
         <table class="w-full">
           <thead>
             <tr class="bg-gray-50/80">
-              <th class="text-left py-3.5 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider first:rounded-tl-xl">Date</th>
+              <th
+                class="text-left py-3.5 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider first:rounded-tl-xl">
+                Date</th>
               <th class="text-left py-3.5 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider">Type</th>
               <th class="text-left py-3.5 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider">Amount</th>
               <th class="text-left py-3.5 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider">Status</th>
-              <th class="text-left py-3.5 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider last:rounded-tr-xl">Order ID</th>
+              <th
+                class="text-left py-3.5 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider last:rounded-tr-xl">
+                Order ID</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-50">
-            <tr v-for="(payment, index) in paymentHistory" :key="payment.paymentid" 
-                class="hover:bg-blue-50/30 transition-colors"
-                :class="index % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'">
+            <tr v-for="(payment, index) in paymentHistory" :key="payment.paymentid"
+              class="hover:bg-blue-50/30 transition-colors" :class="index % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'">
               <td class="py-3.5 px-4 text-sm text-gray-600">{{ formatDate(payment.created_at) }}</td>
-              <td class="py-3.5 px-4 text-sm font-medium text-gray-800">{{ getPaymentTypeName(payment.payment_type) }}</td>
+              <td class="py-3.5 px-4 text-sm font-medium text-gray-800">{{ getPaymentTypeName(payment.payment_type) }}
+              </td>
               <td class="py-3.5 px-4 text-sm font-bold text-gray-800">{{ formatCurrency(payment.amount) }}</td>
               <td class="py-3.5 px-4">
                 <span class="px-3 py-1 text-xs font-semibold rounded-full capitalize"
-                      :class="getStatusBadgeClass(payment.status)">
+                  :class="getStatusBadgeClass(payment.status)">
                   {{ payment.status }}
                 </span>
               </td>
-              <td class="py-3.5 px-4 text-xs text-gray-500 font-mono">{{ payment.midtrans_transactionid || payment.midtrans_orderid }}</td>
+              <td class="py-3.5 px-4 text-xs text-gray-500 font-mono">{{ payment.midtrans_transactionid ||
+                payment.midtrans_orderid }}</td>
             </tr>
           </tbody>
         </table>
@@ -735,7 +748,8 @@ onMounted(async () => {
 
     <!-- Success Modal -->
     <Teleport to="body">
-      <div v-if="showSuccessModal" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      <div v-if="showSuccessModal"
+        class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
         <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl transform transition-all">
           <div class="text-center">
             <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5">
@@ -743,7 +757,8 @@ onMounted(async () => {
             </div>
             <h3 class="text-2xl font-bold text-gray-800 mb-2">Payment Successful!</h3>
             <p class="text-gray-600 mb-6">Your transaction has been processed successfully.</p>
-            <button @click="closeSuccessModal" class="w-full py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-full transition-colors shadow-lg hover:shadow-xl">
+            <button @click="closeSuccessModal"
+              class="w-full py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-full transition-colors shadow-lg hover:shadow-xl">
               Done
             </button>
           </div>
@@ -753,7 +768,8 @@ onMounted(async () => {
 
     <!-- Error Modal -->
     <Teleport to="body">
-      <div v-if="showErrorModal" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      <div v-if="showErrorModal"
+        class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
         <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl transform transition-all">
           <div class="text-center">
             <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-5">
@@ -761,7 +777,8 @@ onMounted(async () => {
             </div>
             <h3 class="text-2xl font-bold text-gray-800 mb-2">Payment Failed</h3>
             <p class="text-gray-600 mb-6">{{ paymentError || 'An error occurred while processing the payment.' }}</p>
-            <button @click="closeErrorModal" class="w-full py-3 bg-red-500 hover:bg-red-600 text-white font-bold rounded-full transition-colors shadow-lg hover:shadow-xl">
+            <button @click="closeErrorModal"
+              class="w-full py-3 bg-red-500 hover:bg-red-600 text-white font-bold rounded-full transition-colors shadow-lg hover:shadow-xl">
               Close
             </button>
           </div>
@@ -771,8 +788,10 @@ onMounted(async () => {
 
     <!-- Payment Guide Modal -->
     <Teleport to="body">
-      <div v-if="showGuideModal" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-        <div class="bg-white rounded-3xl p-8 max-w-2xl w-full shadow-2xl transform transition-all max-h-[90vh] overflow-y-auto">
+      <div v-if="showGuideModal"
+        class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+        <div
+          class="bg-white rounded-3xl p-8 max-w-2xl w-full shadow-2xl transform transition-all max-h-[90vh] overflow-y-auto">
           <div class="mb-6">
             <div class="flex items-center gap-4 mb-3">
               <div class="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center">
@@ -788,7 +807,8 @@ onMounted(async () => {
           <div class="space-y-3 mb-6">
             <!-- Guide Point 1 -->
             <div class="flex items-start gap-4 p-4 bg-blue-50 rounded-2xl border border-blue-100">
-              <div class="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm">
+              <div
+                class="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm">
                 1
               </div>
               <div class="flex-1">
@@ -799,18 +819,21 @@ onMounted(async () => {
 
             <!-- Guide Point 2 -->
             <div class="flex items-start gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
-              <div class="flex-shrink-0 w-8 h-8 bg-slate-600 text-white rounded-full flex items-center justify-center font-bold text-sm">
+              <div
+                class="flex-shrink-0 w-8 h-8 bg-slate-600 text-white rounded-full flex items-center justify-center font-bold text-sm">
                 2
               </div>
               <div class="flex-1">
                 <h4 class="font-bold text-gray-800 mb-1">Changing Payment Method</h4>
-                <p class="text-sm text-gray-600">To change payment method, wait until the current transaction expires before creating a new one</p>
+                <p class="text-sm text-gray-600">To change payment method, wait until the current transaction expires
+                  before creating a new one</p>
               </div>
             </div>
 
             <!-- Guide Point 3 -->
             <div class="flex items-start gap-4 p-4 bg-blue-50 rounded-2xl border border-blue-100">
-              <div class="flex-shrink-0 w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
+              <div
+                class="flex-shrink-0 w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
                 3
               </div>
               <div class="flex-1">
@@ -821,28 +844,33 @@ onMounted(async () => {
 
             <!-- Guide Point 4 -->
             <div class="flex items-start gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
-              <div class="flex-shrink-0 w-8 h-8 bg-slate-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
+              <div
+                class="flex-shrink-0 w-8 h-8 bg-slate-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
                 4
               </div>
               <div class="flex-1">
                 <h4 class="font-bold text-gray-800 mb-1">Refresh Payment History</h4>
-                <p class="text-sm text-gray-600">If status doesn't update automatically, use the refresh button in payment history</p>
+                <p class="text-sm text-gray-600">If status doesn't update automatically, use the refresh button in
+                  payment history</p>
               </div>
             </div>
 
             <!-- Guide Point 5 -->
             <div class="flex items-start gap-4 p-4 bg-red-50 rounded-2xl border border-red-100">
-              <div class="flex-shrink-0 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
+              <div
+                class="flex-shrink-0 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
                 !
               </div>
               <div class="flex-1">
                 <h4 class="font-bold text-gray-800 mb-1">Payment Status Issue</h4>
-                <p class="text-sm text-gray-600">If payment succeeded but shows pending/failed, please contact admin immediately</p>
+                <p class="text-sm text-gray-600">If payment succeeded but shows pending/failed, please contact admin
+                  immediately</p>
               </div>
             </div>
           </div>
 
-          <button @click="closeGuideModal" class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full transition-all shadow-lg hover:shadow-xl">
+          <button @click="closeGuideModal"
+            class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full transition-all shadow-lg hover:shadow-xl">
             Got it, Thanks!
           </button>
         </div>
@@ -877,6 +905,7 @@ onMounted(async () => {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);

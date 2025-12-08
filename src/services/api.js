@@ -156,6 +156,15 @@ export const priceAPI = {
   deletePrice: (id) => apiClient.delete(`/prices/${id}`)
 };
 
+/** Ancillary Price API - additional fees (exam, registration, etc.) */
+export const ancillaryPriceAPI = {
+  getAll: () => apiClient.get('/ancillary_price'),
+  getById: (id) => apiClient.get(`/ancillary_price/${id}`),
+  create: (data) => apiClient.post('/ancillary_price', data),
+  update: (id, data) => apiClient.put(`/ancillary_price/${id}`, data),
+  delete: (id) => apiClient.delete(`/ancillary_price/${id}`)
+};
+
 // Level API endpoints
 export const levelAPI = {
   getAllLevels: () => apiClient.get('/levels'),
