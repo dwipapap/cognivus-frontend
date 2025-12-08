@@ -1,7 +1,6 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { studentAPI, lecturerAPI, classAPI, dashboardAPI, paymentAPI } from '@/services/api';
-import BaseCard from '@/components/ui/BaseCard.vue';
 import LoadingBar from '@/components/ui/LoadingBar.vue';
 
 const students = ref([]);
@@ -40,27 +39,16 @@ const getRelativeTime = (timestamp) => {
   const date = new Date(timestamp);
   const now = new Date();
   const diffInSeconds = Math.floor((now - date) / 1000);
-  
+
   if (diffInSeconds < 60) return 'Just now';
-  if (diffInSeconds < 3600) {
-    const minutes = Math.floor(diffInSeconds / 60);
-    return `${minutes} minute${minutes !== 1 ? 's' : ''} ago`;
-  }
-  if (diffInSeconds < 86400) {
-    const hours = Math.floor(diffInSeconds / 3600);
-    return `${hours} hour${hours !== 1 ? 's' : ''} ago`;
-  }
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
   const days = Math.floor(diffInSeconds / 86400);
-  if (days < 30) return `${days} day${days !== 1 ? 's' : ''} ago`;
-  if (days < 365) {
-    const months = Math.floor(days / 30);
-    return `${months} month${months !== 1 ? 's' : ''} ago`;
-  }
-  const years = Math.floor(days / 365);
-  return `${years} year${years !== 1 ? 's' : ''} ago`;
+  if (days < 30) return `${days}d ago`;
+  return `${Math.floor(days / 30)}mo ago`;
 };
 
-/** Format currency (Indonesian Rupiah) */
+/** Format currency */
 const formatCurrency = (amount) => {
   return new Intl.NumberFormat('id-ID', {
     style: 'currency',
@@ -69,195 +57,266 @@ const formatCurrency = (amount) => {
   }).format(amount);
 };
 
-/** Calculate total revenue from successful payments */
+/** Total revenue from successful payments */
 const totalRevenue = computed(() => {
   return payments.value
-    .filter(payment => payment.status === 'success')
-    .reduce((sum, payment) => sum + (payment.amount || 0), 0);
+    .filter(p => p.status === 'success')
+    .reduce((sum, p) => sum + (p.amount || 0), 0);
 });
 
-/** Computed stats */
-const stats = computed(() => [
-  { title: 'Total Students', value: students.value.length.toString(), icon: 'users', color: 'blue' },
-  { title: 'Total Lecturers', value: lecturers.value.length.toString(), icon: 'teacher', color: 'green' },
-  { title: 'Total Classes', value: classes.value.length.toString(), icon: 'class', color: 'purple' },
-]);
+/** Pending payments count */
+const pendingCount = computed(() => payments.value.filter(p => p.status === 'pending').length);
 
-onMounted(() => {
-  fetchDashboardData();
+/** Recent team members (students + lecturers) */
+const recentTeam = computed(() => {
+  const team = [];
+  students.value.slice(0, 4).forEach(s => {
+    team.push({ name: s.fullname, type: 'student', initials: getInitials(s.fullname) });
+  });
+  lecturers.value.slice(0, 2).forEach(l => {
+    team.push({ name: l.fullname, type: 'lecturer', initials: getInitials(l.fullname) });
+  });
+  return team.slice(0, 6);
 });
+
+/** Get initials from name */
+const getInitials = (name) => {
+  if (!name) return '?';
+  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+};
+
+/** Activity dot color */
+const getDotColor = (color) => {
+  const colors = { blue: 'bg-blue-500', green: 'bg-green-500', yellow: 'bg-yellow-500', emerald: 'bg-emerald-500', orange: 'bg-orange-500' };
+  return colors[color] || 'bg-gray-400';
+};
+
+onMounted(fetchDashboardData);
 </script>
 
 <template>
   <div>
-    <h1 class="text-4xl font-bold text-gray-800 mb-2">Admin Dashboard</h1>
-    <p class="text-gray-600 mb-8">Welcome to the admin control panel</p>
-
-    <!-- Stats Grid -->
-        <!-- Loading State -->
-    <div v-if="isLoading" class="max-w-2xl mx-auto py-20">
-      <LoadingBar :loading="true" color="blue" :duration="2000" />
-      <p class="text-center text-gray-600 mt-4">Loading dashboard...</p>
+    <!-- Header -->
+    <div class="mb-6">
+      <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
+      <p class="text-gray-500 mt-1">Overview of your institution</p>
     </div>
 
-    <div v-else class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <div 
-        v-for="stat in stats" 
-        :key="stat.title"
-        class="stat-card bg-white/60 backdrop-blur-sm border border-white/50 p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-      >
-        <div class="flex items-center justify-between">
-          <div class="flex-1 min-w-0 mr-4">
-            <p class="text-sm font-medium text-gray-600 mb-1">{{ stat.title }}</p>
-            <h3 
-              :class="stat.icon === 'money' ? 'text-xl md:text-2xl font-bold text-gray-800' : 'text-3xl font-bold text-gray-800'"
-            >
-              {{ stat.value }}
-            </h3>
+    <!-- Loading -->
+    <div v-if="isLoading" class="max-w-md mx-auto py-20">
+      <LoadingBar :loading="true" color="blue" :duration="2000" />
+    </div>
+
+    <!-- Bento Grid -->
+    <div v-else class="grid grid-cols-2 md:grid-cols-4 gap-4">
+
+      <!-- Stat: Students -->
+      <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-sm text-gray-500">Total Students</span>
+          <span class="text-gray-300">•••</span>
+        </div>
+        <div class="text-3xl font-bold text-gray-900">{{ students.length }}</div>
+        <div class="mt-3 flex items-end gap-1 h-8">
+          <div v-for="i in 6" :key="i" class="flex-1 bg-blue-500 rounded-sm"
+            :style="`height: ${20 + Math.random() * 80}%`"></div>
+        </div>
+        <router-link to="/admin/students" class="mt-3 block text-xs text-blue-600 hover:text-blue-800 font-medium">
+          Manage Students →
+        </router-link>
+      </div>
+
+      <!-- Stat: Lecturers -->
+      <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-sm text-gray-500">Total Lecturers</span>
+          <span class="text-gray-300">•••</span>
+        </div>
+        <div class="text-3xl font-bold text-gray-900">{{ lecturers.length }}</div>
+        <div class="mt-3 flex items-end gap-1 h-8">
+          <div v-for="i in 6" :key="i" class="flex-1 rounded-sm" :class="i % 2 === 0 ? 'bg-green-400' : 'bg-blue-400'"
+            :style="`height: ${30 + Math.random() * 70}%`"></div>
+        </div>
+        <router-link to="/admin/lecturers" class="mt-3 block text-xs text-green-600 hover:text-green-800 font-medium">
+          Manage Lecturers →
+        </router-link>
+      </div>
+
+      <!-- Last Actions -->
+      <div class="col-span-2 md:col-span-1 bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+          <span class="text-sm font-semibold text-gray-700">Last actions</span>
+          <span class="text-gray-300">•••</span>
+        </div>
+        <div class="space-y-3">
+          <div v-for="(act, i) in recentActivities.slice(0, 3)" :key="i" class="flex items-start gap-2">
+            <div :class="['w-2 h-2 rounded-full mt-1.5 flex-shrink-0', getDotColor(act.color)]"></div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm text-gray-800 truncate">{{ act.title }}</p>
+              <p class="text-xs text-gray-400">{{ act.description }}</p>
+            </div>
+            <span class="text-xs text-gray-400 flex-shrink-0">{{ getRelativeTime(act.timestamp) }}</span>
           </div>
-          <div :class="`w-14 h-14 flex-shrink-0 rounded-2xl flex items-center justify-center bg-${stat.color}-100`">
-            <svg class="w-7 h-7" :class="`text-${stat.color}-600`" fill="currentColor" viewBox="0 0 20 20">
-              <path v-if="stat.icon === 'users'" d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"></path>
-              <path v-else-if="stat.icon === 'teacher'" d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"></path>
-              <path v-else-if="stat.icon === 'class'" d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
-              <path v-else-if="stat.icon === 'money'" d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"></path>
+        </div>
+      </div>
+
+      <!-- Quick Actions (was Team) -->
+      <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+        <p class="text-sm font-semibold text-gray-700 mb-3">Quick Actions</p>
+        <div class="space-y-2">
+          <router-link to="/admin/lecturers"
+            class="flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600 transition-colors">
+            <div class="w-6 h-6 bg-blue-100 rounded flex items-center justify-center">
+              <svg class="w-3 h-3 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z" />
+              </svg>
+            </div>
+            Add Lecturer
+          </router-link>
+          <router-link to="/admin/classes"
+            class="flex items-center gap-2 text-sm text-gray-600 hover:text-green-600 transition-colors">
+            <div class="w-6 h-6 bg-green-100 rounded flex items-center justify-center">
+              <svg class="w-3 h-3 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd"
+                  d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                  clip-rule="evenodd" />
+              </svg>
+            </div>
+            Create Class
+          </router-link>
+          <router-link to="/admin/prices"
+            class="flex items-center gap-2 text-sm text-gray-600 hover:text-purple-600 transition-colors">
+            <div class="w-6 h-6 bg-purple-100 rounded flex items-center justify-center">
+              <svg class="w-3 h-3 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z"
+                  clip-rule="evenodd" />
+              </svg>
+            </div>
+            Manage Prices
+          </router-link>
+        </div>
+      </div>
+
+      <!-- Revenue Card (Wide) -->
+      <div class="col-span-2 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-6 text-white">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm text-white/70">Total Revenue</p>
+            <p class="text-2xl md:text-3xl font-bold mt-1">{{ formatCurrency(totalRevenue) }}</p>
+            <p class="text-sm text-white/60 mt-1">{{ pendingCount }} pending</p>
+          </div>
+          <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z"
+                clip-rule="evenodd" />
             </svg>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Quick Actions -->
-    <div class="bg-white/60 backdrop-blur-sm border border-white/50 p-6 rounded-2xl shadow-lg mb-8">
-      <h2 class="text-2xl font-semibold text-gray-800 mb-4">Quick Actions</h2>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <router-link 
-          to="/admin/lecturers" 
-          class="quick-action-btn flex items-center gap-3 p-4 bg-blue-50 hover:bg-blue-100 rounded-xl transition-all duration-200 border border-blue-200 hover:shadow-md"
-        >
-          <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z"></path>
-          </svg>
-          <div>
-            <h3 class="font-semibold text-gray-800">Add Lecturer</h3>
-            <p class="text-sm text-gray-600">Register new instructor</p>
-          </div>
-        </router-link>
-
-        <router-link 
-          to="/admin/classes" 
-          class="quick-action-btn flex items-center gap-3 p-4 bg-green-50 hover:bg-green-100 rounded-xl transition-all duration-200 border border-green-200 hover:shadow-md"
-        >
-          <svg class="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
-          </svg>
-          <div>
-            <h3 class="font-semibold text-gray-800">Create Class</h3>
-            <p class="text-sm text-gray-600">Setup new class</p>
-          </div>
-        </router-link>
-
-        <router-link 
-          to="/admin/prices" 
-          class="quick-action-btn flex items-center gap-3 p-4 bg-purple-50 hover:bg-purple-100 rounded-xl transition-all duration-200 border border-purple-200 hover:shadow-md"
-        >
-          <svg class="w-6 h-6 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"></path>
-            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"></path>
-          </svg>
-          <div>
-            <h3 class="font-semibold text-gray-800">Manage Prices</h3>
-            <p class="text-sm text-gray-600">Update class pricing</p>
-          </div>
+      <!-- Classes Card -->
+      <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-sm text-gray-500">Classes</span>
+          <span class="text-gray-300">•••</span>
+        </div>
+        <div class="text-3xl font-bold text-gray-900">{{ classes.length }}</div>
+        <p class="text-xs text-purple-600 mt-1">Active classes</p>
+        <router-link to="/admin/classes" class="mt-3 block text-xs text-purple-600 hover:text-purple-800 font-medium">
+          Manage Classes →
         </router-link>
       </div>
-    </div>
 
-    <!-- Recent Activity -->
-    <div class="bg-white/60 backdrop-blur-sm border border-white/50 p-6 rounded-2xl shadow-lg">
-      <h2 class="text-2xl font-semibold text-gray-800 mb-4">Recent Activity</h2>
-      
-      <!-- Loading State -->
-      <div v-if="isLoading" class="text-center py-8">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-        <p class="text-sm text-gray-600 mt-2">Loading activities...</p>
+      <!-- Payments Card -->
+      <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-sm text-gray-500">Payments</span>
+          <span class="text-gray-300">•••</span>
+        </div>
+        <div class="text-3xl font-bold text-gray-900">{{ payments.length }}</div>
+        <p class="text-xs text-orange-600 mt-1">{{ pendingCount }} pending</p>
+        <router-link to="/admin/transactions"
+          class="mt-3 block text-xs text-orange-600 hover:text-orange-800 font-medium">
+          View Transactions →
+        </router-link>
       </div>
-      
-      <!-- Empty State -->
-      <div v-else-if="recentActivities.length === 0" class="text-center py-12">
-        <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-        </svg>
-        <p class="text-gray-500 font-medium">No recent activity</p>
-        <p class="text-sm text-gray-400 mt-1">Activity will appear here as actions occur</p>
-      </div>
-      
-      <!-- Activity List -->
-      <div v-else class="space-y-3">
-        <div 
-          v-for="(activity, index) in recentActivities" 
-          :key="`${activity.type}-${activity.timestamp}-${index}`"
-          class="flex items-start gap-3 p-3 bg-white/40 rounded-lg hover:bg-white/60 transition-colors"
-        >
-          <div 
-            :class="`w-2 h-2 rounded-full bg-${activity.color}-500 mt-2 flex-shrink-0`"
-          ></div>
-          <div class="flex-1 min-w-0">
-            <p class="text-sm font-medium text-gray-800">{{ activity.title }}</p>
-            <p class="text-xs text-gray-600 truncate">
-              {{ activity.description }} • {{ getRelativeTime(activity.timestamp) }}
-            </p>
+
+      <!-- Full Activity Feed (Full Width) -->
+      <div class="col-span-2 md:col-span-4 bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+          <span class="font-semibold text-gray-800">Recent Activity</span>
+          <span class="text-xs text-gray-400">Last 10</span>
+        </div>
+        <div v-if="recentActivities.length === 0" class="text-center py-8 text-gray-400 text-sm">
+          No recent activity
+        </div>
+        <div v-else class="space-y-3 max-h-64 overflow-y-auto">
+          <div v-for="(act, i) in recentActivities" :key="i"
+            class="flex items-start gap-3 py-2 border-b border-gray-50 last:border-0">
+            <div :class="['w-2 h-2 rounded-full mt-1.5', getDotColor(act.color)]"></div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm text-gray-800">{{ act.title }}</p>
+              <p class="text-xs text-gray-400 truncate">{{ act.description }}</p>
+            </div>
+            <span class="text-xs text-gray-400">{{ getRelativeTime(act.timestamp) }}</span>
           </div>
         </div>
       </div>
+
     </div>
   </div>
 </template>
 
 <style scoped>
-.stat-card {
-  animation: fadeInUp 0.5s ease-out;
+.grid>div {
+  animation: fadeIn 0.3s ease-out;
+  animation-fill-mode: backwards;
 }
 
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.grid>div:nth-child(1) {
+  animation-delay: 0.05s;
 }
 
-.quick-action-btn {
-  animation: fadeIn 0.6s ease-out;
+.grid>div:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.grid>div:nth-child(3) {
+  animation-delay: 0.15s;
+}
+
+.grid>div:nth-child(4) {
+  animation-delay: 0.2s;
+}
+
+.grid>div:nth-child(5) {
+  animation-delay: 0.25s;
+}
+
+.grid>div:nth-child(6) {
+  animation-delay: 0.3s;
+}
+
+.grid>div:nth-child(7) {
+  animation-delay: 0.35s;
+}
+
+.grid>div:nth-child(8) {
+  animation-delay: 0.4s;
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
+    transform: translateY(10px);
   }
+
   to {
     opacity: 1;
+    transform: translateY(0);
   }
-}
-
-/* Rick Roll specific animations */
-@keyframes pulse-slow {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.95;
-  }
-}
-
-.animate-pulse-slow {
-  animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-.aspect-video {
-  aspect-ratio: 16 / 9;
 }
 </style>
