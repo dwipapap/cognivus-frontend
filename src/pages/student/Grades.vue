@@ -319,7 +319,7 @@ onMounted(() => {
                   <td class="px-6 py-4">
                     <button
                       @click="handleDownloadCertificate(grade.gradeid, grade.test_type)"
-                      class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 hover:text-blue-700 transition-all border border-blue-100 shadow-sm hover:shadow"
+                      class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-full hover:bg-blue-100 hover:text-blue-700 transition-all border border-blue-100 shadow-sm hover:shadow"
                     >
                       <IconDocument class="w-4 h-4" />
                       Download
