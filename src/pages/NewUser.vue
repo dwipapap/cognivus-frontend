@@ -73,17 +73,38 @@ const fetchProfile = async () => {
   try {
     const response = await studentAPI.getStudentById(userId);
     if (response.data.success) {
-      // Assign backend data to form (excluding password fields)
-      const studentData = response.data.data;
+      // Handle both array and object response from backend
+      let studentData = response.data.data;
+      
+      // If response is array, take first element
+      if (Array.isArray(studentData)) {
+        studentData = studentData[0];
+      }
+      
+      // If no data found, exit early
+      if (!studentData) {
+        modalType.value = 'info';
+        modalMessage.value = "No student profile found. Please fill in the form.";
+        openModal();
+        return;
+      }
+      
+      // Assign student fields to form
       Object.keys(studentData).forEach(key => {
-        if (key in formData && key !== 'password' && key !== 'confirmPassword') {
+        if (key in formData && key !== 'password' && key !== 'confirmPassword' && key !== 'tbuser') {
           formData[key] = studentData[key];
         }
       });
       
-      // Pre-fill username from auth store if available
-      if (authStore.user?.username) {
-        formData.username = authStore.user.username;
+      // Extract user data from nested tbuser object
+      if (studentData.tbuser) {
+        const userData = studentData.tbuser;
+        if (userData.username) {
+          formData.username = userData.username;
+        }
+        if (userData.userid) {
+          formData.userid = userData.userid;
+        }
       }
     }
   } catch (error) {

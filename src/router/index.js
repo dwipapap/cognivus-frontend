@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { authStore } from '../store/auth';
+import apiClient from '../services/api';
 
 /**
  * Lazy-loaded route components.
@@ -271,7 +272,7 @@ const getDefaultDashboard = (role) => {
 };
 
 // Navigation Guard
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const isAuthenticated = authStore.isAuthenticated();
   const userRole = authStore.role;
 
@@ -282,8 +283,30 @@ router.beforeEach((to, from, next) => {
     userRole
   });
 
-  // Allow access to NewUser page for authenticated users (bypass role checks)
-  if (to.name === 'NewUser' && isAuthenticated) {
+  // Special handling for NewUser page - only allow users without password
+  if (to.name === 'NewUser') {
+    if (!isAuthenticated) {
+      return next({ name: 'Login' });
+    }
+    
+    // Check if user actually needs to complete profile (no password set)
+    try {
+      const userId = authStore.user?.id;
+      if (userId) {
+        const response = await apiClient.get(`/users/${userId}`);
+        if (response.data.success) {
+          const userData = response.data.data;
+          // If user has password, redirect to dashboard (they don't need NewUser page)
+          if (userData.password && userData.password !== null) {
+            return next({ name: getDefaultDashboard(userRole) });
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error checking password status:', error);
+      // On error, allow access (fail gracefully)
+    }
+    
     return next();
   }
 
