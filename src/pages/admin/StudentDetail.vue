@@ -402,6 +402,7 @@ onMounted(() => {
                   <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">ID</th>
                   <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Date</th>
                   <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Amount</th>
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Payment Type</th>
                   <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
                 </tr>
               </thead>
@@ -409,7 +410,15 @@ onMounted(() => {
                 <tr v-for="transaction in transactions" :key="transaction.paymentid">
                   <td class="px-6 py-4 text-sm font-medium text-gray-900">#{{ transaction.paymentid }}</td>
                   <td class="px-6 py-4 text-sm text-gray-600">{{ formatDate(transaction.created_at) }}</td>
-                  <td class="px-6 py-4 text-sm text-gray-900 font-medium">{{ transaction.amount ? `Rp ${transaction.amount.toLocaleString()}` : '-' }}</td>
+                  <td class="px-6 py-4 text-xs text-gray-900 font-medium">{{ transaction.amount ? `Rp ${transaction.amount.toLocaleString()}` : '-' }}</td>
+                  <td class="px-6 py-4">
+                    <span v-if="transaction.payment_type" 
+                      class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium" 
+                      :class="transaction.payment_type === 'Full' ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800'">
+                      {{ transaction.payment_type }}
+                    </span>
+                    <span v-else class="text-sm text-gray-400">-</span>
+                  </td>
                   <td class="px-6 py-4">
                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full capitalize" :class="getStatusBadge(transaction.status)">
                       {{ transaction.status }}
@@ -623,7 +632,9 @@ onMounted(() => {
                 <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Listening</th>
                 <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Speaking</th>
                 <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Reading</th>
-                <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Writing</th>
+                 <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Writing</th>
+                <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Grammar</th>
+                <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Vocabulary</th>
                 <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Final Score</th>
                 <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
                 <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Certificate</th>
@@ -633,12 +644,14 @@ onMounted(() => {
             <tbody class="bg-white divide-y divide-gray-100">
               <tr v-for="grade in grades" :key="grade.gradeid" class="hover:bg-gray-50 transition-colors group">
                 <td class="px-6 py-4">
-                  <span class="font-medium text-gray-900 block">{{ grade.test_type }}</span>
+                  <span class="font-medium text-gray-900 block text-sm">{{ grade.test_type }}</span>
                 </td>
                 <td class="px-6 py-4 text-center text-sm text-gray-600">{{ grade.listening_score || '-' }}</td>
                 <td class="px-6 py-4 text-center text-sm text-gray-600">{{ grade.speaking_score || '-' }}</td>
-                <td class="px-6 py-4 text-center text-sm text-gray-600">{{ grade.reading_score || '-' }}</td>
+                 <td class="px-6 py-4 text-center text-sm text-gray-600">{{ grade.reading_score || '-' }}</td>
                 <td class="px-6 py-4 text-center text-sm text-gray-600">{{ grade.writing_score || '-' }}</td>
+                <td class="px-6 py-4 text-center text-sm text-gray-600">{{ grade.grammar_score || '-' }}</td>
+                <td class="px-6 py-4 text-center text-sm text-gray-600">{{ grade.vocabulary_score || '-' }}</td>
                 <td class="px-6 py-4 text-center">
                   <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-50 text-blue-700 font-bold text-sm border border-blue-100">
                     {{ grade.final_score ?? '-' }}

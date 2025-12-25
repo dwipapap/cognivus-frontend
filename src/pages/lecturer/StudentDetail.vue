@@ -41,27 +41,6 @@ const getStatusBadge = (status) => {
   return badges[status] || 'bg-gray-100 text-gray-800 border-gray-200';
 };
 
-const handleDownloadCertificate = async (gradeId, testType) => {
-  try {
-    const response = await gradeAPI.downloadCertificate(gradeId);
-    
-    const blob = new Blob([response.data], { type: 'application/pdf' });
-    const url = window.URL.createObjectURL(blob);
-    
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `Certificate_${testType || 'Test'}.pdf`;
-    document.body.appendChild(link);
-    link.click();
-    
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
-  } catch (error) {
-    console.error('Error downloading certificate:', error);
-    alert('Failed to download certificate. Please try again.');
-  }
-};
-
 /** Get initials for avatar */
 const getInitials = (name) => {
   if (!name) return 'ST';
@@ -291,7 +270,7 @@ onMounted(() => {
                     <tr>
                       <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">ID</th>
                       <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Date</th>
-                      <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Amount</th>
+                      <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Payment Type</th>
                       <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
                     </tr>
                   </thead>
@@ -299,7 +278,14 @@ onMounted(() => {
                     <tr v-for="transaction in transactions" :key="transaction.paymentid" class="hover:bg-gray-50 transition-colors">
                       <td class="px-6 py-4 text-sm font-medium text-gray-900">#{{ transaction.paymentid }}</td>
                       <td class="px-6 py-4 text-sm text-gray-600">{{ formatDate(transaction.created_at) }}</td>
-                      <td class="px-6 py-4 text-sm text-gray-900 font-medium">{{ transaction.amount ? `Rp ${transaction.amount.toLocaleString()}` : '-' }}</td>
+                      <td class="px-6 py-4">
+                        <span v-if="transaction.payment_type" 
+                          class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium" 
+                          :class="transaction.payment_type === 'Full' ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800'">
+                          {{ transaction.payment_type }}
+                        </span>
+                        <span v-else class="text-sm text-gray-400">-</span>
+                      </td>
                       <td class="px-6 py-4">
                         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full capitalize" :class="getStatusBadge(transaction.status)">
                           {{ transaction.status }}
@@ -353,9 +339,10 @@ onMounted(() => {
                   <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Speaking</th>
                   <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Reading</th>
                   <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Writing</th>
+                  <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Grammar</th>
+                  <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Vocabulary</th>
                   <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Final Score</th>
                   <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
-                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Certificate</th>
                   <th class="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
@@ -368,21 +355,14 @@ onMounted(() => {
                   <td class="px-6 py-4 text-center text-sm text-gray-600">{{ grade.speaking_score || '-' }}</td>
                   <td class="px-6 py-4 text-center text-sm text-gray-600">{{ grade.reading_score || '-' }}</td>
                   <td class="px-6 py-4 text-center text-sm text-gray-600">{{ grade.writing_score || '-' }}</td>
+                  <td class="px-6 py-4 text-center text-sm text-gray-600">{{ grade.grammar_score || '-' }}</td>
+                  <td class="px-6 py-4 text-center text-sm text-gray-600">{{ grade.vocabulary_score || '-' }}</td>
                   <td class="px-6 py-4 text-center">
                     <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-50 text-blue-700 font-bold text-sm border border-blue-100">
                       {{ grade.final_score ?? '-' }}
                     </span>
                   </td>
                   <td class="px-6 py-4 text-sm text-gray-500">{{ formatDate(grade.date_taken) }}</td>
-                  <td class="px-6 py-4">
-                    <BaseButton
-                      size="sm"
-                      variant="secondary"
-                      @click="handleDownloadCertificate(grade.gradeid, grade.test_type)"
-                    >
-                      Download
-                    </BaseButton>
-                  </td>
                   <td class="px-6 py-4 text-right">
                     <BaseButton
                       size="sm"
