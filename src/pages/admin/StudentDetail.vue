@@ -69,6 +69,27 @@ const formatDate = (dateString) => {
   });
 };
 
+const handleDownloadCertificate = async (gradeId, testType) => {
+  try {
+    const response = await gradeAPI.downloadCertificate(gradeId);
+    
+    const blob = new Blob([response.data], { type: 'application/pdf' });
+    const url = window.URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Certificate_${testType || 'Test'}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Error downloading certificate:', error);
+    showNotification('error', 'Failed to download certificate. Please try again.');
+  }
+};
+
 const getStatusBadge = (status) => {
   const badges = {
     pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
@@ -502,33 +523,11 @@ onMounted(() => {
                   />
                 </div>
               </div>
-
-              <!-- Class & Payment Section -->
-              <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                <h3 class="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                  <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                  </svg>
-                  Class & Payment
-                </h3>
-                
-                <div class="space-y-4">
-                  <BaseSelect
-                    v-bind="getFieldProps('payment_type')"
-                    label="Payment Type"
-                    :options="['Monthly', 'Full']"
-                    placeholder="Select payment type"
-                  />
-                </div>
-              </div>
             </div>
           </div>
 
           <!-- Actions Footer -->
           <div class="flex justify-end gap-3 pt-6 mt-6 border-t border-gray-200">
-            <BaseButton type="button" variant="secondary" @click="goBack">
-              Cancel
-            </BaseButton>
             <BaseButton type="submit" variant="primary" :loading="isSubmitting">
               <template #icon>
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -581,9 +580,9 @@ onMounted(() => {
                 <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Speaking</th>
                 <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Reading</th>
                 <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Writing</th>
-                <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Average</th>
+                <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Final Score</th>
                 <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
-                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Report</th>
+                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Certificate</th>
                 <th class="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
@@ -598,21 +597,18 @@ onMounted(() => {
                 <td class="px-6 py-4 text-center text-sm text-gray-600">{{ grade.writing_score || '-' }}</td>
                 <td class="px-6 py-4 text-center">
                   <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-50 text-blue-700 font-bold text-sm border border-blue-100">
-                    {{ getAverageScore(grade) }}
+                    {{ grade.final_score ?? '-' }}
                   </span>
                 </td>
                 <td class="px-6 py-4 text-sm text-gray-500">{{ formatDate(grade.date_taken) }}</td>
                 <td class="px-6 py-4">
-                  <a
-                    v-if="grade.tbreport_files && grade.tbreport_files.length > 0"
-                    :href="grade.tbreport_files[0].url"
-                    target="_blank"
-                    class="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors"
+                  <BaseButton
+                    size="sm"
+                    variant="secondary"
+                    @click="handleDownloadCertificate(grade.gradeid, grade.test_type)"
                   >
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg>
-                    View PDF
-                  </a>
-                  <span v-else class="text-xs text-gray-400 italic">No file</span>
+                    Download
+                  </BaseButton>
                 </td>
                 <td class="px-6 py-4 text-right">
                   <BaseButton
