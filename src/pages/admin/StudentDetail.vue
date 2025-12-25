@@ -69,6 +69,15 @@ const formatDate = (dateString) => {
   });
 };
 
+const getStatusBadge = (status) => {
+  const badges = {
+    pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+    success: 'bg-green-100 text-green-800 border-green-200',
+    failed: 'bg-red-100 text-red-800 border-red-200'
+  };
+  return badges[status] || 'bg-gray-100 text-gray-800 border-gray-200';
+};
+
 const getAverageScore = (grade) => {
   const scores = [
     grade.listening_score,
@@ -337,7 +346,7 @@ onMounted(() => {
                   <td class="px-6 py-4 text-sm text-gray-600">{{ formatDate(transaction.created_at) }}</td>
                   <td class="px-6 py-4 text-sm text-gray-900 font-medium">{{ transaction.amount ? `Rp ${transaction.amount.toLocaleString()}` : '-' }}</td>
                   <td class="px-6 py-4">
-                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-green-50 text-green-700 border border-green-100">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full capitalize" :class="getStatusBadge(transaction.status)">
                       {{ transaction.status }}
                     </span>
                   </td>
@@ -544,7 +553,7 @@ onMounted(() => {
           </div>
           <BaseButton
             variant="primary"
-            @click="router.push({ name: 'AddGrade', params: { userid: studentId } })"
+            @click="router.push({ name: 'AdminAddGrade', params: { userid: studentId } })"
           >
             <template #icon>
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -610,7 +619,7 @@ onMounted(() => {
                     size="sm"
                     variant="secondary"
                     rounded="lg"
-                    @click="router.push({ name: 'EditGrade', params: { userid: studentId, gradeid: grade.gradeid } })"
+                    @click="router.push({ name: 'AdminEditGrade', params: { userid: studentId, gradeid: grade.gradeid } })"
                   >
                     Edit
                   </BaseButton>
