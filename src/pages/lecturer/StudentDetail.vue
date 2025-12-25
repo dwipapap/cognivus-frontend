@@ -32,18 +32,34 @@ const formatDate = (dateString) => {
   });
 };
 
-/** Calculate average score */
-const getAverageScore = (grade) => {
-  const scores = [
-    grade.listening_score,
-    grade.speaking_score,
-    grade.reading_score,
-    grade.writing_score
-  ].filter(s => s !== null && s !== undefined);
-  
-  if (scores.length === 0) return '-';
-  const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
-  return avg.toFixed(1);
+const getStatusBadge = (status) => {
+  const badges = {
+    pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+    success: 'bg-green-100 text-green-800 border-green-200',
+    failed: 'bg-red-100 text-red-800 border-red-200'
+  };
+  return badges[status] || 'bg-gray-100 text-gray-800 border-gray-200';
+};
+
+const handleDownloadCertificate = async (gradeId, testType) => {
+  try {
+    const response = await gradeAPI.downloadCertificate(gradeId);
+    
+    const blob = new Blob([response.data], { type: 'application/pdf' });
+    const url = window.URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Certificate_${testType || 'Test'}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Error downloading certificate:', error);
+    alert('Failed to download certificate. Please try again.');
+  }
 };
 
 /** Get initials for avatar */
@@ -107,7 +123,7 @@ const fetchStudentData = async () => {
         const paymentResponse = await paymentAPI.getPaymentHistory(student.value.studentid);
         if (paymentResponse.data.success) {
           transactions.value = Array.isArray(paymentResponse.data.data)
-            ? paymentResponse.data.data
+            ? paymentResponse.data.data.slice(0, 10)
             : [];
         }
       } catch (error) {
@@ -223,19 +239,11 @@ onMounted(() => {
                   <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Birth Place</label>
                   <p class="text-gray-900 font-medium">{{ student.birthplace || '-' }}</p>
                 </div>
-                <div class="space-y-1">
-                  <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Address</label>
-                  <p class="text-gray-900 font-medium truncate" :title="student.address">{{ student.address || '-' }}</p>
-                </div>
-                <div class="space-y-1">
-                  <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Payment Type</label>
-                  <p class="text-gray-900 font-medium">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                      {{ student.payment_type || 'Not Set' }}
-                    </span>
-                  </p>
-                </div>
-              </div>
+                 <div class="space-y-1">
+                   <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Address</label>
+                   <p class="text-gray-900 font-medium truncate" :title="student.address">{{ student.address || '-' }}</p>
+                 </div>
+               </div>
 
               <div class="mt-8 pt-6 border-t border-gray-100">
                 <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wider mb-4 flex items-center gap-2">
@@ -264,8 +272,8 @@ onMounted(() => {
                 Payment History
               </h2>
               <span class="text-xs font-medium text-gray-500 bg-white px-2 py-1 rounded-md border border-gray-200 shadow-sm">
-                {{ transactions.length }} Records
-              </span>
+                 Latest 10
+               </span>
             </div>
             
             <div class="flex-1 overflow-hidden flex flex-col">
@@ -281,18 +289,19 @@ onMounted(() => {
                 <table class="min-w-full divide-y divide-gray-100">
                   <thead class="bg-gray-50">
                     <tr>
-                      <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">ID</th>
-                      <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
-                      <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                      <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">ID</th>
+                      <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Date</th>
+                      <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Amount</th>
+                      <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Status</th>
                     </tr>
                   </thead>
                   <tbody class="bg-white divide-y divide-gray-100">
                     <tr v-for="transaction in transactions" :key="transaction.paymentid" class="hover:bg-gray-50 transition-colors">
-                      <td class="px-6 py-4 text-sm font-medium text-gray-900 font-mono">#{{ transaction.paymentid }}</td>
+                      <td class="px-6 py-4 text-sm font-medium text-gray-900">#{{ transaction.paymentid }}</td>
                       <td class="px-6 py-4 text-sm text-gray-600">{{ formatDate(transaction.created_at) }}</td>
+                      <td class="px-6 py-4 text-sm text-gray-900 font-medium">{{ transaction.amount ? `Rp ${transaction.amount.toLocaleString()}` : '-' }}</td>
                       <td class="px-6 py-4">
-                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-green-50 text-green-700 border border-green-100">
-                          <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full capitalize" :class="getStatusBadge(transaction.status)">
                           {{ transaction.status }}
                         </span>
                       </td>
@@ -344,9 +353,9 @@ onMounted(() => {
                   <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Speaking</th>
                   <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Reading</th>
                   <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Writing</th>
-                  <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Average</th>
+                  <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Final Score</th>
                   <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
-                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Report</th>
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Certificate</th>
                   <th class="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
@@ -361,21 +370,18 @@ onMounted(() => {
                   <td class="px-6 py-4 text-center text-sm text-gray-600">{{ grade.writing_score || '-' }}</td>
                   <td class="px-6 py-4 text-center">
                     <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-50 text-blue-700 font-bold text-sm border border-blue-100">
-                      {{ getAverageScore(grade) }}
+                      {{ grade.final_score ?? '-' }}
                     </span>
                   </td>
                   <td class="px-6 py-4 text-sm text-gray-500">{{ formatDate(grade.date_taken) }}</td>
                   <td class="px-6 py-4">
-                    <a
-                      v-if="grade.tbreport_files && grade.tbreport_files.length > 0"
-                      :href="grade.tbreport_files[0].url"
-                      target="_blank"
-                      class="inline-flex items-center gap-1.5 text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors"
+                    <BaseButton
+                      size="sm"
+                      variant="secondary"
+                      @click="handleDownloadCertificate(grade.gradeid, grade.test_type)"
                     >
-                      <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/></svg>
-                      View PDF
-                    </a>
-                    <span v-else class="text-xs text-gray-400 italic">No file</span>
+                      Download
+                    </BaseButton>
                   </td>
                   <td class="px-6 py-4 text-right">
                     <BaseButton

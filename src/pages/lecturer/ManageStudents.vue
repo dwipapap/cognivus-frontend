@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import { useLecturerProfile } from '../../composables/useLecturerProfile';
 import { classAPI, studentAPI, levelAPI } from '../../services/api';
 import LoadingBar from '../../components/ui/LoadingBar.vue';
+import BaseButton from '../../components/ui/BaseButton.vue';
 import IconArrowLeft from '~icons/basil/arrow-left-solid';
 import IconArrowRight from '~icons/basil/arrow-right-solid';
 
@@ -175,20 +176,6 @@ const viewStudentDetails = (student) => {
   router.push({ name: 'StudentDetail', params: { id: userId } });
 };
 
-/** Get payment label */
-const getPaymentLabel = (type) => {
-  if (type === 'Full') return 'Full Payment';
-  if (type === 'Monthly') return 'Monthly';
-  return type;
-};
-
-/** Get payment badge style */
-const getPaymentStyle = (type) => {
-  if (type === 'Full') return 'bg-emerald-100 text-emerald-700';
-  if (type === 'Monthly') return 'bg-blue-100 text-blue-700';
-  return 'bg-gray-100 text-gray-600';
-};
-
 /** Auto-fetch classes when profile loads */
 watchEffect(() => {
   if (!profileLoading.value && lecturerProfile.value) {
@@ -315,15 +302,16 @@ onMounted(() => {
                   <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
                   <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gender</th>
                   <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Parent</th>
-                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Class</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Level</th>
                   <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-200">
                 <tr 
-                  v-for="student in paginatedStudents" 
-                  :key="student.studentid" 
-                  v-memo="[student.studentid, student.fullname, student.payment_type]"
+                  v-for="student in paginatedStudents"
+                  :key="student.studentid"
+                  v-memo="[student.studentid, student.fullname]"
                   class="hover:bg-gray-50"
                 >
                   <!-- Student Info -->
@@ -361,16 +349,14 @@ onMounted(() => {
                     <span v-else class="text-sm text-gray-400">-</span>
                   </td>
                   <td class="px-4 py-3">
-                    <span
-                      v-if="student.payment_type"
-                      :class="[
-                        'inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full',
-                        getPaymentStyle(student.payment_type)
-                      ]"
-                    >
-                      {{ getPaymentLabel(student.payment_type) }}
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800">
+                      {{ selectedClass?.class_code || 'Unassigned' }}
                     </span>
-                    <span v-else class="text-sm text-gray-400">-</span>
+                  </td>
+                  <td class="px-4 py-3">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-indigo-100 text-indigo-800">
+                      {{ getLevelName(selectedClass?.levelid) }}
+                    </span>
                   </td>
                   <td class="px-4 py-3">
                     <button
