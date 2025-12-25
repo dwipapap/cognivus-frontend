@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { authStore } from '../store/auth';
-import apiClient from '../services/api';
+import apiClient, { studentAPI } from '../services/api';
 import LoadingSpinner from '../components/ui/LoadingSpinner.vue';
 import ittrLogo from '../assets/ittrlogo.png';
 
@@ -39,7 +39,7 @@ onMounted(async () => {
 
     authStore.setAuth(user, token, role);
 
-    // Check if user has a password set
+    // Check if user needs to complete profile setup
     statusMessage.value = 'Checking account status...';
     
     try {
@@ -48,16 +48,43 @@ onMounted(async () => {
       if (response.data.success) {
         const userData = response.data.data;
         
-        // If password is null, redirect to new user page
-        if (!userData.password || userData.password === null) {
-          statusMessage.value = 'Setting up your account...';
-          await new Promise(resolve => setTimeout(resolve, 500));
-          router.push('/new-user');
-          return;
+        // Check if this is a Google user (has raw_meta_data from Google OAuth)
+        const isGoogleUser = userData.raw_meta_data && userData.raw_meta_data.sub;
+        
+        if (isGoogleUser) {
+          // For Google users, check if student profile is complete
+          const studentResponse = await studentAPI.getStudentById(id);
+          
+          if (studentResponse.data.success) {
+            const studentData = Array.isArray(studentResponse.data.data)
+              ? studentResponse.data.data[0]
+              : studentResponse.data.data;
+            
+            // Check if critical fields are missing (indicates first-time login)
+            // Using OR logic: if ANY of these fields is missing, it's first-time
+            const isFirstTime = !studentData.phone || 
+                               !studentData.birthdate || 
+                               !studentData.address;
+            
+            if (isFirstTime) {
+              statusMessage.value = 'Setting up your account...';
+              await new Promise(resolve => setTimeout(resolve, 500));
+              router.push('/new-user');
+              return;
+            }
+          }
+        } else {
+          // For non-Google users, check password (existing logic)
+          if (!userData.password || userData.password === null) {
+            statusMessage.value = 'Setting up your account...';
+            await new Promise(resolve => setTimeout(resolve, 500));
+            router.push('/new-user');
+            return;
+          }
         }
       }
     } catch (checkError) {
-      console.error('Error checking user password:', checkError);
+      console.error('Error checking user status:', checkError);
       // Continue to dashboard if check fails (fail gracefully)
     }
 
