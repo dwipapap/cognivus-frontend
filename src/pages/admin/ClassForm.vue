@@ -5,6 +5,7 @@ import BaseInput from '../../components/form/BaseInput.vue';
 import BaseSelect from '../../components/form/BaseSelect.vue';
 import BaseTextarea from '../../components/form/BaseTextarea.vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
+import StudentTransferList from '../../components/admin/StudentTransferList.vue';
 
 const props = defineProps({
   classItem: {
@@ -22,10 +23,20 @@ const props = defineProps({
   lecturers: {
     type: Array,
     default: () => []
+  },
+  allStudents: {
+    type: Array,
+    default: () => []
+  },
+  allClasses: {
+    type: Array,
+    default: () => []
   }
 });
 
-const emit = defineEmits(['close', 'save']);
+const emit = defineEmits(['close', 'save', 'saveStudents']);
+
+const activeTab = ref('details');
 
 /** Days of the week for schedule selection */
 const daysOfWeek = [
@@ -67,17 +78,61 @@ watch(() => props.classItem, (newVal) => {
   }
 }, { immediate: true });
 
-/** Handle form submission */
 const handleSave = async () => {
   await submit(async (data) => {
     emit('save', data);
   });
 };
+
+const handleStudentSave = async (studentData) => {
+  emit('saveStudents', studentData);
+};
 </script>
 
 <template>
-  <form @submit.prevent="handleSave" class="space-y-6">
-    <!-- Two Column Grid Layout -->
+  <div class="space-y-6">
+    <div v-if="isEditMode" class="border-b border-gray-200">
+      <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+        <button
+          type="button"
+          @click="activeTab = 'details'"
+          :class="[
+            'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors',
+            activeTab === 'details'
+              ? 'border-blue-600 text-blue-600'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+          ]"
+        >
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+            </svg>
+            <span>Class Details</span>
+          </div>
+        </button>
+        <button
+          type="button"
+          @click="activeTab = 'students'"
+          :class="[
+            'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors',
+            activeTab === 'students'
+              ? 'border-blue-600 text-blue-600'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+          ]"
+        >
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+            </svg>
+            <span>Manage Students</span>
+          </div>
+        </button>
+      </nav>
+    </div>
+
+    <div v-show="activeTab === 'details'">
+      <form @submit.prevent="handleSave" class="space-y-6">
+        <!-- Two Column Grid Layout -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       
       <!-- Left Column: Class Information -->
@@ -278,4 +333,17 @@ const handleSave = async () => {
       </BaseButton>
     </div>
   </form>
+</div>
+
+<div v-if="isEditMode" v-show="activeTab === 'students'">
+  <StudentTransferList
+    :current-class-id="classItem?.classid"
+    :current-class-name="classItem?.class_code"
+    :all-students="allStudents"
+    :all-classes="allClasses"
+    @save="handleStudentSave"
+    @cancel="$emit('close')"
+  />
+</div>
+</div>
 </template>

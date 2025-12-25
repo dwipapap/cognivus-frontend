@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { classAPI, levelAPI, lecturerAPI } from '../../services/api';
+import { classAPI, levelAPI, lecturerAPI, studentAPI } from '../../services/api';
 import Modal from '../../components/ui/Modal.vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
 import ClassForm from './ClassForm.vue';
@@ -8,6 +8,7 @@ import ClassForm from './ClassForm.vue';
 const classes = ref([]);
 const levels = ref([]);
 const lecturers = ref([]);
+const students = ref([]);
 const isLoading = ref(true);
 const showFormModal = ref(false);
 const showNotificationModal = ref(false);
@@ -85,12 +86,12 @@ const fetchClasses = async () => {
   }
 };
 
-/** Fetch dropdown options */
 const fetchOptions = async () => {
   try {
-    const [levelRes, lecturerRes] = await Promise.all([
+    const [levelRes, lecturerRes, studentRes] = await Promise.all([
       levelAPI.getAllLevels(),
-      lecturerAPI.getAllLecturers()
+      lecturerAPI.getAllLecturers(),
+      studentAPI.getAllStudents()
     ]);
     
     if (levelRes.data.success) {
@@ -99,6 +100,10 @@ const fetchOptions = async () => {
     
     if (lecturerRes.data.success) {
       lecturers.value = lecturerRes.data.data;
+    }
+
+    if (studentRes.data.success) {
+      students.value = studentRes.data.data;
     }
   } catch (error) {
     console.error('Failed to fetch options:', error);
@@ -126,7 +131,6 @@ const openEditModal = (classItem) => {
   showFormModal.value = true;
 };
 
-/** Handle save (create or update) */
 const handleSave = async (formData) => {
   try {
     if (isEditMode.value) {
@@ -141,6 +145,45 @@ const handleSave = async (formData) => {
   } catch (error) {
     const message = error.response?.data?.message || 'An error occurred.';
     showNotification('error', `Failed to save class: ${message}`);
+  }
+};
+
+const handleStudentSave = async (studentData) => {
+  try {
+    const { toAdd, toRemove } = studentData;
+    const classid = selectedClass.value.classid;
+
+    const updatePromises = [];
+
+    toAdd.forEach(studentid => {
+      const student = students.value.find(s => s.studentid === studentid);
+      if (student) {
+        const userid = student.tbuser?.userid || student.userid;
+        updatePromises.push(
+          studentAPI.updateStudent(userid, { classid: classid })
+        );
+      }
+    });
+
+    toRemove.forEach(studentid => {
+      const student = students.value.find(s => s.studentid === studentid);
+      if (student) {
+        const userid = student.tbuser?.userid || student.userid;
+        updatePromises.push(
+          studentAPI.updateStudent(userid, { classid: null })
+        );
+      }
+    });
+
+    await Promise.all(updatePromises);
+
+    showNotification('success', `Successfully updated ${toAdd.length + toRemove.length} student(s).`);
+    showFormModal.value = false;
+    
+    await fetchOptions();
+  } catch (error) {
+    const message = error.response?.data?.message || 'An error occurred.';
+    showNotification('error', `Failed to update students: ${message}`);
   }
 };
 
@@ -336,8 +379,11 @@ onMounted(() => {
           :is-edit-mode="isEditMode"
           :levels="levels"
           :lecturers="lecturers"
+          :all-students="students"
+          :all-classes="classes"
           @close="showFormModal = false"
           @save="handleSave"
+          @saveStudents="handleStudentSave"
         />
       </template>
     </Modal>
