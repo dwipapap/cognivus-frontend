@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { studentAPI, gradeAPI, paymentAPI, userAPI } from '../../services/api';
+import { studentAPI, gradeAPI, paymentAPI, userAPI, classAPI, levelAPI } from '../../services/api';
 import { useForm } from '../../composables/useForm';
 import LoadingBar from '../../components/ui/LoadingBar.vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
@@ -15,6 +15,8 @@ const router = useRouter();
 const studentId = route.params.id;
 
 const student = ref(null);
+const classInfo = ref(null);
+const levelInfo = ref(null);
 const grades = ref([]);
 const transactions = ref([]);
 const isLoading = ref(true);
@@ -147,7 +149,39 @@ const fetchStudentData = async () => {
     }
     
     student.value = studentData;
-    
+
+    // Fetch class data
+    if (studentData.classid) {
+      try {
+        const classResponse = await classAPI.getClassById(studentData.classid);
+        if (classResponse.data.success) {
+          let classData = classResponse.data.data;
+          if (Array.isArray(classData)) {
+            classData = classData[0];
+          }
+          classInfo.value = classData;
+
+          // Fetch level data from class
+          if (classData?.levelid) {
+            try {
+              const levelResponse = await levelAPI.getLevelById(classData.levelid);
+              if (levelResponse.data.success) {
+                let levelData = levelResponse.data.data;
+                if (Array.isArray(levelData)) {
+                  levelData = levelData[0];
+                }
+                levelInfo.value = levelData;
+              }
+            } catch (error) {
+              console.error('Error fetching level:', error);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching class:', error);
+      }
+    }
+
     // Populate form
     formData.fullname = studentData.fullname || '';
     formData.gender = studentData.gender || '';
@@ -322,6 +356,16 @@ onMounted(() => {
                 <span class="flex items-center gap-1.5">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
                   {{ student.phone || 'No phone' }}
+                </span>
+                <span class="w-1 h-1 rounded-full bg-gray-300"></span>
+                <span class="flex items-center gap-1.5">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                  {{ classInfo?.class_code || 'No class' }}
+                </span>
+                <span class="w-1 h-1 rounded-full bg-gray-300"></span>
+                <span class="flex items-center gap-1.5">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                  {{ levelInfo?.name || 'No level' }}
                 </span>
               </div>
             </div>
