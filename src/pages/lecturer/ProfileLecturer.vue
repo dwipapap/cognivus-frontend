@@ -127,7 +127,7 @@ const closeModal = () => {
 };
 
 const handleCancel = () => {
-  router.push('/lecturer/profile/view');
+  router.push('/lecturer/profile-view');
 };
 
 onMounted(fetchProfile);
