@@ -6,6 +6,7 @@ import { classAPI, studentAPI, levelAPI } from '../../services/api';
 import LoadingBar from '../../components/ui/LoadingBar.vue';
 import IconArrowLeft from '~icons/basil/arrow-left-solid';
 import IconArrowRight from '~icons/basil/arrow-right-solid';
+import { getInitials } from '../../utils/formatters';
 
 const router = useRouter();
 const { lecturerProfile, isLoading: profileLoading } = useLecturerProfile();
@@ -135,15 +136,6 @@ const getGenderLabel = (gender) => {
 };
 
 /** Get initials from name */
-const getInitials = (name) => {
-  if (!name) return '?';
-  return name
-    .split(' ')
-    .map(n => n[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase();
-};
 
 /** Handle class selection */
 const selectClass = (cls) => {

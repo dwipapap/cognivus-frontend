@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { studentAPI, gradeAPI, paymentAPI } from '../../services/api';
+import { formatDate, getAverageScore, getInitials } from '../../utils/formatters';
 import LoadingBar from '../../components/ui/LoadingBar.vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
 
@@ -15,52 +16,12 @@ const transactions = ref([]);
 const isLoading = ref(true);
 const errorMessage = ref('');
 
-/** Get gender display */
 const getGenderDisplay = (code) => {
   if (code === 'L') return 'Male';
   if (code === 'F') return 'Female';
   return '-';
 };
 
-/** Format date */
-const formatDate = (dateString) => {
-  if (!dateString) return '-';
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  });
-};
-
-/** Calculate average score */
-const getAverageScore = (grade) => {
-  const scores = [
-    grade.listening_score,
-    grade.speaking_score,
-    grade.reading_score,
-    grade.writing_score
-  ].filter(s => s !== null && s !== undefined);
-  
-  if (scores.length === 0) return '-';
-  const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
-  return avg.toFixed(1);
-};
-
-/** Get initials for avatar */
-const getInitials = (name) => {
-  if (!name) return 'ST';
-  return name
-    .split(' ')
-    .map(n => n[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase();
-};
-
-/**
- * Fetch student profile and grades.
- * Grades fetched separately since they depend on studentid.
- */
 const fetchStudentData = async () => {
   try {
     isLoading.value = true;

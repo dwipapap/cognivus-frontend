@@ -5,6 +5,7 @@ import { useLecturerProfile } from '../../composables/useLecturerProfile';
 import LoadingBar from '../../components/ui/LoadingBar.vue';
 import iconBoyImage from '../../assets/iconboy.webp';
 import iconGirlImage from '../../assets/icongirl.webp';
+import { formatDate } from '../../utils/formatters';
 
 const { lecturerProfile, isLoading, errorMessage } = useLecturerProfile();
 
@@ -31,22 +32,7 @@ const avatarUrl = computed(() => {
 const handleImageError = (event) => {
   event.target.src = iconBoyImage;
 };
-
-/** Format date to DD-MM-YYYY */
-const formatDate = (dateString) => {
-  if (!dateString) return '-';
-  try {
-    const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
-  } catch {
-    return dateString;
-  }
-};
 </script>
-
 
 <template>
   <!-- Loading State -->
