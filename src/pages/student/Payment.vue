@@ -772,88 +772,102 @@ onMounted(async () => {
     <!-- Payment Guide Modal -->
     <Teleport to="body">
       <div v-if="showGuideModal"
-        class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+        class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+        @keydown.esc="closeGuideModal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="guide-modal-title"
+        aria-describedby="guide-modal-description">
         <div
-          class="bg-white rounded-3xl p-8 max-w-2xl w-full shadow-2xl transform transition-all max-h-[90vh] overflow-y-auto">
-          <div class="mb-6">
-            <div class="flex items-center gap-4 mb-3">
-              <div class="w-14 h-14 bg-blue-100 rounded-2xl flex items-center justify-center">
-                <IconQuestionCircle class="w-7 h-7 text-blue-600" />
+          class="guide-modal-container bg-white/95 backdrop-blur-lg rounded-3xl p-6 sm:p-8 max-w-2xl w-full shadow-2xl transform transition-all max-h-[90vh] overflow-y-auto border border-white/20">
+          
+          <!-- Header -->
+          <div class="mb-8">
+            <div class="flex items-center gap-4 mb-4">
+              <div class="question-icon-container w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
+                <IconQuestionCircle class="w-8 h-8 text-white" aria-hidden="true" />
               </div>
-              <div>
-                <h3 class="text-2xl font-bold text-gray-800">Payment Guide</h3>
-                <p class="text-gray-500 text-sm">Important information about payments</p>
+              <div class="flex-1">
+                <h3 id="guide-modal-title" class="text-3xl font-bold text-gray-800 mb-1">Payment Guide</h3>
+                <p id="guide-modal-description" class="text-base text-gray-500">Important information about payments</p>
               </div>
             </div>
+            <!-- Elegant divider -->
+            <div class="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent mt-4"></div>
           </div>
 
-          <div class="space-y-3 mb-6">
-            <!-- Guide Point 1 -->
-            <div class="flex items-start gap-4 p-4 bg-blue-50 rounded-2xl border border-blue-100">
+          <div class="space-y-4 mb-8">
+            <!-- Step 1: Info -->
+            <div class="guide-step-card flex items-start gap-4 p-5 bg-white/90 backdrop-blur rounded-2xl border border-blue-100 border-l-4 border-l-blue-600 hover:shadow-lg transition-all duration-300 cursor-default">
               <div
-                class="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                class="flex-shrink-0 w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-base shadow-md"
+                aria-hidden="true">
                 1
               </div>
               <div class="flex-1">
-                <h4 class="font-bold text-gray-800 mb-1">Payment Confirmation Time</h4>
-                <p class="text-sm text-gray-600">Payment confirmation takes approximately 5-10 minutes to process</p>
+                <h4 class="text-sm font-bold text-gray-800 mb-2 leading-tight">Payment Confirmation Time</h4>
+                <p class="text-sm text-gray-600 leading-relaxed">Payment confirmation takes approximately 5-10 minutes to process</p>
               </div>
             </div>
 
-            <!-- Guide Point 2 -->
-            <div class="flex items-start gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+            <!-- Step 2: Neutral -->
+            <div class="guide-step-card flex items-start gap-4 p-5 bg-white/90 backdrop-blur rounded-2xl border border-slate-100 border-l-4 border-l-slate-600 hover:shadow-lg transition-all duration-300 cursor-default">
               <div
-                class="flex-shrink-0 w-8 h-8 bg-slate-600 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                class="flex-shrink-0 w-10 h-10 bg-slate-600 text-white rounded-full flex items-center justify-center font-bold text-base shadow-md"
+                aria-hidden="true">
                 2
               </div>
               <div class="flex-1">
-                <h4 class="font-bold text-gray-800 mb-1">Changing Payment Method</h4>
-                <p class="text-sm text-gray-600">To change payment method, wait until the current transaction expires
-                  before creating a new one</p>
+                <h4 class="text-sm font-bold text-gray-800 mb-2 leading-tight">Changing Payment Method</h4>
+                <p class="text-sm text-gray-600 leading-relaxed">To change payment method, wait until the current transaction expires before creating a new one</p>
               </div>
             </div>
 
-            <!-- Guide Point 3 -->
-            <div class="flex items-start gap-4 p-4 bg-blue-50 rounded-2xl border border-blue-100">
+            <!-- Step 3: Info -->
+            <div class="guide-step-card flex items-start gap-4 p-5 bg-white/90 backdrop-blur rounded-2xl border border-blue-100 border-l-4 border-l-blue-600 hover:shadow-lg transition-all duration-300 cursor-default">
               <div
-                class="flex-shrink-0 w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                class="flex-shrink-0 w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-base shadow-md"
+                aria-hidden="true">
                 3
               </div>
               <div class="flex-1">
-                <h4 class="font-bold text-gray-800 mb-1">Course Fee Calculation</h4>
-                <p class="text-sm text-gray-600">Course fees are calculated based on your student level and program</p>
+                <h4 class="text-sm font-bold text-gray-800 mb-2 leading-tight">Course Fee Calculation</h4>
+                <p class="text-sm text-gray-600 leading-relaxed">Course fees are calculated based on your student level and program</p>
               </div>
             </div>
 
-            <!-- Guide Point 4 -->
-            <div class="flex items-start gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+            <!-- Step 4: Neutral -->
+            <div class="guide-step-card flex items-start gap-4 p-5 bg-white/90 backdrop-blur rounded-2xl border border-slate-100 border-l-4 border-l-slate-600 hover:shadow-lg transition-all duration-300 cursor-default">
               <div
-                class="flex-shrink-0 w-8 h-8 bg-slate-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                class="flex-shrink-0 w-10 h-10 bg-slate-600 text-white rounded-full flex items-center justify-center font-bold text-base shadow-md"
+                aria-hidden="true">
                 4
               </div>
               <div class="flex-1">
-                <h4 class="font-bold text-gray-800 mb-1">Refresh Payment History</h4>
-                <p class="text-sm text-gray-600">If status doesn't update automatically, use the refresh button in
-                  payment history</p>
+                <h4 class="text-sm font-bold text-gray-800 mb-2 leading-tight">Refresh Payment History</h4>
+                <p class="text-sm text-gray-600 leading-relaxed">If status doesn't update automatically, use the refresh button in payment history</p>
               </div>
             </div>
 
-            <!-- Guide Point 5 -->
-            <div class="flex items-start gap-4 p-4 bg-red-50 rounded-2xl border border-red-100">
+            <!-- Step 5: Warning -->
+            <div class="guide-step-card flex items-start gap-4 p-5 bg-white/90 backdrop-blur rounded-2xl border border-red-100 border-l-4 border-l-red-600 hover:shadow-lg transition-all duration-300 cursor-default">
               <div
-                class="flex-shrink-0 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                class="flex-shrink-0 w-10 h-10 bg-red-600 text-white rounded-full flex items-center justify-center font-bold text-base shadow-md"
+                aria-hidden="true">
                 !
               </div>
               <div class="flex-1">
-                <h4 class="font-bold text-gray-800 mb-1">Payment Status Issue</h4>
-                <p class="text-sm text-gray-600">If payment succeeded but shows pending/failed, please contact admin
-                  immediately</p>
+                <h4 class="text-sm font-bold text-gray-800 mb-2 leading-tight">Payment Status Issue</h4>
+                <p class="text-sm text-gray-600 leading-relaxed">If payment succeeded but shows pending/failed, please contact admin immediately</p>
               </div>
             </div>
+
           </div>
 
+          <!-- Close Button -->
           <button @click="closeGuideModal"
-            class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full transition-all shadow-lg hover:shadow-xl">
+            class="guide-close-button w-full min-h-[44px] py-3.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold rounded-full transition-all duration-300 shadow-lg hover:shadow-xl active:scale-[0.98] border border-blue-500/30"
+            aria-label="Close payment guide">
             Got it, Thanks!
           </button>
         </div>
@@ -915,5 +929,104 @@ onMounted(async () => {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+/* Payment Guide Modal Styles */
+.guide-modal-container {
+  animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Step cards with staggered animation */
+.guide-step-card {
+  opacity: 0;
+  animation: cardSlideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.guide-step-card:nth-child(1) { animation-delay: 0.05s; }
+.guide-step-card:nth-child(2) { animation-delay: 0.1s; }
+.guide-step-card:nth-child(3) { animation-delay: 0.15s; }
+.guide-step-card:nth-child(4) { animation-delay: 0.2s; }
+.guide-step-card:nth-child(5) { animation-delay: 0.25s; }
+
+@keyframes cardSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Step card hover effects */
+.guide-step-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
+/* Question icon pulse animation */
+.question-icon-container {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* Close button hover effect */
+.guide-close-button:hover {
+  transform: scale(1.02);
+}
+
+.guide-close-button:active {
+  transform: scale(0.98);
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .guide-modal-container,
+  .guide-step-card,
+  .question-icon-container,
+  .payment-type-card {
+    animation: none;
+    transition: none;
+  }
+
+  .guide-step-card:hover {
+    transform: none;
+  }
+
+  .guide-close-button:hover {
+    transform: none;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .guide-modal-container {
+    max-width: 100%;
+    padding: 1.5rem;
+  }
+
+  .guide-step-card {
+    padding: 1rem;
+  }
 }
 </style>
