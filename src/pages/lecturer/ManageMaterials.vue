@@ -10,6 +10,16 @@ import LoadingBar from '../../components/ui/LoadingBar.vue';
 import ConfirmDialog from '../../components/ui/ConfirmDialog.vue';
 import IconArrowLeft from '~icons/basil/arrow-left-solid';
 import IconArrowRight from '~icons/basil/arrow-right-solid';
+import IconPlus from '~icons/solar/add-circle-bold';
+import IconPen from '~icons/solar/pen-new-square-bold';
+import IconTrash from '~icons/solar/trash-bin-trash-bold';
+import IconFile from '~icons/solar/file-text-bold';
+import IconVideo from '~icons/solar/videocamera-record-bold';
+import IconLink from '~icons/solar/link-bold';
+import IconCheck from '~icons/solar/check-circle-bold';
+import IconInfo from '~icons/solar/info-circle-bold';
+import IconCloudUpload from '~icons/solar/cloud-upload-bold';
+import IconClose from '~icons/solar/close-circle-bold';
 import { formatDate } from '../../utils/formatters';
 
 const { lecturerProfile, isLoading: profileLoading } = useLecturerProfile();
@@ -375,38 +385,51 @@ onMounted(() => {
     <!-- Main Content -->
     <div v-else-if="myClasses.length > 0" class="space-y-6">
       <!-- Class Selection -->
-      <div class="bg-white rounded-2xl shadow-lg p-6">
-        <h2 class="text-xl font-bold text-gray-900 mb-4">Select Class</h2>
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-xl shadow-blue-900/5 p-6 mb-8">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-2 h-6 bg-blue-600 rounded-full"></div>
+          <h2 class="text-lg font-extrabold text-blue-900 tracking-tight uppercase">Select Class</h2>
+        </div>
         
         <!-- Horizontal Card Selector with Pagination -->
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2 md:gap-4">
           <!-- Previous Button -->
           <button
             v-if="shouldShowClassNavigation"
             @click="goToClassPage(classCurrentPage - 1)"
             :disabled="classCurrentPage === 1"
-            class="flex-shrink-0 w-10 h-10 rounded-full border-2 border-gray-300 bg-white flex items-center justify-center text-gray-600 transition-all hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:border-blue-400 hover:text-blue-700 hover:scale-110 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-sm hover:shadow-md"
+            class="flex-shrink-0 w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all duration-300 ring-1 ring-gray-200 bg-white text-gray-400 hover:ring-blue-500 hover:text-blue-600 hover:bg-blue-50 active:scale-90 disabled:opacity-20 disabled:cursor-not-allowed shadow-sm"
             aria-label="Previous classes"
           >
-            <IconArrowLeft class="w-5 h-5" />
+            <IconArrowLeft class="w-4 h-4 md:w-5 md:h-5" />
           </button>
 
           <!-- Cards Container -->
-          <div class="flex-1 flex flex-wrap" :class="classJustifyMode">
+          <div class="flex-1 grid grid-cols-2 sm:grid-cols-3 md:flex md:flex-wrap gap-3 md:gap-4" :class="classJustifyMode">
             <button
               v-for="cls in paginatedClasses"
               :key="cls.classid"
               @click="selectedClass = cls"
               :class="[
-                'flex-shrink-0 min-w-[160px] max-w-[220px] p-3 rounded-xl border-2 text-left transition-all shadow-sm hover:shadow-md',
+                'group relative min-w-0 md:flex-shrink-0 md:min-w-[180px] md:max-w-[240px] p-3 md:p-5 rounded-2xl border transition-all duration-300 text-left',
                 selectedClass?.classid === cls.classid
-                  ? 'border-blue-600 bg-gradient-to-br from-blue-50 to-indigo-50 scale-105'
-                  : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50/30'
+                  ? 'bg-blue-50/50 border-blue-600 ring-1 ring-blue-600 shadow-lg shadow-blue-500/15'
+                  : 'bg-white border-gray-100 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-500/10 hover:-translate-y-1'
               ]"
             >
-              <h3 class="font-bold text-base text-gray-900 truncate">{{ cls.class_code }}</h3>
-              <p class="text-xs text-gray-600 mt-1">{{ getLevelName(cls.levelid) }}</p>
-              <p class="text-xs text-gray-500 mt-1 line-clamp-2">{{ cls.description || 'No description' }}</p>
+              <!-- Selected Indicator -->
+              <div 
+                v-if="selectedClass?.classid === cls.classid"
+                class="absolute top-2 right-2 md:top-3 md:right-3 w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-blue-600 animate-pulse"
+              ></div>
+
+              <span class="inline-block px-1.5 py-0.5 rounded-md bg-blue-50 text-[8px] md:text-[10px] font-bold text-blue-700 uppercase tracking-wider mb-1 md:mb-2">
+                {{ getLevelName(cls.levelid) }}
+              </span>
+              <h3 class="font-extrabold text-sm md:text-lg text-blue-900 truncate leading-tight mb-1">{{ cls.class_code }}</h3>
+              <p class="text-[10px] md:text-xs text-gray-500 line-clamp-2 leading-relaxed h-7 md:h-8 italic">
+                {{ cls.description || 'Professional academic path' }}
+              </p>
             </button>
           </div>
 
@@ -415,10 +438,10 @@ onMounted(() => {
             v-if="shouldShowClassNavigation"
             @click="goToClassPage(classCurrentPage + 1)"
             :disabled="classCurrentPage === classTotalPages"
-            class="flex-shrink-0 w-10 h-10 rounded-full border-2 border-gray-300 bg-white flex items-center justify-center text-gray-600 transition-all hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:border-blue-400 hover:text-blue-700 hover:scale-110 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-sm hover:shadow-md"
+            class="flex-shrink-0 w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all duration-300 ring-1 ring-gray-200 bg-white text-gray-400 hover:ring-blue-500 hover:text-blue-600 hover:bg-blue-50 active:scale-90 disabled:opacity-20 disabled:cursor-not-allowed shadow-sm"
             aria-label="Next classes"
           >
-            <IconArrowRight class="w-5 h-5" />
+            <IconArrowRight class="w-4 h-4 md:w-5 md:h-5" />
           </button>
         </div>
       </div>
@@ -557,22 +580,15 @@ onMounted(() => {
           class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
           @click.self="resetForm"
         >
-          <div class="bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
-            <!-- Modal Header with Gradient -->
-            <div class="sticky top-0 bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 px-8 py-6 flex justify-between items-center shadow-lg">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                  <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </div>
-                <h3 class="text-2xl font-bold text-white">
-                  {{ editingCourse ? 'Edit Material' : 'Add New Material' }}
-                </h3>
-              </div>
+          <div class="bg-white rounded-3xl shadow-2xl w-full max-w-6xl max-h-[92vh] overflow-hidden flex flex-col border border-gray-100">
+            <!-- Modal Header -->
+            <div class="sticky top-0 bg-white px-8 py-6 flex justify-between items-center z-10 border-b border-gray-100">
+              <h3 class="text-xl font-bold text-gray-900">
+                {{ editingCourse ? 'Edit Material' : 'Add Material' }}
+              </h3>
               <button
                 @click="resetForm"
-                class="text-white/80 hover:text-white hover:bg-white/10 rounded-full p-2 transition-all hover:scale-110 active:scale-95"
+                class="text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg p-2 transition-all"
               >
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -581,26 +597,24 @@ onMounted(() => {
             </div>
 
             <!-- Modal Body - Scrollable -->
-            <div class="flex-1 overflow-y-auto px-8 py-6 bg-gradient-to-b from-gray-50/50 to-white">
+            <div class="flex-1 overflow-y-auto px-8 py-6 bg-white">
               <!-- Two Column Grid Layout -->
-              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
                 
-                <!-- Left Column: Material Details -->
-                <div class="space-y-6">
-                  <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                    <h3 class="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                      <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                      Material Details
-                    </h3>
+                <!-- Left Column: Material Details (7 cols) -->
+                <div class="lg:col-span-7 space-y-8">
+                  <div>
+                    <div class="flex items-center gap-2 mb-6">
+                      <div class="w-1 h-5 bg-blue-600 rounded-full"></div>
+                      <h4 class="text-sm font-bold text-gray-900 uppercase tracking-wider">Material Details</h4>
+                    </div>
                     
-                    <div class="space-y-4">
+                    <div class="space-y-6">
                       <!-- Title Input -->
                       <BaseInput
                         v-model="formData.title"
-                        label="Title"
-                        placeholder="Enter material title"
+                        label="Material Title"
+                        placeholder="Enter a descriptive title"
                         required
                       />
 
@@ -608,66 +622,57 @@ onMounted(() => {
                       <BaseInput
                         v-model="formData.course_code"
                         label="Course Code"
-                        placeholder="e.g., ENG-101"
+                        placeholder="e.g., CS-204"
                       />
 
                       <!-- Description Textarea -->
                       <BaseTextarea
                         v-model="formData.description"
                         label="Description"
-                        placeholder="Describe the course material..."
-                        :rows="4"
+                        placeholder="Provide context or instructions for students..."
+                        :rows="5"
                       />
                     </div>
                   </div>
                 </div>
 
-                <!-- Right Column: Files & Media -->
-                <div class="space-y-6">
-                  <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                    <h3 class="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                      <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-                      </svg>
-                      Files & Media
-                    </h3>
+                <!-- Right Column: Files & Media (5 cols) -->
+                <div class="lg:col-span-5 space-y-8">
+                  <div>
+                    <div class="flex items-center gap-2 mb-6">
+                      <div class="w-1 h-5 bg-blue-600 rounded-full"></div>
+                      <h4 class="text-sm font-bold text-gray-900 uppercase tracking-wider">Files & Resources</h4>
+                    </div>
 
-                    <div class="space-y-4">
+                    <div class="space-y-6">
                       <!-- Existing Files (Edit Mode) -->
                       <div v-if="editingCourse && existingFiles.length > 0" class="space-y-3">
-                        <label class="block text-sm font-medium text-gray-700">Existing Files</label>
-                        <div class="bg-white border border-gray-200 rounded-lg p-3 space-y-2 max-h-48 overflow-y-auto">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">Attached Files</label>
+                        <div class="space-y-2 max-h-48 overflow-y-auto pr-2">
                           <div
                             v-for="file in existingFiles"
                             :key="file.cfid"
-                            class="flex items-center justify-between bg-gray-50 border border-gray-100 rounded-lg p-3 hover:bg-gray-100 transition-all"
+                            class="flex items-center justify-between bg-gray-50 border border-gray-100 rounded-lg p-3 hover:bg-gray-100 transition-colors"
                           >
-                            <div class="flex items-center gap-2 flex-1 min-w-0">
-                              <div class="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-md flex items-center justify-center">
-                                <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                  <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z"/>
-                                </svg>
-                              </div>
+                            <div class="flex items-center gap-3 flex-1 min-w-0">
+                              <IconFile class="w-5 h-5 text-blue-600 flex-shrink-0" />
                               <div class="flex-1 min-w-0">
                                 <a 
                                   :href="file.url || file.path" 
                                   target="_blank"
-                                  class="text-xs font-semibold text-blue-600 hover:text-blue-800 truncate block transition-colors"
+                                  class="text-sm font-semibold text-gray-900 hover:text-blue-600 truncate block transition-colors"
                                 >
-                                  File {{ file.cfid }}
+                                  {{ file.filename || 'Resource ' + file.cfid }}
                                 </a>
-                                <p class="text-xs text-gray-500">{{ formatDate(file.upload_date) }}</p>
                               </div>
                             </div>
                             <button
                               @click="deleteExistingFile(file.cfid)"
                               :disabled="isDeletingFile"
-                              class="ml-2 flex-shrink-0 inline-flex items-center gap-1 px-2 py-1 bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 rounded-md text-xs font-semibold transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                              class="ml-3 p-1.5 text-gray-400 hover:text-red-600 transition-colors"
+                              title="Delete File"
                             >
-                              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
-                              Delete
+                              <IconTrash class="w-4 h-4" />
                             </button>
                           </div>
                         </div>
@@ -676,27 +681,21 @@ onMounted(() => {
                       <!-- File Upload -->
                       <BaseFileUpload
                         v-model="uploadFiles"
-                        label="Upload New Files"
+                        label="Upload Materials"
                         accept=".pdf,.doc,.docx,.ppt,.pptx"
                         :max-size="50"
                         :multiple="true"
-                        hint="PDF, Word, or PowerPoint (max 50MB each)"
+                        hint="PDF, Word, PowerPoint (Max 50MB)"
                       />
 
                       <!-- Video Link Input -->
-                      <div>
+                      <div class="pt-4 border-t border-gray-50">
                         <BaseInput
                           v-model="formData.video_link"
-                          label="Video Link (Optional)"
-                          placeholder="https://youtube.com/watch?v=..."
+                          label="Video Resource"
+                          placeholder="YouTube or Vimeo link"
                           type="url"
                         />
-                        <div class="flex items-start gap-2 mt-2">
-                          <svg class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-                          </svg>
-                          <p class="text-xs text-gray-500">YouTube, Vimeo, or other platform</p>
-                        </div>
                       </div>
                     </div>
                   </div>
@@ -705,29 +704,23 @@ onMounted(() => {
               </div>
             </div>
 
-            <!-- Modal Footer with Actions -->
-            <div class="sticky bottom-0 bg-white border-t border-gray-200 px-8 py-5 flex justify-end gap-3 shadow-lg">
-              <BaseButton 
+            <!-- Modal Footer -->
+            <div class="sticky bottom-0 bg-white border-t border-gray-100 px-8 py-6 flex justify-end items-center gap-4 z-10">
+              <button 
                 type="button" 
-                variant="glass-secondary" 
                 @click="resetForm"
-                size="lg"
+                class="px-6 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
               >
                 Cancel
-              </BaseButton>
+              </button>
               <BaseButton 
                 type="button" 
-                variant="glass-primary" 
+                variant="primary" 
                 @click="saveMaterial"
                 :loading="isUploading"
-                size="lg"
+                class="min-w-[140px]"
               >
-                <span v-if="!isUploading">
-                  <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                  </svg>
-                  {{ editingCourse ? 'Update Material' : 'Save Material' }}
-                </span>
+                {{ editingCourse ? 'Save Changes' : 'Add Material' }}
               </BaseButton>
             </div>
           </div>

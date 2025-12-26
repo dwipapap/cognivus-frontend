@@ -207,38 +207,51 @@ onMounted(() => {
     <!-- Main Content -->
     <div v-else-if="myClasses.length > 0" class="space-y-6">
       <!-- Class Selection -->
-      <div class="bg-white rounded-2xl shadow-lg p-6">
-        <h2 class="text-xl font-bold text-gray-900 mb-4">Select Class</h2>
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-xl shadow-blue-900/5 p-6 mb-8">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-2 h-6 bg-blue-600 rounded-full"></div>
+          <h2 class="text-lg font-extrabold text-blue-900 tracking-tight uppercase">Select Class</h2>
+        </div>
         
         <!-- Horizontal Card Selector with Pagination -->
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2 md:gap-4">
           <!-- Previous Button -->
           <button
             v-if="shouldShowClassNavigation"
             @click="goToClassPage(classCurrentPage - 1)"
             :disabled="classCurrentPage === 1"
-            class="flex-shrink-0 w-10 h-10 rounded-full border-2 border-gray-300 bg-white flex items-center justify-center text-gray-600 transition-all hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:border-blue-400 hover:text-blue-700 hover:scale-110 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-sm hover:shadow-md"
+            class="flex-shrink-0 w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all duration-300 ring-1 ring-gray-200 bg-white text-gray-400 hover:ring-blue-500 hover:text-blue-600 hover:bg-blue-50 active:scale-90 disabled:opacity-20 disabled:cursor-not-allowed shadow-sm"
             aria-label="Previous classes"
           >
-            <IconArrowLeft class="w-5 h-5" />
+            <IconArrowLeft class="w-4 h-4 md:w-5 md:h-5" />
           </button>
 
           <!-- Cards Container -->
-          <div class="flex-1 flex flex-wrap" :class="classJustifyMode">
+          <div class="flex-1 grid grid-cols-2 sm:grid-cols-3 md:flex md:flex-wrap gap-3 md:gap-4" :class="classJustifyMode">
             <button
               v-for="cls in paginatedClasses"
               :key="cls.classid"
               @click="selectClass(cls)"
               :class="[
-                'flex-shrink-0 min-w-[160px] max-w-[220px] p-3 rounded-xl border-2 text-left transition-all shadow-sm hover:shadow-md',
+                'group relative min-w-0 md:flex-shrink-0 md:min-w-[180px] md:max-w-[240px] p-3 md:p-5 rounded-2xl border transition-all duration-300 text-left',
                 selectedClass?.classid === cls.classid
-                  ? 'border-blue-600 bg-gradient-to-br from-blue-50 to-indigo-50 scale-105'
-                  : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50/30'
+                  ? 'bg-blue-50/50 border-blue-600 ring-1 ring-blue-600 shadow-lg shadow-blue-500/15'
+                  : 'bg-white border-gray-100 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-500/10 hover:-translate-y-1'
               ]"
             >
-              <h3 class="font-bold text-base text-gray-900 truncate">{{ cls.class_code }}</h3>
-              <p class="text-xs text-gray-600 mt-1">{{ getLevelName(cls.levelid) }}</p>
-              <p class="text-xs text-gray-500 mt-1 line-clamp-2">{{ cls.description || 'No description' }}</p>
+              <!-- Selected Indicator -->
+              <div 
+                v-if="selectedClass?.classid === cls.classid"
+                class="absolute top-2 right-2 md:top-3 md:right-3 w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-blue-600 animate-pulse"
+              ></div>
+
+              <span class="inline-block px-1.5 py-0.5 rounded-md bg-blue-50 text-[8px] md:text-[10px] font-bold text-blue-700 uppercase tracking-wider mb-1 md:mb-2">
+                {{ getLevelName(cls.levelid) }}
+              </span>
+              <h3 class="font-extrabold text-sm md:text-lg text-blue-900 truncate leading-tight mb-1">{{ cls.class_code }}</h3>
+              <p class="text-[10px] md:text-xs text-gray-500 line-clamp-2 leading-relaxed h-7 md:h-8 italic">
+                {{ cls.description || 'Professional academic path' }}
+              </p>
             </button>
           </div>
 
@@ -247,10 +260,10 @@ onMounted(() => {
             v-if="shouldShowClassNavigation"
             @click="goToClassPage(classCurrentPage + 1)"
             :disabled="classCurrentPage === classTotalPages"
-            class="flex-shrink-0 w-10 h-10 rounded-full border-2 border-gray-300 bg-white flex items-center justify-center text-gray-600 transition-all hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:border-blue-400 hover:text-blue-700 hover:scale-110 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-sm hover:shadow-md"
+            class="flex-shrink-0 w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all duration-300 ring-1 ring-gray-200 bg-white text-gray-400 hover:ring-blue-500 hover:text-blue-600 hover:bg-blue-50 active:scale-90 disabled:opacity-20 disabled:cursor-not-allowed shadow-sm"
             aria-label="Next classes"
           >
-            <IconArrowRight class="w-5 h-5" />
+            <IconArrowRight class="w-4 h-4 md:w-5 md:h-5" />
           </button>
         </div>
       </div>
