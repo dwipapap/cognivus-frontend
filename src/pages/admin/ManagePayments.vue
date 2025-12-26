@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { paymentAPI, studentAPI } from '../../services/api';
+import { formatCurrency, formatDate } from '../../utils/formatters';
 import Modal from '../../components/ui/Modal.vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
 
@@ -16,45 +17,12 @@ const searchQuery = ref('');
 const statusFilter = ref('');
 const typeFilter = ref('');
 
-/** Get student name by studentid */
 const getStudentName = (studentid) => {
   if (!studentid) return 'Unknown';
   const student = students.value.find(s => s.studentid === studentid);
   return student?.fullname || 'Unknown';
 };
 
-/** Format currency (Indonesian Rupiah) */
-const formatCurrency = (amount) => {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0
-  }).format(amount);
-};
-
-/** Format date */
-const formatDate = (dateString) => {
-  if (!dateString) return '-';
-  return new Date(dateString).toLocaleDateString('id-ID', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
-};
-
-/** Get status badge class */
-const getStatusBadge = (status) => {
-  const badges = {
-    pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-    success: 'bg-green-100 text-green-800 border-green-200',
-    failed: 'bg-red-100 text-red-800 border-red-200'
-  };
-  return badges[status] || 'bg-gray-100 text-gray-800 border-gray-200';
-};
-
-/** Filtered and searched payments */
 const filteredPayments = computed(() => {
   let result = payments.value;
 
