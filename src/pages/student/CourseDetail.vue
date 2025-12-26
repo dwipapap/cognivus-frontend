@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watchEffect, defineAsyncComponent } from 'vue';
+import { ref, computed, watchEffect } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useClassDetails } from '../../composables/useClassDetails';
 import { courseAPI } from '../../services/api';
@@ -13,15 +13,7 @@ import IconArrowLeft from '~icons/basil/arrow-left-outline';
 import IconUpload from '~icons/basil/upload-outline';
 import LoadingBar from '../../components/ui/LoadingBar.vue';
 import Modal from '../../components/ui/Modal.vue';
-
-// Lazy-load PDFViewer to reduce initial bundle size
-const PDFViewer = defineAsyncComponent({
-  loader: () => import('../../components/ui/PDFViewer.vue'),
-  loadingComponent: LoadingBar,
-  delay: 200,
-  timeout: 10000
-});
-
+import PDFViewer from '../../components/ui/PDFViewer.vue';
 import { formatDate } from '../../utils/formatters';
 
 const route = useRoute();
