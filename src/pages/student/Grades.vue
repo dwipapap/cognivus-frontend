@@ -11,6 +11,7 @@ import IconCalendar from '~icons/basil/calendar-outline';
 import IconDocument from '~icons/basil/document-solid';
 import IconClose from '~icons/basil/cross-outline';
 import IconInfo from '~icons/basil/info-circle-outline';
+import { formatDate, getAverageScore } from '../../utils/formatters';
 
 const { studentProfile, isLoading: isProfileLoading } = useStudentProfile();
 
@@ -22,37 +23,6 @@ const grades = ref([]);
 const isLoadingGrades = ref(false);
 const errorMessage = ref('');
 
-/**
- * Calculate average score from all components
- */
-const getAverageScore = (grade) => {
-  const scores = [
-    grade.listening_score,
-    grade.speaking_score,
-    grade.reading_score,
-    grade.writing_score
-  ].filter(s => s !== null && s !== undefined);
-  
-  if (scores.length === 0) return '-';
-  const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
-  return avg.toFixed(1);
-};
-
-/**
- * Format date to readable format
- */
-const formatDate = (dateString) => {
-  if (!dateString) return '-';
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  });
-};
-
-/**
- * Fetch grades for the current student
- */
 const fetchGrades = async () => {
   if (!studentProfile.value?.studentid) {
     console.log('Student profile not loaded yet or missing studentid');

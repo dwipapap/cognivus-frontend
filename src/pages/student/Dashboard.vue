@@ -13,6 +13,7 @@ import IconUser from '~icons/solar/user-bold';
 import IconClock from '~icons/basil/clock-solid';
 import IconArrowRight from '~icons/basil/arrow-right-solid';
 import IconBookSolid from '~icons/basil/book-solid';
+import { formatDate } from '../../utils/formatters';
 
 const router = useRouter();
 const { studentProfile, isLoading } = useStudentProfile();
@@ -82,24 +83,8 @@ const placeholderImages = [
   'https://ichef.bbci.co.uk/ace/ws/640/amz/worldservice/live/assets/images/2016/03/26/160326125304_libreria_bookstore_1_640x360_iwanbaan_nocredit.jpg.webp'
 ];
 
-/** Get placeholder image by index */
 const getPlaceholderImage = (index) => placeholderImages[index % placeholderImages.length];
 
-/** Format date for display */
-const formatDate = (dateString) => {
-  if (!dateString) return 'No date';
-  try {
-    const date = new Date(dateString);
-    const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
-    const formatted = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    const time = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-    return `${dayName}, ${formatted}, ${time}`;
-  } catch {
-    return 'No date';
-  }
-};
-
-/** Fetch courses for student's class */
 const fetchCourses = async () => {
   if (!studentProfile.value?.classid) return;
   

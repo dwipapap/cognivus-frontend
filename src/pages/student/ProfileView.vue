@@ -5,6 +5,7 @@ import { useStudentProfile } from '../../composables/useStudentProfile';
 import { classAPI, levelAPI } from '../../services/api';
 import iconBoyImage from '../../assets/iconboy.webp';
 import iconGirlImage from '../../assets/icongirl.webp';
+import { formatDate } from '../../utils/formatters';
 
 const { studentProfile, isLoading, errorMessage } = useStudentProfile();
 const classCode = ref('-');
@@ -29,26 +30,10 @@ const avatarUrl = computed(() => {
   return iconBoyImage;
 });
 
-/** Handle avatar image loading errors */
 const handleImageError = (event) => {
   event.target.src = iconBoyImage;
 };
 
-/** Format date to DD-MM-YYYY */
-const formatDate = (dateString) => {
-  if (!dateString) return '-';
-  try {
-    const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
-  } catch {
-    return dateString;
-  }
-};
-
-/** Fetch class and level data */
 watchEffect(async () => {
   if (studentProfile.value?.classid) {
     try {
@@ -70,7 +55,6 @@ watchEffect(async () => {
   }
 });
 </script>
-
 
 <template>
   <!-- Welcome Banner -->
