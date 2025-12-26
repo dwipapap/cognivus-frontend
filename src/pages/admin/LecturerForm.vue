@@ -2,6 +2,7 @@
 import { ref, watch } from 'vue';
 import { useForm } from '../../composables/useForm';
 import BaseInput from '../../components/form/BaseInput.vue';
+import BaseSelect from '../../components/form/BaseSelect.vue';
 import BaseTextarea from '../../components/form/BaseTextarea.vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
 
@@ -80,199 +81,208 @@ const handleSave = async () => {
 </script>
 
 <template>
-  <form @submit.prevent="handleSave" class="space-y-6">
-    <!-- Two Column Grid Layout -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      
-      <!-- Left Column: Account & Personal Info -->
-      <div class="space-y-6">
-        <!-- Account Details Section -->
-        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-          <h3 class="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-            </svg>
-            Account Details
-          </h3>
-          
-          <div class="space-y-4">
-            <!-- Username -->
-            <BaseInput 
-              v-bind="getFieldProps('username')" 
-              label="Username" 
-              :disabled="isEditMode"
-              :placeholder="isEditMode ? 'Cannot change username' : 'Enter username'"
-              required 
-            />
-
-            <!-- Email -->
-            <BaseInput 
-              v-bind="getFieldProps('email')" 
-              type="email" 
-              label="Email"
-              :placeholder="isEditMode ? 'Leave blank to keep current email' : 'Enter email address'"
-              :required="!isEditMode"
-            />
-            <p v-if="isEditMode" class="text-xs text-gray-500 -mt-2">Leave blank to keep existing email</p>
-
-            <!-- Password -->
-            <BaseInput
-              v-bind="getFieldProps('password')"
-              type="password"
-              label="Password"
-              :placeholder="isEditMode ? 'Leave blank to keep current password' : 'Minimum 8 characters'"
-              :required="!isEditMode"
-            />
-            <p v-if="isEditMode" class="text-xs text-gray-500 -mt-2">Leave blank to keep existing password</p>
+  <form @submit.prevent="handleSave" class="max-w-5xl mx-auto p-1">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <!-- Left Column (8 units) -->
+      <div class="lg:col-span-8 space-y-8">
+        <!-- Section: Identity -->
+        <section class="bg-white rounded-2xl p-6 border border-blue-100 shadow-sm transition-all duration-300 hover:shadow-md">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="p-2 bg-blue-50 rounded-lg">
+              <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 tracking-tight">Lecturer Profile</h3>
           </div>
-        </div>
 
-        <!-- Personal Information Section -->
-        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-          <h3 class="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"/>
-            </svg>
-            Personal Information
-          </h3>
-          
-          <div class="space-y-4">
-            <!-- Full Name -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
             <BaseInput 
               v-bind="getFieldProps('fullname')" 
               label="Full Name" 
-              placeholder="Enter full name"
+              placeholder="Full name with titles"
+              variant="outline"
+              class="md:col-span-2"
               required 
             />
 
-            <!-- Gender -->
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
-              <select
-                v-model="formData.gender"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="">Select gender</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-              </select>
-            </div>
-
-            <!-- Birth Date -->
-            <BaseInput 
-              v-bind="getFieldProps('birthdate')" 
-              type="date" 
-              label="Birth Date" 
+            <BaseSelect
+              v-model="formData.gender"
+              label="Gender"
+              :options="[
+                { label: 'Male', value: 'Male' },
+                { label: 'Female', value: 'Female' }
+              ]"
+              placeholder="Select gender"
+              variant="outline"
             />
 
-            <!-- Birth Place -->
-            <BaseInput 
-              v-bind="getFieldProps('birthplace')" 
-              label="Birth Place"
-              placeholder="Enter birth place"
-            />
-          </div>
-        </div>
-      </div>
-
-      <!-- Right Column: Contact & Education Info -->
-      <div class="space-y-6">
-        <!-- Contact Information Section -->
-        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-          <h3 class="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-            </svg>
-            Contact Information
-          </h3>
-          
-          <div class="space-y-4">
-            <!-- Phone -->
             <BaseInput 
               v-bind="getFieldProps('phone')" 
               type="tel" 
               label="Phone Number"
-              placeholder="Enter phone number"
+              placeholder="+62 ..."
+              variant="outline"
               required 
             />
 
-            <!-- Address -->
-            <BaseTextarea 
-              v-bind="getFieldProps('address')" 
-              label="Address"
-              placeholder="Enter complete address"
-              :rows="4"
+            <BaseInput 
+              v-bind="getFieldProps('birthplace')" 
+              label="Birth Place"
+              placeholder="City of birth"
+              variant="outline"
+            />
+
+            <BaseInput 
+              v-bind="getFieldProps('birthdate')" 
+              type="date" 
+              label="Birth Date" 
+              variant="outline"
             />
           </div>
-        </div>
+        </section>
 
-        <!-- Education Section -->
-        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-          <h3 class="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/>
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0v6"/>
-            </svg>
-            Education
-          </h3>
-          
-          <div class="space-y-4">
-            <!-- Last Education -->
+        <!-- Section: Account -->
+        <section class="bg-white rounded-2xl p-6 border border-blue-100 shadow-sm transition-all duration-300 hover:shadow-md">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="p-2 bg-blue-50 rounded-lg">
+              <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 tracking-tight">Security & Access</h3>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <BaseInput 
+              v-bind="getFieldProps('username')" 
+              label="Username" 
+              :disabled="isEditMode"
+              :placeholder="isEditMode ? 'Username is locked' : 'Unique username'"
+              variant="outline"
+              required 
+            />
+
+            <BaseInput 
+              v-bind="getFieldProps('email')" 
+              type="email" 
+              label="Email Address"
+              :placeholder="isEditMode ? 'Current email' : 'lecturer@example.com'"
+              variant="outline"
+              :required="!isEditMode"
+            >
+              <template #help v-if="isEditMode">
+                <span class="text-xs text-blue-600/70 italic">Leave empty to keep existing email</span>
+              </template>
+            </BaseInput>
+
+            <BaseInput
+              v-bind="getFieldProps('password')"
+              type="password"
+              label="Access Password"
+              :placeholder="isEditMode ? '••••••••' : 'Min. 8 characters'"
+              variant="outline"
+              class="md:col-span-2"
+              :required="!isEditMode"
+            >
+              <template #help v-if="isEditMode">
+                <span class="text-xs text-blue-600/70 italic">Leave empty to keep current password</span>
+              </template>
+            </BaseInput>
+          </div>
+        </section>
+      </div>
+
+      <!-- Right Column (4 units) -->
+      <div class="lg:col-span-4 space-y-8">
+        <!-- Section: Professional Info -->
+        <section class="bg-blue-600 rounded-2xl p-6 border border-blue-500 shadow-lg text-white">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="p-2 bg-white/10 rounded-lg">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold tracking-tight">Professional Info</h3>
+          </div>
+
+          <div class="space-y-5">
             <BaseInput 
               v-bind="getFieldProps('lasteducation')" 
-              label="Last Education"
-              placeholder="e.g., S1 Pendidikan Bahasa Inggris"
+              label="Latest Education"
+              placeholder="e.g., M.Sc in Computer Science"
+              variant="filled"
+              class="[&_label]:text-blue-50 [&_input]:bg-blue-700/30 [&_input]:border-blue-400/50 [&_input]:text-white [&_input]:placeholder-blue-300"
+            />
+            
+            <BaseTextarea 
+              v-bind="getFieldProps('address')" 
+              label="Residential Address"
+              placeholder="Full physical address"
+              :rows="4"
+              variant="filled"
+              class="[&_label]:text-blue-50 [&_textarea]:bg-blue-700/30 [&_textarea]:border-blue-400/50 [&_textarea]:text-white [&_textarea]:placeholder-blue-300"
             />
           </div>
-        </div>
+        </section>
 
-        <!-- Quick Info Card -->
-        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
-          <h4 class="text-sm font-semibold text-gray-900 mb-3">Quick Guide</h4>
-          <ul class="space-y-2 text-xs text-gray-700">
-            <li class="flex items-start gap-2">
-              <svg class="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-              </svg>
-              <span>Username cannot be changed after creation</span>
-            </li>
-            <li class="flex items-start gap-2">
-              <svg class="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-              </svg>
-              <span>Leave password blank when editing to keep current password</span>
-            </li>
-            <li class="flex items-start gap-2">
-              <svg class="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-              </svg>
-              <span>Phone number is required for contact purposes</span>
-            </li>
-            <li class="flex items-start gap-2">
-              <svg class="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-              </svg>
-              <span>Class assignment is managed in the Classes section</span>
+        <!-- Help Card -->
+        <section class="bg-white rounded-2xl p-6 border border-blue-100 shadow-sm relative overflow-hidden">
+          <div class="absolute top-0 right-0 -mr-8 -mt-8 w-24 h-24 bg-blue-50 rounded-full"></div>
+          
+          <h4 class="text-sm font-bold text-blue-900 mb-4 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+            </svg>
+            Guidelines
+          </h4>
+          
+          <ul class="space-y-3">
+            <li v-for="(item, idx) in [
+              'Username is permanent after creation.',
+              'Email must be unique and valid.',
+              'Passwords require at least 8 characters.',
+              'Phone number for direct coordination.'
+            ]" :key="idx" class="flex items-start gap-2.5 group">
+              <div class="mt-1 w-1.5 h-1.5 rounded-full bg-blue-400 group-hover:scale-125 transition-transform"></div>
+              <span class="text-xs text-gray-600 leading-relaxed">{{ item }}</span>
             </li>
           </ul>
-        </div>
+        </section>
       </div>
     </div>
 
-    <!-- Actions Footer -->
-    <div class="flex justify-end gap-3 pt-6 border-t border-gray-200">
-      <BaseButton type="button" variant="secondary" @click="$emit('close')">
-        Cancel
-      </BaseButton>
-      <BaseButton type="submit" variant="primary" :loading="isSubmitting">
-        <template #icon>
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-          </svg>
-        </template>
-        {{ isEditMode ? 'Update Lecturer' : 'Create Lecturer' }}
-      </BaseButton>
+    <!-- Sticky Actions -->
+    <div class="mt-10 flex items-center justify-between gap-4 pt-6 border-t border-blue-50">
+      <span class="hidden sm:block text-xs text-gray-400 font-medium">
+        * Fields marked with asterisk are required
+      </span>
+      <div class="flex items-center gap-3 w-full sm:w-auto">
+        <BaseButton 
+          type="button" 
+          variant="secondary" 
+          size="lg"
+          class="flex-1 sm:flex-none"
+          @click="$emit('close')"
+        >
+          Discard
+        </BaseButton>
+        <BaseButton 
+          type="submit" 
+          variant="primary" 
+          size="lg"
+          class="flex-1 sm:flex-none shadow-blue-200"
+          :loading="isSubmitting"
+        >
+          <template #icon>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+          </template>
+          {{ isEditMode ? 'Save Changes' : 'Register Lecturer' }}
+        </BaseButton>
+      </div>
     </div>
   </form>
 </template>
