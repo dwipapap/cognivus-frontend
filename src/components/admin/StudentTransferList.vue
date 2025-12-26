@@ -33,14 +33,27 @@ const searchQuery = ref('');
 const filterClassId = ref('');
 const selectedAvailable = ref(new Set());
 const selectedEnrolled = ref(new Set());
-const hasChanges = ref(false);
+const pendingToAdd = ref(new Set());
+const pendingToRemove = ref(new Set());
 
 const enrolledStudents = computed(() => {
-  return props.allStudents.filter(s => s.classid === props.currentClassId);
+  const currentlyEnrolled = props.allStudents.filter(s => s.classid === props.currentClassId);
+  const enrolledIds = new Set(currentlyEnrolled.map(s => s.studentid));
+  
+  pendingToAdd.value.forEach(id => enrolledIds.add(id));
+  pendingToRemove.value.forEach(id => enrolledIds.delete(id));
+  
+  return props.allStudents.filter(s => enrolledIds.has(s.studentid));
 });
 
 const availableStudents = computed(() => {
-  let students = props.allStudents.filter(s => s.classid !== props.currentClassId);
+  const currentlyEnrolled = props.allStudents.filter(s => s.classid === props.currentClassId);
+  const enrolledIds = new Set(currentlyEnrolled.map(s => s.studentid));
+  
+  pendingToAdd.value.forEach(id => enrolledIds.add(id));
+  pendingToRemove.value.forEach(id => enrolledIds.delete(id));
+  
+  let students = props.allStudents.filter(s => !enrolledIds.has(s.studentid));
   
   if (searchQuery.value.trim()) {
     const query = searchQuery.value.toLowerCase();
@@ -85,31 +98,44 @@ const toggleEnrolledSelection = (studentid) => {
 };
 
 const moveToEnrolled = () => {
-  hasChanges.value = true;
+  selectedAvailable.value.forEach(id => {
+    pendingToAdd.value.add(id);
+    pendingToRemove.value.delete(id);
+  });
   selectedAvailable.value.clear();
 };
 
 const moveToAvailable = () => {
-  hasChanges.value = true;
+  selectedEnrolled.value.forEach(id => {
+    pendingToRemove.value.add(id);
+    pendingToAdd.value.delete(id);
+  });
   selectedEnrolled.value.clear();
 };
 
 const moveAllToEnrolled = () => {
-  availableStudents.value.forEach(s => selectedAvailable.value.add(s.studentid));
-  hasChanges.value = true;
+  availableStudents.value.forEach(s => {
+    pendingToAdd.value.add(s.studentid);
+    pendingToRemove.value.delete(s.studentid);
+  });
   selectedAvailable.value.clear();
 };
 
 const moveAllToAvailable = () => {
-  enrolledStudents.value.forEach(s => selectedEnrolled.value.add(s.studentid));
-  hasChanges.value = true;
+  enrolledStudents.value.forEach(s => {
+    pendingToRemove.value.add(s.studentid);
+    pendingToAdd.value.delete(s.studentid);
+  });
   selectedEnrolled.value.clear();
 };
 
 const handleSave = () => {
-  const currentEnrolledIds = enrolledStudents.value.map(s => s.studentid);
-  const studentsToAdd = Array.from(selectedAvailable.value);
-  const studentsToRemove = Array.from(selectedEnrolled.value);
+  const studentsToAdd = Array.from(pendingToAdd.value);
+  const studentsToRemove = Array.from(pendingToRemove.value);
+  
+  const currentEnrolledIds = props.allStudents
+    .filter(s => s.classid === props.currentClassId)
+    .map(s => s.studentid);
   
   const finalEnrolled = currentEnrolledIds
     .filter(id => !studentsToRemove.includes(id))
@@ -120,12 +146,19 @@ const handleSave = () => {
     toAdd: studentsToAdd,
     toRemove: studentsToRemove
   });
+  
+  pendingToAdd.value.clear();
+  pendingToRemove.value.clear();
 };
 
 const clearSelections = () => {
   selectedAvailable.value.clear();
   selectedEnrolled.value.clear();
 };
+
+const hasChanges = computed(() => {
+  return pendingToAdd.value.size > 0 || pendingToRemove.value.size > 0;
+});
 </script>
 
 <template>
@@ -314,7 +347,16 @@ const clearSelections = () => {
               />
               <div class="flex-1 min-w-0">
                 <p class="text-sm font-medium text-gray-900 truncate">{{ student.fullname }}</p>
-                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700 mt-1">
+                <span 
+                  v-if="pendingToAdd.has(student.studentid)"
+                  class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700 mt-1"
+                >
+                  Pending Addition
+                </span>
+                <span 
+                  v-else
+                  class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700 mt-1"
+                >
                   Currently Enrolled
                 </span>
               </div>
@@ -324,18 +366,30 @@ const clearSelections = () => {
       </div>
     </div>
 
-    <div v-if="selectedAvailable.size > 0 || selectedEnrolled.size > 0" class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+    <div v-if="hasChanges || selectedAvailable.size > 0 || selectedEnrolled.size > 0" class="bg-blue-50 border border-blue-200 rounded-lg p-4">
       <div class="flex items-start gap-3">
         <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
         </svg>
         <div class="text-sm text-blue-800">
-          <p class="font-medium">Pending Changes</p>
-          <p class="mt-1">
-            <span v-if="selectedAvailable.size > 0">{{ selectedAvailable.size }} student(s) selected to add. </span>
-            <span v-if="selectedEnrolled.size > 0">{{ selectedEnrolled.size }} student(s) selected to remove.</span>
+          <p class="font-medium">
+            <span v-if="selectedAvailable.size > 0 || selectedEnrolled.size > 0">Current Selection</span>
+            <span v-else-if="hasChanges">Pending Changes</span>
           </p>
-          <button @click="clearSelections" class="text-xs underline mt-2 hover:text-blue-900">Clear selections</button>
+          <p class="mt-1">
+            <span v-if="selectedAvailable.size > 0">{{ selectedAvailable.size }} student(s) selected to move. </span>
+            <span v-if="selectedEnrolled.size > 0">{{ selectedEnrolled.size }} student(s) selected to remove. </span>
+            <span v-if="hasChanges && !(selectedAvailable.size > 0 || selectedEnrolled.size > 0)">
+              {{ pendingToAdd.size }} to add, {{ pendingToRemove.size }} to remove.
+            </span>
+          </p>
+          <button 
+            v-if="selectedAvailable.size > 0 || selectedEnrolled.size > 0"
+            @click="clearSelections" 
+            class="text-xs underline mt-2 hover:text-blue-900"
+          >
+            Clear selections
+          </button>
         </div>
       </div>
     </div>
@@ -344,7 +398,14 @@ const clearSelections = () => {
       <BaseButton type="button" variant="secondary" @click="$emit('cancel')" rounded="full">
         Cancel
       </BaseButton>
-      <BaseButton type="button" variant="primary" @click="handleSave" :loading="isLoading" rounded="full">
+      <BaseButton 
+        type="button" 
+        variant="primary" 
+        @click="handleSave" 
+        :loading="isLoading" 
+        :disabled="!hasChanges"
+        rounded="full"
+      >
         <template #icon>
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
