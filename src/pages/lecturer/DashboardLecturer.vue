@@ -483,12 +483,12 @@ onMounted(() => {
           </div>
         </div>
 
-        <!-- Today's Schedule Section -->
+        <!-- Schedule Section -->
         <div class="mt-6">
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-base font-bold text-gray-900 flex items-center gap-2">
               <IconClock class="w-4 h-4 text-blue-600" />
-              Today's Schedule
+              Schedule
             </h3>
             <button @click="goToMaterials"
               class="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full hover:from-blue-700 hover:to-indigo-700 hover:scale-105 active:scale-95 focus:ring-2 focus:ring-blue-300 transition-all shadow-md hover:shadow-lg">

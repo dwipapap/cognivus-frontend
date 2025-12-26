@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted, nextTick } from 'vue';
+import { useRouter } from 'vue-router';
 import { lecturerAPI } from '../../services/api';
 import { authStore } from '../../store/auth';
 import { useForm } from '../../composables/useForm';
@@ -15,6 +16,7 @@ import BaseCard from '../../components/ui/BaseCard.vue';
 import LoadingSpinner from '../../components/ui/LoadingSpinner.vue';
 
 const { mapGenderToBackend } = useLecturerProfile();
+const router = useRouter();
 
 const isLoading = ref(true);
 const showModal = ref(false);
@@ -122,6 +124,10 @@ const closeModal = () => {
   showModal.value = false;
   modalType.value = 'info';
   modalMessage.value = '';
+};
+
+const handleCancel = () => {
+  router.push('/lecturer/profile/view');
 };
 
 onMounted(fetchProfile);
@@ -252,10 +258,10 @@ onMounted(fetchProfile);
         <BaseButton
           type="button"
           variant="glass-secondary"
-          @click="reset"
+          @click="handleCancel"
           class="flex-1"
         >
-          Reset
+          Cancel
         </BaseButton>
         
         <BaseButton
