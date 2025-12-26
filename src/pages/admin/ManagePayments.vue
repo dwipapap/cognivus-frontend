@@ -23,6 +23,17 @@ const getStudentName = (studentid) => {
   return student?.fullname || 'Unknown';
 };
 
+/** Get status badge classes */
+const getStatusBadge = (status) => {
+  const classes = {
+    success: 'bg-green-100 text-green-800 border-green-200',
+    pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+    error: 'bg-red-100 text-red-800 border-red-200',
+    failed: 'bg-red-100 text-red-800 border-red-200'
+  };
+  return classes[status] || 'bg-gray-100 text-gray-800 border-gray-200';
+};
+
 const filteredPayments = computed(() => {
   let result = payments.value;
 

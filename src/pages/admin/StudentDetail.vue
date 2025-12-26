@@ -63,6 +63,17 @@ const getGenderDisplay = (code) => {
   return '-';
 };
 
+/** Get status badge classes */
+const getStatusBadge = (status) => {
+  const classes = {
+    success: 'bg-green-100 text-green-800 border-green-200',
+    pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+    error: 'bg-red-100 text-red-800 border-red-200',
+    failed: 'bg-red-100 text-red-800 border-red-200'
+  };
+  return classes[status] || 'bg-gray-100 text-gray-800 border-gray-200';
+};
+
 /** Fetch student data */
 const fetchStudentData = async () => {
   try {
@@ -210,6 +221,31 @@ const handleSave = async () => {
       showNotification('error', error.response?.data?.message || 'Failed to save student.');
     }
   });
+};
+
+/** Download certificate */
+const handleDownloadCertificate = async (gradeId, testType) => {
+  try {
+    const response = await gradeAPI.downloadCertificate(gradeId);
+    
+    // Create blob URL from response
+    const blob = new Blob([response.data], { type: 'application/pdf' });
+    const url = window.URL.createObjectURL(blob);
+    
+    // Create temporary link and trigger download
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Certificate_${testType || 'Test'}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    
+    // Cleanup
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Error downloading certificate:', error);
+    showNotification('error', 'Failed to download certificate. Please try again.');
+  }
 };
 
 /** Navigate back */
