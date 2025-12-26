@@ -36,6 +36,11 @@ const selectedEnrolled = ref(new Set());
 const pendingToAdd = ref(new Set());
 const pendingToRemove = ref(new Set());
 
+// Pagination state
+const availablePage = ref(1);
+const enrolledPage = ref(1);
+const itemsPerPage = 15;
+
 const enrolledStudents = computed(() => {
   const currentlyEnrolled = props.allStudents.filter(s => s.classid === props.currentClassId);
   const enrolledIds = new Set(currentlyEnrolled.map(s => s.studentid));
@@ -46,7 +51,14 @@ const enrolledStudents = computed(() => {
   return props.allStudents.filter(s => enrolledIds.has(s.studentid));
 });
 
-const availableStudents = computed(() => {
+const paginatedEnrolled = computed(() => {
+  const start = (enrolledPage.value - 1) * itemsPerPage;
+  return enrolledStudents.value.slice(start, start + itemsPerPage);
+});
+
+const enrolledTotalPages = computed(() => Math.ceil(enrolledStudents.value.length / itemsPerPage));
+
+const filteredAvailableStudents = computed(() => {
   const currentlyEnrolled = props.allStudents.filter(s => s.classid === props.currentClassId);
   const enrolledIds = new Set(currentlyEnrolled.map(s => s.studentid));
   
@@ -74,6 +86,13 @@ const availableStudents = computed(() => {
   
   return students;
 });
+
+const paginatedAvailable = computed(() => {
+  const start = (availablePage.value - 1) * itemsPerPage;
+  return filteredAvailableStudents.value.slice(start, start + itemsPerPage);
+});
+
+const availableTotalPages = computed(() => Math.ceil(filteredAvailableStudents.value.length / itemsPerPage));
 
 const getClassCode = (classid) => {
   if (!classid) return 'Unassigned';
@@ -114,7 +133,7 @@ const moveToAvailable = () => {
 };
 
 const moveAllToEnrolled = () => {
-  availableStudents.value.forEach(s => {
+  filteredAvailableStudents.value.forEach(s => {
     pendingToAdd.value.add(s.studentid);
     pendingToRemove.value.delete(s.studentid);
   });
@@ -162,86 +181,117 @@ const hasChanges = computed(() => {
 </script>
 
 <template>
-  <div class="space-y-6">
-    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-      <div class="flex items-start gap-3">
-        <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
-        <div class="text-sm text-gray-700">
-          <p class="font-medium">Transfer Students</p>
-          <p class="mt-1">Use the controls below to assign students to <span class="font-semibold text-blue-600">{{ currentClassName }}</span>. Select students from the left panel and move them to the right panel to enroll them in this class.</p>
+  <div class="space-y-8">
+    <!-- Header Section -->
+    <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+      <div class="flex items-start gap-4">
+        <div class="p-3 bg-blue-50 rounded-xl">
+          <svg class="w-6 h-6 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+          </svg>
+        </div>
+        <div class="text-gray-900">
+          <h3 class="text-lg font-bold">Transfer Students</h3>
+          <p class="text-sm text-gray-500 mt-1 leading-relaxed">
+            Manage student enrollment for <span class="font-bold text-blue-600 px-2 py-0.5 bg-blue-50 rounded">{{ currentClassName }}</span>. 
+            Select students from the available list and move them to enroll.
+          </p>
         </div>
       </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <!-- Filters Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
       <div class="space-y-4">
-        <div>
-          <BaseInput
-            v-model="searchQuery"
-            placeholder="Search students by name or email..."
-            size="md"
-          >
-            <template #icon>
-              <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-              </svg>
-            </template>
-          </BaseInput>
-        </div>
+        <BaseInput
+          v-model="searchQuery"
+          placeholder="Search by name, email or username..."
+          label="Search Students"
+          size="md"
+        >
+          <template #icon>
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+          </template>
+        </BaseInput>
+      </div>
 
-        <div>
-          <BaseSelect v-model="filterClassId" label="Filter by Class">
-            <option value="">All Classes</option>
-            <option value="unassigned">Unassigned Students</option>
+      <div class="space-y-4">
+        <BaseSelect v-model="filterClassId" label="Filter by Current Class">
+          <option value="">All Students</option>
+          <option value="unassigned">Unassigned Students Only</option>
+          <optgroup label="Filter by Class">
             <option v-for="cls in allClasses.filter(c => c.classid !== currentClassId)" :key="cls.classid" :value="cls.classid">
               {{ cls.class_code }}
             </option>
-          </BaseSelect>
-        </div>
+          </optgroup>
+        </BaseSelect>
       </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-7 gap-4">
-      <div class="lg:col-span-3 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-4 py-3 border-b border-gray-200">
-          <div class="flex items-center justify-between">
-            <h3 class="text-sm font-semibold text-gray-900 flex items-center gap-2">
-              <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-              </svg>
-              Available Students
-            </h3>
-            <span class="text-xs font-medium text-gray-600 bg-white px-2 py-1 rounded-md border border-gray-200">
-              {{ availableStudents.length }} students
+    <!-- Main Transfer Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-7 gap-6">
+      <!-- Available Students Column -->
+      <div class="lg:col-span-3 flex flex-col bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div class="bg-gray-50/50 px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <div class="w-2 h-2 rounded-full bg-gray-400"></div>
+            <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wider">Available</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-gray-500 bg-white px-2.5 py-1 rounded-full border border-gray-100 shadow-sm">
+              {{ filteredAvailableStudents.length }}
             </span>
+            <div v-if="availableTotalPages > 1" class="flex items-center bg-white rounded-full border border-gray-100 shadow-sm p-0.5">
+              <button 
+                @click="availablePage = Math.max(1, availablePage - 1)"
+                :disabled="availablePage === 1"
+                class="p-1 hover:bg-gray-50 rounded-full disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+              </button>
+              <span class="text-[10px] font-bold px-1">{{ availablePage }}/{{ availableTotalPages }}</span>
+              <button 
+                @click="availablePage = Math.min(availableTotalPages, availablePage + 1)"
+                :disabled="availablePage === availableTotalPages"
+                class="p-1 hover:bg-gray-50 rounded-full disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+              </button>
+            </div>
           </div>
         </div>
 
-        <div class="h-96 overflow-y-auto">
-          <div v-if="availableStudents.length === 0" class="flex flex-col items-center justify-center h-full text-gray-400 p-6">
-            <svg class="w-16 h-16 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
-            </svg>
-            <p class="text-sm font-medium">No students available</p>
-            <p class="text-xs mt-1">Try adjusting your search or filter</p>
+        <div class="h-[400px] overflow-y-auto p-2 space-y-1">
+          <div v-if="filteredAvailableStudents.length === 0" class="flex flex-col items-center justify-center h-full text-gray-400 p-8 text-center">
+            <div class="p-4 bg-gray-50 rounded-full mb-4">
+              <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+              </svg>
+            </div>
+            <p class="text-sm font-bold text-gray-900">No students found</p>
+            <p class="text-xs mt-1 leading-relaxed">Try adjusting your search or filters to find more students.</p>
           </div>
 
-          <div v-for="student in availableStudents" :key="student.studentid" 
-            class="border-b border-gray-100 hover:bg-blue-50 transition-colors cursor-pointer"
+          <div v-for="student in paginatedAvailable" :key="student.studentid" 
+            class="group rounded-xl p-3 flex items-center gap-4 cursor-pointer transition-all hover:bg-blue-50/50 border border-transparent hover:border-blue-100"
             @click="toggleAvailableSelection(student.studentid)"
+            :class="{ 'bg-blue-50 border-blue-100 shadow-sm': selectedAvailable.has(student.studentid) }"
           >
-            <div class="flex items-start gap-3 px-4 py-3">
+            <div class="relative flex items-center justify-center">
               <input
                 type="checkbox"
                 :checked="selectedAvailable.has(student.studentid)"
                 @click.stop="toggleAvailableSelection(student.studentid)"
-                class="mt-1 w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                class="w-5 h-5 text-blue-600 bg-white border-gray-300 rounded-lg focus:ring-blue-500 focus:ring-offset-0 transition-all"
               />
-              <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-gray-900 truncate">{{ student.fullname }}</p>
-                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-700 mt-1">
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-bold text-gray-900 truncate">{{ student.fullname }}</p>
+              <div class="flex items-center gap-2 mt-1">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Class:</span>
+                <span class="text-[10px] font-bold text-gray-600 px-1.5 py-0.5 bg-gray-100 rounded">
                   {{ getClassCode(student.classid) }}
                 </span>
               </div>
@@ -250,114 +300,131 @@ const hasChanges = computed(() => {
         </div>
       </div>
 
-      <div class="lg:col-span-1 flex flex-col items-center justify-center gap-2">
-        <BaseButton
-          @click="() => { moveToEnrolled(); }"
-          variant="primary"
-          size="sm"
-          :disabled="selectedAvailable.size === 0"
-          class="w-full lg:w-auto"
-          rounded="full"
-        >
-          <template #icon>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
-            </svg>
-          </template>
-          <span class="hidden lg:inline">Move</span>
-          <span class="lg:hidden">Add Selected</span>
-        </BaseButton>
+      <!-- Controls Column -->
+      <div class="lg:col-span-1 flex flex-col items-center justify-center gap-3">
+        <div class="w-full lg:w-auto flex lg:flex-col gap-3">
+          <BaseButton
+            @click="moveToEnrolled"
+            variant="primary"
+            size="sm"
+            :disabled="selectedAvailable.size === 0"
+            class="flex-1 lg:flex-none shadow-lg shadow-blue-100"
+            rounded="full"
+          >
+            <template #icon>
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+              </svg>
+            </template>
+            <span class="hidden lg:inline">Add</span>
+          </BaseButton>
 
-        <BaseButton
-          @click="moveToAvailable"
-          variant="primary"
-          size="sm"
-          :disabled="selectedEnrolled.size === 0"
-          class="w-full lg:w-auto"
-          rounded="full"
-        >
-          <template #icon>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12"/>
-            </svg>
-          </template>
-          <span class="hidden lg:inline">Remove</span>
-          <span class="lg:hidden">Remove Selected</span>
-        </BaseButton>
+          <BaseButton
+            @click="moveToAvailable"
+            variant="secondary"
+            size="sm"
+            :disabled="selectedEnrolled.size === 0"
+            class="flex-1 lg:flex-none"
+            rounded="full"
+          >
+            <template #icon>
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12"/>
+              </svg>
+            </template>
+            <span class="hidden lg:inline">Remove</span>
+          </BaseButton>
+        </div>
 
-        <div class="hidden lg:block w-full border-t border-gray-300 my-2"></div>
+        <div class="hidden lg:block w-full border-t border-gray-100 my-4"></div>
 
-        <BaseButton
-          @click="moveAllToEnrolled"
-          variant="primary"
-          size="sm"
-          :disabled="availableStudents.length === 0"
-          class="w-full lg:w-auto"
-          rounded="full"
-        >
-          <span class="text-xs">Add All</span>
-        </BaseButton>
-
-        <BaseButton
-          @click="moveAllToAvailable"
-          variant="primary"
-          size="sm"
-          :disabled="enrolledStudents.length === 0"
-          class="w-full lg:w-auto"
-          rounded="full"
-        >
-          <span class="text-xs">Remove All</span>
-        </BaseButton>
+        <div class="w-full lg:w-auto flex lg:flex-col gap-3">
+          <button
+            @click="moveAllToEnrolled"
+            :disabled="filteredAvailableStudents.length === 0"
+            class="flex-1 lg:flex-none text-[10px] font-bold uppercase tracking-widest text-blue-600 hover:text-blue-700 disabled:text-gray-300 transition-colors"
+          >
+            Add All
+          </button>
+          <button
+            @click="moveAllToAvailable"
+            :disabled="enrolledStudents.length === 0"
+            class="flex-1 lg:flex-none text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-gray-500 disabled:text-gray-300 transition-colors"
+          >
+            Clear All
+          </button>
+        </div>
       </div>
 
-      <div class="lg:col-span-3 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 border-b border-blue-200">
-          <div class="flex items-center justify-between">
-            <h3 class="text-sm font-semibold text-gray-900 flex items-center gap-2">
-              <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-              Enrolled in {{ currentClassName }}
-            </h3>
-            <span class="text-xs font-medium text-blue-700 bg-white px-2 py-1 rounded-md border border-blue-200">
-              {{ enrolledStudents.length }} students
+      <!-- Enrolled Students Column -->
+      <div class="lg:col-span-3 flex flex-col bg-white rounded-2xl border border-blue-100 shadow-sm overflow-hidden">
+        <div class="bg-blue-50/50 px-5 py-4 border-b border-blue-100 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <div class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]"></div>
+            <h3 class="text-sm font-bold text-blue-900 uppercase tracking-wider">Enrolled</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-blue-700 bg-white px-2.5 py-1 rounded-full border border-blue-100 shadow-sm">
+              {{ enrolledStudents.length }}
             </span>
+            <div v-if="enrolledTotalPages > 1" class="flex items-center bg-white rounded-full border border-blue-100 shadow-sm p-0.5">
+              <button 
+                @click="enrolledPage = Math.max(1, enrolledPage - 1)"
+                :disabled="enrolledPage === 1"
+                class="p-1 hover:bg-gray-50 rounded-full disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                <svg class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+              </button>
+              <span class="text-[10px] font-bold px-1 text-blue-900">{{ enrolledPage }}/{{ enrolledTotalPages }}</span>
+              <button 
+                @click="enrolledPage = Math.min(enrolledTotalPages, enrolledPage + 1)"
+                :disabled="enrolledPage === enrolledTotalPages"
+                class="p-1 hover:bg-gray-50 rounded-full disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                <svg class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+              </button>
+            </div>
           </div>
         </div>
 
-        <div class="h-96 overflow-y-auto">
-          <div v-if="enrolledStudents.length === 0" class="flex flex-col items-center justify-center h-full text-gray-400 p-6">
-            <svg class="w-16 h-16 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-            </svg>
-            <p class="text-sm font-medium">No students enrolled</p>
-            <p class="text-xs mt-1">Select students from the left to enroll</p>
+        <div class="h-[400px] overflow-y-auto p-2 space-y-1">
+          <div v-if="enrolledStudents.length === 0" class="flex flex-col items-center justify-center h-full text-blue-200 p-8 text-center">
+            <div class="p-4 bg-blue-50/50 rounded-full mb-4">
+              <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+              </svg>
+            </div>
+            <p class="text-sm font-bold text-blue-900/40">No students enrolled</p>
+            <p class="text-xs mt-1 leading-relaxed">Move students from the available list to enroll them in this class.</p>
           </div>
 
-          <div v-for="student in enrolledStudents" :key="student.studentid" 
-            class="border-b border-gray-100 hover:bg-blue-50 transition-colors cursor-pointer"
+          <div v-for="student in paginatedEnrolled" :key="student.studentid" 
+            class="group rounded-xl p-3 flex items-center gap-4 cursor-pointer transition-all hover:bg-blue-50 border border-transparent hover:border-blue-100"
             @click="toggleEnrolledSelection(student.studentid)"
+            :class="{ 'bg-blue-50 border-blue-200 shadow-sm': selectedEnrolled.has(student.studentid) }"
           >
-            <div class="flex items-start gap-3 px-4 py-3">
+            <div class="relative flex items-center justify-center">
               <input
                 type="checkbox"
                 :checked="selectedEnrolled.has(student.studentid)"
                 @click.stop="toggleEnrolledSelection(student.studentid)"
-                class="mt-1 w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                class="w-5 h-5 text-blue-600 bg-white border-gray-300 rounded-lg focus:ring-blue-500 focus:ring-offset-0 transition-all"
               />
-              <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-gray-900 truncate">{{ student.fullname }}</p>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-bold text-gray-900 truncate">{{ student.fullname }}</p>
+              <div class="flex items-center gap-2 mt-1">
                 <span 
                   v-if="pendingToAdd.has(student.studentid)"
-                  class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700 mt-1"
+                  class="text-[10px] font-bold uppercase tracking-wider text-green-600 px-1.5 py-0.5 bg-green-50 rounded border border-green-100"
                 >
                   Pending Addition
                 </span>
                 <span 
                   v-else
-                  class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700 mt-1"
+                  class="text-[10px] font-bold uppercase tracking-wider text-blue-500 px-1.5 py-0.5 bg-blue-50/50 rounded"
                 >
-                  Currently Enrolled
+                  Enrolled
                 </span>
               </div>
             </div>
@@ -366,53 +433,61 @@ const hasChanges = computed(() => {
       </div>
     </div>
 
-    <div v-if="hasChanges || selectedAvailable.size > 0 || selectedEnrolled.size > 0" class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-      <div class="flex items-start gap-3">
-        <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
-        <div class="text-sm text-blue-800">
-          <p class="font-medium">
-            <span v-if="selectedAvailable.size > 0 || selectedEnrolled.size > 0">Current Selection</span>
-            <span v-else-if="hasChanges">Pending Changes</span>
+    <!-- Summary & Footer Actions -->
+    <div class="flex flex-col lg:flex-row items-center justify-between gap-6 pt-8 border-t border-gray-100">
+      <div v-if="hasChanges || selectedAvailable.size > 0 || selectedEnrolled.size > 0" class="flex items-center gap-4">
+        <div class="flex -space-x-2">
+          <div v-if="pendingToAdd.size > 0" class="w-8 h-8 rounded-full bg-green-500 border-2 border-white flex items-center justify-center shadow-sm">
+            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+            </svg>
+          </div>
+          <div v-if="pendingToRemove.size > 0" class="w-8 h-8 rounded-full bg-red-500 border-2 border-white flex items-center justify-center shadow-sm">
+            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+            </svg>
+          </div>
+        </div>
+        <div class="text-sm">
+          <p class="font-bold text-gray-900">
+            <span v-if="pendingToAdd.size > 0">{{ pendingToAdd.size }} to add</span>
+            <span v-if="pendingToAdd.size > 0 && pendingToRemove.size > 0" class="mx-2 text-gray-300">|</span>
+            <span v-if="pendingToRemove.size > 0" class="text-red-600">{{ pendingToRemove.size }} to remove</span>
           </p>
-          <p class="mt-1">
-            <span v-if="selectedAvailable.size > 0">{{ selectedAvailable.size }} student(s) selected to move. </span>
-            <span v-if="selectedEnrolled.size > 0">{{ selectedEnrolled.size }} student(s) selected to remove. </span>
-            <span v-if="hasChanges && !(selectedAvailable.size > 0 || selectedEnrolled.size > 0)">
-              {{ pendingToAdd.size }} to add, {{ pendingToRemove.size }} to remove.
-            </span>
-          </p>
-          <button 
-            v-if="selectedAvailable.size > 0 || selectedEnrolled.size > 0"
-            @click="clearSelections" 
-            class="text-xs underline mt-2 hover:text-blue-900"
-          >
-            Clear selections
+          <button @click="clearSelections" class="text-xs font-bold text-blue-600 hover:text-blue-700 uppercase tracking-widest mt-1">
+            Clear Selection
           </button>
         </div>
       </div>
-    </div>
+      <div v-else class="hidden lg:block"></div>
 
-    <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
-      <BaseButton type="button" variant="secondary" @click="$emit('cancel')" rounded="full">
-        Cancel
-      </BaseButton>
-      <BaseButton 
-        type="button" 
-        variant="primary" 
-        @click="handleSave" 
-        :loading="isLoading" 
-        :disabled="!hasChanges"
-        rounded="full"
-      >
-        <template #icon>
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-          </svg>
-        </template>
-        Save Student Assignments
-      </BaseButton>
+      <div class="flex items-center gap-4 w-full lg:w-auto">
+        <BaseButton 
+          type="button" 
+          variant="secondary" 
+          @click="$emit('cancel')" 
+          class="flex-1 lg:flex-none px-8"
+          rounded="full"
+        >
+          Cancel
+        </BaseButton>
+        <BaseButton 
+          type="button" 
+          variant="primary" 
+          @click="handleSave" 
+          :loading="isLoading" 
+          :disabled="!hasChanges"
+          class="flex-1 lg:flex-none px-8 shadow-lg shadow-blue-200"
+          rounded="full"
+        >
+          <template #icon>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+          </template>
+          Confirm Changes
+        </BaseButton>
+      </div>
     </div>
   </div>
 </template>
