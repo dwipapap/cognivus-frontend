@@ -6,10 +6,48 @@ import { classAPI, levelAPI } from '../../services/api';
 import iconBoyImage from '../../assets/iconboy.webp';
 import iconGirlImage from '../../assets/icongirl.webp';
 import { formatDate } from '../../utils/formatters';
+import OtpFlow from '../../components/ui/OtpFlow.vue';
+import Modal from '../../components/ui/Modal.vue';
 
 const { studentProfile, isLoading, errorMessage } = useStudentProfile();
 const classCode = ref('-');
 const levelName = ref('-');
+
+// Change Password state
+const showChangePassword = ref(false);
+const showModal = ref(false);
+const modalType = ref('info');
+const modalMessage = ref('');
+
+// Computed properties for prefilling OtpFlow
+const userEmail = computed(() => {
+  return authStore.user?.email || '';
+});
+
+const userPhone = computed(() => {
+  return studentProfile.value?.phone || '';
+});
+
+const openChangePassword = () => {
+  showChangePassword.value = true;
+};
+
+const closeChangePassword = () => {
+  showChangePassword.value = false;
+};
+
+const handleChangePasswordSuccess = () => {
+  closeChangePassword();
+  modalType.value = 'success';
+  modalMessage.value = 'Your password has been successfully changed.';
+  showModal.value = true;
+};
+
+const closeModal = () => {
+  showModal.value = false;
+  modalType.value = 'info';
+  modalMessage.value = '';
+};
 
 /** Gender-based avatar computed property */
 const avatarUrl = computed(() => {
@@ -124,6 +162,15 @@ watchEffect(async () => {
                 >
                   Edit Profile
                 </router-link>
+
+                <button type="button" @click="openChangePassword"
+                  class="w-full mt-3 px-6 py-3 bg-gradient-to-r from-blue-700 to-indigo-700 text-white font-semibold text-base rounded-full hover:from-blue-800 hover:to-indigo-800 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                  Change Password
+                </button>
               </div>
             </div>
 
@@ -187,7 +234,7 @@ watchEffect(async () => {
                     </div>
                   </div>
 
-                  <!-- Parent Phone -->
+                   <!-- Parent Phone -->
                   <div>
                     <p class="text-base font-bold text-blue-600 mb-3">Parent Phone</p>
                     <div class="bg-blue-200 rounded-full px-6 py-3">
@@ -198,4 +245,11 @@ watchEffect(async () => {
               </div>
             </div>
           </div>
+
+  <!-- Modal Component -->
+  <Modal :show="showModal" :type="modalType" :message="modalMessage" @close="closeModal" />
+
+  <!-- Change Password OTP Flow -->
+  <OtpFlow :show="showChangePassword" title="Change Password" :prefill-email="userEmail" :prefill-phone="userPhone"
+    @close="closeChangePassword" @success="handleChangePasswordSuccess" />
 </template>

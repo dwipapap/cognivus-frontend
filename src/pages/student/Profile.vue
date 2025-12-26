@@ -1,9 +1,8 @@
 <script setup>
-import { ref, onMounted, nextTick, computed } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import { studentAPI } from '../../services/api';
 import { authStore } from '../../store/auth';
 import Modal from '../../components/ui/Modal.vue';
-import OtpFlow from '../../components/ui/OtpFlow.vue';
 
 // Gender mapping helper
 const mapGenderToBackend = (frontendGender) => {
@@ -18,33 +17,6 @@ const showModal = ref(false);
 const modalType = ref('info');
 const modalMessage = ref('');
 const modalRef = ref(null);
-
-// Change Password state
-const showChangePassword = ref(false);
-
-// Computed properties for prefilling OtpFlow
-const userEmail = computed(() => {
-  return authStore.user?.email || '';
-});
-
-const userPhone = computed(() => {
-  return formData.value.phone || '';
-});
-
-const openChangePassword = () => {
-  showChangePassword.value = true;
-};
-
-const closeChangePassword = () => {
-  showChangePassword.value = false;
-};
-
-const handleChangePasswordSuccess = () => {
-  closeChangePassword();
-  modalType.value = 'success';
-  modalMessage.value = 'Your password has been successfully changed.';
-  openModal();
-};
 
 // Form data
 const formData = ref({
@@ -298,31 +270,9 @@ onMounted(fetchProfile);
           </button>
         </div>
       </form>
-
-      <!-- Change Password Section -->
-      <div class="mt-8 pt-8 border-t border-blue-200">
-        <div class="flex items-center justify-between">
-          <div>
-            <h3 class="text-lg font-bold text-blue-600">Security</h3>
-            <p class="text-sm text-gray-500 mt-1">Manage your account password</p>
-          </div>
-          <button type="button" @click="openChangePassword"
-            class="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-sm rounded-full hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg flex items-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
-            Change Password
-          </button>
-        </div>
-      </div>
     </div>
 
     <!-- Modal Component -->
     <Modal :show="showModal" :type="modalType" :message="modalMessage" @close="closeModal" />
-
-    <!-- Change Password OTP Flow -->
-    <OtpFlow :show="showChangePassword" title="Change Password" :prefill-email="userEmail" :prefill-phone="userPhone"
-      @close="closeChangePassword" @success="handleChangePasswordSuccess" />
   </div>
 </template>
