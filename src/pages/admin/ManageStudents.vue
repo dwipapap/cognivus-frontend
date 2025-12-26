@@ -27,6 +27,15 @@ const getClassCode = (classid) => {
   return cls?.class_code || 'Unassigned';
 };
 
+/** Get level name by student's classid */
+const getStudentLevel = (classid) => {
+  if (!classid) return 'Unassigned';
+  const cls = classes.value.find(c => c.classid === classid);
+  if (!cls?.levelid) return 'Unassigned';
+  const level = levels.value.find(l => l.levelid === cls.levelid);
+  return level?.name || 'Unassigned';
+};
+
 /** Enrich classes with level names */
 const enrichedClasses = computed(() => {
   return classes.value.map(cls => ({
@@ -226,7 +235,7 @@ onMounted(() => {
             >
               <option value="">All Classes</option>
               <option v-for="cls in classes" :key="cls.classid" :value="cls.classid">
-                {{ cls.class_code }} - {{ cls.level?.level_name || 'Unknown Level' }}
+                {{ cls.class_code }} - {{ cls.level?.name || 'Unknown Level' }}
               </option>
             </select>
           </div>
@@ -252,7 +261,7 @@ onMounted(() => {
               <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Name</th>
               <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Email</th>
               <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Class</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Payment</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Level</th>
               <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
@@ -279,12 +288,9 @@ onMounted(() => {
                 </span>
               </td>
               <td class="px-4 py-3">
-                <span v-if="student.payment_type" 
-                  class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium" 
-                  :class="student.payment_type === 'Full' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'">
-                  {{ student.payment_type }}
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-indigo-100 text-indigo-800">
+                  {{ getStudentLevel(student.classid) }}
                 </span>
-                <span v-else class="text-sm text-gray-400">-</span>
               </td>
               <td class="px-4 py-3">
                 <div class="flex justify-center gap-2">
