@@ -175,6 +175,7 @@ export const authStore = reactive({
   }
 });
 
-document.addEventListener('visibilitychange', () => {
-  // Visibility change handler - no action needed
+// Cleanup interval when page unloads
+window.addEventListener('beforeunload', () => {
+  authStore.stopExpiryCheck();
 });

@@ -3,6 +3,7 @@ import { ref, computed, watchEffect } from 'vue';
 import { useStudentProfile } from '../../composables/useStudentProfile';
 import { useClassDetails } from '../../composables/useClassDetails';
 import { courseAPI } from '../../services/api';
+import { formatDate } from '../../utils/formatters';
 import LoadingBar from '../../components/ui/LoadingBar.vue';
 import IconArrowRight from '~icons/basil/arrow-right-solid';
 
@@ -49,19 +50,6 @@ const errorMessage = computed(() => {
   if (!classId.value && !profileLoading.value) return 'No class assigned to your account.';
   return classError.value || coursesError.value;
 });
-
-/** Format date with day name */
-const formatDate = (dateString) => {
-  if (!dateString) return '-';
-  try {
-    const date = new Date(dateString);
-    const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
-    const dateOnly = date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    return `${dayName}, ${dateOnly}`;
-  } catch {
-    return dateString;
-  }
-};
 </script>
 
 <template>

@@ -10,6 +10,7 @@ import LoadingBar from '../../components/ui/LoadingBar.vue';
 import ConfirmDialog from '../../components/ui/ConfirmDialog.vue';
 import IconArrowLeft from '~icons/basil/arrow-left-solid';
 import IconArrowRight from '~icons/basil/arrow-right-solid';
+import { formatDate } from '../../utils/formatters';
 
 const { lecturerProfile, isLoading: profileLoading } = useLecturerProfile();
 
@@ -305,10 +306,6 @@ const deleteMaterial = (courseid) => {
 };
 
 /** Format date */
-const formatDate = (dateString) => {
-  if (!dateString) return '-';
-  return new Date(dateString).toLocaleDateString('en-GB');
-};
 
 const goToPage = (page) => {
   if (page >= 1 && page <= totalPages.value) {

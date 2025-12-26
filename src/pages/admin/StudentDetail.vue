@@ -9,6 +9,7 @@ import BaseInput from '../../components/form/BaseInput.vue';
 import BaseSelect from '../../components/form/BaseSelect.vue';
 import BaseTextarea from '../../components/form/BaseTextarea.vue';
 import Modal from '../../components/ui/Modal.vue';
+import { formatDate, getAverageScore, getInitials } from '../../utils/formatters';
 
 const route = useRoute();
 const router = useRouter();
@@ -60,69 +61,6 @@ const getGenderDisplay = (code) => {
   if (code === 'L') return 'Male';
   if (code === 'P') return 'Female';
   return '-';
-};
-
-const formatDate = (dateString) => {
-  if (!dateString) return '-';
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  });
-};
-
-const handleDownloadCertificate = async (gradeId, testType) => {
-  try {
-    const response = await gradeAPI.downloadCertificate(gradeId);
-    
-    const blob = new Blob([response.data], { type: 'application/pdf' });
-    const url = window.URL.createObjectURL(blob);
-    
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `Certificate_${testType || 'Test'}.pdf`;
-    document.body.appendChild(link);
-    link.click();
-    
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
-  } catch (error) {
-    console.error('Error downloading certificate:', error);
-    showNotification('error', 'Failed to download certificate. Please try again.');
-  }
-};
-
-const getStatusBadge = (status) => {
-  const badges = {
-    pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-    success: 'bg-green-100 text-green-800 border-green-200',
-    failed: 'bg-red-100 text-red-800 border-red-200'
-  };
-  return badges[status] || 'bg-gray-100 text-gray-800 border-gray-200';
-};
-
-const getAverageScore = (grade) => {
-  const scores = [
-    grade.listening_score,
-    grade.speaking_score,
-    grade.reading_score,
-    grade.writing_score
-  ].filter(s => s !== null && s !== undefined);
-  
-  if (scores.length === 0) return '-';
-  const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
-  return avg.toFixed(1);
-};
-
-/** Get initials for avatar */
-const getInitials = (name) => {
-  if (!name) return 'ST';
-  return name
-    .split(' ')
-    .map(n => n[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase();
 };
 
 /** Fetch student data */

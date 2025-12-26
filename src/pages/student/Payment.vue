@@ -5,6 +5,7 @@ import { useStudentProfile } from '../../composables/useStudentProfile';
 import { useClassDetails } from '../../composables/useClassDetails';
 import { useSnapPayment } from '../../composables/useSnapPayment';
 import { paymentAPI, priceAPI, ancillaryPriceAPI } from '../../services/api';
+import { formatCurrency, formatDate } from '../../utils/formatters';
 import IconWallet from '~icons/basil/wallet-outline';
 import IconCheck from '~icons/basil/check-solid';
 import IconBook from '~icons/basil/book-solid';
@@ -163,14 +164,6 @@ const fetchPrices = async () => {
   }
 };
 
-const formatCurrency = (amount) => {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0
-  }).format(amount);
-};
-
 const selectPaymentType = (typeId) => {
   selectedPaymentType.value = typeId;
   resetPaymentState();
@@ -254,16 +247,6 @@ const getStatusBadgeClass = (status) => {
     failed: 'bg-red-100 text-red-800 border-red-200'
   };
   return classes[status] || 'bg-gray-100 text-gray-800 border-gray-200';
-};
-
-const formatDate = (dateString) => {
-  return new Date(dateString).toLocaleDateString('id-ID', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
 };
 
 const fetchPaymentHistory = async () => {

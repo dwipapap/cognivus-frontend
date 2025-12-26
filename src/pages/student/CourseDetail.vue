@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watchEffect } from 'vue';
+import { ref, computed, watchEffect, defineAsyncComponent } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useClassDetails } from '../../composables/useClassDetails';
 import { courseAPI } from '../../services/api';
@@ -13,7 +13,16 @@ import IconArrowLeft from '~icons/basil/arrow-left-outline';
 import IconUpload from '~icons/basil/upload-outline';
 import LoadingBar from '../../components/ui/LoadingBar.vue';
 import Modal from '../../components/ui/Modal.vue';
-import PDFViewer from '../../components/ui/PDFViewer.vue';
+
+// Lazy-load PDFViewer to reduce initial bundle size
+const PDFViewer = defineAsyncComponent({
+  loader: () => import('../../components/ui/PDFViewer.vue'),
+  loadingComponent: LoadingBar,
+  delay: 200,
+  timeout: 10000
+});
+
+import { formatDate } from '../../utils/formatters';
 
 const route = useRoute();
 const router = useRouter();
@@ -51,20 +60,6 @@ const getFileUrl = (file) => {
   return file.url || file.path;
 };
 
-/** Format date with day name */
-const formatDate = (dateString) => {
-  if (!dateString) return '-';
-  try {
-    const date = new Date(dateString);
-    const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
-    const dateOnly = date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    return `${dayName}, ${dateOnly}`;
-  } catch {
-    return dateString;
-  }
-};
-
-/** Open PDF in Modal */
 const openMaterial = (url, title) => {
   selectedPdfUrl.value = url;
   selectedPdfTitle.value = title;

@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { studentAPI, lecturerAPI, classAPI, dashboardAPI, paymentAPI } from '@/services/api';
 import LoadingBar from '@/components/ui/LoadingBar.vue';
+import { formatCurrency, getInitials } from '../../utils/formatters';
 
 const students = ref([]);
 const lecturers = ref([]);
@@ -48,15 +49,6 @@ const getRelativeTime = (timestamp) => {
   return `${Math.floor(days / 30)}mo ago`;
 };
 
-/** Format currency */
-const formatCurrency = (amount) => {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0
-  }).format(amount);
-};
-
 /** Total revenue from successful payments */
 const totalRevenue = computed(() => {
   return payments.value
@@ -78,12 +70,6 @@ const recentTeam = computed(() => {
   });
   return team.slice(0, 6);
 });
-
-/** Get initials from name */
-const getInitials = (name) => {
-  if (!name) return '?';
-  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-};
 
 /** Activity dot color */
 const getDotColor = (color) => {

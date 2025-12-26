@@ -5,6 +5,7 @@ import Modal from '../../components/ui/Modal.vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
 import BaseInput from '../../components/form/BaseInput.vue';
 import PriceForm from './PriceForm.vue';
+import { formatCurrency } from '../../utils/formatters';
 
 // Tab state
 const activeTab = ref('classes');
@@ -48,16 +49,6 @@ const goToPage = (page) => {
   if (page >= 1 && page <= totalPages.value) {
     currentPage.value = page;
   }
-};
-
-/** Format currency to IDR */
-const formatCurrency = (amount) => {
-  if (!amount) return '-';
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0
-  }).format(amount);
 };
 
 /** Get level name */
