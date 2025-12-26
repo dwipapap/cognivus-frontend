@@ -169,7 +169,7 @@ onMounted(() => {
       :show="showFormModal" 
       @close="showFormModal = false" 
       :persistent="true" 
-      size="5xl"
+      size="6xl"
       :title="isEditMode ? 'Edit Level' : 'Add New Level'"
       variant="gradient"
       :hide-footer="true"

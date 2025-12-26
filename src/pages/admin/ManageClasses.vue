@@ -214,7 +214,7 @@ onMounted(() => {
         <h1 class="text-2xl font-bold text-gray-800">Manage Classes</h1>
         <p class="text-gray-600 mt-1">Create, edit, and manage class records</p>
       </div>
-      <BaseButton @click="openAddModal" variant="primary">
+      <BaseButton @click="openAddModal" variant="primary" rounded="full">
         <span class="mr-2">+</span> Add Class
       </BaseButton>
     </div>
@@ -224,7 +224,6 @@ onMounted(() => {
       <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
     </div>
 
-    <!-- Classes Table -->
     <div v-else class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full">
@@ -291,6 +290,7 @@ onMounted(() => {
                     @click="openEditModal(classItem)" 
                     variant="secondary"
                     size="sm"
+                    rounded="full"
                   >
                     Edit
                   </BaseButton>
@@ -298,6 +298,7 @@ onMounted(() => {
                     @click="handleDelete(classItem)" 
                     variant="danger"
                     size="sm"
+                    rounded="full"
                   >
                     Delete
                   </BaseButton>
@@ -330,7 +331,7 @@ onMounted(() => {
           <button
             @click="goToPage(currentPage - 1)"
             :disabled="currentPage === 1"
-            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-full hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             Previous
           </button>
@@ -339,9 +340,9 @@ onMounted(() => {
             :key="page"
             @click="goToPage(page)"
             :class="[
-              'px-4 py-2 text-sm font-medium rounded-lg transition-colors',
+              'px-4 py-2 text-sm font-medium rounded-full transition-colors',
               currentPage === page
-                ? 'bg-blue-600 text-white border border-blue-600'
+                ? 'bg-blue-600 text-white border border-blue-600 shadow-sm shadow-blue-200'
                 : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
             ]"
           >
@@ -350,7 +351,7 @@ onMounted(() => {
           <button
             @click="goToPage(currentPage + 1)"
             :disabled="currentPage === totalPages"
-            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-full hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             Next
           </button>

@@ -296,7 +296,7 @@ onMounted(() => {
                 <div class="flex justify-center gap-2">
                   <BaseButton 
                     @click="viewStudentDetail(student)" 
-                    variant="primary" 
+                    variant="secondary" 
                     size="sm"
                   >
                     View
