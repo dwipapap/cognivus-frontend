@@ -35,6 +35,10 @@ const paymentHistory = ref([]);
 const ancillaryPrices = ref([]);
 const isAncillaryLoading = ref(true);
 
+// Pagination state
+const currentPage = ref(1);
+const itemsPerPage = 10;
+
 // Payment types: regular (semester, monthly) + dynamic ancillary
 const regularPaymentTypes = [
   {
@@ -145,6 +149,20 @@ const canPay = computed(() => {
   return selectedPaymentType.value && selectedAmount.value > 0 && !isPaymentLoading.value;
 });
 
+// Pagination computed properties
+const totalPages = computed(() => {
+  return Math.ceil(paymentHistory.value.length / itemsPerPage);
+});
+
+const paginatedHistory = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  return paymentHistory.value.slice(start, end);
+});
+
+const hasPrevious = computed(() => currentPage.value > 1);
+const hasNext = computed(() => currentPage.value < totalPages.value);
+
 // Methods
 const fetchPrices = async () => {
   try {
@@ -249,6 +267,18 @@ const getStatusBadgeClass = (status) => {
   return classes[status] || 'bg-gray-100 text-gray-800 border-gray-200';
 };
 
+const nextPage = () => {
+  if (hasNext.value) {
+    currentPage.value++;
+  }
+};
+
+const previousPage = () => {
+  if (hasPrevious.value) {
+    currentPage.value--;
+  }
+};
+
 const fetchPaymentHistory = async () => {
   try {
     isHistoryLoading.value = true;
@@ -263,6 +293,7 @@ const fetchPaymentHistory = async () => {
 
     if (response.data?.success && response.data?.data) {
       paymentHistory.value = Array.isArray(response.data.data) ? response.data.data : [];
+      currentPage.value = 1; // Reset to first page
     } else {
       paymentHistory.value = [];
     }
@@ -536,7 +567,7 @@ onMounted(async () => {
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-50">
-                <tr v-for="(payment, index) in paymentHistory" :key="payment.paymentid"
+                <tr v-for="(payment, index) in paginatedHistory" :key="payment.paymentid"
                   class="hover:bg-blue-50/30 transition-colors" :class="index % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'">
                   <td class="py-3.5 px-4 text-sm text-gray-600">{{ formatDate(payment.created_at) }}</td>
                   <td class="py-3.5 px-4 text-sm font-medium text-gray-800">{{ getPaymentTypeName(payment.payment_type)
@@ -553,6 +584,23 @@ onMounted(async () => {
                 </tr>
               </tbody>
             </table>
+
+            <!-- Pagination Controls -->
+            <div v-if="totalPages > 1" class="flex items-center justify-between mt-6 pt-4 border-t border-gray-100 px-4">
+              <div class="text-sm text-gray-600 font-medium">
+                Page {{ currentPage }} of {{ totalPages }}
+              </div>
+              <div class="flex gap-2">
+                <button @click="previousPage" :disabled="!hasPrevious"
+                  class="px-4 py-2 rounded-full bg-white border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow">
+                  Previous
+                </button>
+                <button @click="nextPage" :disabled="!hasNext"
+                  class="px-4 py-2 rounded-full bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg border border-blue-500/30">
+                  Next
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -709,7 +757,7 @@ onMounted(async () => {
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-50">
-            <tr v-for="(payment, index) in paymentHistory" :key="payment.paymentid"
+            <tr v-for="(payment, index) in paginatedHistory" :key="payment.paymentid"
               class="hover:bg-blue-50/30 transition-colors" :class="index % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'">
               <td class="py-3.5 px-4 text-sm text-gray-600">{{ formatDate(payment.created_at) }}</td>
               <td class="py-3.5 px-4 text-sm font-medium text-gray-800">{{ getPaymentTypeName(payment.payment_type) }}
@@ -726,6 +774,23 @@ onMounted(async () => {
             </tr>
           </tbody>
         </table>
+
+        <!-- Pagination Controls -->
+        <div v-if="totalPages > 1" class="flex flex-col sm:flex-row items-center justify-between mt-6 pt-4 border-t border-gray-100 gap-3">
+          <div class="text-sm text-gray-600 font-medium">
+            Page {{ currentPage }} of {{ totalPages }}
+          </div>
+          <div class="flex gap-2 w-full sm:w-auto">
+            <button @click="previousPage" :disabled="!hasPrevious"
+              class="flex-1 sm:flex-none px-4 py-2 rounded-full bg-white border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow min-h-[44px]">
+              Previous
+            </button>
+            <button @click="nextPage" :disabled="!hasNext"
+              class="flex-1 sm:flex-none px-4 py-2 rounded-full bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg border border-blue-500/30 min-h-[44px]">
+              Next
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
