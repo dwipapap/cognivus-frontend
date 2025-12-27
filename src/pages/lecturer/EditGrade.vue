@@ -137,6 +137,24 @@
                 min="0"
                 max="100"
               />
+
+              <BaseInput
+                v-bind="getFieldProps('grammar_score')"
+                type="number"
+                label="Grammar Score"
+                placeholder="0-100"
+                min="0"
+                max="100"
+              />
+
+              <BaseInput
+                v-bind="getFieldProps('vocabulary_score')"
+                type="number"
+                label="Vocabulary Score"
+                placeholder="0-100"
+                min="0"
+                max="100"
+              />
             </div>
           </div>
 
@@ -289,6 +307,8 @@ const { formData, errors, isSubmitting, submit, getFieldProps } = useForm(
     speaking_score: null,
     reading_score: null,
     writing_score: null,
+    grammar_score: null,
+    vocabulary_score: null,
     final_score: null,
     description: '',
     date_taken: ''
@@ -331,6 +351,8 @@ const fetchData = async () => {
               speaking_score: grade.value.speaking_score,
               reading_score: grade.value.reading_score,
               writing_score: grade.value.writing_score,
+              grammar_score: grade.value.grammar_score,
+              vocabulary_score: grade.value.vocabulary_score,
               final_score: grade.value.final_score,
               description: grade.value.description || '',
               date_taken: grade.value.date_taken ? new Date(grade.value.date_taken).toISOString().split('T')[0] : ''
@@ -381,6 +403,8 @@ const handleSave = async () => {
         speaking_score: data.speaking_score || null,
         reading_score: data.reading_score || null,
         writing_score: data.writing_score || null,
+        grammar_score: data.grammar_score || null,
+        vocabulary_score: data.vocabulary_score || null,
         final_score: data.final_score ? Math.round(data.final_score) : null,
         description: data.description || null,
         date_taken: data.date_taken || null

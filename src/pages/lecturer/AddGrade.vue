@@ -137,6 +137,24 @@
                 min="0"
                 max="100"
               />
+
+              <BaseInput
+                v-bind="getFieldProps('grammar_score')"
+                type="number"
+                label="Grammar Score"
+                placeholder="0-100"
+                min="0"
+                max="100"
+              />
+
+              <BaseInput
+                v-bind="getFieldProps('vocabulary_score')"
+                type="number"
+                label="Vocabulary Score"
+                placeholder="0-100"
+                min="0"
+                max="100"
+              />
             </div>
           </div>
 
@@ -269,6 +287,8 @@ const { formData, errors, isSubmitting, submit, getFieldProps } = useForm(
     speaking_score: null,
     reading_score: null,
     writing_score: null,
+    grammar_score: null,
+    vocabulary_score: null,
     final_score: null,
     description: '',
     date_taken: new Date().toISOString().split('T')[0]
@@ -329,6 +349,8 @@ const handleSave = async () => {
         speaking_score: data.speaking_score || null,
         reading_score: data.reading_score || null,
         writing_score: data.writing_score || null,
+        grammar_score: data.grammar_score || null,
+        vocabulary_score: data.vocabulary_score || null,
         final_score: data.final_score ? Math.round(data.final_score) : null,
         description: data.description || null,
         date_taken: data.date_taken || null
