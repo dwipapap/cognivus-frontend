@@ -197,7 +197,7 @@ watchEffect(() => {
             v-for="file in courseFiles" 
             :key="file.cfid"
             @click="openMaterial(getFileUrl(file), 'Learning Materials')"
-            class="flex items-center gap-3 md:gap-4 p-3 md:p-4 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 cursor-pointer text-left"
+            class="flex items-center gap-3 md:gap-4 p-3 md:p-4 bg-blue-600 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 cursor-pointer text-left"
           >
             <!-- PDF Thumbnail -->
             <div class="flex-shrink-0 w-14 h-16 md:w-16 md:h-16 bg-white rounded-lg flex items-center justify-center">

@@ -74,7 +74,7 @@ const errorMessage = computed(() => {
   <!-- Course Content -->
   <div v-else class="space-y-6">
     <!-- Class Info Card -->
-    <div class="relative bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-lg overflow-hidden">
+    <div class="relative bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 rounded-2xl p-6 md:p-8 shadow-lg overflow-hidden">
       <!-- Diagonal Book Graphics -->
       <div class="absolute top-0 right-0 w-1/2 h-full pointer-events-none overflow-hidden">
         <div class="absolute -top-10 -right-10 w-40 h-48 bg-blue-400/30 rounded-lg transform rotate-12"></div>
@@ -83,7 +83,7 @@ const errorMessage = computed(() => {
       </div>
 
       <!-- Content -->
-      <div class="relative p-5 md:p-8 z-10">
+      <div class="relative z-10">
         <div class="mb-6">
           <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">{{ levelName || 'Your Course Level' }}</h2>
           <h3 class="text-lg md:text-xl font-semibold text-white/90 mb-3">{{ classInfo?.class_code || 'Class Code' }}
@@ -94,7 +94,10 @@ const errorMessage = computed(() => {
         </div>
 
         <!-- Lecturer Badge -->
-        <div class="inline-block bg-white/20 backdrop-blur-sm rounded-full px-4 py-2">
+        <div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2">
+          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
           <p class="text-white text-sm font-medium">{{ lecturerName || 'Instructor' }}</p>
         </div>
       </div>

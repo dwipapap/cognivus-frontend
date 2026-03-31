@@ -491,7 +491,7 @@ onMounted(() => {
               Schedule
             </h3>
             <button @click="goToMaterials"
-              class="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full hover:from-blue-700 hover:to-indigo-700 hover:scale-105 active:scale-95 focus:ring-2 focus:ring-blue-300 transition-all shadow-md hover:shadow-lg">
+              class="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white bg-blue-600 rounded-full hover:bg-blue-700 hover:scale-105 active:scale-95 focus:ring-2 focus:ring-blue-300 transition-all shadow-md hover:shadow-lg">
               View All
             </button>
           </div>

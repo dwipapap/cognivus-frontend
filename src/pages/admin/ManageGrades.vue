@@ -160,7 +160,7 @@ onMounted(() => {
           <h2 class="text-2xl font-bold text-gray-900">Upload Grade Report</h2>
           <button
             @click="showUploadModal = true"
-            class="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-full hover:from-blue-700 hover:to-blue-800 hover:scale-105 active:scale-95 transition-all shadow-md hover:shadow-lg font-semibold"
+            class="inline-flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-full hover:bg-blue-700 hover:scale-105 active:scale-95 transition-all shadow-md hover:shadow-lg font-semibold"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />

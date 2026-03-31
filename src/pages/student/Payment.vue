@@ -596,7 +596,7 @@ onMounted(async () => {
                   Previous
                 </button>
                 <button @click="nextPage" :disabled="!hasNext"
-                  class="px-4 py-2 rounded-full bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg border border-blue-500/30">
+                  class="px-4 py-2 rounded-full bg-blue-600 text-white font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg border border-blue-500/30">
                   Next
                 </button>
               </div>
@@ -703,7 +703,7 @@ onMounted(async () => {
 
           <button @click="handlePayment" :disabled="!canPay || isPaymentLoading"
             class="w-full py-3 px-5 rounded-full font-bold text-white transition-all duration-300 shadow-md" :class="canPay && !isPaymentLoading
-              ? 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 hover:shadow-xl active:scale-[0.98] cursor-pointer'
+              ? 'bg-blue-600 hover:bg-blue-700 hover:shadow-xl active:scale-[0.98] cursor-pointer'
               : 'bg-gray-300 cursor-not-allowed'">
             <span v-if="isPaymentLoading" class="flex items-center justify-center">
               <IconLoading class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" />
@@ -786,7 +786,7 @@ onMounted(async () => {
               Previous
             </button>
             <button @click="nextPage" :disabled="!hasNext"
-              class="flex-1 sm:flex-none px-4 py-2 rounded-full bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg border border-blue-500/30 min-h-[44px]">
+              class="flex-1 sm:flex-none px-4 py-2 rounded-full bg-blue-600 text-white font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-md hover:shadow-lg border border-blue-500/30 min-h-[44px]">
               Next
             </button>
           </div>
@@ -931,7 +931,7 @@ onMounted(async () => {
 
           <!-- Close Button -->
           <button @click="closeGuideModal"
-            class="guide-close-button w-full min-h-[44px] py-3.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold rounded-full transition-all duration-300 shadow-lg hover:shadow-xl active:scale-[0.98] border border-blue-500/30"
+            class="guide-close-button w-full min-h-[44px] py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full transition-all duration-300 shadow-lg hover:shadow-xl active:scale-[0.98] border border-blue-500/30"
             aria-label="Close payment guide">
             Got it, Thanks!
           </button>

@@ -111,7 +111,7 @@ onMounted(() => {
   <div class="mb-8">
         <button
           @click="goBack"
-          class="mb-6 inline-flex items-center gap-2 px-4 py-2 text-blue-600 hover:text-white bg-blue-50 hover:bg-gradient-to-r hover:from-blue-600 hover:to-indigo-600 rounded-full font-medium transition-all hover:shadow-md"
+          class="mb-6 inline-flex items-center gap-2 px-4 py-2 text-blue-600 hover:text-white bg-blue-50 hover:bg-blue-600 rounded-full font-medium transition-all hover:shadow-md"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />

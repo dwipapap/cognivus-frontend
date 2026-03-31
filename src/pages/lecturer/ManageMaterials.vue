@@ -455,7 +455,7 @@ onMounted(() => {
           </div>
           <button
             @click="openAddForm"
-            class="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-full hover:from-blue-700 hover:to-blue-800 hover:scale-105 active:scale-95 transition-all shadow-md hover:shadow-lg font-semibold"
+            class="inline-flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-full hover:bg-blue-700 hover:scale-105 active:scale-95 transition-all shadow-md hover:shadow-lg font-semibold"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -536,7 +536,7 @@ onMounted(() => {
               <button
                 @click="goToPage(currentPage - 1)"
                 :disabled="currentPage === 1"
-                class="inline-flex h-9 w-9 items-center justify-center rounded-full border-2 border-gray-300 text-sm text-gray-600 transition-all hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:border-blue-400 hover:text-blue-700 hover:scale-110 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 shadow-sm hover:shadow-md"
+                class="inline-flex h-9 w-9 items-center justify-center rounded-full border-2 border-gray-300 text-sm text-gray-600 transition-all hover:bg-blue-50 hover:border-blue-400 hover:text-blue-700 hover:scale-110 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 shadow-sm hover:shadow-md"
               >
                 <span aria-hidden="true">‹</span>
                 <span class="sr-only">Previous page</span>
@@ -548,8 +548,8 @@ onMounted(() => {
                 :class="[
                   'inline-flex h-9 min-w-[2.25rem] items-center justify-center rounded-full border-2 text-sm font-semibold transition-all shadow-sm hover:shadow-md',
                   currentPage === page
-                    ? 'border-blue-600 bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 scale-110'
-                    : 'border-gray-300 text-gray-600 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:border-blue-400 hover:text-blue-700 hover:scale-110 active:scale-95'
+                    ? 'border-blue-600 bg-blue-600 text-white hover:bg-blue-700 scale-110'
+                    : 'border-gray-300 text-gray-600 hover:bg-blue-50 hover:border-blue-400 hover:text-blue-700 hover:scale-110 active:scale-95'
                 ]"
               >
                 {{ page }}
@@ -557,7 +557,7 @@ onMounted(() => {
               <button
                 @click="goToPage(currentPage + 1)"
                 :disabled="currentPage === totalPages"
-                class="inline-flex h-9 w-9 items-center justify-center rounded-full border-2 border-gray-300 text-sm text-gray-600 transition-all hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:border-blue-400 hover:text-blue-700 hover:scale-110 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 shadow-sm hover:shadow-md"
+                class="inline-flex h-9 w-9 items-center justify-center rounded-full border-2 border-gray-300 text-sm text-gray-600 transition-all hover:bg-blue-50 hover:border-blue-400 hover:text-blue-700 hover:scale-110 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 shadow-sm hover:shadow-md"
               >
                 <span aria-hidden="true">›</span>
                 <span class="sr-only">Next page</span>

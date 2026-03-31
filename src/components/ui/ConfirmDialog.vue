@@ -43,19 +43,19 @@ const variantStyles = computed(() => {
     danger: {
       icon: 'text-red-600 bg-red-100',
       iconGradient: 'from-red-500 to-rose-600',
-      confirmButton: 'bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white border-red-600',
+      confirmButton: 'bg-red-600 hover:bg-red-700 text-white border-red-600',
       header: 'from-red-500 via-red-600 to-rose-600'
     },
     warning: {
       icon: 'text-yellow-600 bg-yellow-100',
       iconGradient: 'from-yellow-500 to-amber-600',
-      confirmButton: 'bg-gradient-to-r from-yellow-600 to-amber-600 hover:from-yellow-700 hover:to-amber-700 text-white border-yellow-600',
+      confirmButton: 'bg-yellow-600 hover:bg-yellow-700 text-white border-yellow-600',
       header: 'from-yellow-500 via-yellow-600 to-amber-600'
     },
     info: {
       icon: 'text-blue-600 bg-blue-100',
       iconGradient: 'from-blue-500 to-indigo-600',
-      confirmButton: 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white border-blue-600',
+      confirmButton: 'bg-blue-600 hover:bg-blue-700 text-white border-blue-600',
       header: 'from-blue-500 via-blue-600 to-indigo-600'
     }
   };
