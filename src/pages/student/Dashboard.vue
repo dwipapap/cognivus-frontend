@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watchEffect } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { authStore } from '../../store/auth';
 import { useStudentProfile } from '../../composables/useStudentProfile';
@@ -16,7 +16,13 @@ import IconCalendar from '~icons/basil/calendar-outline';
 import { formatDate } from '../../utils/formatters';
 
 const router = useRouter();
-const { studentProfile, isLoading } = useStudentProfile();
+const { studentProfile, isLoading, fetchStudentProfile } = useStudentProfile();
+
+// Fetch profile and courses on mount
+onMounted(async () => {
+  await fetchStudentProfile();
+  fetchCourses();
+});
 
 // Fetch class details (level and lecturer info)
 const classId = computed(() => studentProfile.value?.classid);
@@ -187,13 +193,6 @@ const fetchCourses = async () => {
     coursesLoading.value = false;
   }
 };
-
-// Auto-fetch courses when profile loads
-watchEffect(() => {
-  if (!isLoading.value && studentProfile.value) {
-    fetchCourses();
-  }
-});
 </script>
 
 <template>

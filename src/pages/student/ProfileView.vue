@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watchEffect } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { authStore } from '../../store/auth';
 import { useStudentProfile } from '../../composables/useStudentProfile';
 import { classAPI, levelAPI } from '../../services/api';
@@ -8,10 +8,17 @@ import iconGirlImage from '../../assets/icongirl.webp';
 import { formatDate } from '../../utils/formatters';
 import OtpFlow from '../../components/ui/OtpFlow.vue';
 import Modal from '../../components/ui/Modal.vue';
+import LoadingBar from '../../components/ui/LoadingBar.vue';
 
-const { studentProfile, isLoading, errorMessage } = useStudentProfile();
+const { studentProfile, isLoading, errorMessage, fetchStudentProfile } = useStudentProfile();
 const classCode = ref('-');
 const levelName = ref('-');
+
+// Fetch profile on mount
+onMounted(async () => {
+  await fetchStudentProfile();
+  fetchClassData();
+});
 
 // Change Password state
 const showChangePassword = ref(false);
@@ -72,26 +79,26 @@ const handleImageError = (event) => {
   event.target.src = iconBoyImage;
 };
 
-watchEffect(async () => {
-  if (studentProfile.value?.classid) {
-    try {
-      const classRes = await classAPI.getClassById(studentProfile.value.classid);
-      if (classRes.data.success) {
-        classCode.value = classRes.data.data.class_code || '-';
-        
-        // Fetch level name
-        if (classRes.data.data.levelid) {
-          const levelRes = await levelAPI.getLevelById(classRes.data.data.levelid);
-          if (levelRes.data.success) {
-            levelName.value = levelRes.data.data.name || '-';
-          }
+// Fetch class data after profile loads
+const fetchClassData = async () => {
+  if (!studentProfile.value?.classid) return;
+  
+  try {
+    const classRes = await classAPI.getClassById(studentProfile.value.classid);
+    if (classRes.data.success) {
+      classCode.value = classRes.data.data.class_code || '-';
+      
+      if (classRes.data.data.levelid) {
+        const levelRes = await levelAPI.getLevelById(classRes.data.data.levelid);
+        if (levelRes.data.success) {
+          levelName.value = levelRes.data.data.name || '-';
         }
       }
-    } catch (error) {
-      console.error('Error fetching class data:', error);
     }
+  } catch (error) {
+    console.error('Error fetching class data:', error);
   }
-});
+};
 </script>
 
 <template>
@@ -128,8 +135,7 @@ watchEffect(async () => {
   </div>
 
   <!-- Loading State -->
-      <!-- Loading State -->
-    <div v-if="loading" class="max-w-2xl mx-auto py-20">
+    <div v-if="isLoading" class="max-w-2xl mx-auto py-20">
       <LoadingBar :loading="true" color="blue" :duration="2000" />
       <p class="text-center text-gray-600 mt-4">Loading profile...</p>
     </div>

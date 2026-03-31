@@ -14,7 +14,12 @@ import IconLogout from '~icons/basil/logout-solid';
 import IconCaret from '~icons/basil/caret-down-outline';
 
 const router = useRouter();
-const { studentProfile, isLoading: isProfileLoading } = useStudentProfile();
+const { studentProfile, isLoading: isProfileLoading, fetchStudentProfile } = useStudentProfile();
+
+// Fetch profile on mount
+onMounted(() => {
+  fetchStudentProfile();
+});
 
 // Click-based dropdown state
 const showDropdown = ref(false);

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watchEffect } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useClassDetails } from '../../composables/useClassDetails';
 import { courseAPI } from '../../services/api';
@@ -92,8 +92,8 @@ const fetchCourseData = async () => {
 const isLoading = computed(() => courseLoading.value || classLoading.value);
 const errorMessage = computed(() => courseError.value || classError.value);
 
-// Auto-fetch course on mount
-watchEffect(() => {
+// Fetch course on mount
+onMounted(() => {
   if (route.params.id) {
     fetchCourseData();
   }

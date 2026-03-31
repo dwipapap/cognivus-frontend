@@ -18,7 +18,7 @@ import IconLoading from '~icons/svg-spinners/pulse-rings-multiple';
 import IconQuestionCircle from '~icons/solar/question-circle-broken';
 
 // Composables
-const { studentProfile, isLoading: isProfileLoading } = useStudentProfile();
+const { studentProfile, isLoading: isProfileLoading, fetchStudentProfile } = useStudentProfile();
 const classId = computed(() => studentProfile.value?.classid);
 const { classInfo, levelName, programName, isLoading: isClassLoading } = useClassDetails(classId);
 const { pay, isLoading: isPaymentLoading, error: paymentError, paymentStatus, resetPaymentState } = useSnapPayment();
@@ -328,6 +328,7 @@ const handleRefreshHistory = async () => {
 
 // Lifecycle
 onMounted(async () => {
+  await fetchStudentProfile();
   fetchPrices();
   fetchAncillaryPrices();
   await new Promise(resolve => setTimeout(resolve, 500));

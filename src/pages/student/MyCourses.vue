@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watchEffect } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useStudentProfile } from '../../composables/useStudentProfile';
 import { useClassDetails } from '../../composables/useClassDetails';
 import { courseAPI } from '../../services/api';
@@ -7,7 +7,7 @@ import { formatDate } from '../../utils/formatters';
 import LoadingBar from '../../components/ui/LoadingBar.vue';
 import IconArrowRight from '~icons/basil/arrow-right-solid';
 
-const { studentProfile, isLoading: profileLoading } = useStudentProfile();
+const { studentProfile, isLoading: profileLoading, fetchStudentProfile } = useStudentProfile();
 
 // Use composable for class details
 const classId = computed(() => studentProfile.value?.classid);
@@ -37,9 +37,10 @@ const fetchCourses = async () => {
   }
 };
 
-// Auto-fetch courses when profile loads
-watchEffect(() => {
-  if (!profileLoading.value && classId.value) {
+// Fetch profile and courses on mount
+onMounted(async () => {
+  await fetchStudentProfile();
+  if (classId.value) {
     fetchCourses();
   }
 });

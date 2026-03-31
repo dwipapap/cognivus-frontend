@@ -13,7 +13,7 @@ import IconClose from '~icons/basil/cross-outline';
 import IconInfo from '~icons/basil/info-circle-outline';
 import { formatDate, getAverageScore } from '../../utils/formatters';
 
-const { studentProfile, isLoading: isProfileLoading } = useStudentProfile();
+const { studentProfile, isLoading: isProfileLoading, fetchStudentProfile } = useStudentProfile();
 
 // Use composable for class details to match MyCourses style
 const classId = computed(() => studentProfile.value?.classid);
@@ -90,6 +90,7 @@ watch(
 );
 
 onMounted(() => {
+  fetchStudentProfile();
   // If studentProfile is already loaded, fetch immediately
   if (studentProfile.value?.studentid) {
     fetchGrades();
