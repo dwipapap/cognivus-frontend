@@ -1,4 +1,4 @@
-import { ref, watchEffect, toValue } from 'vue';
+import { ref, watch, toValue } from 'vue';
 import { classAPI, levelAPI, lecturerAPI, priceAPI, programAPI } from '../services/api';
 
 const formatLecturerName = (fullname, gender) => {
@@ -83,8 +83,8 @@ export function useClassDetails(classId) {
     }
   };
 
-  // Auto-fetch when classId changes
-  watchEffect(() => {
+  // Fetch when classId changes (not immediately on mount)
+  watch(classId, () => {
     fetchDetails();
   });
 

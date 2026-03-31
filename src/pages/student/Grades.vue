@@ -160,7 +160,7 @@ onMounted(() => {
         </div>
 
         <!-- Grades Table Container -->
-        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-4 md:p-6 shadow-sm hover:shadow-md transition-all duration-200">
+        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-6 md:p-8 shadow-sm hover:shadow-md transition-all duration-200">
           <div class="mb-4 md:mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <h2 class="text-xl md:text-2xl font-bold text-gray-900">Test Results</h2>
           </div>

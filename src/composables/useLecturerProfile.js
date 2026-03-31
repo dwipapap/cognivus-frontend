@@ -134,13 +134,6 @@ export function useLecturerProfile() {
     }
   };
 
-  onMounted(() => {
-    // Only fetch profile if user is lecturer
-    if (authStore.role === 'lecturer') {
-      fetchLecturerProfile();
-    }
-  });
-
   return {
     lecturerProfile,
     isLoading,
@@ -149,6 +142,6 @@ export function useLecturerProfile() {
     fetchLecturerProfile,
     updateLecturerProfile,
     getAllLecturers,
-    mapGenderToBackend // Export for use in forms
+    mapGenderToBackend
   };
 }

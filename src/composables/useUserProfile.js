@@ -112,8 +112,6 @@ export function useUserProfile() {
     }
   };
 
-  onMounted(fetchUserProfile);
-
   return {
     userProfile,
     isLoading,
@@ -121,6 +119,6 @@ export function useUserProfile() {
     errorMessage,
     fetchUserProfile,
     updateUserProfile,
-    createUserProfile,
+    createUserProfile
   };
 }

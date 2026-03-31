@@ -24,11 +24,13 @@ const mapGenderToBackend = (gender) => {
 
 /**
  * Manage student profile.
+ * NOTE: Call fetchStudentProfile() in component's onMounted or where needed.
+ * This ensures the component controls when to fetch, enabling better reusability.
  * @returns {Object} State and functions
  */
 export function useStudentProfile() {
   const studentProfile = ref(null);
-  const isLoading = ref(true);
+  const isLoading = ref(false);
   const errorMessage = ref('');
 
   /**
@@ -76,13 +78,11 @@ export function useStudentProfile() {
     }
   };
 
-  onMounted(fetchStudentProfile);
-
   return {
     studentProfile,
     isLoading,
     errorMessage,
     fetchStudentProfile,
-    mapGenderToBackend // Export for use in forms
+    mapGenderToBackend
   };
 }

@@ -105,7 +105,7 @@ const errorMessage = computed(() => {
 
     <!-- Course List -->
     <div
-      class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-4 md:p-6 shadow-sm hover:shadow-md transition-all duration-200">
+      class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-6 md:p-8 shadow-sm hover:shadow-md transition-all duration-200">
       <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-4 md:mb-6">Course Materials</h2>
 
       <div v-if="courses.length === 0" class="py-12 text-center text-gray-500">
