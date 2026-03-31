@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import { authStore } from '../../store/auth';
 import { useStudentProfile } from '../../composables/useStudentProfile';
 import { useClassDetails } from '../../composables/useClassDetails';
+import { useDashboardUtils } from '../../composables/useDashboardUtils';
 import { courseAPI } from '../../services/api';
 import LoadingBar from '../../components/ui/LoadingBar.vue';
 import IconChart from '~icons/solar/round-graph-bold';
@@ -16,15 +17,14 @@ import IconCalendar from '~icons/basil/calendar-outline';
 import { formatDate } from '../../utils/formatters';
 
 const router = useRouter();
-const { studentProfile, isLoading, fetchStudentProfile } = useStudentProfile();
+const { studentProfile, fetchStudentProfile } = useStudentProfile();
+const { greeting, getFormattedSchedule, getDashboardCourses, getPlaceholderImage, getCourseStatusText, getStatusBadgeClass } = useDashboardUtils();
 
-// Fetch profile and courses on mount
 onMounted(async () => {
   await fetchStudentProfile();
   fetchCourses();
 });
 
-// Fetch class details (level and lecturer info)
 const classId = computed(() => studentProfile.value?.classid);
 const { classInfo, levelName, lecturerName, isLoading: classLoading } = useClassDetails(classId);
 
@@ -32,133 +32,13 @@ const user = computed(() => ({
   name: studentProfile.value?.nama_lengkap || studentProfile.value?.fullname || authStore.user?.username || authStore.user?.email?.split('@')[0] || 'Student',
 }));
 
-/** Get time-based greeting */
-const getGreeting = () => {
-  const hour = new Date().getHours();
-  if (hour >= 5 && hour < 12) return 'Good Morning';
-  if (hour >= 12 && hour < 17) return 'Good Afternoon';
-  if (hour >= 17 && hour < 21) return 'Good Evening';
-  return 'Good Night';
-};
+const formattedSchedule = computed(() => getFormattedSchedule(classInfo.value));
 
-const greeting = ref(getGreeting());
 const courses = ref([]);
 const coursesLoading = ref(false);
 const coursesError = ref(null);
 
-/** Format time from 24h to 12h format */
-const formatTime = (time) => {
-  if (!time) return '';
-  
-  try {
-    const [hours, minutes] = time.split(':');
-    const hour = parseInt(hours, 10);
-    const ampm = hour >= 12 ? 'PM' : 'AM';
-    const formattedHour = hour % 12 || 12;
-    return `${formattedHour}:${minutes} ${ampm}`;
-  } catch {
-    return time;
-  }
-};
-
-/** Day name to number mapping (Sunday = 0) */
-const dayToNumber = {
-  'Sunday': 0,
-  'Monday': 1,
-  'Tuesday': 2,
-  'Wednesday': 3,
-  'Thursday': 4,
-  'Friday': 5,
-  'Saturday': 6
-};
-
-/** Get the next upcoming schedule based on current day */
-const formattedSchedule = computed(() => {
-  if (!classInfo.value) return 'Schedule not set';
-  
-  const schedule1 = classInfo.value.schedule_day;
-  const time1 = classInfo.value.schedule_time;
-  const schedule2 = classInfo.value.schedule_day_2;
-  const time2 = classInfo.value.schedule_time_2;
-  
-  // If no schedules exist
-  if (!schedule1 && !schedule2) return 'Schedule not set';
-  
-  // If only one schedule exists, show it
-  if (!schedule2 || !time2) {
-    if (schedule1 && time1) {
-      return `${schedule1}, ${formatTime(time1)}`;
-    }
-    return 'Schedule not set';
-  }
-  
-  if (!schedule1 || !time1) {
-    return `${schedule2}, ${formatTime(time2)}`;
-  }
-  
-  // Both schedules exist - find the next upcoming one
-  const today = new Date().getDay(); // 0 = Sunday, 6 = Saturday
-  const day1Num = dayToNumber[schedule1];
-  const day2Num = dayToNumber[schedule2];
-  
-  // Calculate days until each schedule (0 = today, 7 = same day next week)
-  const daysUntil1 = (day1Num - today + 7) % 7 || 7; // If today, show as 7 days (next week)
-  const daysUntil2 = (day2Num - today + 7) % 7 || 7;
-  
-  // Show the schedule that comes sooner
-  if (daysUntil1 <= daysUntil2) {
-    return `${schedule1}, ${formatTime(time1)}`;
-  } else {
-    return `${schedule2}, ${formatTime(time2)}`;
-  }
-});
-
-/** Default placeholder images */
-const placeholderImages = [
-  'https://semilir.co/wp-content/uploads/2023/01/buku-buku.jpg',
-  'https://www.pertuni.or.id/wp-content/uploads/2021/01/books-690219_1920.jpg',
-  'https://ichef.bbci.co.uk/ace/ws/640/amz/worldservice/live/assets/images/2016/03/26/160326125304_libreria_bookstore_1_640x360_iwanbaan_nocredit.jpg.webp'
-];
-
-const getPlaceholderImage = (index) => placeholderImages[index % placeholderImages.length];
-
-/** Get course status based on upload date */
-const getCourseStatus = (course) => {
-  const daysSinceUpload = Math.floor(
-    (new Date() - new Date(course.upload_date)) / (1000 * 60 * 60 * 24)
-  );
-  
-  if (daysSinceUpload <= 7) return 'new';
-  if (daysSinceUpload <= 30) return 'recent';
-  return 'older';
-};
-
-/** Get status text for display */
-const getCourseStatusText = (course) => {
-  const status = getCourseStatus(course);
-  return {
-    new: 'New',
-    recent: 'Recent',
-    older: 'Older'
-  }[status];
-};
-
-/** Get status badge classes */
-const getStatusBadgeClass = (course) => {
-  const status = getCourseStatus(course);
-  return {
-    'bg-green-500': status === 'new',
-    'bg-blue-500': status === 'recent',
-    'bg-gray-500': status === 'older'
-  };
-};
-
-/** Dashboard courses (limited to 3, sorted by newest) */
-const dashboardCourses = computed(() => {
-  return [...courses.value]
-    .sort((a, b) => new Date(b.upload_date) - new Date(a.upload_date))
-    .slice(0, 3);
-});
+const dashboardCourses = computed(() => getDashboardCourses(courses.value, 4));
 
 const fetchCourses = async () => {
   if (!studentProfile.value?.classid) return;
@@ -170,7 +50,6 @@ const fetchCourses = async () => {
     const response = await courseAPI.getAllCourses();
     
     if (response.data.success) {
-      // Filter by classid and sort by upload_date (newest first)
       const filtered = response.data.data
         .filter(course => course.classid === studentProfile.value.classid)
         .sort((a, b) => {
@@ -193,189 +72,278 @@ const fetchCourses = async () => {
     coursesLoading.value = false;
   }
 };
+
+const courseLink = (courseId) => ({ name: 'StudentCourseDetail', params: { id: courseId } });
 </script>
 
 <template>
-  <!-- Welcome Section with Illustration -->
-  <div class="relative bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 rounded-2xl p-6 md:p-8 mb-8 shadow-lg overflow-hidden">
-    <!-- Decorative Background Elements -->
-    <div class="absolute top-0 right-0 w-1/2 h-full pointer-events-none overflow-hidden">
-      <div class="absolute -top-10 -right-10 w-40 h-48 bg-blue-400/30 rounded-lg transform rotate-12"></div>
-      <div class="absolute top-20 -right-5 w-32 h-40 bg-blue-300/40 rounded-lg transform rotate-12"></div>
-      <div class="absolute top-40 right-10 w-28 h-36 bg-white/20 rounded-lg transform rotate-12"></div>
-    </div>
-
-    <!-- Content -->
-    <div class="relative z-10">
-      <p class="text-white/80 text-sm mb-1">{{ greeting }},</p>
-      <h1 class="text-2xl md:text-3xl font-bold text-white mb-2">{{ user.name }}</h1>
-      <p class="text-white/70 text-sm md:text-base max-w-md">
-        Welcome back! Continue your learning journey and explore your course materials.
-      </p>
-    </div>
-  </div>
-
-  <!-- Quick Stats Cards -->
-  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-    <!-- Level -->
-    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-      <div class="flex items-start justify-between mb-3">
-        <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
-          <IconChart class="w-5 h-5 text-blue-600" />
-        </div>
-      </div>
-      <p class="text-sm text-gray-500 mb-1">Level</p>
-      <p class="text-lg font-semibold text-gray-900 line-clamp-1">{{ classLoading ? 'Loading...' : (levelName || '-') }}</p>
-    </div>
-
-    <!-- Courses -->
-    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-      <div class="flex items-start justify-between mb-3">
-        <div class="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center">
-          <IconBook class="w-5 h-5 text-indigo-600" />
-        </div>
-      </div>
-      <p class="text-sm text-gray-500 mb-1">Courses</p>
-      <p class="text-lg font-semibold text-gray-900">{{ coursesLoading ? 'Loading...' : courses.length }}</p>
-    </div>
-
-    <!-- Lecturer -->
-    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-      <div class="flex items-start justify-between mb-3">
-        <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
-          <IconUser class="w-5 h-5 text-blue-600" />
-        </div>
-      </div>
-      <p class="text-sm text-gray-500 mb-1">Instructor</p>
-      <p class="text-lg font-semibold text-gray-900 line-clamp-1">{{ classLoading ? 'Loading...' : (lecturerName || '-') }}</p>
-    </div>
-
-    <!-- Schedule -->
-    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-      <div class="flex items-start justify-between mb-3">
-        <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
-          <IconClock class="w-5 h-5 text-blue-600" />
-        </div>
-      </div>
-      <p class="text-sm text-gray-500 mb-1">Next Class</p>
-      <p class="text-lg font-semibold text-gray-900 line-clamp-1">{{ classLoading ? 'Loading...' : formattedSchedule }}</p>
-    </div>
-  </div>
-
-  <!-- My Courses Section -->
-  <section class="mb-8">
-    <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6 md:p-8 border border-blue-100 shadow-sm">
-      <!-- Section Header with View All -->
-      <div class="flex items-center justify-between mb-6">
-        <div>
-          <h2 class="text-2xl font-bold text-gray-900">My Courses</h2>
-          <p class="text-sm text-gray-500 mt-1">{{ courses.length }} course materials available</p>
-        </div>
-        <router-link to="/student/courses" class="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1">
-          View All
-          <IconArrowRight class="w-4 h-4" />
-        </router-link>
+  <div class="space-y-6">
+    <!-- Welcome Section -->
+    <section 
+      class="relative bg-blue-600 rounded-2xl p-6 md:p-8 shadow-lg overflow-hidden"
+      aria-labelledby="welcome-heading"
+    >
+      <div class="absolute top-0 right-0 w-1/2 h-full pointer-events-none overflow-hidden" aria-hidden="true">
+        <div class="absolute -top-10 -right-10 w-40 h-48 bg-blue-400/30 rounded-lg transform rotate-12"></div>
+        <div class="absolute top-20 -right-5 w-32 h-40 bg-blue-300/40 rounded-lg transform rotate-12"></div>
+        <div class="absolute top-40 right-10 w-28 h-36 bg-white/20 rounded-lg transform rotate-12"></div>
       </div>
 
-      <!-- Loading State -->
-      <div v-if="coursesLoading" class="max-w-2xl mx-auto py-12">
-        <LoadingBar :loading="true" color="blue" :duration="2000" />
-        <p class="text-center text-gray-600 mt-4">Loading courses...</p>
+      <div class="relative z-10">
+        <p class="text-white/80 text-sm mb-1">{{ greeting }},</p>
+        <h1 id="welcome-heading" class="text-2xl md:text-3xl font-bold text-white mb-2">{{ user.name }}</h1>
+        <p class="text-white/70 text-sm md:text-base max-w-md">
+          Welcome back! Continue your learning journey and explore your course materials.
+        </p>
       </div>
+    </section>
 
-      <!-- Error State -->
-      <div v-else-if="coursesError" class="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
-        <p class="text-red-800 mb-4">{{ coursesError }}</p>
-        <button 
-          @click="fetchCourses"
-          class="px-6 py-2.5 bg-red-600 text-white font-medium rounded-xl hover:bg-red-700 transition-colors"
-        >
-          Retry
-        </button>
-      </div>
-
-      <!-- Empty State -->
-      <div v-else-if="dashboardCourses.length === 0" class="text-center py-12">
-        <IconBookSolid class="w-16 h-16 mx-auto text-gray-400 mb-4" />
-        <p class="text-gray-500">No course materials available yet.</p>
-      </div>
-
-      <!-- Course Cards - Hybrid Layout -->
-      <div v-else class="space-y-4">
-        <!-- Hero card for latest course -->
-        <article class="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all">
-          <div class="flex flex-col md:flex-row">
-            <div class="md:w-1/3 h-48 md:h-auto relative">
-              <img 
-                :src="getPlaceholderImage(0)" 
-                :alt="dashboardCourses[0].title" 
-                class="w-full h-full object-cover" 
-              />
-              <span 
-                :class="getStatusBadgeClass(dashboardCourses[0])"
-                class="absolute top-3 left-3 z-10 px-2.5 py-1 rounded-full text-white text-xs font-medium"
-              >
-                {{ getCourseStatusText(dashboardCourses[0]) }}
-              </span>
+    <!-- Quick Stats Cards -->
+    <section aria-label="Quick stats">
+      <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-px bg-gray-100">
+          
+          <!-- Level -->
+          <article class="bg-white p-3 sm:p-5 hover:bg-slate-50 transition-colors" aria-label="Level">
+            <div class="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-1.5">
+              <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
+                <IconChart class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600" aria-hidden="true" />
+              </div>
+              <h3 class="text-xs sm:text-sm font-medium text-gray-500 line-clamp-1">Level</h3>
             </div>
-            
-            <div class="p-6 md:w-2/3 flex flex-col justify-between">
-              <div>
-                <div class="flex items-center gap-2 mb-2">
-                  <span class="text-xs font-medium px-2 py-1 rounded-full bg-white/20 text-white">Latest</span>
-                  <span class="text-xs text-white/70 flex items-center gap-1">
-                    <IconCalendar class="w-3.5 h-3.5" />
+            <div class="pl-9 sm:pl-11">
+              <p class="text-base sm:text-xl font-bold text-gray-900 line-clamp-1">
+                <span v-if="classLoading" role="status" aria-busy="true">—</span>
+                <span v-else>{{ levelName || '-' }}</span>
+              </p>
+              <p class="text-[10px] sm:text-xs text-gray-400 mt-0.5 line-clamp-1">Current class</p>
+            </div>
+          </article>
+
+          <!-- Courses -->
+          <article class="bg-white p-3 sm:p-5 hover:bg-slate-50 transition-colors" aria-label="Courses">
+            <div class="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-1.5">
+              <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0">
+                <IconBook class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600" aria-hidden="true" />
+              </div>
+              <h3 class="text-xs sm:text-sm font-medium text-gray-500 line-clamp-1">Courses</h3>
+            </div>
+            <div class="pl-9 sm:pl-11">
+              <p class="text-base sm:text-xl font-bold text-gray-900 line-clamp-1">
+                <span v-if="coursesLoading" role="status" aria-busy="true">—</span>
+                <span v-else>{{ courses.length }}</span>
+              </p>
+              <p class="text-[10px] sm:text-xs text-gray-400 mt-0.5 line-clamp-1">Available materials</p>
+            </div>
+          </article>
+
+          <!-- Instructor -->
+          <article class="bg-white p-3 sm:p-5 hover:bg-slate-50 transition-colors" aria-label="Instructor">
+            <div class="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-1.5">
+              <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-indigo-50 flex items-center justify-center flex-shrink-0">
+                <IconUser class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-600" aria-hidden="true" />
+              </div>
+              <h3 class="text-xs sm:text-sm font-medium text-gray-500 line-clamp-1">Instructor</h3>
+            </div>
+            <div class="pl-9 sm:pl-11">
+              <p class="text-base sm:text-xl font-bold text-gray-900 line-clamp-1">
+                <span v-if="classLoading" role="status" aria-busy="true">—</span>
+                <span v-else>{{ lecturerName || '-' }}</span>
+              </p>
+              <p class="text-[10px] sm:text-xs text-gray-400 mt-0.5 line-clamp-1">Class lecturer</p>
+            </div>
+          </article>
+
+          <!-- Next Class -->
+          <article class="bg-white p-3 sm:p-5 hover:bg-slate-50 transition-colors" aria-label="Next Class">
+            <div class="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-1.5">
+              <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0">
+                <IconClock class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-600" aria-hidden="true" />
+              </div>
+              <h3 class="text-xs sm:text-sm font-medium text-gray-500 line-clamp-1">Next Class</h3>
+            </div>
+            <div class="pl-9 sm:pl-11">
+              <p class="text-base sm:text-xl font-bold text-gray-900 line-clamp-1">
+                <span v-if="classLoading" role="status" aria-busy="true">—</span>
+                <span v-else>{{ formattedSchedule }}</span>
+              </p>
+              <p class="text-[10px] sm:text-xs text-gray-400 mt-0.5 line-clamp-1">Upcoming schedule</p>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- My Courses Section -->
+    <section aria-labelledby="courses-heading">
+      <div class="bg-gray-50 rounded-2xl p-6 md:p-8 border border-gray-200 shadow-sm">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h2 id="courses-heading" class="text-2xl font-bold text-gray-900">My Courses</h2>
+            <p class="text-sm text-gray-500 mt-1">{{ courses.length }} course materials available</p>
+          </div>
+          <router-link 
+            to="/student/courses" 
+            class="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1"
+            aria-label="View all courses"
+          >
+            View All
+            <IconArrowRight class="w-4 h-4" aria-hidden="true" />
+          </router-link>
+        </div>
+
+        <div v-if="coursesLoading" class="max-w-2xl mx-auto py-12" role="status" aria-busy="true">
+          <LoadingBar :loading="true" color="blue" :duration="2000" />
+          <p class="text-center text-gray-600 mt-4">Loading courses...</p>
+        </div>
+
+        <div v-else-if="coursesError" class="bg-red-50 border border-red-200 rounded-xl p-6 text-center" role="alert">
+          <p class="text-red-800 mb-4">{{ coursesError }}</p>
+          <button 
+            @click="fetchCourses"
+            class="px-6 py-2.5 bg-red-600 text-white font-medium rounded-xl hover:bg-red-700 transition-colors"
+            aria-label="Retry loading courses"
+          >
+            Retry
+          </button>
+        </div>
+
+        <div v-else-if="dashboardCourses.length === 0" class="text-center py-12" role="status">
+          <IconBookSolid class="w-16 h-16 mx-auto text-gray-400 mb-4" aria-hidden="true" />
+          <p class="text-gray-500">No course materials available yet.</p>
+        </div>
+
+        <div v-else class="space-y-6">
+          <!-- Hero Banner for Latest Course -->
+          <article 
+            class="bg-blue-600 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 group relative"
+            aria-labelledby="hero-course-title"
+          >
+            <!-- Background Decoration -->
+            <div class="absolute top-0 right-0 w-1/2 h-full pointer-events-none overflow-hidden" aria-hidden="true">
+              <div class="absolute -top-24 -right-10 w-64 h-64 bg-blue-500/30 rounded-full blur-3xl"></div>
+              <div class="absolute bottom-0 right-1/4 w-40 h-40 bg-blue-400/20 rounded-full blur-2xl"></div>
+            </div>
+
+            <router-link :to="courseLink(dashboardCourses[0].courseid)" class="flex flex-col md:flex-row relative z-10">
+              <div class="md:w-5/12 lg:w-2/5 h-48 md:h-auto relative overflow-hidden bg-blue-800">
+                <img 
+                  :src="getPlaceholderImage(0)" 
+                  :alt="dashboardCourses[0].title" 
+                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90 group-hover:opacity-100" 
+                />
+                <span 
+                  :class="getStatusBadgeClass(dashboardCourses[0])"
+                  class="absolute top-3 left-3 md:top-4 md:left-4 z-10 px-2.5 py-1 md:px-3 rounded-full text-white text-[10px] md:text-xs font-semibold shadow-sm"
+                  aria-label="Course status"
+                >
+                  {{ getCourseStatusText(dashboardCourses[0]) }}
+                </span>
+              </div>
+              
+              <div class="p-5 md:p-8 md:w-7/12 lg:w-3/5 flex flex-col justify-center">
+                <div class="flex items-center gap-2.5 mb-2.5 md:mb-3">
+                  <span class="text-[10px] md:text-xs font-bold px-2 py-0.5 md:px-2.5 md:py-1 rounded-full bg-white/20 text-white backdrop-blur-sm">Latest Activity</span>
+                  <span class="text-[10px] md:text-xs text-blue-100 flex items-center gap-1 font-medium">
+                    <IconCalendar class="w-3.5 h-3.5 md:w-4 md:h-4" aria-hidden="true" />
                     {{ formatDate(dashboardCourses[0].upload_date) }}
                   </span>
                 </div>
-                <h3 class="text-xl md:text-2xl font-bold text-white mb-2">{{ dashboardCourses[0].title }}</h3>
-                <p class="text-white/80 text-sm md:text-base">Access your latest course materials and continue your learning journey.</p>
+                <h3 id="hero-course-title" class="text-xl md:text-2xl lg:text-3xl font-bold text-white mb-2 md:mb-3 line-clamp-2">{{ dashboardCourses[0].title }}</h3>
+                <p class="text-blue-100/90 text-xs md:text-sm lg:text-base mb-5 md:mb-8 line-clamp-2 md:line-clamp-3 max-w-xl">
+                  Access your latest course materials and continue your learning journey right where you left off.
+                </p>
+                
+                <div class="mt-auto pt-2 md:pt-0">
+                  <span class="inline-flex justify-center w-full md:w-auto items-center gap-2 px-5 md:px-6 py-2 md:py-2.5 bg-white text-blue-600 text-sm md:text-base font-bold rounded-xl hover:bg-blue-50 transition-all shadow-sm group-hover:shadow group-hover:-translate-y-0.5">
+                    Open Course
+                    <IconArrowRight class="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
+                  </span>
+                </div>
               </div>
-              
-              <div class="mt-4 md:mt-6">
-                <router-link 
-                  :to="{ name: 'StudentCourseDetail', params: { id: dashboardCourses[0].courseid } }" 
-                  class="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-blue-600 font-semibold rounded-full hover:bg-blue-50 transition-colors"
-                >
-                  Open Course
-                  <IconArrowRight class="w-4 h-4" />
-                </router-link>
-              </div>
-            </div>
-          </div>
-        </article>
+            </router-link>
+          </article>
 
-        <!-- Compact list cards for remaining courses -->
-        <div 
-          v-for="(course, index) in dashboardCourses.slice(1)" 
-          :key="course.courseid" 
-          class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-blue-200 transition-all"
-        >
-          <router-link :to="{ name: 'StudentCourseDetail', params: { id: course.courseid } }" class="flex items-center gap-4">
-            <div class="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden bg-gray-100 relative">
-              <img :src="getPlaceholderImage(index + 1)" :alt="course.title" class="w-full h-full object-cover" />
-              <span 
-                :class="getStatusBadgeClass(course)"
-                class="absolute top-1 left-1 z-10 px-1.5 py-0.5 rounded-full text-white text-[10px] font-medium"
-              >
-                {{ getCourseStatusText(course) }}
-              </span>
-            </div>
-            
-            <div class="flex-1 min-w-0">
-              <h4 class="text-base font-semibold text-gray-900 mb-1 line-clamp-1">{{ course.title }}</h4>
-              <p class="text-sm text-gray-500 flex items-center gap-2">
-                <IconCalendar class="w-4 h-4" />
-                {{ formatDate(course.upload_date) }}
-              </p>
-            </div>
-            
-            <div class="flex-shrink-0">
-              <IconArrowRight class="w-5 h-5 text-gray-400" />
-            </div>
-          </router-link>
+          <!-- Grid for Remaining Courses -->
+          <div v-if="dashboardCourses.length > 1" class="grid grid-cols-3 gap-2 sm:gap-3 md:gap-5">
+            <article 
+              v-for="(course, index) in dashboardCourses.slice(1)" 
+              :key="course.courseid"
+              class="bg-white rounded-xl sm:rounded-2xl overflow-hidden shadow-sm border border-gray-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col h-full group"
+            >
+              <router-link :to="courseLink(course.courseid)" class="flex flex-col h-full">
+                <!-- Course Image Header -->
+                <div class="h-20 sm:h-28 md:h-40 w-full relative overflow-hidden bg-gray-100">
+                  <img 
+                    :src="getPlaceholderImage(index + 1)" 
+                    :alt="course.title" 
+                    class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
+                  />
+                  
+                  <!-- Status Badge -->
+                  <div class="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 md:top-3 md:left-3 z-10 hidden sm:block">
+                    <span 
+                      :class="getStatusBadgeClass(course)"
+                      class="px-2 py-0.5 md:px-2.5 md:py-1 rounded-full text-white text-[9px] md:text-[10px] font-semibold shadow-sm"
+                    >
+                      {{ getCourseStatusText(course) }}
+                    </span>
+                  </div>
+                  
+                  <!-- Hover Overlay -->
+                  <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                    <div class="bg-white/90 backdrop-blur-sm text-blue-600 p-1.5 sm:p-2 md:p-2.5 rounded-full transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 shadow-lg">
+                      <IconArrowRight class="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" />
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Course Content -->
+                <div class="p-2 sm:p-3 md:p-4 flex flex-col flex-grow justify-between">
+                  <div>
+                    <h3 class="text-[11px] sm:text-sm md:text-base font-bold text-gray-900 mb-1 md:mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors leading-tight">
+                      {{ course.title }}
+                    </h3>
+                  </div>
+                  
+                  <div class="mt-1 sm:mt-2 md:mt-3 pt-1.5 sm:pt-2 md:pt-3 border-t border-gray-100 flex flex-col xl:flex-row xl:items-center justify-between gap-1 xl:gap-0">
+                    <div class="hidden sm:flex items-center gap-1 md:gap-1.5 text-[9px] md:text-[11px] text-gray-500 font-medium">
+                      <IconCalendar class="w-3 h-3 md:w-3.5 md:h-3.5 text-gray-400 flex-shrink-0" />
+                      <span class="truncate">{{ formatDate(course.upload_date) }}</span>
+                    </div>
+                    <span class="text-[9px] sm:text-[10px] md:text-xs font-semibold text-blue-600 flex items-center gap-0.5 md:gap-1 group-hover:translate-x-1 transition-transform w-fit">
+                      Open <IconArrowRight class="w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-3.5 md:h-3.5" />
+                    </span>
+                  </div>
+                </div>
+              </router-link>
+            </article>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
+  </div>
 </template>
+
+<style scoped>
+.grid > article {
+  animation: fadeIn 0.3s ease-out backwards;
+}
+
+.grid > article:nth-child(1) { animation-delay: 0.05s; }
+.grid > article:nth-child(2) { animation-delay: 0.1s; }
+.grid > article:nth-child(3) { animation-delay: 0.15s; }
+.grid > article:nth-child(4) { animation-delay: 0.2s; }
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+</style>
