@@ -31,7 +31,6 @@ const fetchCourses = async () => {
     }
   } catch (error) {
     coursesError.value = 'Failed to load courses';
-    console.error('Error fetching courses:', error);
   } finally {
     coursesLoading.value = false;
   }

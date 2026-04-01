@@ -3,6 +3,7 @@ import { ref, onMounted, nextTick } from 'vue';
 import { studentAPI } from '../../services/api';
 import { authStore } from '../../store/auth';
 import Modal from '../../components/ui/Modal.vue';
+import LoadingBar from '../../components/ui/LoadingBar.vue';
 
 // Gender mapping helper
 const mapGenderToBackend = (frontendGender) => {
@@ -170,7 +171,7 @@ onMounted(fetchProfile);
     <h1 class="text-5xl font-bold text-gray-900 mb-10">Edit Profile</h1>
 
     <!-- Loading State -->
-    <div v-if="loading" class="max-w-2xl mx-auto py-20">
+    <div v-if="isLoading" class="max-w-2xl mx-auto py-20">
       <LoadingBar :loading="true" color="blue" :duration="2000" />
       <p class="text-center text-gray-600 mt-4">Loading profile...</p>
     </div>

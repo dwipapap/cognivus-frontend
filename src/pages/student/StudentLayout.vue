@@ -7,6 +7,7 @@ import IconHome from '~icons/solar/home-smile-bold';
 import IconBook from '~icons/solar/book-bookmark-bold';
 import iconBoyImage from '../../assets/iconboy.webp';
 import iconGirlImage from '../../assets/icongirl.webp';
+import ittrLogo from '../../assets/ittrlogo.png';
 import IconGrade from '~icons/solar/graph-bold';
 import IconWallet from '~icons/solar/money-bag-bold';
 import IconUser from '~icons/basil/user-solid';
@@ -16,10 +17,9 @@ import IconCaret from '~icons/basil/caret-down-outline';
 const router = useRouter();
 const { studentProfile, isLoading: isProfileLoading, fetchStudentProfile } = useStudentProfile();
 
-// Fetch profile on mount
-onMounted(() => {
-  fetchStudentProfile();
-});
+// Template refs for dropdown (Vue best practice - use refs instead of document.getElementById)
+const profileButtonRef = ref(null);
+const profileDropdownRef = ref(null);
 
 // Click-based dropdown state
 const showDropdown = ref(false);
@@ -29,10 +29,9 @@ const dropdownPosition = ref({ top: '0px', left: '0px' });
 // Toggle dropdown on click
 const toggleDropdown = () => {
   if (!showDropdown.value) {
-    // Calculate position before opening
-    const profileButton = document.getElementById('profile-button');
-    if (profileButton) {
-      const rect = profileButton.getBoundingClientRect();
+    // Calculate position before opening using template ref
+    if (profileButtonRef.value) {
+      const rect = profileButtonRef.value.getBoundingClientRect();
       dropdownPosition.value = {
         top: `${rect.bottom + 8}px`,
         left: `${rect.right - 224}px` // 224px = w-56 (14rem * 16px)
@@ -55,21 +54,20 @@ const toggleDropdown = () => {
 
 // Close dropdown when clicking outside
 const closeDropdownOnOutsideClick = (event) => {
-  const profileDropdown = document.getElementById('profile-dropdown');
-  const profileButton = document.getElementById('profile-button');
   if (
     showDropdown.value && 
-    profileDropdown && 
-    profileButton && 
-    !profileDropdown.contains(event.target) && 
-    !profileButton.contains(event.target)
+    profileDropdownRef.value && 
+    profileButtonRef.value && 
+    !profileDropdownRef.value.contains(event.target) && 
+    !profileButtonRef.value.contains(event.target)
   ) {
     toggleDropdown();
   }
 };
 
-// Setup click outside listener
+// Consolidated lifecycle hooks (Vue best practice - single onMounted/onUnmounted)
 onMounted(() => {
+  fetchStudentProfile();
   document.addEventListener('click', closeDropdownOnOutsideClick);
 });
 
@@ -108,10 +106,6 @@ const handleLogout = async () => {
   authStore.clearAuth();
   router.push('/login');
 };
-
-onUnmounted(() => {
-  console.log('Unmounting StudentLayout.vue');
-});
 </script>
 
 <template>
@@ -121,7 +115,7 @@ onUnmounted(() => {
       <div class="flex items-center justify-between px-4 py-3 md:px-6 md:py-4 min-w-0">
         <!-- Left: ITTR Logo -->
         <div class="flex items-center">
-          <img src="/src/assets/ittrlogo.png" alt="ITTR Logo" class="h-8 md:h-10 w-auto object-contain" />
+          <img :src="ittrLogo" alt="ITTR Logo" class="h-8 md:h-10 w-auto object-contain" />
         </div>
 
         <!-- Right: User Profile -->
@@ -130,7 +124,7 @@ onUnmounted(() => {
           <div class="relative z-50">
             <!-- Profile Pill -->
             <div 
-              id="profile-button"
+              ref="profileButtonRef"
               @click.stop="toggleDropdown()"
               class="flex items-center gap-2 sm:gap-3 h-8 sm:h-10 md:h-12 px-2 xs:px-3 sm:px-4 rounded-full sm:rounded-[28px] bg-white/30 backdrop-blur-sm border border-white/50 shadow-sm overflow-hidden whitespace-nowrap max-w-[50vw] xs:max-w-[60vw] sm:max-w-[200px] md:max-w-[240px] min-w-0 hover:bg-white/40 transition-all duration-200 cursor-pointer active:scale-95"
             >
@@ -154,7 +148,7 @@ onUnmounted(() => {
             <Teleport to="body">
               <div 
                 v-if="showDropdown" 
-                id="profile-dropdown"
+                ref="profileDropdownRef"
                 class="fixed w-56 origin-top-right profile-dropdown-glass rounded-xl shadow-lg border border-white/20 overflow-hidden z-[9999]"
                 :class="{'dropdown-enter': isDropdownVisible, 'dropdown-leave': !isDropdownVisible}"
                 :style="dropdownPosition"

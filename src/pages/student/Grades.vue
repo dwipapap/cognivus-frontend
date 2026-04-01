@@ -25,7 +25,6 @@ const errorMessage = ref('');
 
 const fetchGrades = async () => {
   if (!studentProfile.value?.studentid) {
-    console.log('Student profile not loaded yet or missing studentid');
     return;
   }
 

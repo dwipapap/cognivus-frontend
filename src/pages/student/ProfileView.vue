@@ -96,7 +96,7 @@ const fetchClassData = async () => {
       }
     }
   } catch (error) {
-    console.error('Error fetching class data:', error);
+    // Error fetching class data - fail silently as this is non-critical
   }
 };
 </script>
