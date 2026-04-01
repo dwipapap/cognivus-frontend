@@ -380,12 +380,8 @@ const fetchData = async () => {
 /** Submit grade update */
 const handleSave = async () => {
   await submit(async (data) => {
-    console.log('=== EDIT GRADE SUBMISSION STARTED ===');
-    console.log('📝 Grade ID:', gradeid);
-    
     if (!student.value?.studentid) {
       submitError.value = 'Invalid student data';
-      console.error('❌ Invalid student data:', student.value);
       return;
     }
 
@@ -393,9 +389,6 @@ const handleSave = async () => {
       submitError.value = '';
       successMessage.value = '';
 
-      // Log file upload information
-      console.log('📁 Upload Files:', uploadFiles.value);
-      
       const payload = {
         studentid: student.value.studentid,
         test_type: data.test_type,
@@ -410,31 +403,21 @@ const handleSave = async () => {
         date_taken: data.date_taken || null
       };
 
-      console.log('📤 Payload to send:', payload);
-
       // Extract file from array (BaseFileUpload returns array even with multiple=false)
       const fileToUpload = uploadFiles.value && uploadFiles.value.length > 0 ? uploadFiles.value[0] : null;
-      console.log('📁 File to upload:', fileToUpload);
       
-      console.log('🚀 Calling gradeAPI.updateGrade...');
       const response = await gradeAPI.updateGrade(gradeid, payload, fileToUpload);
-      console.log('✅ API Response:', response.data);
 
       if (response.data.success) {
         successMessage.value = 'Grade updated successfully!';
-        console.log('✅ Grade updated successfully');
         setTimeout(() => {
           router.push({ name: 'StudentDetail', params: { id: userid } });
         }, 1000);
       } else {
         submitError.value = response.data.message || 'Failed to update grade';
-        console.error('❌ Failed to update grade:', response.data);
       }
     } catch (error) {
       submitError.value = error.response?.data?.message || 'Error updating grade';
-      console.error('❌ Error during submission:', error);
-    } finally {
-      console.log('=== EDIT GRADE SUBMISSION ENDED ===');
     }
   });
 };

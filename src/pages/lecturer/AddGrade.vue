@@ -327,11 +327,8 @@ const fetchStudent = async () => {
 /** Submit grade form */
 const handleSave = async () => {
   await submit(async (data) => {
-    console.log('=== ADD GRADE SUBMISSION STARTED ===');
-    
     if (!student.value?.studentid) {
       submitError.value = 'Invalid student data';
-      console.error('❌ Invalid student data:', student.value);
       return;
     }
 
@@ -339,9 +336,6 @@ const handleSave = async () => {
       submitError.value = '';
       successMessage.value = '';
 
-      // Log file upload information
-      console.log('📁 Upload Files:', uploadFiles.value);
-      
       const payload = {
         studentid: student.value.studentid,
         test_type: data.test_type,
@@ -356,29 +350,21 @@ const handleSave = async () => {
         date_taken: data.date_taken || null
       };
 
-      console.log('📤 Payload to send:', payload);
-
-      const fileToUpload = uploadFiles.value instanceof File ? uploadFiles.value : null;
+      // Extract file from array (BaseFileUpload returns array even with multiple=false)
+      const fileToUpload = uploadFiles.value && uploadFiles.value.length > 0 ? uploadFiles.value[0] : null;
       
-      console.log('🚀 Calling gradeAPI.createGrade...');
       const response = await gradeAPI.createGrade(payload, fileToUpload);
-      console.log('✅ API Response:', response.data);
 
       if (response.data.success) {
         successMessage.value = 'Grade saved successfully!';
-        console.log('✅ Grade saved successfully');
         setTimeout(() => {
           router.push({ name: 'StudentDetail', params: { id: userid } });
         }, 1000);
       } else {
         submitError.value = response.data.message || 'Failed to save grade';
-        console.error('❌ Failed to save grade:', response.data);
       }
     } catch (error) {
       submitError.value = error.response?.data?.message || 'Error saving grade';
-      console.error('❌ Error during submission:', error);
-    } finally {
-      console.log('=== ADD GRADE SUBMISSION ENDED ===');
     }
   });
 };

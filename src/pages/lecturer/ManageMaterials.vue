@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed, watch, watchEffect } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useLecturerProfile } from '../../composables/useLecturerProfile';
 import { classAPI, courseAPI, courseFileAPI, levelAPI } from '../../services/api';
 import BaseFileUpload from '../../components/form/BaseFileUpload.vue';
@@ -343,19 +343,16 @@ watch(myClasses, () => {
   classCurrentPage.value = 1;
 });
 
-/** Auto-fetch classes when profile loads */
-watchEffect(() => {
-  if (!profileLoading.value && lecturerProfile.value) {
-    fetchMyClasses();
-  }
-});
-
-onMounted(() => {
-  // Trigger initial fetch if profile already loaded
-  if (!profileLoading.value && lecturerProfile.value) {
-    fetchMyClasses();
-  }
-});
+/** Auto-fetch classes when profile loads (handles both immediate and async cases) */
+watch(
+  () => ({ loading: profileLoading.value, profile: lecturerProfile.value }),
+  ({ loading, profile }) => {
+    if (!loading && profile) {
+      fetchMyClasses();
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
