@@ -134,6 +134,10 @@ export function useLecturerProfile() {
     }
   };
 
+  onMounted(() => {
+    fetchLecturerProfile();
+  });
+
   return {
     lecturerProfile,
     isLoading,

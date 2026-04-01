@@ -109,9 +109,9 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="flex flex-col min-h-screen bg-blue-200">
+  <div class="flex flex-col min-h-screen bg-white">
     <!-- Header -->
-    <header class="header-glass backdrop-blur-lg bg-gradient-to-r from-white via-blue-50 to-indigo-100 shadow-lg border-b border-white/20 sticky top-0 z-40 rounded-b-[28px]">
+    <header class="header-glass backdrop-blur-lg bg-gradient-to-r from-white via-blue-50 to-indigo-100 shadow-lg border-b border-white/20 sticky top-0 z-40">
       <div class="flex items-center justify-between px-6 py-4 min-w-0">
         <!-- Left: ITTR Logo -->
         <div class="flex items-center">
@@ -238,7 +238,7 @@ onUnmounted(() => {
       </nav>
 
       <!-- Main Content Area - This is where child routes will render -->
-      <main class="main-content flex-1 p-6 lg:p-8 overflow-auto md:ml-28 mb-20 md:mb-0 transition-all duration-300 ease-in-out">
+      <main class="main-content flex-1 min-h-0 w-full max-w-full p-6 lg:p-8 overflow-auto md:ml-24 md:pl-32 mb-20 md:mb-0 transition-all duration-300 ease-in-out">
         <router-view />
       </main>
     </div>
