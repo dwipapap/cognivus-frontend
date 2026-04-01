@@ -273,7 +273,6 @@ onMounted(fetchLecturers);
       :persistent="true" 
       size="5xl"
       :title="isEditMode ? 'Edit Lecturer' : 'Add New Lecturer'"
-      variant="gradient"
       :hide-footer="true"
     >
       <template #icon>
@@ -297,7 +296,6 @@ onMounted(fetchLecturers);
       :type="notificationType" 
       :message="notificationMessage" 
       @close="showNotificationModal = false"
-      variant="gradient"
       :hide-footer="true"
     />
   </div>

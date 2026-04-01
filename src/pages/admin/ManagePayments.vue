@@ -403,7 +403,6 @@ onMounted(() => {
       @close="showDetailsModal = false" 
       size="2xl" 
       title="Payment Details"
-      variant="gradient"
     >
       <template #icon>
         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -483,7 +482,6 @@ onMounted(() => {
       @close="showNotificationModal = false" 
       :type="notificationType"
       :message="notificationMessage"
-      variant="gradient"
     />
   </div>
 </template>

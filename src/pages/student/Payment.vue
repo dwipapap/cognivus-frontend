@@ -16,6 +16,7 @@ import IconClose from '~icons/basil/cross-solid';
 import IconClipboard from '~icons/basil/clipboard-solid';
 import IconLoading from '~icons/svg-spinners/pulse-rings-multiple';
 import IconQuestionCircle from '~icons/solar/question-circle-broken';
+import Modal from '../../components/ui/Modal.vue';
 
 // Composables
 const { studentProfile, isLoading: isProfileLoading, fetchStudentProfile } = useStudentProfile();
@@ -796,149 +797,110 @@ onMounted(async () => {
     </div>
 
     <!-- Success Modal -->
-    <Teleport to="body">
-      <div v-if="showSuccessModal"
-        class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-        <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl transform transition-all">
-          <div class="text-center">
-            <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5">
-              <IconCheck class="w-10 h-10 text-green-500" />
-            </div>
-            <h3 class="text-2xl font-bold text-gray-800 mb-2">Payment Successful!</h3>
-            <p class="text-gray-600 mb-6">Your transaction has been processed successfully.</p>
-            <button @click="closeSuccessModal"
-              class="w-full py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-full transition-colors shadow-lg hover:shadow-xl">
-              Done
-            </button>
-          </div>
-        </div>
-      </div>
-    </Teleport>
+    <Modal
+      :show="showSuccessModal"
+      type="success"
+      title="Payment Successful!"
+      message="Your transaction has been processed successfully."
+      @close="closeSuccessModal"
+      @confirm="closeSuccessModal"
+    />
 
     <!-- Error Modal -->
-    <Teleport to="body">
-      <div v-if="showErrorModal"
-        class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-        <div class="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl transform transition-all">
-          <div class="text-center">
-            <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-5">
-              <IconClose class="w-10 h-10 text-red-500" />
-            </div>
-            <h3 class="text-2xl font-bold text-gray-800 mb-2">Payment Failed</h3>
-            <p class="text-gray-600 mb-6">{{ paymentError || 'An error occurred while processing the payment.' }}</p>
-            <button @click="closeErrorModal"
-              class="w-full py-3 bg-red-500 hover:bg-red-600 text-white font-bold rounded-full transition-colors shadow-lg hover:shadow-xl">
-              Close
-            </button>
-          </div>
-        </div>
-      </div>
-    </Teleport>
+    <Modal
+      :show="showErrorModal"
+      type="error"
+      title="Payment Failed"
+      :message="paymentError || 'An error occurred while processing the payment.'"
+      @close="closeErrorModal"
+      @confirm="closeErrorModal"
+    />
 
     <!-- Payment Guide Modal -->
-    <Teleport to="body">
-      <div v-if="showGuideModal"
-        class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-        @keydown.esc="closeGuideModal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="guide-modal-title"
-        aria-describedby="guide-modal-description">
-        <div
-          class="guide-modal-container bg-white/95 backdrop-blur-lg rounded-3xl p-6 sm:p-8 max-w-2xl w-full shadow-2xl transform transition-all max-h-[90vh] overflow-y-auto border border-white/20">
-          
-          <!-- Header -->
-          <div class="mb-8">
-            <div class="flex items-center gap-4 mb-4">
-              <div class="question-icon-container w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
-                <IconQuestionCircle class="w-8 h-8 text-white" aria-hidden="true" />
-              </div>
-              <div class="flex-1">
-                <h3 id="guide-modal-title" class="text-3xl font-bold text-gray-800 mb-1">Payment Guide</h3>
-                <p id="guide-modal-description" class="text-base text-gray-500">Important information about payments</p>
-              </div>
+    <Modal
+      :show="showGuideModal"
+      type="info"
+      title="Payment Guide"
+      size="2xl"
+      :hide-footer="true"
+      @close="closeGuideModal"
+    >
+      <template #content>
+        <div class="space-y-4">
+          <!-- Step 1: Info -->
+          <div class="guide-step-card flex items-start gap-4 p-5 bg-white/90 backdrop-blur rounded-2xl border border-blue-100 border-l-4 border-l-blue-600 hover:shadow-lg transition-all duration-300 cursor-default">
+            <div
+              class="flex-shrink-0 w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-base shadow-md"
+              aria-hidden="true">
+              1
             </div>
-            <!-- Elegant divider -->
-            <div class="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent mt-4"></div>
+            <div class="flex-1">
+              <h4 class="text-sm font-bold text-gray-800 mb-2 leading-tight">Payment Confirmation Time</h4>
+              <p class="text-sm text-gray-600 leading-relaxed">Payment confirmation takes approximately 5-10 minutes to process</p>
+            </div>
           </div>
 
-          <div class="space-y-4 mb-8">
-            <!-- Step 1: Info -->
-            <div class="guide-step-card flex items-start gap-4 p-5 bg-white/90 backdrop-blur rounded-2xl border border-blue-100 border-l-4 border-l-blue-600 hover:shadow-lg transition-all duration-300 cursor-default">
-              <div
-                class="flex-shrink-0 w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-base shadow-md"
-                aria-hidden="true">
-                1
-              </div>
-              <div class="flex-1">
-                <h4 class="text-sm font-bold text-gray-800 mb-2 leading-tight">Payment Confirmation Time</h4>
-                <p class="text-sm text-gray-600 leading-relaxed">Payment confirmation takes approximately 5-10 minutes to process</p>
-              </div>
+          <!-- Step 2: Neutral -->
+          <div class="guide-step-card flex items-start gap-4 p-5 bg-white/90 backdrop-blur rounded-2xl border border-slate-100 border-l-4 border-l-slate-600 hover:shadow-lg transition-all duration-300 cursor-default">
+            <div
+              class="flex-shrink-0 w-10 h-10 bg-slate-600 text-white rounded-full flex items-center justify-center font-bold text-base shadow-md"
+              aria-hidden="true">
+              2
             </div>
-
-            <!-- Step 2: Neutral -->
-            <div class="guide-step-card flex items-start gap-4 p-5 bg-white/90 backdrop-blur rounded-2xl border border-slate-100 border-l-4 border-l-slate-600 hover:shadow-lg transition-all duration-300 cursor-default">
-              <div
-                class="flex-shrink-0 w-10 h-10 bg-slate-600 text-white rounded-full flex items-center justify-center font-bold text-base shadow-md"
-                aria-hidden="true">
-                2
-              </div>
-              <div class="flex-1">
-                <h4 class="text-sm font-bold text-gray-800 mb-2 leading-tight">Changing Payment Method</h4>
-                <p class="text-sm text-gray-600 leading-relaxed">To change payment method, wait until the current transaction expires before creating a new one</p>
-              </div>
+            <div class="flex-1">
+              <h4 class="text-sm font-bold text-gray-800 mb-2 leading-tight">Changing Payment Method</h4>
+              <p class="text-sm text-gray-600 leading-relaxed">To change payment method, wait until the current transaction expires before creating a new one</p>
             </div>
+          </div>
 
-            <!-- Step 3: Info -->
-            <div class="guide-step-card flex items-start gap-4 p-5 bg-white/90 backdrop-blur rounded-2xl border border-blue-100 border-l-4 border-l-blue-600 hover:shadow-lg transition-all duration-300 cursor-default">
-              <div
-                class="flex-shrink-0 w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-base shadow-md"
-                aria-hidden="true">
-                3
-              </div>
-              <div class="flex-1">
-                <h4 class="text-sm font-bold text-gray-800 mb-2 leading-tight">Course Fee Calculation</h4>
-                <p class="text-sm text-gray-600 leading-relaxed">Course fees are calculated based on your student level and program</p>
-              </div>
+          <!-- Step 3: Info -->
+          <div class="guide-step-card flex items-start gap-4 p-5 bg-white/90 backdrop-blur rounded-2xl border border-blue-100 border-l-4 border-l-blue-600 hover:shadow-lg transition-all duration-300 cursor-default">
+            <div
+              class="flex-shrink-0 w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-base shadow-md"
+              aria-hidden="true">
+              3
             </div>
-
-            <!-- Step 4: Neutral -->
-            <div class="guide-step-card flex items-start gap-4 p-5 bg-white/90 backdrop-blur rounded-2xl border border-slate-100 border-l-4 border-l-slate-600 hover:shadow-lg transition-all duration-300 cursor-default">
-              <div
-                class="flex-shrink-0 w-10 h-10 bg-slate-600 text-white rounded-full flex items-center justify-center font-bold text-base shadow-md"
-                aria-hidden="true">
-                4
-              </div>
-              <div class="flex-1">
-                <h4 class="text-sm font-bold text-gray-800 mb-2 leading-tight">Refresh Payment History</h4>
-                <p class="text-sm text-gray-600 leading-relaxed">If status doesn't update automatically, use the refresh button in payment history</p>
-              </div>
+            <div class="flex-1">
+              <h4 class="text-sm font-bold text-gray-800 mb-2 leading-tight">Course Fee Calculation</h4>
+              <p class="text-sm text-gray-600 leading-relaxed">Course fees are calculated based on your student level and program</p>
             </div>
+          </div>
 
-            <!-- Step 5: Warning -->
-            <div class="guide-step-card flex items-start gap-4 p-5 bg-white/90 backdrop-blur rounded-2xl border border-red-100 border-l-4 border-l-red-600 hover:shadow-lg transition-all duration-300 cursor-default">
-              <div
-                class="flex-shrink-0 w-10 h-10 bg-red-600 text-white rounded-full flex items-center justify-center font-bold text-base shadow-md"
-                aria-hidden="true">
-                !
-              </div>
-              <div class="flex-1">
-                <h4 class="text-sm font-bold text-gray-800 mb-2 leading-tight">Payment Status Issue</h4>
-                <p class="text-sm text-gray-600 leading-relaxed">If payment succeeded but shows pending/failed, please contact admin immediately</p>
-              </div>
+          <!-- Step 4: Neutral -->
+          <div class="guide-step-card flex items-start gap-4 p-5 bg-white/90 backdrop-blur rounded-2xl border border-slate-100 border-l-4 border-l-slate-600 hover:shadow-lg transition-all duration-300 cursor-default">
+            <div
+              class="flex-shrink-0 w-10 h-10 bg-slate-600 text-white rounded-full flex items-center justify-center font-bold text-base shadow-md"
+              aria-hidden="true">
+              4
             </div>
+            <div class="flex-1">
+              <h4 class="text-sm font-bold text-gray-800 mb-2 leading-tight">Refresh Payment History</h4>
+              <p class="text-sm text-gray-600 leading-relaxed">If status doesn't update automatically, use the refresh button in payment history</p>
+            </div>
+          </div>
 
+          <!-- Step 5: Warning -->
+          <div class="guide-step-card flex items-start gap-4 p-5 bg-white/90 backdrop-blur rounded-2xl border border-red-100 border-l-4 border-l-red-600 hover:shadow-lg transition-all duration-300 cursor-default">
+            <div
+              class="flex-shrink-0 w-10 h-10 bg-red-600 text-white rounded-full flex items-center justify-center font-bold text-base shadow-md"
+              aria-hidden="true">
+              !
+            </div>
+            <div class="flex-1">
+              <h4 class="text-sm font-bold text-gray-800 mb-2 leading-tight">Payment Status Issue</h4>
+              <p class="text-sm text-gray-600 leading-relaxed">If payment succeeded but shows pending/failed, please contact admin immediately</p>
+            </div>
           </div>
 
           <!-- Close Button -->
           <button @click="closeGuideModal"
-            class="guide-close-button w-full min-h-[44px] py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full transition-all duration-300 shadow-lg hover:shadow-xl active:scale-[0.98] border border-blue-500/30"
+            class="w-full min-h-[44px] py-3.5 mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full transition-all duration-300 shadow-lg hover:shadow-xl active:scale-[0.98] border border-blue-500/30"
             aria-label="Close payment guide">
             Got it, Thanks!
           </button>
         </div>
-      </div>
-    </Teleport>
+      </template>
+    </Modal>
   </div>
 </template>
 
@@ -997,23 +959,7 @@ onMounted(async () => {
   background: #94a3b8;
 }
 
-/* Payment Guide Modal Styles */
-.guide-modal-container {
-  animation: modalFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@keyframes modalFadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95) translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-/* Step cards with staggered animation */
+/* Payment Guide Step cards animation */
 .guide-step-card {
   opacity: 0;
   animation: cardSlideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
@@ -1042,34 +988,9 @@ onMounted(async () => {
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
 }
 
-/* Question icon pulse animation */
-.question-icon-container {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.8;
-  }
-}
-
-/* Close button hover effect */
-.guide-close-button:hover {
-  transform: scale(1.02);
-}
-
-.guide-close-button:active {
-  transform: scale(0.98);
-}
-
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
-  .guide-modal-container,
   .guide-step-card,
-  .question-icon-container,
   .payment-type-card {
     animation: none;
     transition: none;
@@ -1078,19 +999,10 @@ onMounted(async () => {
   .guide-step-card:hover {
     transform: none;
   }
-
-  .guide-close-button:hover {
-    transform: none;
-  }
 }
 
 /* Responsive adjustments */
 @media (max-width: 640px) {
-  .guide-modal-container {
-    max-width: 100%;
-    padding: 1.5rem;
-  }
-
   .guide-step-card {
     padding: 1rem;
   }

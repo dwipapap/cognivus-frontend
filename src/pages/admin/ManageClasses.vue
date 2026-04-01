@@ -365,7 +365,6 @@ onMounted(() => {
       @close="showFormModal = false" 
       :persistent="true" 
       :title="isEditMode ? 'Edit Class' : 'Add New Class'"
-      variant="gradient"
       size="5xl"
       :hide-footer="true"
     >
@@ -394,7 +393,6 @@ onMounted(() => {
       :show="showNotificationModal" 
       :type="notificationType" 
       :message="notificationMessage" 
-      variant="gradient"
       @close="showNotificationModal = false" 
     />
   </div>

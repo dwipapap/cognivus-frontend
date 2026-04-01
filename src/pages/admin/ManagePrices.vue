@@ -389,7 +389,7 @@ onMounted(() => {
 
     <!-- Class Price Form Modal -->
     <Modal :show="showFormModal" @close="showFormModal = false" :persistent="true"
-      :title="isEditMode ? 'Edit Price' : 'Add New Price'" variant="gradient" size="5xl" :hide-footer="true">
+      :title="isEditMode ? 'Edit Price' : 'Add New Price'" size="5xl" :hide-footer="true">
       <template #icon>
         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -404,7 +404,7 @@ onMounted(() => {
 
     <!-- Ancillary Price Form Modal -->
     <Modal :show="showAncillaryModal" @close="showAncillaryModal = false" :persistent="true"
-      :title="isAncillaryEditMode ? 'Edit Ancillary Price' : 'Add Ancillary Price'" variant="gradient" size="md"
+      :title="isAncillaryEditMode ? 'Edit Ancillary Price' : 'Add Ancillary Price'" size="md"
       :hide-footer="true">
       <template #icon>
         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -426,7 +426,7 @@ onMounted(() => {
     </Modal>
 
     <!-- Notification Modal -->
-    <Modal :show="showNotificationModal" :type="notificationType" :message="notificationMessage" variant="gradient"
+    <Modal :show="showNotificationModal" :type="notificationType" :message="notificationMessage"
       @close="showNotificationModal = false" :hide-footer="true" />
   </div>
 </template>

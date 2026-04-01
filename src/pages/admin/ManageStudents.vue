@@ -336,7 +336,6 @@ onMounted(() => {
       size="5xl" 
       :persistent="true"
       :title="isEditMode ? 'Edit Student' : 'Add New Student'"
-      variant="gradient"
       :hide-footer="true"
     >
       <template #icon>
@@ -361,7 +360,6 @@ onMounted(() => {
       @close="showNotificationModal = false" 
       :type="notificationType"
       :message="notificationMessage"
-      variant="gradient"
     />
   </div>
 </template>

@@ -82,7 +82,6 @@ const fetchCourseData = async () => {
     course.value = courseRes.data.data;
   } catch (error) {
     courseError.value = 'Failed to load course';
-    console.error('Error fetching course:', error);
   } finally {
     courseLoading.value = false;
   }
@@ -263,10 +262,6 @@ onMounted(() => {
       :hide-footer="true"
       title="Course Material"
       type="info"
-      variant="gradient"
-      gradient-from="blue-500"
-      gradient-via="blue-600"
-      gradient-to="indigo-600"
     >
       <template #content>
         <PDFViewer 

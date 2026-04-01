@@ -195,7 +195,6 @@ onMounted(() => {
       @close="showFormModal = false" 
       :persistent="true" 
       :title="isEditMode ? 'Edit Program' : 'Add New Program'"
-      variant="gradient"
       size="5xl"
       :hide-footer="true"
     >
@@ -219,7 +218,6 @@ onMounted(() => {
       :show="showNotificationModal" 
       :type="notificationType" 
       :message="notificationMessage" 
-      variant="gradient"
       @close="showNotificationModal = false"
       :hide-footer="true"
     />

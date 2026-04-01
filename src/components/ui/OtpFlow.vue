@@ -300,7 +300,6 @@ const handleOtpInput = (event) => {
     :title="title"
     :persistent="isSubmitting"
     size="md"
-    variant="gradient"
     :hide-footer="true"
     @close="handleClose"
   >

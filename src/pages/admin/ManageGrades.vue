@@ -180,7 +180,6 @@ onMounted(() => {
       :show="showUploadModal" 
       @close="resetUploadForm"
       title="Upload Grade Report"
-      variant="gradient"
       size="5xl"
       :persistent="isUploading"
       :hide-footer="true"

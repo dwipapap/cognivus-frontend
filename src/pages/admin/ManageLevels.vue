@@ -171,7 +171,6 @@ onMounted(() => {
       :persistent="true" 
       size="6xl"
       :title="isEditMode ? 'Edit Level' : 'Add New Level'"
-      variant="gradient"
       :hide-footer="true"
     >
       <template #icon>
@@ -195,7 +194,6 @@ onMounted(() => {
       @close="showNotificationModal = false"
       :type="notificationType"
       :message="notificationMessage"
-      variant="gradient"
     />
   </div>
 </template>

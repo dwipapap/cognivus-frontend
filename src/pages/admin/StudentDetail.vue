@@ -664,7 +664,6 @@ onMounted(() => {
       @close="showNotificationModal = false" 
       :type="notificationType"
       :message="notificationMessage"
-      variant="gradient"
     />
   </div>
 </template>
