@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref, onMounted, onUnmounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { authStore } from '../../store/auth';
 import { useStudentProfile } from '../../composables/useStudentProfile';
 import IconHome from '~icons/solar/home-smile-bold';
@@ -15,7 +15,17 @@ import IconLogout from '~icons/basil/logout-solid';
 import IconCaret from '~icons/basil/caret-down-outline';
 
 const router = useRouter();
+const route = useRoute();
 const { studentProfile, isLoading: isProfileLoading, fetchStudentProfile } = useStudentProfile();
+
+const activeTabIndex = computed(() => {
+  const path = route.path;
+  if (path.includes('/dashboard')) return 0;
+  if (path.includes('/courses')) return 1;
+  if (path.includes('/grades')) return 2;
+  if (path.includes('/payment')) return 3;
+  return 0;
+});
 
 // Template refs for dropdown (Vue best practice - use refs instead of document.getElementById)
 const profileButtonRef = ref(null);
@@ -219,31 +229,39 @@ const handleLogout = async () => {
       </aside>
 
       <!-- Mobile Bottom Navigation -->
-      <nav class="mobile-nav fixed bottom-0 left-0 right-0 h-16 bg-transparent md:hidden z-50">
-        <div class="mobile-nav-glass h-full mb-0 rounded-2xl">
-          <ul class="h-full flex justify-around items-center px-6">
-            <li>
-              <router-link to="/student/dashboard" class="mobile-nav-item flex flex-col items-center gap-1">
+      <nav class="fixed bottom-4 left-4 right-4 h-14 bg-transparent md:hidden z-50">
+        <div class="h-full bg-white rounded-[28px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100 overflow-hidden relative">
+          <ul class="h-full flex relative z-10">
+            <!-- Sliding Indicator -->
+            <div 
+              class="absolute top-1 bottom-1 w-1/4 px-1.5 z-0 transition-transform duration-300 ease-out"
+              :style="{ transform: `translateX(${activeTabIndex * 100}%)` }"
+            >
+              <div class="w-full h-full bg-[#e0f2fe] rounded-[24px]"></div>
+            </div>
+
+            <li class="flex-1 flex justify-center items-center z-10">
+              <router-link to="/student/dashboard" class="mobile-nav-item flex flex-col items-center gap-0.5 w-full h-full justify-center transition-colors duration-200">
                 <IconHome class="w-5 h-5" />
-                <span class="text-xs">Dashboard</span>
+                <span class="text-[10px] font-medium">Dashboard</span>
               </router-link>
             </li>
-            <li>
-              <router-link to="/student/courses" class="mobile-nav-item flex flex-col items-center gap-1">
+            <li class="flex-1 flex justify-center items-center z-10">
+              <router-link to="/student/courses" class="mobile-nav-item flex flex-col items-center gap-0.5 w-full h-full justify-center transition-colors duration-200">
                 <IconBook class="w-5 h-5" />
-                <span class="text-xs">Courses</span>
+                <span class="text-[10px] font-medium">Courses</span>
               </router-link>
             </li>
-            <li>
-              <router-link to="/student/grades" class="mobile-nav-item flex flex-col items-center gap-1">
+            <li class="flex-1 flex justify-center items-center z-10">
+              <router-link to="/student/grades" class="mobile-nav-item flex flex-col items-center gap-0.5 w-full h-full justify-center transition-colors duration-200">
                 <IconGrade class="w-5 h-5" />
-                <span class="text-xs">Grades</span>
+                <span class="text-[10px] font-medium">Grades</span>
               </router-link>
             </li>
-            <li>
-              <router-link to="/student/payment" class="mobile-nav-item flex flex-col items-center gap-1">
+            <li class="flex-1 flex justify-center items-center z-10">
+              <router-link to="/student/payment" class="mobile-nav-item flex flex-col items-center gap-0.5 w-full h-full justify-center transition-colors duration-200">
                 <IconWallet class="w-5 h-5" />
-                <span class="text-xs">Bayar</span>
+                <span class="text-[10px] font-medium">Bayar</span>
               </router-link>
             </li>
           </ul>
@@ -465,56 +483,24 @@ const handleLogout = async () => {
   opacity: 1;
 }
 
-/* Mobile navigation styles - Performance optimized */
-.mobile-nav-glass {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.85), rgba(240, 249, 255, 0.8), rgba(224, 242, 254, 0.75));
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  box-shadow: 
-    0 -4px 16px rgba(31, 41, 55, 0.08),
-    0 -2px 8px rgba(59, 130, 246, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
+/* Mobile navigation styles */
 .mobile-nav-item {
-  color: #374151; /* text-gray-700 */
-  transition: color 0.2s ease;
-  position: relative;
+  color: #4b5563; /* text-gray-600 */
 }
 
 .mobile-nav-item.router-link-active {
-  color: #2563eb; /* text-blue-600 */
+  color: #0284c7; /* text-sky-600 */
 }
 
 .mobile-nav-item:hover {
-  color: #2563eb; /* text-blue-600 */
-}
-
-.mobile-nav-item::after {
-  content: '';
-  position: absolute;
-  bottom: -4px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background-color: currentColor;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.mobile-nav-item.router-link-active::after {
-  opacity: 1;
+  color: #0284c7; /* text-sky-600 */
 }
 
 /* Additional performance optimizations for glassmorphism */
 @media (prefers-reduced-motion: reduce) {
   .header-glass,
   .profile-dropdown-glass,
-  .sidebar-glass,
-  .mobile-nav-glass {
+  .sidebar-glass {
     backdrop-filter: blur(2px) !important;
     -webkit-backdrop-filter: blur(2px) !important;
     transition: none !important;
@@ -529,8 +515,7 @@ const handleLogout = async () => {
 /* GPU acceleration for better performance */
 .header-glass,
 .profile-dropdown-glass,
-.sidebar-glass,
-.mobile-nav-glass {
+.sidebar-glass {
   contain: layout style paint;
 }
 </style>
