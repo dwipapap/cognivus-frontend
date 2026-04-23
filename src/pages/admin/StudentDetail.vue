@@ -3,7 +3,7 @@ import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { studentAPI, gradeAPI, paymentAPI, userAPI, classAPI, levelAPI } from '../../services/api';
 import { useForm } from '../../composables/useForm';
-import LoadingBar from '../../components/ui/LoadingBar.vue';
+import LoadingSpinner from '../../components/ui/LoadingSpinner.vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
 import BaseInput from '../../components/form/BaseInput.vue';
 import BaseSelect from '../../components/form/BaseSelect.vue';
@@ -277,7 +277,7 @@ onMounted(() => {
 
     <!-- Loading -->
     <div v-if="isLoading" class="max-w-2xl mx-auto py-20">
-      <LoadingBar :loading="true" color="blue" :duration="2000" />
+      <LoadingSpinner size="lg" color="blue" :center="true" />
     </div>
 
     <!-- Error -->

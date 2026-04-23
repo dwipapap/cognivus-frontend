@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { studentAPI, lecturerAPI, classAPI, dashboardAPI, paymentAPI } from '@/services/api';
-import LoadingBar from '@/components/ui/LoadingBar.vue';
+import LoadingSpinner from '@/components/ui/LoadingSpinner.vue';
 import { formatCurrency, getInitials } from '../../utils/formatters';
 
 const students = ref([]);
@@ -90,7 +90,7 @@ onMounted(fetchDashboardData);
 
     <!-- Loading -->
     <div v-if="isLoading" class="max-w-md mx-auto py-20">
-      <LoadingBar :loading="true" color="blue" :duration="2000" />
+      <LoadingSpinner size="lg" color="blue" :center="true" />
     </div>
 
     <!-- Bento Grid -->
@@ -224,7 +224,7 @@ onMounted(fetchDashboardData);
         </div>
         <div class="text-3xl font-bold text-gray-900">{{ payments.length }}</div>
         <p class="text-xs text-orange-600 mt-1">{{ pendingCount }} pending</p>
-        <router-link to="/admin/transactions"
+        <router-link to="/admin/payments"
           class="mt-3 block text-xs text-orange-600 hover:text-orange-800 font-medium">
           View Transactions →
         </router-link>

@@ -117,7 +117,7 @@ const handleLogout = () => {
 
       <!-- Mobile Bottom Navigation -->
       <nav class="fixed bottom-0 left-0 right-0 h-16 md:hidden z-50">
-        <div class="h-full bg-whi1/90 backdrop-blur-md border-t border-gray-200 shadow-lg">
+        <div class="h-full bg-white/90 backdrop-blur-md border-t border-gray-200 shadow-lg">
           <ul class="h-full flex justify-around items-center px-2">
             <li>
               <router-link to="/admin/dashboard" 

@@ -12,7 +12,7 @@
 
   <!-- Loading -->
   <div v-if="isLoading" class="max-w-2xl mx-auto py-20">
-    <LoadingBar :loading="true" color="blue" :duration="2000" />
+    <LoadingSpinner size="lg" color="blue" :center="true" />
   </div>
 
   <!-- Error -->
@@ -286,7 +286,7 @@ import BaseFileUpload from '../../components/form/BaseFileUpload.vue';
 import BaseInput from '../../components/form/BaseInput.vue';
 import BaseSelect from '../../components/form/BaseSelect.vue';
 import BaseTextarea from '../../components/form/BaseTextarea.vue';
-import LoadingBar from '../../components/ui/LoadingBar.vue';
+import LoadingSpinner from '../../components/ui/LoadingSpinner.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -327,10 +327,8 @@ const fetchData = async () => {
   try {
     isLoading.value = true;
     isNewGrade.value = gradeid === 'new';
-    console.log('🔍 Fetching data - gradeid:', gradeid, 'isNewGrade:', isNewGrade.value, 'userid:', userid);
     
     const studentRes = await studentAPI.getStudentById(userid);
-    console.log('👤 Student response:', studentRes.data);
 
     if (studentRes.data.success) {
       // Handle both array and single object responses
@@ -343,16 +341,12 @@ const fetchData = async () => {
       if (!isNewGrade.value) {
         // Fetch grades by studentid
         if (student.value && student.value.studentid) {
-          console.log('📚 Fetching grades for studentid:', student.value.studentid);
           const gradesRes = await gradeAPI.getGradeById(student.value.studentid);
-          console.log('📚 Grades response:', gradesRes.data);
           
           if (gradesRes.data.success) {
             const grades = gradesRes.data.data;
-            console.log('📚 All grades for student:', grades);
             // Use string comparison to handle both string and number types safely
             grade.value = grades.find(g => String(g.gradeid) === String(gradeid));
-            console.log('📚 Found grade:', grade.value);
             
             if (grade.value) {
               formData.test_type = grade.value.test_type || '';
@@ -365,7 +359,6 @@ const fetchData = async () => {
               formData.final_score = grade.value.final_score;
               formData.description = grade.value.description || '';
               formData.date_taken = grade.value.date_taken ? new Date(grade.value.date_taken).toISOString().split('T')[0] : '';
-              console.log('✅ Form populated with grade data:', formData);
             } else {
               errorMessage.value = `Grade with ID ${gradeid} not found for this student`;
             }
@@ -390,9 +383,6 @@ const fetchData = async () => {
 /** Submit grade update */
 const handleSave = async () => {
   await submit(async (data) => {
-    console.log('=== EDIT GRADE SUBMISSION STARTED ===');
-    console.log('📝 Grade ID:', gradeid);
-    
     if (!student.value?.studentid) {
       submitError.value = 'Invalid student data';
       console.error('❌ Invalid student data:', student.value);
@@ -402,9 +392,6 @@ const handleSave = async () => {
     try {
       submitError.value = '';
       successMessage.value = '';
-
-      // Log file upload information
-      console.log('📁 Upload Files:', uploadFiles.value);
       
       const payload = {
         studentid: student.value.studentid,
@@ -420,19 +407,12 @@ const handleSave = async () => {
         date_taken: data.date_taken || null
       };
 
-      console.log('📤 Payload to send:', payload);
-
       // Extract file from array (BaseFileUpload returns array even with multiple=false)
       const fileToUpload = uploadFiles.value && uploadFiles.value.length > 0 ? uploadFiles.value[0] : null;
-      console.log('📁 File to upload:', fileToUpload);
-      
-      console.log('🚀 Calling gradeAPI.updateGrade...');
       const response = await gradeAPI.updateGrade(gradeid, payload, fileToUpload);
-      console.log('✅ API Response:', response.data);
 
       if (response.data.success) {
         successMessage.value = isNewGrade.value ? 'Grade added successfully!' : 'Grade updated successfully!';
-        console.log(isNewGrade.value ? '✅ Grade added successfully' : '✅ Grade updated successfully');
         setTimeout(() => {
           router.push({ name: 'AdminStudentDetail', params: { id: userid } });
         }, 1000);
@@ -443,8 +423,6 @@ const handleSave = async () => {
     } catch (error) {
       submitError.value = error.response?.data?.message || 'Error updating grade';
       console.error('❌ Error during submission:', error);
-    } finally {
-      console.log('=== EDIT GRADE SUBMISSION ENDED ===');
     }
   });
 };
@@ -461,14 +439,14 @@ const handleDelete = async () => {
 
     const response = await gradeAPI.deleteGrade(gradeid);
 
-    if (response.data.success) {
-      successMessage.value = 'Grade deleted successfully!';
-      setTimeout(() => {
-        router.push({ name: 'StudentDetail', params: { id: userid } });
-      }, 1000);
-    } else {
-      submitError.value = response.data.message || 'Failed to delete grade';
-    }
+      if (response.data.success) {
+        successMessage.value = 'Grade deleted successfully!';
+        setTimeout(() => {
+          router.push({ name: 'AdminStudentDetail', params: { id: userid } });
+        }, 1000);
+      } else {
+        submitError.value = response.data.message || 'Failed to delete grade';
+      }
   } catch (error) {
     submitError.value = error.response?.data?.message || 'Error deleting grade';
     console.error('Error:', error);

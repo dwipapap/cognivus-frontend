@@ -3,7 +3,7 @@ import { ref, onMounted } from 'vue';
 import { studentAPI, reportFileAPI, gradeAPI } from '../../services/api';
 import BaseFileUpload from '../../components/form/BaseFileUpload.vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
-import LoadingBar from '../../components/ui/LoadingBar.vue';
+import LoadingSpinner from '../../components/ui/LoadingSpinner.vue';
 import Modal from '../../components/ui/Modal.vue';
 import { useForm } from '../../composables/useForm';
 
@@ -148,8 +148,8 @@ onMounted(() => {
 
     <!-- Loading -->
         <!-- Loading State -->
-    <div v-if="loading" class="max-w-2xl mx-auto py-20">
-      <LoadingBar :loading="true" color="blue" :duration="2000" />
+    <div v-if="isLoading" class="max-w-2xl mx-auto py-20">
+      <LoadingSpinner size="lg" color="blue" :center="true" />
       <p class="text-center text-gray-600 mt-4">Loading grades...</p>
     </div>
 

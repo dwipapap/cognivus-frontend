@@ -12,7 +12,7 @@
 
   <!-- Loading -->
   <div v-if="isLoading" class="max-w-2xl mx-auto py-20">
-    <LoadingBar :loading="true" color="blue" :duration="2000" />
+    <LoadingSpinner size="lg" color="blue" :center="true" />
   </div>
 
   <!-- Error -->
@@ -268,7 +268,7 @@ import BaseFileUpload from '../../components/form/BaseFileUpload.vue';
 import BaseInput from '../../components/form/BaseInput.vue';
 import BaseSelect from '../../components/form/BaseSelect.vue';
 import BaseTextarea from '../../components/form/BaseTextarea.vue';
-import LoadingBar from '../../components/ui/LoadingBar.vue';
+import LoadingSpinner from '../../components/ui/LoadingSpinner.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -327,8 +327,6 @@ const fetchStudent = async () => {
 /** Submit grade form */
 const handleSave = async () => {
   await submit(async (data) => {
-    console.log('=== ADD GRADE SUBMISSION STARTED ===');
-    
     if (!student.value?.studentid) {
       submitError.value = 'Invalid student data';
       console.error('❌ Invalid student data:', student.value);
@@ -339,9 +337,6 @@ const handleSave = async () => {
       submitError.value = '';
       successMessage.value = '';
 
-      // Log file upload information
-      console.log('📁 Upload Files:', uploadFiles.value);
-      
       const payload = {
         studentid: student.value.studentid,
         test_type: data.test_type,
@@ -356,17 +351,11 @@ const handleSave = async () => {
         date_taken: data.date_taken || null
       };
 
-      console.log('📤 Payload to send:', payload);
-
       const fileToUpload = uploadFiles.value instanceof File ? uploadFiles.value : null;
-      
-      console.log('🚀 Calling gradeAPI.createGrade...');
       const response = await gradeAPI.createGrade(payload, fileToUpload);
-      console.log('✅ API Response:', response.data);
 
       if (response.data.success) {
         successMessage.value = 'Grade saved successfully!';
-        console.log('✅ Grade saved successfully');
         setTimeout(() => {
           router.push({ name: 'AdminStudentDetail', params: { id: userid } });
         }, 1000);
@@ -377,8 +366,6 @@ const handleSave = async () => {
     } catch (error) {
       submitError.value = error.response?.data?.message || 'Error saving grade';
       console.error('❌ Error during submission:', error);
-    } finally {
-      console.log('=== ADD GRADE SUBMISSION ENDED ===');
     }
   });
 };

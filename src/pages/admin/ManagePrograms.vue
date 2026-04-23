@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from 'vue';
 import { programAPI } from '../../services/api';
 import Modal from '../../components/ui/Modal.vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
+import LoadingSpinner from '../../components/ui/LoadingSpinner.vue';
 import ProgramForm from './ProgramForm.vue';
 
 const programs = ref([]);
@@ -121,8 +122,8 @@ onMounted(() => {
 
     <!-- Loading State -->
         <!-- Loading State -->
-    <div v-if="loading" class="max-w-2xl mx-auto py-20">
-      <LoadingBar :loading="true" color="blue" :duration="2000" />
+    <div v-if="isLoading" class="max-w-2xl mx-auto py-20">
+      <LoadingSpinner size="lg" color="blue" :center="true" />
       <p class="text-center text-gray-600 mt-4">Loading programs...</p>
     </div>
 
