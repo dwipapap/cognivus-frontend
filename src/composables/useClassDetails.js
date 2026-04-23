@@ -1,4 +1,4 @@
-import { ref, watch, toValue } from 'vue';
+import { ref, watch, toValue, isRef } from 'vue';
 import { classAPI, levelAPI, lecturerAPI, priceAPI, programAPI } from '../services/api';
 
 const formatLecturerName = (fullname, gender) => {
@@ -18,10 +18,21 @@ export function useClassDetails(classId) {
 
   const fetchDetails = async () => {
     const id = toValue(classId);
-    if (!id) return;
+    if (!id) {
+      classInfo.value = null;
+      levelName.value = '';
+      lecturerName.value = '';
+      programName.value = '';
+      error.value = null;
+      isLoading.value = false;
+      return;
+    }
 
     isLoading.value = true;
     error.value = null;
+    levelName.value = '';
+    lecturerName.value = '';
+    programName.value = '';
 
     try {
       const classRes = await classAPI.getClassById(id);
@@ -84,9 +95,15 @@ export function useClassDetails(classId) {
   };
 
   // Fetch when classId changes (not immediately on mount)
-  watch(classId, () => {
+  const classIdSource = typeof classId === 'function'
+    ? classId
+    : isRef(classId)
+      ? classId
+      : () => classId;
+
+  watch(classIdSource, () => {
     fetchDetails();
-  });
+  }, { immediate: true });
 
   return {
     classInfo,
