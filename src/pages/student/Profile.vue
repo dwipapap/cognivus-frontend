@@ -3,7 +3,6 @@ import { ref, onMounted, nextTick } from 'vue';
 import { studentAPI } from '../../services/api';
 import { authStore } from '../../store/auth';
 import Modal from '../../components/ui/Modal.vue';
-import LoadingBar from '../../components/ui/LoadingBar.vue';
 
 // Gender mapping helper
 const mapGenderToBackend = (frontendGender) => {
@@ -171,9 +170,22 @@ onMounted(fetchProfile);
     <h1 class="text-5xl font-bold text-gray-900 mb-10">Edit Profile</h1>
 
     <!-- Loading State -->
-    <div v-if="isLoading" class="max-w-2xl mx-auto py-20">
-      <LoadingBar :loading="true" color="blue" :duration="2000" />
-      <p class="text-center text-gray-600 mt-4">Loading profile...</p>
+    <div v-if="isLoading" class="bg-blue-50 rounded-3xl p-10 shadow-lg animate-pulse">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
+        <div class="h-12 bg-white rounded-full"></div>
+        <div class="h-12 bg-white rounded-full"></div>
+        <div class="h-12 bg-white rounded-full"></div>
+        <div class="h-12 bg-white rounded-full"></div>
+        <div class="h-12 bg-white rounded-full"></div>
+        <div class="h-12 bg-white rounded-full"></div>
+        <div class="h-12 bg-white rounded-full"></div>
+        <div class="h-12 bg-white rounded-full"></div>
+      </div>
+
+      <div class="flex justify-end gap-4 mt-10">
+        <div class="h-12 w-28 bg-white rounded-full"></div>
+        <div class="h-12 w-32 bg-blue-200 rounded-full"></div>
+      </div>
     </div>
 
     <!-- Form Content -->

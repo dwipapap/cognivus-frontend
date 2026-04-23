@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router';
 import { authStore } from '../../store/auth';
 import { useLecturerProfile } from '../../composables/useLecturerProfile';
 import { classAPI, studentAPI, levelAPI } from '../../services/api';
-import LoadingBar from '../../components/ui/LoadingBar.vue';
+import LoadingSpinner from '../../components/ui/LoadingSpinner.vue';
 import IconCheckCircle from '~icons/solar/check-circle-bold';
 import IconUsersGroup from '~icons/solar/users-group-rounded-bold';
 import IconBook from '~icons/basil/book-solid';
@@ -301,7 +301,7 @@ onMounted(() => {
 <template>
   <!-- Loading State -->
   <div v-if="isLoading || dataLoading" class="max-w-2xl mx-auto py-20">
-    <LoadingBar :loading="true" color="blue" :duration="2000" />
+    <LoadingSpinner size="lg" color="blue" :center="true" />
   </div>
 
   <!-- Error State -->

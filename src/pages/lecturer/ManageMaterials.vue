@@ -6,7 +6,7 @@ import BaseFileUpload from '../../components/form/BaseFileUpload.vue';
 import BaseInput from '../../components/form/BaseInput.vue';
 import BaseTextarea from '../../components/form/BaseTextarea.vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
-import LoadingBar from '../../components/ui/LoadingBar.vue';
+import LoadingSpinner from '../../components/ui/LoadingSpinner.vue';
 import ConfirmDialog from '../../components/ui/ConfirmDialog.vue';
 import IconArrowLeft from '~icons/basil/arrow-left-solid';
 import IconArrowRight from '~icons/basil/arrow-right-solid';
@@ -376,7 +376,7 @@ watch(
 
     <!-- Loading -->
     <div v-if="isLoading || profileLoading" class="max-w-2xl mx-auto py-20">
-      <LoadingBar :loading="true" color="blue" :duration="2000" />
+      <LoadingSpinner size="lg" color="blue" :center="true" />
     </div>
 
     <!-- Main Content -->

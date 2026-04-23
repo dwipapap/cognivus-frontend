@@ -4,7 +4,6 @@ import { useStudentProfile } from '../../composables/useStudentProfile';
 import { useClassDetails } from '../../composables/useClassDetails';
 import { courseAPI } from '../../services/api';
 import { formatDate } from '../../utils/formatters';
-import LoadingBar from '../../components/ui/LoadingBar.vue';
 import IconArrowRight from '~icons/basil/arrow-right-solid';
 
 const { studentProfile, isLoading: profileLoading, fetchStudentProfile } = useStudentProfile();
@@ -54,8 +53,21 @@ const errorMessage = computed(() => {
 
 <template>
   <!-- Loading State -->
-  <div v-if="isLoading || profileLoading" class="max-w-2xl mx-auto py-20">
-    <LoadingBar :loading="true" color="blue" :duration="2000" />
+  <div v-if="isLoading || profileLoading" class="space-y-6 animate-pulse">
+    <div class="rounded-2xl p-6 md:p-8 bg-blue-100/70 border border-blue-200">
+      <div class="h-8 w-56 bg-blue-200 rounded mb-3"></div>
+      <div class="h-5 w-40 bg-blue-200 rounded mb-6"></div>
+      <div class="h-4 w-full max-w-xl bg-blue-200 rounded mb-2"></div>
+      <div class="h-4 w-3/4 bg-blue-200 rounded mb-6"></div>
+      <div class="h-9 w-40 bg-white/80 rounded-full"></div>
+    </div>
+
+    <div class="rounded-2xl p-6 md:p-8 bg-blue-50 border border-blue-100 space-y-4">
+      <div class="h-7 w-48 bg-blue-100 rounded"></div>
+      <div class="h-16 w-full bg-blue-100 rounded-xl"></div>
+      <div class="h-16 w-full bg-blue-100 rounded-xl"></div>
+      <div class="h-16 w-full bg-blue-100 rounded-xl"></div>
+    </div>
   </div>
 
   <!-- Error State -->

@@ -3,7 +3,7 @@ import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { studentAPI, gradeAPI, paymentAPI } from '../../services/api';
 import { formatDate, getAverageScore, getInitials } from '../../utils/formatters';
-import LoadingBar from '../../components/ui/LoadingBar.vue';
+import LoadingSpinner from '../../components/ui/LoadingSpinner.vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
 
 const route = useRoute();
@@ -122,7 +122,7 @@ onMounted(() => {
 
       <!-- Loading -->
       <div v-if="isLoading" class="max-w-2xl mx-auto py-20">
-        <LoadingBar :loading="true" color="blue" :duration="2000" />
+        <LoadingSpinner size="lg" color="blue" :center="true" />
       </div>
 
       <!-- Error -->

@@ -6,7 +6,6 @@ import { useStudentProfile } from '../../composables/useStudentProfile';
 import { useClassDetails } from '../../composables/useClassDetails';
 import { useDashboardUtils } from '../../composables/useDashboardUtils';
 import { courseAPI } from '../../services/api';
-import LoadingBar from '../../components/ui/LoadingBar.vue';
 import IconChart from '~icons/solar/round-graph-bold';
 import IconBook from '~icons/solar/book-bookmark-bold';
 import IconUser from '~icons/solar/user-bold';
@@ -192,9 +191,14 @@ const courseLink = (courseId) => ({ name: 'StudentCourseDetail', params: { id: c
           </router-link>
         </div>
 
-        <div v-if="coursesLoading" class="max-w-2xl mx-auto py-12" role="status" aria-busy="true">
-          <LoadingBar :loading="true" color="blue" :duration="2000" />
-          <p class="text-center text-gray-600 mt-4">Loading courses...</p>
+        <div v-if="coursesLoading" class="space-y-6 animate-pulse" role="status" aria-busy="true">
+          <div class="bg-blue-100 rounded-2xl h-52 md:h-64"></div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-white rounded-xl border border-gray-200 p-4 h-28"></div>
+            <div class="bg-white rounded-xl border border-gray-200 p-4 h-28"></div>
+            <div class="bg-white rounded-xl border border-gray-200 p-4 h-28"></div>
+            <div class="bg-white rounded-xl border border-gray-200 p-4 h-28"></div>
+          </div>
         </div>
 
         <div v-else-if="coursesError" class="bg-red-50 border border-red-200 rounded-xl p-6 text-center" role="alert">

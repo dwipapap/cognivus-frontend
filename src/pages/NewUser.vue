@@ -5,7 +5,7 @@ import { authStore } from '../store/auth';
 import { useRouter } from 'vue-router';
 import { useForm } from '../composables/useForm';
 import Modal from '../components/ui/Modal.vue';
-import LoadingBar from '../components/ui/LoadingBar.vue';
+import LoadingSpinner from '../components/ui/LoadingSpinner.vue';
 
 const router = useRouter();
 
@@ -187,7 +187,7 @@ onMounted(fetchProfile);
     <!-- Loading State -->
     <div v-if="isLoading" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
         <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full">
-            <LoadingBar :loading="true" color="blue" :duration="2000" />
+            <LoadingSpinner size="lg" color="blue" :center="true" />
             <p class="text-center text-gray-600 mt-4 font-medium">Loading profile data...</p>
         </div>
     </div>

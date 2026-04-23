@@ -3,7 +3,6 @@ import { ref, onMounted, watch, computed } from 'vue';
 import { useStudentProfile } from '../../composables/useStudentProfile';
 import { useClassDetails } from '../../composables/useClassDetails';
 import { gradeAPI } from '../../services/api';
-import LoadingBar from '../../components/ui/LoadingBar.vue';
 import IconWarning from '~icons/basil/info-triangle-outline';
 import IconUser from '~icons/basil/user-solid';
 import IconChart from '~icons/basil/chart-pie-solid';
@@ -99,9 +98,24 @@ onMounted(() => {
 
 <template>
   <!-- Loading State -->
-      <div v-if="isProfileLoading || isLoadingGrades || classLoading" class="max-w-2xl mx-auto py-20">
-        <LoadingBar :loading="true" color="blue" :duration="2000" />
-        <p class="text-center text-gray-500 mt-4">Loading your grades...</p>
+      <div v-if="isProfileLoading || isLoadingGrades || classLoading" class="space-y-8 mb-8 animate-pulse">
+        <div class="relative rounded-2xl shadow-lg overflow-hidden bg-blue-100 border border-blue-200 p-5 md:p-8">
+          <div class="h-8 w-72 bg-blue-200 rounded mb-3"></div>
+          <div class="h-6 w-56 bg-blue-200 rounded mb-4"></div>
+          <div class="h-4 w-full max-w-xl bg-blue-200 rounded mb-2"></div>
+          <div class="h-4 w-2/3 bg-blue-200 rounded mb-6"></div>
+          <div class="flex flex-wrap gap-3">
+            <div class="h-8 w-40 bg-white/80 rounded-full"></div>
+            <div class="h-8 w-36 bg-white/80 rounded-full"></div>
+          </div>
+        </div>
+
+        <div class="bg-blue-50 border border-blue-100 rounded-2xl p-6 md:p-8 space-y-4">
+          <div class="h-8 w-44 bg-blue-100 rounded"></div>
+          <div class="h-16 w-full bg-white rounded-xl"></div>
+          <div class="h-16 w-full bg-white rounded-xl"></div>
+          <div class="h-16 w-full bg-white rounded-xl"></div>
+        </div>
       </div>
 
       <!-- Error State -->

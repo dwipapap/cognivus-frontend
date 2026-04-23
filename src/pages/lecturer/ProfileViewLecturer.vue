@@ -2,7 +2,7 @@
 import { computed } from 'vue';
 import { authStore } from '../../store/auth';
 import { useLecturerProfile } from '../../composables/useLecturerProfile';
-import LoadingBar from '../../components/ui/LoadingBar.vue';
+import LoadingSpinner from '../../components/ui/LoadingSpinner.vue';
 import iconBoyImage from '../../assets/iconboy.webp';
 import iconGirlImage from '../../assets/icongirl.webp';
 import { formatDate } from '../../utils/formatters';
@@ -37,7 +37,7 @@ const handleImageError = (event) => {
 <template>
   <!-- Loading State -->
   <div v-if="isLoading" class="max-w-2xl mx-auto py-20">
-    <LoadingBar :loading="true" color="blue" :duration="2000" />
+    <LoadingSpinner size="lg" color="blue" :center="true" />
     <p class="text-center text-gray-600 mt-4">Loading profile...</p>
   </div>
 

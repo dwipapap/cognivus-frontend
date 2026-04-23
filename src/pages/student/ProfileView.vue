@@ -8,7 +8,6 @@ import iconGirlImage from '../../assets/icongirl.webp';
 import { formatDate } from '../../utils/formatters';
 import OtpFlow from '../../components/ui/OtpFlow.vue';
 import Modal from '../../components/ui/Modal.vue';
-import LoadingBar from '../../components/ui/LoadingBar.vue';
 
 const { studentProfile, isLoading, errorMessage, fetchStudentProfile } = useStudentProfile();
 const classCode = ref('-');
@@ -135,9 +134,20 @@ const fetchClassData = async () => {
   </div>
 
   <!-- Loading State -->
-    <div v-if="isLoading" class="max-w-2xl mx-auto py-20">
-      <LoadingBar :loading="true" color="blue" :duration="2000" />
-      <p class="text-center text-gray-600 mt-4">Loading profile...</p>
+    <div v-if="isLoading" class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8 animate-pulse">
+      <div class="lg:col-span-1 bg-blue-100 rounded-3xl p-10 shadow-lg h-[540px]"></div>
+      <div class="lg:col-span-2 bg-blue-50 rounded-3xl p-10 shadow-lg">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
+          <div class="h-12 bg-blue-200 rounded-full"></div>
+          <div class="h-12 bg-blue-200 rounded-full"></div>
+          <div class="h-12 bg-blue-200 rounded-full"></div>
+          <div class="h-12 bg-blue-200 rounded-full"></div>
+          <div class="h-12 bg-blue-200 rounded-full"></div>
+          <div class="h-12 bg-blue-200 rounded-full"></div>
+          <div class="h-12 bg-blue-200 rounded-full"></div>
+          <div class="h-12 bg-blue-200 rounded-full"></div>
+        </div>
+      </div>
     </div>
 
       <!-- Error State -->

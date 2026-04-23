@@ -12,7 +12,7 @@
 
   <!-- Loading -->
   <div v-if="isLoading" class="max-w-2xl mx-auto py-20">
-    <LoadingBar :loading="true" color="blue" :duration="2000" />
+    <LoadingSpinner size="lg" color="blue" :center="true" />
   </div>
 
   <!-- Error -->
@@ -268,7 +268,7 @@ import BaseFileUpload from '../../components/form/BaseFileUpload.vue';
 import BaseInput from '../../components/form/BaseInput.vue';
 import BaseSelect from '../../components/form/BaseSelect.vue';
 import BaseTextarea from '../../components/form/BaseTextarea.vue';
-import LoadingBar from '../../components/ui/LoadingBar.vue';
+import LoadingSpinner from '../../components/ui/LoadingSpinner.vue';
 
 const route = useRoute();
 const router = useRouter();

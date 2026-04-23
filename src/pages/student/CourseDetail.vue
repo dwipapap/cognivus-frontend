@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, defineAsyncComponent } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useClassDetails } from '../../composables/useClassDetails';
 import { courseAPI } from '../../services/api';
@@ -11,13 +11,13 @@ import IconDocument from '~icons/basil/document-solid';
 import IconPlay from '~icons/basil/play-solid';
 import IconArrowLeft from '~icons/basil/arrow-left-outline';
 import IconUpload from '~icons/basil/upload-outline';
-import LoadingBar from '../../components/ui/LoadingBar.vue';
 import Modal from '../../components/ui/Modal.vue';
-import PDFViewer from '../../components/ui/PDFViewer.vue';
 import { formatDate } from '../../utils/formatters';
 
 const route = useRoute();
 const router = useRouter();
+
+const PDFViewer = defineAsyncComponent(() => import('../../components/ui/PDFViewer.vue'));
 
 const course = ref(null);
 const courseLoading = ref(false);
@@ -101,9 +101,23 @@ onMounted(() => {
 
 <template>
   <!-- Loading State -->
-  <div v-if="isLoading" class="max-w-2xl mx-auto py-12 md:py-20">
-    <LoadingBar :loading="true" color="blue" :duration="2000" />
-    <p class="text-center text-gray-600 mt-4 text-sm md:text-base">Loading course details...</p>
+  <div v-if="isLoading" class="space-y-4 md:space-y-6 animate-pulse">
+    <div class="rounded-2xl shadow-lg p-5 md:p-8 bg-blue-100 border border-blue-200">
+      <div class="h-8 w-2/3 bg-blue-200 rounded mb-3"></div>
+      <div class="h-4 w-40 bg-blue-200 rounded mb-6"></div>
+      <div class="flex flex-wrap gap-3">
+        <div class="h-7 w-24 bg-blue-200 rounded-full"></div>
+        <div class="h-7 w-28 bg-blue-200 rounded-full"></div>
+        <div class="h-7 w-32 bg-blue-200 rounded-full"></div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 border border-gray-100 space-y-4">
+      <div class="h-7 w-56 bg-gray-200 rounded"></div>
+      <div class="h-20 w-full bg-gray-100 rounded-xl"></div>
+      <div class="h-28 w-full bg-gray-100 rounded-xl"></div>
+      <div class="h-28 w-full bg-gray-100 rounded-xl"></div>
+    </div>
   </div>
 
   <!-- Error State -->
