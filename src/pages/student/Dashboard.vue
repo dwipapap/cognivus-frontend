@@ -7,9 +7,7 @@ import { useClassDetails } from '../../composables/useClassDetails';
 import { useDashboardUtils } from '../../composables/useDashboardUtils';
 import { courseAPI } from '../../services/api';
 import IconChart from '~icons/solar/round-graph-bold';
-import IconBook from '~icons/solar/book-bookmark-bold';
-import IconUser from '~icons/solar/user-bold';
-import IconClock from '~icons/basil/clock-solid';
+import IconCalendarBold from '~icons/solar/calendar-bold';
 import IconArrowRight from '~icons/basil/arrow-right-solid';
 import IconBookSolid from '~icons/basil/book-solid';
 import IconCalendar from '~icons/basil/calendar-outline';
@@ -17,7 +15,7 @@ import { formatDate } from '../../utils/formatters';
 
 const router = useRouter();
 const { studentProfile, fetchStudentProfile } = useStudentProfile();
-const { greeting, getFormattedSchedule, getDashboardCourses, getPlaceholderImage, getCourseStatusText, getStatusBadgeClass } = useDashboardUtils();
+const { greeting, getDashboardCourses, getPlaceholderImage, getCourseStatusText, getStatusBadgeClass } = useDashboardUtils();
 
 onMounted(async () => {
   await fetchStudentProfile();
@@ -31,7 +29,81 @@ const user = computed(() => ({
   name: studentProfile.value?.nama_lengkap || studentProfile.value?.fullname || authStore.user?.username || authStore.user?.email?.split('@')[0] || 'Student',
 }));
 
-const formattedSchedule = computed(() => getFormattedSchedule(classInfo.value));
+const nextClassDetails = computed(() => {
+  if (!classInfo.value) return null;
+  const schedule1 = classInfo.value.schedule_day;
+  const time1 = classInfo.value.schedule_time;
+  const schedule2 = classInfo.value.schedule_day_2;
+  const time2 = classInfo.value.schedule_time_2;
+
+  const dayToNum = {
+    'Sunday': 0, 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4, 'Friday': 5, 'Saturday': 6,
+    'Minggu': 0, 'Senin': 1, 'Selasa': 2, 'Rabu': 3, 'Kamis': 4, 'Jumat': 5, 'Sabtu': 6
+  };
+
+  const getDaysUntil = (dayStr) => {
+    if (!dayStr) return 999;
+    const num = dayToNum[dayStr];
+    if (num === undefined) return 999;
+    const today = new Date().getDay();
+    return (num - today + 7) % 7 || 7;
+  };
+
+  const days1 = getDaysUntil(schedule1);
+  const days2 = getDaysUntil(schedule2);
+  
+  let targetDay = null;
+  let targetTime = null;
+  let daysToAdd = 0;
+
+  if (days1 < 999 || days2 < 999) {
+    if (days1 <= days2) {
+      targetDay = schedule1;
+      targetTime = time1;
+      daysToAdd = days1;
+    } else {
+      targetDay = schedule2;
+      targetTime = time2;
+      daysToAdd = days2;
+    }
+  }
+
+  if (!targetDay) return null;
+
+  const targetDate = new Date();
+  targetDate.setDate(targetDate.getDate() + daysToAdd);
+
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  
+  const formatTimeStr = (t) => {
+    if (!t) return '';
+    try {
+      const [h, m] = t.split(':');
+      return `${h}:${m}`;
+    } catch {
+      return t;
+    }
+  };
+
+  const startTime = formatTimeStr(targetTime);
+  let timeStr = startTime;
+  if (startTime) {
+    try {
+      const [h, m] = startTime.split(':');
+      const endH = (parseInt(h) + 2).toString().padStart(2, '0');
+      timeStr = `${startTime} - ${endH}:${m}`;
+    } catch {
+      timeStr = startTime;
+    }
+  }
+
+  return {
+    date: targetDate.getDate(),
+    month: monthNames[targetDate.getMonth()],
+    dayName: targetDay,
+    timeRange: timeStr
+  };
+});
 
 const courses = ref([]);
 const coursesLoading = ref(false);
@@ -76,7 +148,6 @@ const courseLink = (courseId) => ({ name: 'StudentCourseDetail', params: { id: c
 
 <template>
   <div class="space-y-6">
-    <!-- Welcome Section -->
     <section 
       class="relative bg-blue-600 rounded-2xl p-6 md:p-8 shadow-lg overflow-hidden"
       aria-labelledby="welcome-heading"
@@ -96,84 +167,82 @@ const courseLink = (courseId) => ({ name: 'StudentCourseDetail', params: { id: c
       </div>
     </section>
 
-    <!-- Quick Stats Cards -->
-    <section aria-label="Quick stats">
-      <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-px bg-gray-100">
+    <section aria-label="Quick stats" class="grid grid-cols-2 gap-2 md:gap-4">
+      <article class="relative bg-white rounded-[18px] md:rounded-[20px] border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 min-h-[118px] md:min-h-[132px] flex flex-col md:flex-row group">
+        <svg class="absolute bottom-0 left-0 w-full h-[55%] text-blue-50 md:hidden group-hover:text-blue-100/70 transition-colors duration-500" preserveAspectRatio="none" viewBox="0 0 100 100">
+          <path d="M0,40 C40,20 60,60 100,30 L100,100 L0,100 Z" fill="currentColor"/>
+        </svg>
+        <svg class="absolute right-0 top-0 h-full w-[40%] text-blue-50 hidden md:block group-hover:text-blue-100/70 transition-colors duration-500" preserveAspectRatio="none" viewBox="0 0 100 100">
+          <path d="M30,0 C60,40 10,60 40,100 L100,100 L100,0 Z" fill="currentColor"/>
+        </svg>
+
+        <div class="relative z-10 p-3.5 md:p-5 flex flex-col flex-grow md:w-[66%]">
+          <div class="flex items-center gap-1.5 md:gap-2 text-blue-600 mb-1 md:mb-1.5">
+            <IconCalendar class="w-3 h-3 md:w-3.5 md:h-3.5" />
+            <span class="text-[9px] md:text-[11px] font-semibold uppercase tracking-wider">Next Class</span>
+          </div>
           
-          <!-- Level -->
-          <article class="bg-white p-3 sm:p-5 hover:bg-slate-50 transition-colors" aria-label="Level">
-            <div class="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-1.5">
-              <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
-                <IconChart class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600" aria-hidden="true" />
-              </div>
-              <h3 class="text-xs sm:text-sm font-medium text-gray-500 line-clamp-1">Level</h3>
+          <div v-if="classLoading" class="h-5 md:h-7 w-16 md:w-28 bg-gray-100 animate-pulse rounded mb-1.5 md:mb-2.5"></div>
+          <template v-else-if="nextClassDetails">
+            <h3 class="text-[15px] md:text-xl font-extrabold text-gray-900 mb-1.5 md:mb-2.5 truncate leading-tight">
+              {{ nextClassDetails.dayName }}
+            </h3>
+            <div class="flex flex-col xl:flex-row xl:items-center gap-1 md:gap-1.5">
+              <span class="w-max px-1.5 py-0.5 md:px-2 md:py-0.5 bg-white border border-gray-200 text-gray-700 text-[8.5px] md:text-[11px] font-semibold rounded md:rounded-md shadow-sm">
+                {{ nextClassDetails.date }} {{ nextClassDetails.month }}
+              </span>
+              <span class="text-[8.5px] md:text-[11px] text-gray-500 font-medium">
+                <span class="hidden xl:inline">•</span> {{ nextClassDetails.timeRange }}
+              </span>
             </div>
-            <div class="pl-9 sm:pl-11">
-              <p class="text-base sm:text-xl font-bold text-gray-900 line-clamp-1">
-                <span v-if="classLoading" role="status" aria-busy="true">—</span>
-                <span v-else>{{ levelName || '-' }}</span>
-              </p>
-              <p class="text-[10px] sm:text-xs text-gray-400 mt-0.5 line-clamp-1">Current class</p>
-            </div>
-          </article>
-
-          <!-- Courses -->
-          <article class="bg-white p-3 sm:p-5 hover:bg-slate-50 transition-colors" aria-label="Courses">
-            <div class="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-1.5">
-              <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0">
-                <IconBook class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600" aria-hidden="true" />
-              </div>
-              <h3 class="text-xs sm:text-sm font-medium text-gray-500 line-clamp-1">Courses</h3>
-            </div>
-            <div class="pl-9 sm:pl-11">
-              <p class="text-base sm:text-xl font-bold text-gray-900 line-clamp-1">
-                <span v-if="coursesLoading" role="status" aria-busy="true">—</span>
-                <span v-else>{{ courses.length }}</span>
-              </p>
-              <p class="text-[10px] sm:text-xs text-gray-400 mt-0.5 line-clamp-1">Available materials</p>
-            </div>
-          </article>
-
-          <!-- Instructor -->
-          <article class="bg-white p-3 sm:p-5 hover:bg-slate-50 transition-colors" aria-label="Instructor">
-            <div class="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-1.5">
-              <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-indigo-50 flex items-center justify-center flex-shrink-0">
-                <IconUser class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-600" aria-hidden="true" />
-              </div>
-              <h3 class="text-xs sm:text-sm font-medium text-gray-500 line-clamp-1">Instructor</h3>
-            </div>
-            <div class="pl-9 sm:pl-11">
-              <p class="text-base sm:text-xl font-bold text-gray-900 line-clamp-1">
-                <span v-if="classLoading" role="status" aria-busy="true">—</span>
-                <span v-else>{{ lecturerName || '-' }}</span>
-              </p>
-              <p class="text-[10px] sm:text-xs text-gray-400 mt-0.5 line-clamp-1">Class lecturer</p>
-            </div>
-          </article>
-
-          <!-- Next Class -->
-          <article class="bg-white p-3 sm:p-5 hover:bg-slate-50 transition-colors" aria-label="Next Class">
-            <div class="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-1.5">
-              <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-amber-50 flex items-center justify-center flex-shrink-0">
-                <IconClock class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-600" aria-hidden="true" />
-              </div>
-              <h3 class="text-xs sm:text-sm font-medium text-gray-500 line-clamp-1">Next Class</h3>
-            </div>
-            <div class="pl-9 sm:pl-11">
-              <p class="text-base sm:text-xl font-bold text-gray-900 line-clamp-1">
-                <span v-if="classLoading" role="status" aria-busy="true">—</span>
-                <span v-else>{{ formattedSchedule }}</span>
-              </p>
-              <p class="text-[10px] sm:text-xs text-gray-400 mt-0.5 line-clamp-1">Upcoming schedule</p>
-            </div>
-          </article>
-
+          </template>
+          <div v-else>
+            <h3 class="text-[15px] md:text-xl font-extrabold text-gray-400 mb-1.5 md:mb-2.5">Not Set</h3>
+            <span class="text-[8.5px] md:text-[11px] text-gray-400 font-medium">No upcoming schedule</span>
+          </div>
         </div>
-      </div>
+
+        <div class="absolute right-2.5 bottom-2.5 md:right-6 md:top-1/2 md:-translate-y-1/2 z-10 text-blue-600 group-hover:scale-110 transition-transform duration-500 pointer-events-none drop-shadow-md">
+          <IconCalendarBold class="w-8 h-8 md:w-11 md:h-11 opacity-90" />
+        </div>
+      </article>
+
+      <article class="relative bg-white rounded-[18px] md:rounded-[20px] border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 min-h-[118px] md:min-h-[132px] flex flex-col md:flex-row group">
+        <svg class="absolute bottom-0 left-0 w-full h-[55%] text-indigo-50 md:hidden group-hover:text-indigo-100/70 transition-colors duration-500" preserveAspectRatio="none" viewBox="0 0 100 100">
+          <path d="M0,30 C30,60 70,20 100,50 L100,100 L0,100 Z" fill="currentColor"/>
+        </svg>
+        <svg class="absolute right-0 top-0 h-full w-[40%] text-indigo-50 hidden md:block group-hover:text-indigo-100/70 transition-colors duration-500" preserveAspectRatio="none" viewBox="0 0 100 100">
+          <path d="M40,0 C10,40 60,60 30,100 L100,100 L100,0 Z" fill="currentColor"/>
+        </svg>
+
+        <div class="relative z-10 p-3.5 md:p-5 flex flex-col flex-grow md:w-[66%]">
+          <div class="flex items-center gap-1.5 md:gap-2 text-indigo-600 mb-1 md:mb-1.5">
+            <IconChart class="w-3 h-3 md:w-3.5 md:h-3.5" />
+            <span class="text-[9px] md:text-[11px] font-semibold uppercase tracking-wider">Current Level</span>
+          </div>
+          
+          <div v-if="classLoading" class="h-5 md:h-7 w-20 md:w-32 bg-gray-100 animate-pulse rounded mb-1.5 md:mb-2.5"></div>
+          <h3 v-else class="text-[15px] md:text-xl font-extrabold text-gray-900 mb-1.5 md:mb-2.5 line-clamp-2 leading-tight">
+            {{ levelName || 'Not Assigned' }}
+          </h3>
+          
+          <div class="flex flex-col xl:flex-row xl:items-center gap-1 md:gap-1.5 mt-auto">
+            <span class="w-max px-1.5 py-0.5 md:px-2 md:py-0.5 bg-white border border-gray-200 text-gray-700 text-[8.5px] md:text-[11px] font-semibold rounded md:rounded-md shadow-sm">
+              {{ levelName ? 'Active' : 'Pending' }}
+            </span>
+            <span class="text-[8.5px] md:text-[11px] text-gray-500 font-medium">
+              <span class="hidden xl:inline">•</span> Program
+            </span>
+          </div>
+        </div>
+
+        <div class="absolute right-2.5 bottom-2.5 md:right-6 md:top-1/2 md:-translate-y-1/2 z-10 text-indigo-600 group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-500 pointer-events-none drop-shadow-md">
+          <IconChart class="w-8 h-8 md:w-11 md:h-11 opacity-90" />
+        </div>
+      </article>
+
     </section>
 
-    <!-- My Courses Section -->
     <section aria-labelledby="courses-heading">
       <div class="bg-gray-50 rounded-2xl p-6 md:p-8 border border-gray-200 shadow-sm">
         <div class="flex items-center justify-between mb-6">
@@ -218,12 +287,10 @@ const courseLink = (courseId) => ({ name: 'StudentCourseDetail', params: { id: c
         </div>
 
         <div v-else class="space-y-6">
-          <!-- Hero Banner for Latest Course -->
           <article 
             class="bg-blue-600 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 group relative"
             aria-labelledby="hero-course-title"
           >
-            <!-- Background Decoration -->
             <div class="absolute top-0 right-0 w-1/2 h-full pointer-events-none overflow-hidden" aria-hidden="true">
               <div class="absolute -top-24 -right-10 w-64 h-64 bg-blue-500/30 rounded-full blur-3xl"></div>
               <div class="absolute bottom-0 right-1/4 w-40 h-40 bg-blue-400/20 rounded-full blur-2xl"></div>
@@ -268,7 +335,6 @@ const courseLink = (courseId) => ({ name: 'StudentCourseDetail', params: { id: c
             </router-link>
           </article>
 
-          <!-- Grid for Remaining Courses -->
           <div v-if="dashboardCourses.length > 1" class="grid grid-cols-3 gap-2 sm:gap-3 md:gap-5">
             <article 
               v-for="(course, index) in dashboardCourses.slice(1)" 
@@ -276,15 +342,13 @@ const courseLink = (courseId) => ({ name: 'StudentCourseDetail', params: { id: c
               class="bg-white rounded-xl sm:rounded-2xl overflow-hidden shadow-sm border border-gray-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col h-full group"
             >
               <router-link :to="courseLink(course.courseid)" class="flex flex-col h-full">
-                <!-- Course Image Header -->
                 <div class="h-20 sm:h-28 md:h-40 w-full relative overflow-hidden bg-gray-100">
                   <img 
                     :src="getPlaceholderImage(index + 1)" 
                     :alt="course.title" 
                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
                   />
-                  
-                  <!-- Status Badge -->
+
                   <div class="absolute top-1.5 left-1.5 sm:top-2 sm:left-2 md:top-3 md:left-3 z-10 hidden sm:block">
                     <span 
                       :class="getStatusBadgeClass(course)"
@@ -293,16 +357,14 @@ const courseLink = (courseId) => ({ name: 'StudentCourseDetail', params: { id: c
                       {{ getCourseStatusText(course) }}
                     </span>
                   </div>
-                  
-                  <!-- Hover Overlay -->
+
                   <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                     <div class="bg-white/90 backdrop-blur-sm text-blue-600 p-1.5 sm:p-2 md:p-2.5 rounded-full transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 shadow-lg">
                       <IconArrowRight class="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" />
                     </div>
                   </div>
                 </div>
-                
-                <!-- Course Content -->
+
                 <div class="p-2 sm:p-3 md:p-4 flex flex-col flex-grow justify-between">
                   <div>
                     <h3 class="text-[11px] sm:text-sm md:text-base font-bold text-gray-900 mb-1 md:mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors leading-tight">
