@@ -97,87 +97,56 @@ onMounted(() => {
 </script>
 
 <template>
-  <!-- Loading State -->
-      <div v-if="isProfileLoading || isLoadingGrades || classLoading" class="space-y-8 mb-8 animate-pulse">
-        <div class="relative rounded-2xl shadow-lg overflow-hidden bg-blue-100 border border-blue-200 p-5 md:p-8">
-          <div class="h-8 w-72 bg-blue-200 rounded mb-3"></div>
-          <div class="h-6 w-56 bg-blue-200 rounded mb-4"></div>
-          <div class="h-4 w-full max-w-xl bg-blue-200 rounded mb-2"></div>
-          <div class="h-4 w-2/3 bg-blue-200 rounded mb-6"></div>
-          <div class="flex flex-wrap gap-3">
-            <div class="h-8 w-40 bg-white/80 rounded-full"></div>
-            <div class="h-8 w-36 bg-white/80 rounded-full"></div>
-          </div>
-        </div>
-
-        <div class="bg-blue-50 border border-blue-100 rounded-2xl p-6 md:p-8 space-y-4">
-          <div class="h-8 w-44 bg-blue-100 rounded"></div>
-          <div class="h-16 w-full bg-white rounded-xl"></div>
-          <div class="h-16 w-full bg-white rounded-xl"></div>
-          <div class="h-16 w-full bg-white rounded-xl"></div>
-        </div>
+  <div class="space-y-8 mb-8">
+    <!-- Header Card -->
+    <div class="relative bg-blue-600 rounded-2xl p-6 md:p-8 shadow-lg overflow-hidden">
+      <!-- Diagonal Book Graphics -->
+      <div class="absolute top-0 right-0 w-1/2 h-full pointer-events-none overflow-hidden">
+        <div class="absolute -top-10 -right-10 w-40 h-48 bg-blue-400/30 rounded-lg transform rotate-12"></div>
+        <div class="absolute top-20 -right-5 w-32 h-40 bg-blue-300/40 rounded-lg transform rotate-12"></div>
+        <div class="absolute top-40 right-10 w-28 h-36 bg-white/20 rounded-lg transform rotate-12"></div>
       </div>
 
-      <!-- Error State -->
-      <div v-else-if="errorMessage" class="bg-red-50 border border-red-100 rounded-2xl p-6 text-center max-w-2xl mx-auto">
-        <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <IconWarning class="w-6 h-6 text-red-600" />
-        </div>
-        <h3 class="text-lg font-semibold text-red-900 mb-2">Error Loading Grades</h3>
-        <p class="text-red-600 mb-6">{{ errorMessage }}</p>
-        <button 
-          @click="fetchGrades"
-          class="px-6 py-2.5 bg-red-600 text-white font-medium rounded-xl hover:bg-red-700 transition-colors shadow-sm"
-        >
-          Try Again
-        </button>
+      <!-- Content -->
+      <div class="relative z-10">
+        <p class="text-white/80 text-sm mb-1">{{ classInfo?.class_code ? classInfo.class_code : 'Academic Performance' }}</p>
+        <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">{{ levelName || 'Loading...' }}</h2>
+        <p class="text-white/70 text-sm md:text-base max-w-md">
+          Track your learning progress, view detailed test scores, and access your academic report files.
+        </p>
       </div>
+    </div>
 
-      <div v-else class="space-y-8 mb-8">
-        <!-- Header Card (MyCourses Style) -->
-        <div class="relative bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-lg overflow-hidden">
-          <!-- Diagonal Book Graphics -->
-          <div class="absolute top-0 right-0 w-1/2 h-full pointer-events-none overflow-hidden">
-            <div class="absolute -top-10 -right-10 w-40 h-48 bg-blue-400/30 rounded-lg transform rotate-12"></div>
-            <div class="absolute top-20 -right-5 w-32 h-40 bg-blue-300/40 rounded-lg transform rotate-12"></div>
-            <div class="absolute top-40 right-10 w-28 h-36 bg-white/20 rounded-lg transform rotate-12"></div>
-          </div>
+    <!-- Loading State -->
+    <div v-if="isProfileLoading || isLoadingGrades || classLoading" class="animate-pulse">
+      <div class="bg-blue-50 border border-blue-100 rounded-2xl p-6 md:p-8 space-y-4">
+        <div class="h-8 w-44 bg-blue-100 rounded"></div>
+        <div class="h-16 w-full bg-white rounded-xl"></div>
+        <div class="h-16 w-full bg-white rounded-xl"></div>
+        <div class="h-16 w-full bg-white rounded-xl"></div>
+      </div>
+    </div>
 
-          <!-- Content -->
-          <div class="relative p-5 md:p-8 z-10">
-            <div class="mb-6">
-              <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">Academic Performance</h2>
-              <h3 class="text-lg md:text-xl font-semibold text-white/90 mb-3">
-                {{ levelName || 'Loading...' }} 
-                <span v-if="classInfo?.class_code" class="opacity-75 mx-2">•</span> 
-                {{ classInfo?.class_code }}
-              </h3>
-              <p class="text-sm text-white/80 max-w-2xl">
-                Track your learning progress, view detailed test scores, and access your academic report files.
-              </p>
-            </div>
+    <!-- Error State -->
+    <div v-else-if="errorMessage" class="bg-red-50 border border-red-100 rounded-2xl p-6 text-center max-w-2xl mx-auto">
+      <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <IconWarning class="w-6 h-6 text-red-600" />
+      </div>
+      <h3 class="text-lg font-semibold text-red-900 mb-2">Error Loading Grades</h3>
+      <p class="text-red-600 mb-6">{{ errorMessage }}</p>
+      <button 
+        @click="fetchGrades"
+        class="px-6 py-2.5 bg-red-600 text-white font-medium rounded-xl hover:bg-red-700 transition-colors shadow-sm"
+      >
+        Try Again
+      </button>
+    </div>
 
-            <div class="flex flex-wrap gap-3">
-              <!-- Lecturer Badge -->
-              <div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 border border-white/10">
-                <IconUser class="w-4 h-4 text-white/90" />
-                <p class="text-white text-sm font-medium">{{ lecturerName || 'Instructor' }}</p>
-              </div>
-
-              <!-- Stats Badge -->
-              <div v-if="grades.length > 0" class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 border border-white/10">
-                <IconChart class="w-4 h-4 text-white/90" />
-                <p class="text-white text-sm font-medium">{{ grades.length }} Tests Recorded</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Grades Table Container -->
-        <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-6 md:p-8 shadow-sm hover:shadow-md transition-all duration-200">
-          <div class="mb-4 md:mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <h2 class="text-xl md:text-2xl font-bold text-gray-900">Test Results</h2>
-          </div>
+    <!-- Grades Table Container -->
+    <div v-else class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-6 md:p-8 shadow-sm hover:shadow-md transition-all duration-200">
+      <div class="mb-4 md:mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <h2 class="text-xl md:text-2xl font-bold text-gray-900">Test Results</h2>
+      </div>
           
           <!-- Empty State -->
           <div v-if="grades.length === 0" class="text-center py-12 px-4">

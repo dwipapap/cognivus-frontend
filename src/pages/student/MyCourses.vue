@@ -52,41 +52,9 @@ const errorMessage = computed(() => {
 </script>
 
 <template>
-  <!-- Loading State -->
-  <div v-if="isLoading || profileLoading" class="space-y-6 animate-pulse">
-    <div class="rounded-2xl p-6 md:p-8 bg-blue-100/70 border border-blue-200">
-      <div class="h-8 w-56 bg-blue-200 rounded mb-3"></div>
-      <div class="h-5 w-40 bg-blue-200 rounded mb-6"></div>
-      <div class="h-4 w-full max-w-xl bg-blue-200 rounded mb-2"></div>
-      <div class="h-4 w-3/4 bg-blue-200 rounded mb-6"></div>
-      <div class="h-9 w-40 bg-white/80 rounded-full"></div>
-    </div>
-
-    <div class="rounded-2xl p-6 md:p-8 bg-blue-50 border border-blue-100 space-y-4">
-      <div class="h-7 w-48 bg-blue-100 rounded"></div>
-      <div class="h-16 w-full bg-blue-100 rounded-xl"></div>
-      <div class="h-16 w-full bg-blue-100 rounded-xl"></div>
-      <div class="h-16 w-full bg-blue-100 rounded-xl"></div>
-    </div>
-  </div>
-
-  <!-- Error State -->
-  <div v-else-if="errorMessage" class="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
-    <p class="text-red-800 mb-4">{{ errorMessage }}</p>
-    <button v-if="classError" @click="retryClass"
-      class="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 rounded-full transition-all shadow-md hover:shadow-lg hover:scale-105 active:scale-95 mr-2">
-      Retry Class Details
-    </button>
-    <button v-if="coursesError" @click="fetchCourses"
-      class="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 rounded-full transition-all shadow-md hover:shadow-lg hover:scale-105 active:scale-95">
-      Retry Courses
-    </button>
-  </div>
-
-  <!-- Course Content -->
-  <div v-else class="space-y-6">
+  <div class="space-y-6">
     <!-- Class Info Card -->
-    <div class="relative bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 rounded-2xl p-6 md:p-8 shadow-lg overflow-hidden">
+    <div class="relative bg-blue-600 rounded-2xl p-6 md:p-8 shadow-lg overflow-hidden">
       <!-- Diagonal Book Graphics -->
       <div class="absolute top-0 right-0 w-1/2 h-full pointer-events-none overflow-hidden">
         <div class="absolute -top-10 -right-10 w-40 h-48 bg-blue-400/30 rounded-lg transform rotate-12"></div>
@@ -96,27 +64,39 @@ const errorMessage = computed(() => {
 
       <!-- Content -->
       <div class="relative z-10">
-        <div class="mb-6">
-          <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">{{ levelName || 'Your Course Level' }}</h2>
-          <h3 class="text-lg md:text-xl font-semibold text-white/90 mb-3">{{ classInfo?.class_code || 'Class Code' }}
-          </h3>
-          <p class="text-sm text-white/80">
-            {{ classInfo?.description || 'Access your course materials and learning resources' }}
-          </p>
-        </div>
-
-        <!-- Lecturer Badge -->
-        <div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2">
-          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-          </svg>
-          <p class="text-white text-sm font-medium">{{ lecturerName || 'Instructor' }}</p>
-        </div>
+        <p class="text-white/80 text-sm mb-1">{{ classInfo?.class_code || 'Class Code' }}</p>
+        <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">{{ levelName || 'Your Course Level' }}</h2>
+        <p class="text-white/70 text-sm md:text-base max-w-md">
+          {{ classInfo?.description || 'Access your course materials and learning resources' }}
+        </p>
       </div>
     </div>
 
+    <!-- Loading State -->
+    <div v-if="isLoading || profileLoading" class="animate-pulse">
+      <div class="rounded-2xl p-6 md:p-8 bg-blue-50 border border-blue-100 space-y-4">
+        <div class="h-7 w-48 bg-blue-100 rounded"></div>
+        <div class="h-16 w-full bg-blue-100 rounded-xl"></div>
+        <div class="h-16 w-full bg-blue-100 rounded-xl"></div>
+        <div class="h-16 w-full bg-blue-100 rounded-xl"></div>
+      </div>
+    </div>
+
+    <!-- Error State -->
+    <div v-else-if="errorMessage" class="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+      <p class="text-red-800 mb-4">{{ errorMessage }}</p>
+      <button v-if="classError" @click="retryClass"
+        class="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 rounded-full transition-all shadow-md hover:shadow-lg hover:scale-105 active:scale-95 mr-2">
+        Retry Class Details
+      </button>
+      <button v-if="coursesError" @click="fetchCourses"
+        class="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 rounded-full transition-all shadow-md hover:shadow-lg hover:scale-105 active:scale-95">
+        Retry Courses
+      </button>
+    </div>
+
     <!-- Course List -->
-    <div
+    <div v-else
       class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-6 md:p-8 shadow-sm hover:shadow-md transition-all duration-200">
       <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-4 md:mb-6">Course Materials</h2>
 
