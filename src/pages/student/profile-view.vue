@@ -1,0 +1,272 @@
+<script setup>
+definePageMeta({ layout: 'student', middleware: ['auth'], meta: { requiresAuth: true, role: 'siswa' } })
+
+import { ref, computed, onMounted } from 'vue';
+import { authStore } from '~/store/auth';
+import { useStudentProfile } from '~/composables/useStudentProfile';
+import { classAPI, levelAPI } from '~/services/api';
+import iconBoyImage from '~/assets/iconboy.webp';
+import iconGirlImage from '~/assets/icongirl.webp';
+import { formatDate } from '~/utils/formatters';
+import OtpFlow from '~/components/ui/OtpFlow.vue';
+
+const { studentProfile, isLoading, errorMessage, fetchStudentProfile } = useStudentProfile();
+const classCode = ref('-');
+const levelName = ref('-');
+
+// Fetch profile on mount
+onMounted(async () => {
+  await fetchStudentProfile();
+  fetchClassData();
+});
+
+// Change Password state
+const showChangePassword = ref(false);
+const showModal = ref(false);
+const modalType = ref('info');
+const modalMessage = ref('');
+
+// Computed properties for prefilling OtpFlow
+const userEmail = computed(() => {
+  return authStore.user?.email || '';
+});
+
+const userPhone = computed(() => {
+  return studentProfile.value?.phone || '';
+});
+
+const openChangePassword = () => {
+  showChangePassword.value = true;
+};
+
+const closeChangePassword = () => {
+  showChangePassword.value = false;
+};
+
+const handleChangePasswordSuccess = () => {
+  closeChangePassword();
+  modalType.value = 'success';
+  modalMessage.value = 'Your password has been successfully changed.';
+  showModal.value = true;
+};
+
+const closeModal = () => {
+  showModal.value = false;
+  modalType.value = 'info';
+  modalMessage.value = '';
+};
+
+/** Gender-based avatar computed property */
+const avatarUrl = computed(() => {
+  // Check if user has OAuth avatar from Google
+  if (authStore.user?.user_metadata?.avatar_url) {
+    return authStore.user.user_metadata.avatar_url;
+  }
+  
+  // Use gender-based icon from student profile
+  const gender = studentProfile.value?.jenis_kelamin;
+  if (gender === 'L') {
+    return iconBoyImage;
+  } else if (gender === 'P') {
+    return iconGirlImage;
+  }
+  
+  // Default fallback
+  return iconBoyImage;
+});
+
+const handleImageError = (event) => {
+  event.target.src = iconBoyImage;
+};
+
+// Fetch class data after profile loads
+const fetchClassData = async () => {
+  if (!studentProfile.value?.classid) return;
+  
+  try {
+    const classRes = await classAPI.getClassById(studentProfile.value.classid);
+    if (classRes.data.success) {
+      classCode.value = classRes.data.data.class_code || '-';
+      
+      if (classRes.data.data.levelid) {
+        const levelRes = await levelAPI.getLevelById(classRes.data.data.levelid);
+        if (levelRes.data.success) {
+          levelName.value = levelRes.data.data.name || '-';
+        }
+      }
+    }
+  } catch (error) {
+    // Error fetching class data - fail silently as this is non-critical
+  }
+};
+</script>
+
+<template>
+  <!-- Welcome Banner -->
+  <div class="relative bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 rounded-3xl shadow-lg mb-8 overflow-hidden">
+    <!-- Diagonal ID Card Graphics -->
+    <div class="absolute top-0 right-0 w-1/2 h-full pointer-events-none overflow-hidden">
+      <div class="absolute -top-10 -right-10 w-40 h-48 bg-indigo-400/30 rounded-lg transform rotate-12 flex items-center justify-center">
+        <svg class="w-20 h-20 text-white/40" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+          <path fill-rule="evenodd" d="M4 4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H4Zm10 5a1 1 0 0 1 1-1h3a1 1 0 1 1 0 2h-3a1 1 0 0 1-1-1Zm0 3a1 1 0 0 1 1-1h3a1 1 0 1 1 0 2h-3a1 1 0 0 1-1-1Zm0 3a1 1 0 0 1 1-1h3a1 1 0 1 1 0 2h-3a1 1 0 0 1-1-1Zm-8-5a3 3 0 1 1 6 0 3 3 0 0 1-6 0Zm1.942 4a3 3 0 0 0-2.847 2.051l-.044.133-.004.012c-.042.126-.055.167-.042.195.006.013.02.023.038.039.032.025.08.064.146.155A1 1 0 0 0 6 17h6a1 1 0 0 0 .811-.415.713.713 0 0 1 .146-.155c.019-.016.031-.026.038-.04.014-.027 0-.068-.042-.194l-.004-.012-.044-.133A3 3 0 0 0 10.059 14H7.942Z" clip-rule="evenodd"/>
+        </svg>
+      </div>
+      <div class="absolute top-20 -right-5 w-32 h-40 bg-indigo-300/40 rounded-lg transform rotate-12 flex items-center justify-center">
+        <svg class="w-16 h-16 text-white/40" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+          <path fill-rule="evenodd" d="M4 4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H4Zm10 5a1 1 0 0 1 1-1h3a1 1 0 1 1 0 2h-3a1 1 0 0 1-1-1Zm0 3a1 1 0 0 1 1-1h3a1 1 0 1 1 0 2h-3a1 1 0 0 1-1-1Zm0 3a1 1 0 0 1 1-1h3a1 1 0 1 1 0 2h-3a1 1 0 0 1-1-1Zm-8-5a3 3 0 1 1 6 0 3 3 0 0 1-6 0Zm1.942 4a3 3 0 0 0-2.847 2.051l-.044.133-.004.012c-.042.126-.055.167-.042.195.006.013.02.023.038.039.032.025.08.064.146.155A1 1 0 0 0 6 17h6a1 1 0 0 0 .811-.415.713.713 0 0 1 .146-.155c.019-.016.031-.026.038-.04.014-.027 0-.068-.042-.194l-.004-.012-.044-.133A3 3 0 0 0 10.059 14H7.942Z" clip-rule="evenodd"/>
+        </svg>
+      </div>
+      <div class="absolute top-40 right-10 w-28 h-36 bg-white/20 rounded-lg transform rotate-12 flex items-center justify-center">
+        <svg class="w-14 h-14 text-white/40" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+          <path fill-rule="evenodd" d="M4 4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H4Zm10 5a1 1 0 0 1 1-1h3a1 1 0 1 1 0 2h-3a1 1 0 0 1-1-1Zm0 3a1 1 0 0 1 1-1h3a1 1 0 1 1 0 2h-3a1 1 0 0 1-1-1Zm0 3a1 1 0 0 1 1-1h3a1 1 0 1 1 0 2h-3a1 1 0 0 1-1-1Zm-8-5a3 3 0 1 1 6 0 3 3 0 0 1-6 0Zm1.942 4a3 3 0 0 0-2.847 2.051l-.044.133-.004.012c-.042.126-.055.167-.042.195.006.013.02.023.038.039.032.025.08.064.146.155A1 1 0 0 0 6 17h6a1 1 0 0 0 .811-.415.713.713 0 0 1 .146-.155c.019-.016.031-.026.038-.04.014-.027 0-.068-.042-.194l-.004-.012-.044-.133A3 3 0 0 0 10.059 14H7.942Z" clip-rule="evenodd"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="relative p-5 md:p-8 lg:p-12 z-10">
+      <h1 class="text-2xl md:text-4xl lg:text-6xl font-bold text-white mb-6 leading-tight">
+        My Profile
+      </h1>
+      <p class="text-white/80 text-base lg:text-lg leading-relaxed max-w-lg">
+        View and manage your personal information and account details.
+      </p>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+    <div v-if="isLoading" class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8 animate-pulse">
+      <div class="lg:col-span-1 bg-blue-100 rounded-3xl p-10 shadow-lg h-[540px]"></div>
+      <div class="lg:col-span-2 bg-blue-50 rounded-3xl p-10 shadow-lg">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
+          <div class="h-12 bg-blue-200 rounded-full"></div>
+          <div class="h-12 bg-blue-200 rounded-full"></div>
+          <div class="h-12 bg-blue-200 rounded-full"></div>
+          <div class="h-12 bg-blue-200 rounded-full"></div>
+          <div class="h-12 bg-blue-200 rounded-full"></div>
+          <div class="h-12 bg-blue-200 rounded-full"></div>
+          <div class="h-12 bg-blue-200 rounded-full"></div>
+          <div class="h-12 bg-blue-200 rounded-full"></div>
+        </div>
+      </div>
+    </div>
+
+      <!-- Error State -->
+      <div v-else-if="errorMessage" class="bg-red-50 border border-red-200 rounded-xl p-6">
+        <p class="text-red-800">{{ errorMessage }}</p>
+      </div>
+
+      <!-- Profile Content -->
+      <div v-else-if="studentProfile" class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8">
+        <!-- Left Profile Card -->
+        <div class="lg:col-span-1">
+              <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-3xl p-10 text-white text-center shadow-lg h-full flex flex-col justify-between">
+                <img 
+                  :src="avatarUrl" 
+                  :alt="studentProfile.fullname"
+                  class="w-24 h-24 md:w-48 md:h-48 rounded-full mx-auto object-cover border-4 border-white shadow-xl mb-6"
+                  @error="handleImageError"
+                />
+                
+                <h2 class="text-3xl font-bold mb-3">{{ studentProfile.fullname || 'Student' }}</h2>
+                <p class="text-base text-white/90 mb-2">{{ levelName }}</p>
+                <p class="text-2xl font-semibold mb-4">{{ classCode }}</p>
+                <p class="text-base text-white/80 mb-8 break-words px-2">{{ authStore.user?.email || '-' }}</p>
+
+                <NuxtLink 
+                  to="/student/profile"
+                  class="inline-block w-full px-8 py-3.5 bg-white text-blue-600 font-semibold text-base rounded-full hover:bg-blue-50 transition-colors shadow-md"
+                >
+                  Edit Profile
+                </NuxtLink>
+
+                <button type="button" @click="openChangePassword"
+                  class="w-full mt-3 px-6 py-3 bg-gradient-to-r from-blue-700 to-indigo-700 text-white font-semibold text-base rounded-full hover:from-blue-800 hover:to-indigo-800 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                  Change Password
+                </button>
+              </div>
+            </div>
+
+            <!-- Right Details Card -->
+            <div class="lg:col-span-2">
+              <div class="bg-blue-50 rounded-3xl p-10 shadow-lg h-full">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
+                  <!-- Full Name -->
+                  <div>
+                    <p class="text-base font-bold text-blue-600 mb-3">Full Name</p>
+                    <div class="bg-blue-200 rounded-full px-6 py-3">
+                      <p class="text-base font-medium text-gray-900">{{ studentProfile.fullname || '-' }}</p>
+                    </div>
+                  </div>
+
+                  <!-- Birth Date -->
+                  <div>
+                    <p class="text-base font-bold text-blue-600 mb-3">Birth Date</p>
+                    <div class="bg-blue-200 rounded-full px-6 py-3">
+                      <p class="text-base font-medium text-gray-900">{{ formatDate(studentProfile.birthdate) }}</p>
+                    </div>
+                  </div>
+
+                  <!-- Address -->
+                  <div>
+                    <p class="text-base font-bold text-blue-600 mb-3">Address</p>
+                    <div class="bg-blue-200 rounded-full px-6 py-3">
+                      <p class="text-base font-medium text-gray-900 truncate" :title="studentProfile.address">{{ studentProfile.address || '-' }}</p>
+                    </div>
+                  </div>
+
+                  <!-- Place Date -->
+                  <div>
+                    <p class="text-base font-bold text-blue-600 mb-3">Place Date</p>
+                    <div class="bg-blue-200 rounded-full px-6 py-3">
+                      <p class="text-base font-medium text-gray-900">{{ studentProfile.birthplace || '-' }}</p>
+                    </div>
+                  </div>
+
+                  <!-- Gender -->
+                  <div>
+                    <p class="text-base font-bold text-blue-600 mb-3">Gender</p>
+                    <div class="bg-blue-200 rounded-full px-6 py-3">
+                      <p class="text-base font-medium text-gray-900">{{ studentProfile.gender || '-' }}</p>
+                    </div>
+                  </div>
+
+                  <!-- Phone -->
+                  <div>
+                    <p class="text-base font-bold text-blue-600 mb-3">Phone</p>
+                    <div class="bg-blue-200 rounded-full px-6 py-3">
+                      <p class="text-base font-medium text-gray-900">{{ studentProfile.phone || '-' }}</p>
+                    </div>
+                  </div>
+
+                  <!-- Parent Name -->
+                  <div>
+                    <p class="text-base font-bold text-blue-600 mb-3">Parent Name</p>
+                    <div class="bg-blue-200 rounded-full px-6 py-3">
+                      <p class="text-base font-medium text-gray-900">{{ studentProfile.parentname || '-' }}</p>
+                    </div>
+                  </div>
+
+                   <!-- Parent Phone -->
+                  <div>
+                    <p class="text-base font-bold text-blue-600 mb-3">Parent Phone</p>
+                    <div class="bg-blue-200 rounded-full px-6 py-3">
+                      <p class="text-base font-medium text-gray-900">{{ studentProfile.parentphone || '-' }}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+  <!-- Modal Component -->
+  <Modal :show="showModal" :type="modalType" :message="modalMessage" @close="closeModal" />
+
+  <!-- Change Password OTP Flow -->
+  <OtpFlow :show="showChangePassword" title="Change Password" :prefill-email="userEmail" :prefill-phone="userPhone"
+    @close="closeChangePassword" @success="handleChangePasswordSuccess" />
+</template>

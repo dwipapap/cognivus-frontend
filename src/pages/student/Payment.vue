@@ -1,22 +1,13 @@
 <script setup>
+definePageMeta({ layout: 'student', middleware: ['auth'], meta: { requiresAuth: true, role: 'siswa' } })
+
 import { ref, computed, onMounted } from 'vue';
-import { authStore } from '../../store/auth';
-import { useStudentProfile } from '../../composables/useStudentProfile';
-import { useClassDetails } from '../../composables/useClassDetails';
-import { useSnapPayment } from '../../composables/useSnapPayment';
-import { paymentAPI, priceAPI, ancillaryPriceAPI } from '../../services/api';
-import { formatCurrency, formatDate } from '../../utils/formatters';
-import IconWallet from '~icons/basil/wallet-outline';
-import IconCheck from '~icons/basil/check-solid';
-import IconBook from '~icons/basil/book-solid';
-import IconBadge from '~icons/basil/award-solid';
-import IconMoney from '~icons/solar/wallet-money-bold-duotone';
-import IconInfo from '~icons/basil/info-circle-outline';
-import IconClose from '~icons/basil/cross-solid';
-import IconClipboard from '~icons/basil/clipboard-solid';
-import IconLoading from '~icons/svg-spinners/pulse-rings-multiple';
-import IconQuestionCircle from '~icons/solar/question-circle-broken';
-import Modal from '../../components/ui/Modal.vue';
+import { authStore } from '~/store/auth';
+import { useStudentProfile } from '~/composables/useStudentProfile';
+import { useClassDetails } from '~/composables/useClassDetails';
+import { useSnapPayment } from '~/composables/useSnapPayment';
+import { paymentAPI, priceAPI, ancillaryPriceAPI } from '~/services/api';
+import { formatCurrency, formatDate } from '~/utils/formatters';
 
 // Composables
 const { studentProfile, isLoading: isProfileLoading, fetchStudentProfile } = useStudentProfile();
@@ -357,7 +348,7 @@ onMounted(async () => {
           </div>
           <button @click="openGuideModal"
             class="flex items-center gap-2 bg-white/15 hover:bg-white/25 backdrop-blur-sm text-white px-5 py-2.5 rounded-full transition-all duration-300 hover:shadow-lg border border-white/20">
-            <IconQuestionCircle class="w-5 h-5" />
+            <UIcon name="i-solar-question-circle-broken" class="w-5 h-5" />
             <span class="text-sm font-medium">Payment Guide</span>
           </button>
         </div>
@@ -381,7 +372,7 @@ onMounted(async () => {
         <div class="bg-blue-50/50 rounded-xl p-3.5 border border-blue-100/50 hover:shadow-sm transition-shadow">
           <div class="flex items-center gap-2 mb-2">
             <div class="w-9 h-9 rounded-lg bg-blue-500 flex items-center justify-center shadow-sm">
-              <IconBook class="w-4.5 h-4.5 text-white" />
+              <UIcon name="i-basil-book-solid" class="w-4.5 h-4.5 text-white" />
             </div>
           </div>
           <p class="text-xs font-medium text-gray-500 mb-0.5">Program</p>
@@ -392,7 +383,7 @@ onMounted(async () => {
         <div class="bg-blue-50/50 rounded-xl p-3.5 border border-blue-100/50 hover:shadow-sm transition-shadow">
           <div class="flex items-center gap-2 mb-2">
             <div class="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center shadow-sm">
-              <IconBadge class="w-4.5 h-4.5 text-white" />
+              <UIcon name="i-basil-award-solid" class="w-4.5 h-4.5 text-white" />
             </div>
           </div>
           <p class="text-xs font-medium text-gray-500 mb-0.5">Level</p>
@@ -403,7 +394,7 @@ onMounted(async () => {
         <div class="bg-blue-50/50 rounded-xl p-3.5 border border-blue-100/50 hover:shadow-sm transition-shadow">
           <div class="flex items-center gap-2 mb-2">
             <div class="w-9 h-9 rounded-lg bg-blue-500 flex items-center justify-center shadow-sm">
-              <IconWallet class="w-4.5 h-4.5 text-white" />
+              <UIcon name="i-basil-wallet-outline" class="w-4.5 h-4.5 text-white" />
             </div>
           </div>
           <p class="text-xs font-medium text-gray-500 mb-0.5">Semester Fee</p>
@@ -414,7 +405,7 @@ onMounted(async () => {
         <div class="bg-blue-50/50 rounded-xl p-3.5 border border-blue-100/50 hover:shadow-sm transition-shadow">
           <div class="flex items-center gap-2 mb-2">
             <div class="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center shadow-sm">
-              <IconMoney class="w-4.5 h-4.5 text-white" />
+              <UIcon name="i-solar-wallet-money-bold-duotone" class="w-4.5 h-4.5 text-white" />
             </div>
           </div>
           <p class="text-xs font-medium text-gray-500 mb-0.5">Monthly Fee</p>
@@ -424,7 +415,7 @@ onMounted(async () => {
 
       <!-- Info Note -->
       <div class="mt-4 flex items-start gap-2 bg-blue-50 rounded-full p-3 border border-blue-100">
-        <IconInfo class="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+        <UIcon name="i-basil-info-circle-outline" class="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
         <p class="text-xs text-blue-700">Fees are calculated based on your program level</p>
       </div>
     </div>
@@ -474,7 +465,7 @@ onMounted(async () => {
                   </div>
                   <div v-if="selectedPaymentType === type.id" class="flex-shrink-0">
                     <div class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
-                      <IconCheck class="w-4 h-4 text-white" />
+                      <UIcon name="i-basil-check-solid" class="w-4 h-4 text-white" />
                     </div>
                   </div>
                 </div>
@@ -522,7 +513,7 @@ onMounted(async () => {
                   </div>
                   <div v-if="selectedPaymentType === type.id" class="flex-shrink-0">
                     <div class="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
-                      <IconCheck class="w-4 h-4 text-white" />
+                      <UIcon name="i-basil-check-solid" class="w-4 h-4 text-white" />
                     </div>
                   </div>
                 </div>
@@ -538,7 +529,7 @@ onMounted(async () => {
             <button @click="handleRefreshHistory" :disabled="isHistoryLoading"
               class="p-2.5 rounded-full hover:bg-blue-50 text-gray-400 hover:text-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               title="Refresh History">
-              <IconLoading v-if="isHistoryLoading" class="w-5 h-5 animate-spin text-blue-600" />
+              <UIcon name="i-svg-spinners-pulse-rings-multiple" v-if="isHistoryLoading" class="w-5 h-5 animate-spin text-blue-600" />
               <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -548,7 +539,7 @@ onMounted(async () => {
 
           <div v-if="paymentHistory.length === 0" class="text-center py-12">
             <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-              <IconClipboard class="w-8 h-8 text-gray-300" />
+              <UIcon name="i-basil-clipboard-solid" class="w-8 h-8 text-gray-300" />
             </div>
             <p class="text-gray-500 text-sm">No payment history yet</p>
           </div>
@@ -627,7 +618,7 @@ onMounted(async () => {
             <div class="bg-blue-50/50 rounded-xl p-3.5 border border-blue-100/50 hover:shadow-sm transition-shadow">
               <div class="flex items-center gap-2 mb-2">
                 <div class="w-9 h-9 rounded-lg bg-blue-500 flex items-center justify-center shadow-sm">
-                  <IconBook class="w-4.5 h-4.5 text-white" />
+                  <UIcon name="i-basil-book-solid" class="w-4.5 h-4.5 text-white" />
                 </div>
               </div>
               <p class="text-xs font-medium text-gray-500 mb-0.5">Program</p>
@@ -638,7 +629,7 @@ onMounted(async () => {
             <div class="bg-blue-50/50 rounded-xl p-3.5 border border-blue-100/50 hover:shadow-sm transition-shadow">
               <div class="flex items-center gap-2 mb-2">
                 <div class="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center shadow-sm">
-                  <IconBadge class="w-4.5 h-4.5 text-white" />
+                  <UIcon name="i-basil-award-solid" class="w-4.5 h-4.5 text-white" />
                 </div>
               </div>
               <p class="text-xs font-medium text-gray-500 mb-0.5">Level</p>
@@ -649,7 +640,7 @@ onMounted(async () => {
             <div class="bg-blue-50/50 rounded-xl p-3.5 border border-blue-100/50 hover:shadow-sm transition-shadow">
               <div class="flex items-center gap-2 mb-2">
                 <div class="w-9 h-9 rounded-lg bg-blue-500 flex items-center justify-center shadow-sm">
-                  <IconWallet class="w-4.5 h-4.5 text-white" />
+                  <UIcon name="i-basil-wallet-outline" class="w-4.5 h-4.5 text-white" />
                 </div>
               </div>
               <p class="text-xs font-medium text-gray-500 mb-0.5">Semester Fee</p>
@@ -660,7 +651,7 @@ onMounted(async () => {
             <div class="bg-blue-50/50 rounded-xl p-3.5 border border-blue-100/50 hover:shadow-sm transition-shadow">
               <div class="flex items-center gap-2 mb-2">
                 <div class="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center shadow-sm">
-                  <IconMoney class="w-4.5 h-4.5 text-white" />
+                  <UIcon name="i-solar-wallet-money-bold-duotone" class="w-4.5 h-4.5 text-white" />
                 </div>
               </div>
               <p class="text-xs font-medium text-gray-500 mb-0.5">Monthly Fee</p>
@@ -670,7 +661,7 @@ onMounted(async () => {
 
           <!-- Info Note -->
           <div class="mt-4 flex items-start gap-2 bg-blue-50 rounded-full p-3 border border-blue-100">
-            <IconInfo class="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+            <UIcon name="i-basil-info-circle-outline" class="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
             <p class="text-xs text-blue-700">Fees are calculated based on your program level</p>
           </div>
         </div>
@@ -708,7 +699,7 @@ onMounted(async () => {
               ? 'bg-blue-600 hover:bg-blue-700 hover:shadow-xl active:scale-[0.98] cursor-pointer'
               : 'bg-gray-300 cursor-not-allowed'">
             <span v-if="isPaymentLoading" class="flex items-center justify-center">
-              <IconLoading class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" />
+              <UIcon name="i-svg-spinners-pulse-rings-multiple" class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" />
               Processing...
             </span>
             <span v-else>{{ canPay ? 'Pay Now' : 'Select Payment Type' }}</span>
@@ -728,7 +719,7 @@ onMounted(async () => {
         <button @click="handleRefreshHistory" :disabled="isHistoryLoading"
           class="p-2.5 rounded-full hover:bg-blue-50 text-gray-400 hover:text-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           title="Refresh History">
-          <IconLoading v-if="isHistoryLoading" class="w-5 h-5 animate-spin text-blue-600" />
+          <UIcon name="i-svg-spinners-pulse-rings-multiple" v-if="isHistoryLoading" class="w-5 h-5 animate-spin text-blue-600" />
           <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -738,7 +729,7 @@ onMounted(async () => {
 
       <div v-if="paymentHistory.length === 0" class="text-center py-12">
         <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-          <IconClipboard class="w-8 h-8 text-gray-300" />
+          <UIcon name="i-basil-clipboard-solid" class="w-8 h-8 text-gray-300" />
         </div>
         <p class="text-gray-500 text-sm">No payment history yet</p>
       </div>

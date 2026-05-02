@@ -1,0 +1,31 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+/* Preserve existing glassmorphism utilities */
+@import "./performance-glassmorphism.css";
+
+/* Custom design tokens (migrated from tailwind.config.js) */
+@theme {
+  --font-sans: 'Figtree', system-ui, -apple-system, sans-serif;
+
+  /* Custom backdrop blur utilities */
+  --backdrop-blur-xs: 2px;
+  --backdrop-blur-sm: 4px;
+  --backdrop-blur-DEFAULT: 8px;
+  --backdrop-blur-md: 12px;
+  --backdrop-blur-lg: 16px;
+  --backdrop-blur-xl: 24px;
+  --backdrop-blur-2xl: 40px;
+  --backdrop-blur-3xl: 64px;
+}
+
+/* Global base styles */
+:root {
+  font-family: 'Figtree', system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

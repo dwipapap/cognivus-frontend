@@ -1,22 +1,44 @@
+<template>
+  <UButton
+    :type="href ? undefined : type"
+    :to="href || undefined"
+    :target="href ? target : undefined"
+    :disabled="disabled"
+    :loading="loading"
+    :block="block"
+    :color="uiColor"
+    :variant="uiVariant"
+    :size="size"
+    class="rounded-full"
+    @click="handleClick"
+  >
+    <template v-if="hasIconSlot" #leading>
+      <slot name="icon" v-if="iconPosition === 'left'"></slot>
+    </template>
+    
+    <slot></slot>
+    
+    <template v-if="hasIconSlot && iconPosition === 'right'" #trailing>
+      <slot name="icon"></slot>
+    </template>
+  </UButton>
+</template>
+
 <script setup>
 import { computed, useSlots } from 'vue';
 
-// Props definition
 const props = defineProps({
   variant: {
     type: String,
-    default: 'primary',
-    validator: (value) => ['primary', 'secondary', 'success', 'danger', 'warning', 'info', 'light', 'dark', 'link', 'glass', 'glass-primary', 'glass-secondary', 'gradient'].includes(value)
+    default: 'primary'
   },
   size: {
     type: String,
-    default: 'md',
-    validator: (value) => ['xs', 'sm', 'md', 'lg', 'xl'].includes(value)
+    default: 'md'
   },
   type: {
     type: String,
-    default: 'button',
-    validator: (value) => ['button', 'submit', 'reset'].includes(value)
+    default: 'button'
   },
   disabled: {
     type: Boolean,
@@ -32,8 +54,7 @@ const props = defineProps({
   },
   rounded: {
     type: String,
-    default: 'full',
-    validator: (value) => ['none', 'sm', 'md', 'lg', 'xl', 'full'].includes(value)
+    default: 'full'
   },
   href: {
     type: String,
@@ -49,138 +70,40 @@ const props = defineProps({
   },
   iconPosition: {
     type: String,
-    default: 'left',
-    validator: (value) => ['left', 'right'].includes(value)
+    default: 'left'
   }
 });
 
-// Emits definition
 const emit = defineEmits(['click']);
-
-// Slots
 const slots = useSlots();
 
-// Computed properties
-const buttonClasses = computed(() => {
-  const baseClasses = 'inline-flex items-center justify-center font-medium text-center transition-all duration-300 focus:ring-4 focus:outline-none relative overflow-hidden';
-  
-  const variantClasses = {
-    // Traditional variants with solid colors
-    primary: 'text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-300 disabled:bg-blue-400 shadow-md hover:shadow-lg',
-    secondary: 'text-gray-700 bg-white border-2 border-gray-300 hover:bg-gray-50 hover:border-gray-400 focus:ring-gray-200 disabled:bg-gray-100 shadow-sm hover:shadow-md',
-    success: 'text-white bg-green-600 hover:bg-green-700 focus:ring-green-300 disabled:bg-green-400 shadow-md hover:shadow-lg',
-    danger: 'text-white bg-red-600 hover:bg-red-700 focus:ring-red-300 disabled:bg-red-400 shadow-md hover:shadow-lg',
-    warning: 'text-white bg-yellow-500 hover:bg-yellow-600 focus:ring-yellow-300 disabled:bg-yellow-400 shadow-md hover:shadow-lg',
-    info: 'text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-cyan-300 disabled:bg-cyan-400 shadow-md hover:shadow-lg',
-    light: 'text-gray-800 bg-gray-100 hover:bg-gray-200 focus:ring-gray-200 disabled:bg-gray-50 shadow-sm hover:shadow-md',
-    dark: 'text-white bg-gray-700 hover:bg-gray-800 focus:ring-gray-700 disabled:bg-gray-600 shadow-md hover:shadow-lg',
-    link: 'text-blue-600 hover:text-blue-800 underline hover:no-underline disabled:text-blue-400',
-    
-    // Glassmorphism variants with solid colors
-    glass: 'glass-button-solid text-gray-700 hover:text-blue-700 focus:ring-blue-300/50 disabled:opacity-40 shadow-md hover:shadow-lg',
-    'glass-primary': 'glass-button-primary-solid text-white hover:text-white focus:ring-blue-300/50 disabled:opacity-40 shadow-md hover:shadow-xl',
-    'glass-secondary': 'glass-button-secondary-solid text-gray-600 hover:text-gray-800 focus:ring-gray-300/50 disabled:opacity-40 shadow-sm hover:shadow-md',
-    gradient: 'solid-button text-white hover:text-white focus:ring-blue-300/50 disabled:opacity-40 shadow-lg hover:shadow-xl'
-  };
-  
-  const sizeClasses = {
-    xs: 'px-4 py-2 text-xs gap-1.5',
-    sm: 'px-5 py-2 text-sm gap-2',
-    md: 'px-6 py-2.5 text-sm gap-2',
-    lg: 'px-8 py-3 text-base gap-2.5',
-    xl: 'px-10 py-3.5 text-base gap-3'
-  };
-  
-  const roundedClasses = {
-    none: 'rounded-none',
-    sm: 'rounded-sm',
-    md: 'rounded-md',
-    lg: 'rounded-lg',
-    xl: 'rounded-xl',
-    full: 'rounded-full'
-  };
-  
-  const blockClass = props.block ? 'w-full' : '';
-  const disabledClass = (props.disabled || props.loading) ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:scale-105 active:scale-95';
-  const linkClass = props.variant === 'link' ? '' : '';
-  
-  return [
-    baseClasses,
-    variantClasses[props.variant],
-    props.variant !== 'link' ? sizeClasses[props.size] : 'p-0',
-    props.variant !== 'link' ? roundedClasses[props.rounded] : '',
-    blockClass,
-    disabledClass
-  ].filter(Boolean).join(' ');
+const hasIconSlot = computed(() => !!slots.icon);
+
+const uiColor = computed(() => {
+  switch (props.variant) {
+    case 'primary': return 'blue';
+    case 'secondary': return 'gray';
+    case 'success': return 'green';
+    case 'danger': return 'red';
+    case 'warning': return 'yellow';
+    case 'info': return 'blue';
+    default: return 'blue';
+  }
 });
 
-const hasIconSlot = computed(() => !!slots.icon);
-const hasDefaultSlot = computed(() => !!slots.default);
+const uiVariant = computed(() => {
+  if (props.variant === 'secondary') return 'outline';
+  if (props.variant.includes('glass')) return 'soft';
+  return 'solid';
+});
 
-// Methods
 const handleClick = (event) => {
   if (!props.disabled && !props.loading) {
     emit('click', event);
   }
 };
-
-// Component determination
-const component = computed(() => props.href ? 'a' : 'button');
 </script>
 
-<template>
-  <component
-    :is="component"
-    :type="href ? undefined : type"
-    :href="href || undefined"
-    :target="href ? target : undefined"
-    :disabled="(disabled || loading) && !href"
-    :class="buttonClasses"
-    @click="handleClick"
-  >
-    <!-- Loading Spinner -->
-    <svg
-      v-if="loading"
-      class="animate-spin -ml-1 mr-3 h-4 w-4 text-current"
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-    >
-      <circle
-        class="opacity-25"
-        cx="12"
-        cy="12"
-        r="10"
-        stroke="currentColor"
-        stroke-width="4"
-      ></circle>
-      <path
-        class="opacity-75"
-        fill="currentColor"
-        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-      ></path>
-    </svg>
-
-    <!-- Left Icon -->
-    <span
-      v-if="hasIconSlot && iconPosition === 'left' && !loading"
-      :class="hasDefaultSlot ? 'mr-2' : ''"
-    >
-      <slot name="icon"></slot>
-    </span>
-
-    <!-- Button Text -->
-    <slot></slot>
-
-    <!-- Right Icon -->
-    <span
-      v-if="hasIconSlot && iconPosition === 'right' && !loading"
-      :class="hasDefaultSlot ? 'ml-2' : ''"
-    >
-      <slot name="icon"></slot>
-    </span>
-  </component>
-</template>
 
 <style scoped>
 /* Glassmorphism Button Styles - Solid Color Variants */

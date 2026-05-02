@@ -1,18 +1,14 @@
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { authStore } from '../store/auth';
-import apiClient from '../services/api';
-import { useForm } from '../composables/useForm';
-import ittrLogo from '../assets/ittrlogo.png';
-import login from '../assets/login.png';
-import IconUser from '~icons/solar/user-bold';
-import IconLockPassword from '~icons/solar/lock-password-bold';
+definePageMeta({ layout: 'default' })
 
-import Modal from '../components/ui/Modal.vue';
-import BaseButton from '../components/ui/BaseButton.vue';
-import BaseCard from '../components/ui/BaseCard.vue';
-import OtpFlow from '../components/ui/OtpFlow.vue';
+import { ref } from 'vue';
+import { authStore } from '~/store/auth';
+import apiClient from '~/services/api';
+import { useForm } from '~/composables/useForm';
+import ittrLogo from '~/assets/ittrlogo.png';
+import login from '~/assets/login.png';
+
+import OtpFlow from '~/components/ui/OtpFlow.vue';
 
 // Modal state
 const showModal = ref(false);
@@ -94,7 +90,7 @@ const handleLogin = async () => {
         
         setTimeout(() => {
           closeModal();
-          router.push(targetRoute);
+          navigateTo(targetRoute);
         }, 2000);
       }
     });
@@ -120,9 +116,9 @@ const handleGoogleLogin = () => {
         <BaseCard size="md" class="w-full max-w-md">
           <template #title>
             <div class="text-center">
-              <router-link to="/" class="inline-block">
+              <NuxtLink to="/" class="inline-block">
                 <img :src="ittrLogo" alt="ITTR English Logo" class="w-40 mb-6 mx-auto cursor-pointer hover:opacity-80 transition-opacity" />
-              </router-link>
+              </NuxtLink>
               <h2 class="text-2xl font-bold text-gray-900 mb-2">Welcome!</h2>
               <p class="text-gray-600 mb-6 text-sm">Put your username and password to login</p>
             </div>
@@ -141,7 +137,7 @@ const handleGoogleLogin = () => {
               </label>
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-                  <IconUser class="w-5 h-5 text-gray-400" />
+                  <UIcon name="i-solar-user-bold" class="w-5 h-5 text-gray-400" />
                 </div>
                 <input 
                   type="text" 
@@ -168,7 +164,7 @@ const handleGoogleLogin = () => {
               </label>
               <div class="relative">
                 <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-                  <IconLockPassword class="w-5 h-5 text-gray-400" />
+                  <UIcon name="i-solar-lock-password-bold" class="w-5 h-5 text-gray-400" />
                 </div>
                 <input 
                   type="password" 

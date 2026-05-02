@@ -1,7 +1,6 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 import { VuePDF, usePDF } from '@tato30/vue-pdf';
-import LoadingSpinner from '@/components/ui/LoadingSpinner.vue';
 
 const props = defineProps({
   src: {

@@ -1,16 +1,11 @@
 <script setup>
+definePageMeta({ layout: 'student', middleware: ['auth'], meta: { requiresAuth: true, role: 'siswa' } })
+
 import { ref, onMounted, watch, computed } from 'vue';
-import { useStudentProfile } from '../../composables/useStudentProfile';
-import { useClassDetails } from '../../composables/useClassDetails';
-import { gradeAPI } from '../../services/api';
-import IconWarning from '~icons/basil/info-triangle-outline';
-import IconUser from '~icons/basil/user-solid';
-import IconChart from '~icons/basil/chart-pie-solid';
-import IconCalendar from '~icons/basil/calendar-outline';
-import IconDocument from '~icons/basil/document-solid';
-import IconClose from '~icons/basil/cross-outline';
-import IconInfo from '~icons/basil/info-circle-outline';
-import { formatDate, getAverageScore } from '../../utils/formatters';
+import { useStudentProfile } from '~/composables/useStudentProfile';
+import { useClassDetails } from '~/composables/useClassDetails';
+import { gradeAPI } from '~/services/api';
+import { formatDate, getAverageScore } from '~/utils/formatters';
 
 const { studentProfile, isLoading: isProfileLoading, fetchStudentProfile } = useStudentProfile();
 
@@ -130,7 +125,7 @@ onMounted(() => {
     <!-- Error State -->
     <div v-else-if="errorMessage" class="bg-red-50 border border-red-100 rounded-2xl p-6 text-center max-w-2xl mx-auto">
       <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-        <IconWarning class="w-6 h-6 text-red-600" />
+        <UIcon name="i-basil-info-triangle-outline" class="w-6 h-6 text-red-600" />
       </div>
       <h3 class="text-lg font-semibold text-red-900 mb-2">Error Loading Grades</h3>
       <p class="text-red-600 mb-6">{{ errorMessage }}</p>
@@ -151,7 +146,7 @@ onMounted(() => {
           <!-- Empty State -->
           <div v-if="grades.length === 0" class="text-center py-12 px-4">
             <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
-              <IconDocument class="w-10 h-10 text-blue-200" />
+              <UIcon name="i-basil-document-solid" class="w-10 h-10 text-blue-200" />
             </div>
             <h3 class="text-lg font-medium text-gray-900">No Grades Recorded Yet</h3>
             <p class="text-gray-500 mt-1 max-w-sm mx-auto">Your test scores and grades will appear here once they are recorded by your instructor.</p>
@@ -169,7 +164,7 @@ onMounted(() => {
               <div class="bg-gradient-to-r from-blue-500 to-indigo-600 px-4 py-3">
                 <h3 class="text-base font-semibold text-white">{{ grade.test_type || 'Standard Test' }}</h3>
                 <p class="text-xs text-white/80 mt-1 flex items-center gap-1.5">
-                  <IconCalendar class="w-3.5 h-3.5" />
+                  <UIcon name="i-basil-calendar-outline" class="w-3.5 h-3.5" />
                   {{ formatDate(grade.date_taken) }}
                 </p>
               </div>
@@ -210,7 +205,7 @@ onMounted(() => {
                     @click="handleDownloadCertificate(grade.gradeid, grade.test_type)"
                     class="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 hover:text-blue-700 transition-all border border-blue-100 shadow-sm"
                   >
-                    <IconDocument class="w-4 h-4" />
+                    <UIcon name="i-basil-document-solid" class="w-4 h-4" />
                     Download Certificate
                   </button>
                 </div>
@@ -265,7 +260,7 @@ onMounted(() => {
                   </td>
                   <td class="px-6 py-4 text-sm text-gray-500">
                     <div class="flex items-center gap-2">
-                      <IconCalendar class="w-4 h-4 text-gray-400" />
+                      <UIcon name="i-basil-calendar-outline" class="w-4 h-4 text-gray-400" />
                       {{ formatDate(grade.date_taken) }}
                     </div>
                   </td>
@@ -274,7 +269,7 @@ onMounted(() => {
                       @click="handleDownloadCertificate(grade.gradeid, grade.test_type)"
                       class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-full hover:bg-blue-100 hover:text-blue-700 transition-all border border-blue-100 shadow-sm hover:shadow"
                     >
-                      <IconDocument class="w-4 h-4" />
+                      <UIcon name="i-basil-document-solid" class="w-4 h-4" />
                       Download
                     </button>
                   </td>
@@ -287,7 +282,7 @@ onMounted(() => {
           <!-- Summary Footer (optional) -->
           <div v-if="grades.length > 0" class="mt-4 flex items-center justify-between text-xs md:text-sm px-2">
             <div class="flex items-center gap-2 text-gray-600">
-              <IconInfo class="w-4 h-4 md:w-5 md:h-5 text-gray-400" />
+              <UIcon name="i-basil-info-circle-outline" class="w-4 h-4 md:w-5 md:h-5 text-gray-400" />
               <span>Scores are updated by your instructor</span>
             </div>
           </div>

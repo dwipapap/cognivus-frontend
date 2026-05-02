@@ -1,8 +1,9 @@
 <script setup>
+definePageMeta({ layout: 'student', middleware: ['auth'], meta: { requiresAuth: true, role: 'siswa' } })
+
 import { ref, onMounted, nextTick } from 'vue';
-import { studentAPI } from '../../services/api';
-import { authStore } from '../../store/auth';
-import Modal from '../../components/ui/Modal.vue';
+import { studentAPI } from '~/services/api';
+import { authStore } from '~/store/auth';
 
 // Gender mapping helper
 const mapGenderToBackend = (frontendGender) => {

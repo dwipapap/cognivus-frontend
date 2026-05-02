@@ -1,17 +1,13 @@
 <script setup>
+definePageMeta({ layout: 'student', middleware: ['auth'], meta: { requiresAuth: true, role: 'siswa' } })
+
 import { ref, computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { authStore } from '../../store/auth';
-import { useStudentProfile } from '../../composables/useStudentProfile';
-import { useClassDetails } from '../../composables/useClassDetails';
-import { useDashboardUtils } from '../../composables/useDashboardUtils';
-import { courseAPI } from '../../services/api';
-import IconChart from '~icons/solar/round-graph-bold';
-import IconCalendarBold from '~icons/solar/calendar-bold';
-import IconArrowRight from '~icons/basil/arrow-right-solid';
-import IconBookSolid from '~icons/basil/book-solid';
-import IconCalendar from '~icons/basil/calendar-outline';
-import { formatDate } from '../../utils/formatters';
+import { authStore } from '~/store/auth';
+import { useStudentProfile } from '~/composables/useStudentProfile';
+import { useClassDetails } from '~/composables/useClassDetails';
+import { useDashboardUtils } from '~/composables/useDashboardUtils';
+import { courseAPI } from '~/services/api';
+import { formatDate } from '~/utils/formatters';
 
 const router = useRouter();
 const { studentProfile, fetchStudentProfile } = useStudentProfile();
@@ -171,7 +167,7 @@ const courseLink = (courseId) => ({ name: 'StudentCourseDetail', params: { id: c
 
         <div class="relative z-10 p-3.5 md:p-5 flex flex-col flex-grow md:w-[66%]">
           <div class="flex items-center gap-1.5 md:gap-2 text-blue-600 mb-1 md:mb-1.5">
-            <IconCalendar class="w-3 h-3 md:w-3.5 md:h-3.5" />
+            <UIcon name="i-basil-calendar-outline" class="w-3 h-3 md:w-3.5 md:h-3.5" />
             <span class="text-[9px] md:text-[11px] font-semibold uppercase tracking-wider">Next Class</span>
           </div>
 
@@ -199,7 +195,7 @@ const courseLink = (courseId) => ({ name: 'StudentCourseDetail', params: { id: c
 
         <div
           class="absolute right-2.5 bottom-2.5 md:right-6 md:top-1/2 md:-translate-y-1/2 z-10 text-blue-600 pointer-events-none drop-shadow-md">
-          <IconCalendarBold class="w-8 h-8 md:w-11 md:h-11 opacity-90" />
+          <UIcon name="i-solar-calendar-bold" class="w-8 h-8 md:w-11 md:h-11 opacity-90" />
         </div>
       </article>
 
@@ -208,7 +204,7 @@ const courseLink = (courseId) => ({ name: 'StudentCourseDetail', params: { id: c
 
         <div class="relative z-10 p-3.5 md:p-5 flex flex-col flex-grow md:w-[66%]">
           <div class="flex items-center gap-1.5 md:gap-2 text-indigo-600 mb-1 md:mb-1.5">
-            <IconChart class="w-3 h-3 md:w-3.5 md:h-3.5" />
+            <UIcon name="i-solar-round-graph-bold" class="w-3 h-3 md:w-3.5 md:h-3.5" />
             <span class="text-[9px] md:text-[11px] font-semibold uppercase tracking-wider">Current Level</span>
           </div>
 
@@ -232,7 +228,7 @@ const courseLink = (courseId) => ({ name: 'StudentCourseDetail', params: { id: c
 
         <div
           class="absolute right-2.5 bottom-2.5 md:right-6 md:top-1/2 md:-translate-y-1/2 z-10 text-indigo-600 pointer-events-none drop-shadow-md">
-          <IconChart class="w-8 h-8 md:w-11 md:h-11 opacity-90" />
+          <UIcon name="i-solar-round-graph-bold" class="w-8 h-8 md:w-11 md:h-11 opacity-90" />
         </div>
       </article>
 
@@ -245,12 +241,12 @@ const courseLink = (courseId) => ({ name: 'StudentCourseDetail', params: { id: c
             <h2 id="courses-heading" class="text-2xl font-bold text-gray-900">My Courses</h2>
             <p class="text-sm text-gray-500 mt-1">{{ courses.length }} course materials available</p>
           </div>
-          <router-link to="/student/courses"
+          <NuxtLink to="/student/courses"
             class="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1"
             aria-label="View all courses">
             View All
-            <IconArrowRight class="w-4 h-4" aria-hidden="true" />
-          </router-link>
+            <UIcon name="i-basil-arrow-right-solid" class="w-4 h-4" aria-hidden="true" />
+          </NuxtLink>
         </div>
 
         <div v-if="coursesLoading" class="space-y-6 animate-pulse" role="status" aria-busy="true">
@@ -273,7 +269,7 @@ const courseLink = (courseId) => ({ name: 'StudentCourseDetail', params: { id: c
         </div>
 
         <div v-else-if="dashboardCourses.length === 0" class="text-center py-12" role="status">
-          <IconBookSolid class="w-16 h-16 mx-auto text-gray-400 mb-4" aria-hidden="true" />
+          <UIcon name="i-basil-book-solid" class="w-16 h-16 mx-auto text-gray-400 mb-4" aria-hidden="true" />
           <p class="text-gray-500">No course materials available yet.</p>
         </div>
 
@@ -286,7 +282,7 @@ const courseLink = (courseId) => ({ name: 'StudentCourseDetail', params: { id: c
               <div class="absolute bottom-0 right-1/4 w-40 h-40 bg-blue-400/20 rounded-full blur-2xl"></div>
             </div>
 
-            <router-link :to="courseLink(dashboardCourses[0].courseid)" class="flex flex-col md:flex-row relative z-10">
+            <NuxtLink :to="courseLink(dashboardCourses[0].courseid)" class="flex flex-col md:flex-row relative z-10">
               <div class="md:w-5/12 lg:w-2/5 h-48 md:h-auto relative overflow-hidden bg-blue-800">
                 <img :src="getPlaceholderImage(0)" :alt="dashboardCourses[0].title"
                   class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90 group-hover:opacity-100" />
@@ -303,7 +299,7 @@ const courseLink = (courseId) => ({ name: 'StudentCourseDetail', params: { id: c
                     class="text-[10px] md:text-xs font-bold px-2 py-0.5 md:px-2.5 md:py-1 rounded-full bg-white/20 text-white backdrop-blur-sm">Latest
                     Activity</span>
                   <span class="text-[10px] md:text-xs text-blue-100 flex items-center gap-1 font-medium">
-                    <IconCalendar class="w-3.5 h-3.5 md:w-4 md:h-4" aria-hidden="true" />
+                    <UIcon name="i-basil-calendar-outline" class="w-3.5 h-3.5 md:w-4 md:h-4" aria-hidden="true" />
                     {{ formatDate(dashboardCourses[0].upload_date) }}
                   </span>
                 </div>
@@ -319,18 +315,18 @@ const courseLink = (courseId) => ({ name: 'StudentCourseDetail', params: { id: c
                   <span
                     class="inline-flex justify-center w-full md:w-auto items-center gap-2 px-5 md:px-6 py-2 md:py-2.5 bg-white text-blue-600 text-sm md:text-base font-bold rounded-xl hover:bg-blue-50 transition-all shadow-sm group-hover:shadow group-hover:-translate-y-0.5">
                     Open Course
-                    <IconArrowRight class="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform"
+                    <UIcon name="i-basil-arrow-right-solid" class="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform"
                       aria-hidden="true" />
                   </span>
                 </div>
               </div>
-            </router-link>
+            </NuxtLink>
           </article>
 
           <div v-if="dashboardCourses.length > 1" class="grid grid-cols-3 gap-2 sm:gap-3 md:gap-5 courses-grid">
             <article v-for="(course, index) in dashboardCourses.slice(1)" :key="course.courseid"
               class="bg-white rounded-xl sm:rounded-2xl overflow-hidden shadow-sm border border-gray-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col h-full group">
-              <router-link :to="courseLink(course.courseid)" class="flex flex-col h-full">
+              <NuxtLink :to="courseLink(course.courseid)" class="flex flex-col h-full">
                 <div class="h-20 sm:h-28 md:h-40 w-full relative overflow-hidden bg-gray-100">
                   <img :src="getPlaceholderImage(index + 1)" :alt="course.title"
                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
@@ -346,7 +342,7 @@ const courseLink = (courseId) => ({ name: 'StudentCourseDetail', params: { id: c
                     class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                     <div
                       class="bg-white/90 backdrop-blur-sm text-blue-600 p-1.5 sm:p-2 md:p-2.5 rounded-full transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 shadow-lg">
-                      <IconArrowRight class="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" />
+                      <UIcon name="i-basil-arrow-right-solid" class="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" />
                     </div>
                   </div>
                 </div>
@@ -363,17 +359,17 @@ const courseLink = (courseId) => ({ name: 'StudentCourseDetail', params: { id: c
                     class="mt-1 sm:mt-2 md:mt-3 pt-1.5 sm:pt-2 md:pt-3 border-t border-gray-100 flex flex-col xl:flex-row xl:items-center justify-between gap-1 xl:gap-0">
                     <div
                       class="hidden sm:flex items-center gap-1 md:gap-1.5 text-[9px] md:text-[11px] text-gray-500 font-medium">
-                      <IconCalendar class="w-3 h-3 md:w-3.5 md:h-3.5 text-gray-400 flex-shrink-0" />
+                      <UIcon name="i-basil-calendar-outline" class="w-3 h-3 md:w-3.5 md:h-3.5 text-gray-400 flex-shrink-0" />
                       <span class="truncate">{{ formatDate(course.upload_date) }}</span>
                     </div>
                     <span
                       class="text-[9px] sm:text-[10px] md:text-xs font-semibold text-blue-600 flex items-center gap-0.5 md:gap-1 group-hover:translate-x-1 transition-transform w-fit">
                       Open
-                      <IconArrowRight class="w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-3.5 md:h-3.5" />
+                      <UIcon name="i-basil-arrow-right-solid" class="w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-3.5 md:h-3.5" />
                     </span>
                   </div>
                 </div>
-              </router-link>
+              </NuxtLink>
             </article>
           </div>
         </div>

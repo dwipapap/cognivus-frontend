@@ -1,0 +1,360 @@
+<script setup>
+import { computed, ref, onMounted, onUnmounted } from 'vue';
+import { authStore } from '~/store/auth';
+import { useStudentProfile } from '~/composables/useStudentProfile';
+import iconBoyImage from '~/assets/iconboy.webp';
+import iconGirlImage from '~/assets/icongirl.webp';
+import ittrLogo from '~/assets/ittrlogo.png';
+
+const router = useRouter();
+const route = useRoute();
+const { studentProfile, isLoading: isProfileLoading, fetchStudentProfile } = useStudentProfile();
+
+const activeTabIndex = computed(() => {
+  const path = route.path;
+  if (path.includes('/dashboard')) return 0;
+  if (path.includes('/courses')) return 1;
+  if (path.includes('/grades')) return 2;
+  if (path.includes('/payment')) return 3;
+  return 0;
+});
+
+// Template refs for dropdown (Vue best practice - use refs instead of document.getElementById)
+const profileButtonRef = ref(null);
+const profileDropdownRef = ref(null);
+
+// Click-based dropdown state
+const showDropdown = ref(false);
+const isDropdownVisible = ref(false); // Controls actual visibility for animations
+const dropdownPosition = ref({ top: '0px', left: '0px' });
+
+// Toggle dropdown on click
+const toggleDropdown = () => {
+  if (!showDropdown.value) {
+    // Calculate position before opening using template ref
+    if (profileButtonRef.value) {
+      const rect = profileButtonRef.value.getBoundingClientRect();
+      dropdownPosition.value = {
+        top: `${rect.bottom + 8}px`,
+        left: `${rect.right - 224}px` // 224px = w-56 (14rem * 16px)
+      };
+    }
+    
+    // Opening the dropdown
+    showDropdown.value = true;
+    setTimeout(() => {
+      isDropdownVisible.value = true;
+    }, 10); // Tiny delay to ensure DOM is ready
+  } else {
+    // Closing the dropdown
+    isDropdownVisible.value = false;
+    setTimeout(() => {
+      showDropdown.value = false;
+    }, 300); // Match animation duration
+  }
+};
+
+// Close dropdown when clicking outside
+const closeDropdownOnOutsideClick = (event) => {
+  if (
+    showDropdown.value && 
+    profileDropdownRef.value && 
+    profileButtonRef.value && 
+    !profileDropdownRef.value.contains(event.target) && 
+    !profileButtonRef.value.contains(event.target)
+  ) {
+    toggleDropdown();
+  }
+};
+
+// Consolidated lifecycle hooks (Vue best practice - single onMounted/onUnmounted)
+onMounted(() => {
+  fetchStudentProfile();
+  document.addEventListener('click', closeDropdownOnOutsideClick);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', closeDropdownOnOutsideClick);
+});
+
+const displayName = computed(() => {
+  return studentProfile.value?.nama_lengkap || studentProfile.value?.fullname || authStore.user?.username || authStore.user?.email?.split('@')[0] || 'Student';
+});
+
+// Gender-based avatar computed property
+const avatarUrl = computed(() => {
+  // Check if user has OAuth avatar from Google
+  if (authStore.user?.user_metadata?.avatar_url) {
+    return authStore.user.user_metadata.avatar_url;
+  }
+  
+  // Use gender-based icon from student profile
+  const gender = studentProfile.value?.jenis_kelamin;
+  if (gender === 'L') {
+    return iconBoyImage;
+  } else if (gender === 'P') {
+    return iconGirlImage;
+  }
+  
+  // Default fallback
+  return iconBoyImage;
+});
+
+const handleImageError = (event) => {
+  event.target.src = iconBoyImage;
+};
+
+const handleLogout = async () => {
+  authStore.clearAuth();
+  navigateTo('/login');
+};
+</script>
+
+<template>
+  <div class="flex flex-col min-h-screen bg-white">
+    <!-- Header -->
+    <header class="header-glass backdrop-blur-lg bg-gradient-to-r from-white via-blue-50 to-indigo-100 shadow-lg border-b border-white/20 sticky top-0 z-40">
+      <div class="flex items-center justify-between px-4 py-3 md:px-6 md:py-4 min-w-0">
+        <!-- Left: ITTR Logo -->
+        <div class="flex items-center">
+          <img :src="ittrLogo" alt="ITTR Logo" class="h-8 md:h-10 w-auto object-contain" />
+        </div>
+
+        <!-- Right: User Profile -->
+        <div class="ml-auto flex items-center gap-1 xs:gap-2 sm:gap-3 md:gap-4 flex-nowrap min-w-0">
+          <!-- User Profile Section -->
+          <div class="relative z-50">
+            <!-- Profile Pill -->
+            <div 
+              ref="profileButtonRef"
+              @click.stop="toggleDropdown()"
+              class="flex items-center gap-2 sm:gap-3 h-8 sm:h-10 md:h-12 px-2 xs:px-3 sm:px-4 rounded-full sm:rounded-[28px] bg-white/30 backdrop-blur-sm border border-white/50 shadow-sm overflow-hidden whitespace-nowrap max-w-[50vw] xs:max-w-[60vw] sm:max-w-[200px] md:max-w-[240px] min-w-0 hover:bg-white/40 transition-all duration-200 cursor-pointer active:scale-95"
+            >
+              <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden border-2 border-white/50">
+                <!-- Skeleton while avatar loading -->
+                <div v-if="isProfileLoading" class="avatar-skeleton bg-blue-100 w-full h-full rounded-full"></div>
+
+                <!-- Avatar image -->
+                <img v-else :src="avatarUrl"
+                  :alt="displayName" class="w-full h-full object-cover rounded-full" @error="handleImageError" />
+              </div>
+              <div class="text-left min-w-0 flex-1">
+                <p class="text-xs font-semibold text-gray-600 hidden sm:block">Student</p>
+                <h3 class="text-base sm:text-lg font-medium text-gray-800 truncate">{{ displayName }}</h3>
+              </div>
+              <!-- Dropdown arrow indicator -->
+              <UIcon name="i-basil-caret-down-outline" class="w-4 h-4 text-gray-600 transition-transform duration-300" :class="{ 'rotate-180': isDropdownVisible }" />
+            </div>
+
+            <!-- Dropdown Menu with animation classes -->
+            <Teleport to="body">
+              <div 
+                v-if="showDropdown" 
+                ref="profileDropdownRef"
+                class="fixed w-56 origin-top-right profile-dropdown-glass rounded-xl shadow-lg border border-white/20 overflow-hidden z-[9999]"
+                :class="{'dropdown-enter': isDropdownVisible, 'dropdown-leave': !isDropdownVisible}"
+                :style="dropdownPosition"
+              >
+              <!-- Dropdown Header -->
+              <div class="px-4 py-3 border-b border-white/20">
+                <h3 class="text-sm font-medium text-gray-800">{{ displayName }}</h3>
+                <p class="text-xs text-gray-500 mt-0.5">Student</p>
+              </div>
+
+              <!-- Dropdown Items -->
+              <div class="py-1">
+                <NuxtLink to="/student/profile-view" class="profile-dropdown-item">
+                  <UIcon name="i-basil-user-solid" class="w-5 h-5 mr-3" />
+                  View Profile
+                </NuxtLink>
+                <a @click="handleLogout" class="profile-dropdown-item hover:text-red-600">
+                  <UIcon name="i-basil-logout-solid" class="w-5 h-5 mr-3" />
+                  Logout
+                </a>
+              </div>
+              </div>
+            </Teleport>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="flex flex-1 relative sidebar-container">
+      <!-- Desktop Sidebar -->
+      <aside class="sidebar group w-19 hover:w-64 flex-shrink-0 sidebar-glass shadow-2xl transition-all duration-300 ease-in-out overflow-hidden fixed left-4 top-28 bottom-4 rounded-[28px] z-10 border border-white/20 hidden md:block">
+        <!-- Navigation Menu -->
+        <nav class="p-4 h-full overflow-y-auto">
+          <p class="sidebar-text text-xs font-semibold text-white/80 uppercase tracking-wider mb-3 opacity-0 whitespace-nowrap overflow-hidden">
+            Menu
+          </p>
+          <ul class="space-y-2">
+            <li>
+              <NuxtLink to="/student/dashboard"
+                class="nav-item flex items-center px-3 py-2 text-sm font-medium rounded-lg group">
+                <UIcon name="i-solar-home-smile-bold" class="w-5 h-5 flex-shrink-0" />
+                <span class="sidebar-text ml-3 opacity-0 whitespace-nowrap overflow-hidden">Dashboard</span>
+              </NuxtLink>
+            </li>
+            <li>
+              <NuxtLink to="/student/courses"
+                class="nav-item flex items-center px-3 py-2 text-sm font-medium rounded-lg group">
+                <UIcon name="i-solar-book-bookmark-bold" class="w-5 h-5 flex-shrink-0" />
+                <span class="sidebar-text ml-3 opacity-0 whitespace-nowrap overflow-hidden">My Courses</span>
+              </NuxtLink>
+            </li>
+            <li>
+              <NuxtLink to="/student/grades"
+                class="nav-item flex items-center px-3 py-2 text-sm font-medium rounded-lg group">
+                <UIcon name="i-solar-graph-bold" class="w-5 h-5 flex-shrink-0" />
+                <span class="sidebar-text ml-3 opacity-0 whitespace-nowrap overflow-hidden">Grades</span>
+              </NuxtLink>
+            </li>
+            <li>
+              <NuxtLink to="/student/payment"
+                class="nav-item flex items-center px-3 py-2 text-sm font-medium rounded-lg group">
+                <UIcon name="i-solar-money-bag-bold" class="w-5 h-5 flex-shrink-0" />
+                <span class="sidebar-text ml-3 opacity-0 whitespace-nowrap overflow-hidden">Payment</span>
+              </NuxtLink>
+            </li>
+          </ul>
+        </nav>
+      </aside>
+
+      <!-- Mobile Bottom Navigation -->
+      <nav class="fixed bottom-4 left-4 right-4 h-14 bg-transparent md:hidden z-50">
+        <div class="h-full bg-white rounded-[28px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100 overflow-hidden relative">
+          <ul class="h-full flex relative z-10">
+            <!-- Sliding Indicator -->
+            <div 
+              class="absolute top-1 bottom-1 w-1/4 px-1.5 z-0 transition-transform duration-300 ease-out"
+              :style="{ transform: `translateX(${activeTabIndex * 100}%)` }"
+            >
+              <div class="w-full h-full bg-[#e0f2fe] rounded-[24px]"></div>
+            </div>
+
+            <li class="flex-1 flex justify-center items-center z-10">
+              <NuxtLink to="/student/dashboard" class="mobile-nav-item flex flex-col items-center gap-0.5 w-full h-full justify-center transition-colors duration-200">
+                <UIcon name="i-solar-home-smile-bold" class="w-5 h-5" />
+                <span class="text-[10px] font-medium">Dashboard</span>
+              </NuxtLink>
+            </li>
+            <li class="flex-1 flex justify-center items-center z-10">
+              <NuxtLink to="/student/courses" class="mobile-nav-item flex flex-col items-center gap-0.5 w-full h-full justify-center transition-colors duration-200">
+                <UIcon name="i-solar-book-bookmark-bold" class="w-5 h-5" />
+                <span class="text-[10px] font-medium">Courses</span>
+              </NuxtLink>
+            </li>
+            <li class="flex-1 flex justify-center items-center z-10">
+              <NuxtLink to="/student/grades" class="mobile-nav-item flex flex-col items-center gap-0.5 w-full h-full justify-center transition-colors duration-200">
+                <UIcon name="i-solar-graph-bold" class="w-5 h-5" />
+                <span class="text-[10px] font-medium">Grades</span>
+              </NuxtLink>
+            </li>
+            <li class="flex-1 flex justify-center items-center z-10">
+              <NuxtLink to="/student/payment" class="mobile-nav-item flex flex-col items-center gap-0.5 w-full h-full justify-center transition-colors duration-200">
+                <UIcon name="i-solar-money-bag-bold" class="w-5 h-5" />
+                <span class="text-[10px] font-medium">Bayar</span>
+              </NuxtLink>
+            </li>
+          </ul>
+        </div>
+      </nav>
+
+      <!-- Main Content Area -->
+      <main class="main-content flex-1 p-4 md:p-6 lg:p-8 overflow-auto md:ml-24 mb-20 md:mb-0 transition-all duration-300 ease-in-out">
+        <slot />
+      </main>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+/* Header glassmorphism effect - Performance optimized */
+.header-glass {
+  background: linear-gradient(135deg, #ffffffe6, #dbebffcc, rgba(199, 210, 254, 0.7));
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border-radius: 0 0 30px 30px;
+  box-shadow: 0 4px 16px rgba(31, 38, 135, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* Profile dropdown glassmorphism effect */
+.profile-dropdown-glass {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.85), rgba(240, 249, 255, 0.8), rgba(224, 242, 254, 0.75));
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  box-shadow: 
+    0 12px 24px rgba(31, 41, 55, 0.08),
+    0 4px 16px rgba(59, 130, 246, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+/* Dropdown animations */
+.dropdown-enter { animation: dropdown-appear 300ms ease-out forwards; }
+.dropdown-leave { animation: dropdown-disappear 300ms ease-in forwards; }
+
+@keyframes dropdown-appear {
+  from { opacity: 0; transform: translateY(-10px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes dropdown-disappear {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to { opacity: 0; transform: translateY(-10px) scale(0.95); }
+}
+
+.profile-dropdown-item {
+  display: flex; align-items: center; padding: 0.5rem 1rem;
+  font-size: 0.875rem; color: #374151; transition: all 200ms ease; cursor: pointer;
+}
+.profile-dropdown-item:hover {
+  color: #2563eb; background-color: rgba(255, 255, 255, 0.3);
+  transform: translateX(4px); box-shadow: 0 2px 6px rgba(59, 130, 246, 0.08);
+}
+
+/* Sidebar glassmorphism */
+.sidebar-glass {
+  background: linear-gradient(135deg, rgba(43, 127, 255, 0.95), rgba(43, 127, 255, 0.90), rgba(43, 127, 255, 0.85));
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 12px 24px rgba(31, 41, 55, 0.15), 0 4px 16px rgba(43, 127, 255, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  will-change: transform; transform: translateZ(0);
+}
+
+.sidebar-container { position: relative; }
+.sidebar { transition: width 300ms ease-in-out, transform 200ms ease, box-shadow 300ms ease; }
+.sidebar:hover {
+  width: 16rem; transform: translateY(-2px);
+  box-shadow: 0 35px 60px rgba(31, 41, 55, 0.15), 0 12px 40px rgba(59, 130, 246, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+.sidebar-container:has(.sidebar:hover) .main-content { margin-left: 17.5rem; }
+
+.avatar-skeleton { animation: pulse 1.2s infinite ease-in-out; }
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+
+.sidebar:hover .sidebar-text { opacity: 1; transition: opacity 300ms ease-in-out 150ms; }
+.sidebar-text { transition: opacity 300ms ease-in-out; }
+.nav-item svg, .nav-item .iconify { min-width: 1.25rem; }
+.nav-item { transition: all 200ms ease-in-out; color: rgba(255, 255, 255, 0.9); }
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(2px);
+  transform: translateX(4px); box-shadow: 0 2px 6px rgba(255, 255, 255, 0.2); color: #ffffff;
+}
+.nav-item.router-link-active { background: rgba(255, 255, 255, 0.2); color: #ffffff; font-weight: 600; }
+
+.mobile-nav-item { color: #4b5563; }
+.mobile-nav-item.router-link-active { color: #0284c7; }
+.mobile-nav-item:hover { color: #0284c7; }
+
+@media (prefers-reduced-motion: reduce) {
+  .header-glass, .profile-dropdown-glass, .sidebar-glass {
+    backdrop-filter: blur(2px) !important; -webkit-backdrop-filter: blur(2px) !important; transition: none !important;
+  }
+  .nav-item:hover, .profile-dropdown-item:hover { transform: none !important; }
+}
+.header-glass, .profile-dropdown-glass, .sidebar-glass { contain: layout style paint; }
+</style>
