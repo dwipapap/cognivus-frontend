@@ -3,7 +3,6 @@ import './style.css'
 import App from './App.vue'
 import router from './router'
 import { authStore } from './store/auth';
-import 'flowbite';
 import ui from '@nuxt/ui/vue-plugin'
 
 authStore.init().then(() => {
