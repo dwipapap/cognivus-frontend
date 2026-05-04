@@ -3,12 +3,10 @@
 
 <template>
   <div>
-    <main>
+    <UApp>
       <router-view />
-    </main>
+    </UApp>
   </div>
 </template>
 
-<style>
-
-</style>
+<style></style>
