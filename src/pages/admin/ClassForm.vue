@@ -309,7 +309,6 @@ const handleStudentSave = async (studentData) => {
             variant="secondary" 
             @click="$emit('close')"
             class="px-8"
-            rounded="full"
           >
             Cancel
           </BaseButton>
@@ -318,7 +317,6 @@ const handleStudentSave = async (studentData) => {
             variant="primary" 
             :loading="isSubmitting"
             class="px-8 shadow-lg shadow-blue-200"
-            rounded="full"
           >
             <template #icon>
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

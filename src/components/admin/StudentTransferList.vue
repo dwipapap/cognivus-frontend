@@ -309,7 +309,6 @@ const hasChanges = computed(() => {
             size="sm"
             :disabled="selectedAvailable.size === 0"
             class="flex-1 lg:flex-none shadow-lg shadow-blue-100"
-            rounded="full"
           >
             <template #icon>
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -325,7 +324,6 @@ const hasChanges = computed(() => {
             size="sm"
             :disabled="selectedEnrolled.size === 0"
             class="flex-1 lg:flex-none"
-            rounded="full"
           >
             <template #icon>
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -467,7 +465,6 @@ const hasChanges = computed(() => {
           variant="secondary" 
           @click="$emit('cancel')" 
           class="flex-1 lg:flex-none px-8"
-          rounded="full"
         >
           Cancel
         </BaseButton>
@@ -478,7 +475,6 @@ const hasChanges = computed(() => {
           :loading="isLoading" 
           :disabled="!hasChanges"
           class="flex-1 lg:flex-none px-8 shadow-lg shadow-blue-200"
-          rounded="full"
         >
           <template #icon>
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

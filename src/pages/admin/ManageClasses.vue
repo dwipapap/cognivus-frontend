@@ -19,6 +19,16 @@ const isEditMode = ref(false);
 const currentPage = ref(1);
 const itemsPerPage = 15;
 
+const columns = [
+  { key: 'index', label: '#' },
+  { key: 'class_code', label: 'Class Code' },
+  { key: 'schedule', label: 'Schedule' },
+  { key: 'level', label: 'Level' },
+  { key: 'lecturer', label: 'Lecturer' },
+  { key: 'description', label: 'Description' },
+  { key: 'actions', label: 'Actions', class: 'text-center' }
+];
+
 /** Paginated classes */
 const paginatedClasses = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage;
@@ -214,7 +224,7 @@ onMounted(() => {
         <h1 class="text-2xl font-bold text-gray-800">Manage Classes</h1>
         <p class="text-gray-600 mt-1">Create, edit, and manage class records</p>
       </div>
-      <BaseButton @click="openAddModal" variant="primary" rounded="full">
+      <BaseButton @click="openAddModal" variant="primary">
         <span class="mr-2">+</span> Add Class
       </BaseButton>
     </div>
@@ -224,140 +234,70 @@ onMounted(() => {
       <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
     </div>
 
-    <div v-else class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="w-full">
-          <thead>
-            <tr class="bg-gray-50 border-b border-gray-200">
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider w-16">#</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Class Code</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Schedule</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Level</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Lecturer</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Description</th>
-              <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr 
-              v-for="(classItem, index) in paginatedClasses" 
-              :key="classItem.classid"
-              :class="index % 2 === 0 ? 'bg-white' : 'bg-gray-50'"
-              class="border-b border-gray-100 hover:bg-blue-50 transition-colors"
-            >
-              <!-- Row Number -->
-              <td class="px-6 py-4 text-sm text-gray-500 text-right">
-                {{ (currentPage - 1) * itemsPerPage + index + 1 }}
-              </td>
-
-              <!-- Class Code -->
-              <td class="px-6 py-4">
-                <div class="text-sm font-medium text-gray-900">{{ classItem.class_code }}</div>
-              </td>
-
-              <!-- Schedule -->
-              <td class="px-6 py-4">
-                <div v-if="formatSchedule(classItem)" class="flex items-center gap-1.5">
-                  <svg class="w-4 h-4 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                  </svg>
-                  <span class="text-sm text-gray-700 font-medium">{{ formatSchedule(classItem) }}</span>
-                </div>
-                <span v-else class="text-sm text-gray-400 italic">No schedule</span>
-              </td>
-
-              <!-- Level -->
-              <td class="px-6 py-4">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                  {{ getLevelName(classItem.levelid) }}
-                </span>
-              </td>
-
-              <!-- Lecturer -->
-              <td class="px-6 py-4 text-sm text-gray-700">
-                {{ getLecturerName(classItem.lecturerid) }}
-              </td>
-
-              <!-- Description -->
-              <td class="px-6 py-4 text-sm text-gray-600">
-                {{ classItem.description || '-' }}
-              </td>
-
-              <!-- Actions -->
-              <td class="px-6 py-4">
-                <div class="flex justify-center gap-2">
-                  <BaseButton 
-                    @click="openEditModal(classItem)" 
-                    variant="secondary"
-                    size="sm"
-                    rounded="full"
-                  >
-                    Edit
-                  </BaseButton>
-                  <BaseButton 
-                    @click="handleDelete(classItem)" 
-                    variant="danger"
-                    size="sm"
-                    rounded="full"
-                  >
-                    Delete
-                  </BaseButton>
-                </div>
-              </td>
-            </tr>
-            <tr v-if="classes.length === 0">
-              <td colspan="7" class="px-6 py-12 text-center">
-                <div class="flex flex-col items-center justify-center text-gray-500">
-                  <svg class="w-12 h-12 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                  </svg>
-                  <p class="text-sm font-medium">No classes found</p>
-                  <p class="text-xs mt-1">Click "Add Class" to create one.</p>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+    <UCard v-else :ui="{ body: { padding: '' } }">
+      <UTable
+        :columns="columns"
+        :rows="paginatedClasses"
+      >
+        <template #index-data="{ index }">
+          {{ (currentPage - 1) * itemsPerPage + index + 1 }}
+        </template>
+        <template #class_code-data="{ row }">
+          <span class="font-medium text-gray-900">{{ row.class_code }}</span>
+        </template>
+        <template #schedule-data="{ row }">
+          <div v-if="formatSchedule(row)" class="flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span class="text-sm text-gray-700 font-medium">{{ formatSchedule(row) }}</span>
+          </div>
+          <span v-else class="text-sm text-gray-400 italic">No schedule</span>
+        </template>
+        <template #level-data="{ row }">
+          <UBadge color="blue" variant="soft">{{ getLevelName(row.levelid) }}</UBadge>
+        </template>
+        <template #lecturer-data="{ row }">
+          {{ getLecturerName(row.lecturerid) }}
+        </template>
+        <template #description-data="{ row }">
+          {{ row.description || '-' }}
+        </template>
+        <template #actions-data="{ row }">
+          <div class="flex justify-center gap-2">
+            <BaseButton @click="openEditModal(row)" variant="secondary" size="sm">
+              Edit
+            </BaseButton>
+            <BaseButton @click="handleDelete(row)" variant="danger" size="sm">
+              Delete
+            </BaseButton>
+          </div>
+        </template>
+        <template #empty-state>
+          <div class="flex flex-col items-center justify-center py-12 text-gray-500">
+            <svg class="w-12 h-12 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+            </svg>
+            <p class="text-sm font-medium">No classes found</p>
+            <p class="text-xs mt-1">Click "Add Class" to create one.</p>
+          </div>
+        </template>
+      </UTable>
 
       <!-- Pagination -->
-      <div v-if="totalPages > 1" class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
+      <div v-if="totalPages > 1" class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
         <p class="text-sm text-gray-600">
           Showing <span class="font-medium">{{ (currentPage - 1) * itemsPerPage + 1 }}</span> to 
           <span class="font-medium">{{ Math.min(currentPage * itemsPerPage, classes.length) }}</span> of 
           <span class="font-medium">{{ classes.length }}</span> classes
         </p>
-        <div class="flex gap-2">
-          <button
-            @click="goToPage(currentPage - 1)"
-            :disabled="currentPage === 1"
-            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-full hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            Previous
-          </button>
-          <button
-            v-for="page in totalPages"
-            :key="page"
-            @click="goToPage(page)"
-            :class="[
-              'px-4 py-2 text-sm font-medium rounded-full transition-colors',
-              currentPage === page
-                ? 'bg-blue-600 text-white border border-blue-600 shadow-sm shadow-blue-200'
-                : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
-            ]"
-          >
-            {{ page }}
-          </button>
-          <button
-            @click="goToPage(currentPage + 1)"
-            :disabled="currentPage === totalPages"
-            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-full hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            Next
-          </button>
-        </div>
+        <UPagination
+          v-model="currentPage"
+          :page-count="itemsPerPage"
+          :total="classes.length"
+        />
       </div>
-    </div>
+    </UCard>
 
     <!-- Form Modal -->
     <Modal 

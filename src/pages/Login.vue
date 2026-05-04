@@ -134,67 +134,56 @@ const handleGoogleLogin = () => {
             <input type="password" name="fakepasswordremembered" id="fakepasswordremembered" style="position: absolute; left: -9999px; top: -9999px; width: 1px; height: 1px; opacity: 0;" autocomplete="new-password" />
             
             <!-- Username Input -->
-            <div>
-              <label for="username" class="block mb-2 text-sm font-medium text-gray-900">
-                Username
-                <span class="text-red-500 ml-1">*</span>
-              </label>
-              <div class="relative">
-                <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+            <UFormField label="Username" :error="errors.username" required class="w-full">
+              <UInput
+                id="username"
+                name="login-identifier"
+                v-model="formData.username"
+                placeholder="Enter your username"
+                size="lg"
+                autocomplete="off"
+                autocorrect="off"
+                autocapitalize="none"
+                spellcheck="false"
+                :ui="{ base: 'rounded-full py-3 px-4 text-center' }"
+                class="w-full"
+              >
+                <template #leading>
                   <IconUser class="w-5 h-5 text-gray-400" />
-                </div>
-                <input 
-                  type="text" 
-                  id="username"
-                  name="login-identifier"
-                  autocomplete="off"
-                  autocorrect="off"
-                  autocapitalize="none"
-                  spellcheck="false"
-                  v-model="formData.username"
-                  class="block w-full !bg-white pl-11 pr-4 py-2.5 text-gray-900 placeholder-gray-400 border rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  :class="errors.username ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'"
-                  placeholder="Enter your username"
-                />
-              </div>
-              <p v-if="errors.username" class="mt-2 text-sm text-red-600">{{ errors.username }}</p>
-            </div>
+                </template>
+              </UInput>
+            </UFormField>
 
             <!-- Password Input -->
-            <div>
-              <label for="password" class="block mb-2 text-sm font-medium text-gray-900">
-                Password
-                <span class="text-red-500 ml-1">*</span>
-              </label>
-              <div class="relative">
-                <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+            <UFormField label="Password" :error="errors.password" required class="w-full">
+              <UInput
+                id="password"
+                name="password"
+                type="password"
+                v-model="formData.password"
+                placeholder="Enter your password"
+                size="lg"
+                autocomplete="current-password"
+                autocorrect="off"
+                autocapitalize="none"
+                spellcheck="false"
+                :ui="{ base: 'rounded-full py-3 px-4 text-center' }"
+                class="w-full"
+              >
+                <template #leading>
                   <IconLockPassword class="w-5 h-5 text-gray-400" />
-                </div>
-                <input 
-                  type="password" 
-                  id="password"
-                  name="password"
-                  autocomplete="current-password"
-                  autocorrect="off"
-                  autocapitalize="none"
-                  spellcheck="false"
-                  v-model="formData.password"
-                  class="block w-full !bg-white pl-11 pr-4 py-2.5 text-gray-900 placeholder-gray-400 border rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  :class="errors.password ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'"
-                  placeholder="Enter your password"
-                />
-              </div>
-              <div class="flex justify-between items-center mt-2">
-                <p v-if="errors.password" class="text-sm text-red-600">{{ errors.password }}</p>
+                </template>
+              </UInput>
+              <div class="flex justify-end mt-2">
                 <button
                   type="button"
                   @click="openForgotPassword"
-                  class="text-sm text-blue-600 hover:text-blue-800 hover:underline transition-colors ml-auto"
+                  class="text-sm text-blue-600 hover:text-blue-800 hover:underline transition-colors"
                 >
                   Forgot Password?
                 </button>
               </div>
-            </div>
+            </UFormField>
 
             <BaseButton
               type="submit"

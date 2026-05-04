@@ -645,7 +645,6 @@ onMounted(() => {
                   <BaseButton
                     size="sm"
                     variant="secondary"
-                    rounded="lg"
                     @click="router.push({ name: 'AdminEditGrade', params: { userid: studentId, gradeid: grade.gradeid } })"
                   >
                     Edit

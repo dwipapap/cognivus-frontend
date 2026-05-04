@@ -20,6 +20,15 @@ const selectedStudent = ref(null);
 const isEditMode = ref(false);
 const selectedClassFilter = ref('');
 
+const columns = [
+  { key: 'index', label: '#' },
+  { key: 'name', label: 'Name' },
+  { key: 'email', label: 'Email' },
+  { key: 'class', label: 'Class' },
+  { key: 'level', label: 'Level' },
+  { key: 'actions', label: 'Actions', class: 'text-center' }
+];
+
 /** Get class code by classid */
 const getClassCode = (classid) => {
   if (!classid) return 'Unassigned';
@@ -252,82 +261,54 @@ onMounted(() => {
       <p class="text-gray-600 mt-4">Loading students...</p>
     </div>
 
-    <div v-else class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="w-full border-collapse">
-          <thead>
-            <tr class="bg-gray-50 border-b border-gray-200">
-              <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider w-16">#</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Name</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Email</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Class</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Level</th>
-              <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(student, index) in filteredStudents" :key="student.studentid" 
-              class="border-b border-gray-200 transition-colors"
-              :class="index % 2 === 0 ? 'bg-white' : 'bg-gray-50'"
-            >
-              <td class="px-4 py-3 text-right text-sm text-gray-500 font-medium">{{ index + 1 }}</td>
-              <td class="px-4 py-3">
-                <div class="text-sm font-semibold text-gray-900">{{ student.fullname }}</div>
-              </td>
-              <td class="px-4 py-3">
-                <a v-if="student.tbuser?.email" 
-                  :href="`mailto:${student.tbuser.email}`"
-                  class="text-sm text-blue-600 hover:text-blue-800 hover:underline">
-                  {{ student.tbuser.email }}
-                </a>
-                <span v-else class="text-sm text-gray-400">No email</span>
-              </td>
-              <td class="px-4 py-3">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800">
-                  {{ getClassCode(student.classid) }}
-                </span>
-              </td>
-              <td class="px-4 py-3">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-indigo-100 text-indigo-800">
-                  {{ getStudentLevel(student.classid) }}
-                </span>
-              </td>
-              <td class="px-4 py-3">
-                <div class="flex justify-center gap-2">
-                  <BaseButton 
-                    @click="viewStudentDetail(student)" 
-                    variant="secondary" 
-                    size="sm"
-                  >
-                    View
-                  </BaseButton>
-                  <BaseButton 
-                    @click="handleDelete(student)" 
-                    variant="danger" 
-                    size="sm"
-                  >
-                    Delete
-                  </BaseButton>
-                </div>
-              </td>
-            </tr>
-            <tr v-if="filteredStudents.length === 0">
-              <td colspan="6" class="px-4 py-12 text-center">
-                <div class="text-gray-400">
-                  <svg class="mx-auto h-12 w-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-                  </svg>
-                  <p class="text-sm font-medium text-gray-900">No students found</p>
-                  <p class="text-sm text-gray-500 mt-1">
-                    {{ selectedClassFilter ? 'Try selecting a different class or clear the filter' : 'Click "Add Student" to create one' }}
-                  </p>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <UCard v-else :ui="{ body: { padding: '' } }">
+      <UTable
+        :columns="columns"
+        :rows="filteredStudents"
+      >
+        <template #index-data="{ index }">
+          {{ index + 1 }}
+        </template>
+        <template #name-data="{ row }">
+          <span class="font-semibold text-gray-900">{{ row.fullname }}</span>
+        </template>
+        <template #email-data="{ row }">
+          <a v-if="row.tbuser?.email" 
+            :href="`mailto:${row.tbuser.email}`"
+            class="text-sm text-blue-600 hover:text-blue-800 hover:underline">
+            {{ row.tbuser.email }}
+          </a>
+          <span v-else class="text-sm text-gray-400">No email</span>
+        </template>
+        <template #class-data="{ row }">
+          <UBadge color="blue" variant="soft">{{ getClassCode(row.classid) }}</UBadge>
+        </template>
+        <template #level-data="{ row }">
+          <UBadge color="indigo" variant="soft">{{ getStudentLevel(row.classid) }}</UBadge>
+        </template>
+        <template #actions-data="{ row }">
+          <div class="flex justify-center gap-2">
+            <BaseButton @click="viewStudentDetail(row)" variant="secondary" size="sm">
+              View
+            </BaseButton>
+            <BaseButton @click="handleDelete(row)" variant="danger" size="sm">
+              Delete
+            </BaseButton>
+          </div>
+        </template>
+        <template #empty-state>
+          <div class="flex flex-col items-center justify-center py-12 text-gray-400">
+            <svg class="w-12 h-12 mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+            </svg>
+            <p class="text-sm font-medium text-gray-900">No students found</p>
+            <p class="text-sm text-gray-500 mt-1">
+              {{ selectedClassFilter ? 'Try selecting a different class or clear the filter' : 'Click "Add Student" to create one' }}
+            </p>
+          </div>
+        </template>
+      </UTable>
+    </UCard>
 
     <!-- Form Modal -->
     <Modal 
