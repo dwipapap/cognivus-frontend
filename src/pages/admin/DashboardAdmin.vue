@@ -2,7 +2,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { studentAPI, lecturerAPI, classAPI, dashboardAPI, paymentAPI } from '@/services/api';
 import LoadingSpinner from '@/components/ui/LoadingSpinner.vue';
-import { formatCurrency, getInitials } from '../../utils/formatters';
+import { formatCurrency } from '../../utils/formatters';
 
 const students = ref([]);
 const lecturers = ref([]);
@@ -59,250 +59,126 @@ const totalRevenue = computed(() => {
 /** Pending payments count */
 const pendingCount = computed(() => payments.value.filter(p => p.status === 'pending').length);
 
-/** Recent team members (students + lecturers) */
-const recentTeam = computed(() => {
-  const team = [];
-  students.value.slice(0, 4).forEach(s => {
-    team.push({ name: s.fullname, type: 'student', initials: getInitials(s.fullname) });
-  });
-  lecturers.value.slice(0, 2).forEach(l => {
-    team.push({ name: l.fullname, type: 'lecturer', initials: getInitials(l.fullname) });
-  });
-  return team.slice(0, 6);
-});
-
-/** Activity dot color */
-const getDotColor = (color) => {
-  const colors = { blue: 'bg-blue-500', green: 'bg-green-500', yellow: 'bg-yellow-500', emerald: 'bg-emerald-500', orange: 'bg-orange-500' };
-  return colors[color] || 'bg-gray-400';
-};
-
 onMounted(fetchDashboardData);
 </script>
 
 <template>
-  <div>
+  <div class="space-y-8 pb-8 w-full">
     <!-- Header -->
-    <div class="mb-6">
-      <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
-      <p class="text-gray-500 mt-1">Overview of your institution</p>
-    </div>
+    <header class="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
+      <div>
+        <h1 class="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight">Dashboard</h1>
+        <p class="text-slate-500 mt-2">Overview of the institution's key metrics and recent activity.</p>
+      </div>
+      <div class="flex items-center gap-3 sm:gap-4 flex-wrap">
+        <router-link to="/admin/lecturers" class="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">
+          Add Staff
+        </router-link>
+        <span class="text-slate-300">•</span>
+        <router-link to="/admin/classes" class="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">
+          Create Class
+        </router-link>
+        <span class="text-slate-300">•</span>
+        <router-link to="/admin/prices" class="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">
+          Manage Prices
+        </router-link>
+      </div>
+    </header>
 
     <!-- Loading -->
-    <div v-if="isLoading" class="max-w-md mx-auto py-20">
-      <LoadingSpinner size="lg" color="blue" :center="true" />
+    <div v-if="isLoading" class="py-20 flex justify-center">
+      <LoadingSpinner size="lg" color="slate" :center="true" />
     </div>
 
-    <!-- Bento Grid -->
-    <div v-else class="grid grid-cols-2 md:grid-cols-4 gap-4">
-
-      <!-- Stat: Students -->
-      <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-3">
-          <span class="text-sm text-gray-500">Total Students</span>
-          <span class="text-gray-300">•••</span>
-        </div>
-        <div class="text-3xl font-bold text-gray-900">{{ students.length }}</div>
-        <div class="mt-3 flex items-end gap-1 h-8">
-          <div v-for="i in 6" :key="i" class="flex-1 bg-blue-500 rounded-sm"
-            :style="`height: ${20 + Math.random() * 80}%`"></div>
-        </div>
-        <router-link to="/admin/students" class="mt-3 block text-xs text-blue-600 hover:text-blue-800 font-medium">
-          Manage Students →
-        </router-link>
-      </div>
-
-      <!-- Stat: Lecturers -->
-      <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-3">
-          <span class="text-sm text-gray-500">Total Lecturers</span>
-          <span class="text-gray-300">•••</span>
-        </div>
-        <div class="text-3xl font-bold text-gray-900">{{ lecturers.length }}</div>
-        <div class="mt-3 flex items-end gap-1 h-8">
-          <div v-for="i in 6" :key="i" class="flex-1 rounded-sm" :class="i % 2 === 0 ? 'bg-green-400' : 'bg-blue-400'"
-            :style="`height: ${30 + Math.random() * 70}%`"></div>
-        </div>
-        <router-link to="/admin/lecturers" class="mt-3 block text-xs text-green-600 hover:text-green-800 font-medium">
-          Manage Lecturers →
-        </router-link>
-      </div>
-
-      <!-- Last Actions -->
-      <div class="col-span-2 md:col-span-1 bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-        <div class="flex items-center justify-between mb-4">
-          <span class="text-sm font-semibold text-gray-700">Last actions</span>
-          <span class="text-gray-300">•••</span>
-        </div>
-        <div class="space-y-3">
-          <div v-for="(act, i) in recentActivities.slice(0, 3)" :key="i" class="flex items-start gap-2">
-            <div :class="['w-2 h-2 rounded-full mt-1.5 flex-shrink-0', getDotColor(act.color)]"></div>
-            <div class="flex-1 min-w-0">
-              <p class="text-sm text-gray-800 truncate">{{ act.title }}</p>
-              <p class="text-xs text-gray-400">{{ act.description }}</p>
+    <div v-else class="space-y-16">
+      <!-- Key Metrics Ledger (replaces cards) -->
+      <section>
+        <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-6">Key Metrics</h2>
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-8 md:gap-6 border-y border-slate-200 py-8">
+          
+          <!-- Metric: Revenue -->
+          <div class="flex flex-col">
+            <div class="text-sm font-medium text-slate-500 mb-2">Total Revenue</div>
+            <div class="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight">{{ formatCurrency(totalRevenue) }}</div>
+            <div class="mt-2 text-xs text-slate-500 h-4 flex items-center">
+              <span v-if="pendingCount > 0" class="inline-flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                {{ pendingCount }} pending
+              </span>
             </div>
-            <span class="text-xs text-gray-400 flex-shrink-0">{{ getRelativeTime(act.timestamp) }}</span>
           </div>
-        </div>
-      </div>
-
-      <!-- Quick Actions (was Team) -->
-      <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-        <p class="text-sm font-semibold text-gray-700 mb-3">Quick Actions</p>
-        <div class="space-y-2">
-          <router-link to="/admin/lecturers"
-            class="flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600 transition-colors">
-            <div class="w-6 h-6 bg-blue-100 rounded flex items-center justify-center">
-              <svg class="w-3 h-3 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  d="M8 9a3 3 0 100-6 3 3 0 000 6zM8 11a6 6 0 016 6H2a6 6 0 016-6zM16 7a1 1 0 10-2 0v1h-1a1 1 0 100 2h1v1a1 1 0 102 0v-1h1a1 1 0 100-2h-1V7z" />
-              </svg>
-            </div>
-            Add Lecturer
-          </router-link>
-          <router-link to="/admin/classes"
-            class="flex items-center gap-2 text-sm text-gray-600 hover:text-green-600 transition-colors">
-            <div class="w-6 h-6 bg-green-100 rounded flex items-center justify-center">
-              <svg class="w-3 h-3 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd"
-                  d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
-                  clip-rule="evenodd" />
-              </svg>
-            </div>
-            Create Class
-          </router-link>
-          <router-link to="/admin/prices"
-            class="flex items-center gap-2 text-sm text-gray-600 hover:text-purple-600 transition-colors">
-            <div class="w-6 h-6 bg-purple-100 rounded flex items-center justify-center">
-              <svg class="w-3 h-3 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z"
-                  clip-rule="evenodd" />
-              </svg>
-            </div>
-            Manage Prices
-          </router-link>
-        </div>
-      </div>
-
-      <!-- Revenue Card (Wide) -->
-      <div class="col-span-2 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-6 text-white">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm text-white/70">Total Revenue</p>
-            <p class="text-2xl md:text-3xl font-bold mt-1">{{ formatCurrency(totalRevenue) }}</p>
-            <p class="text-sm text-white/60 mt-1">{{ pendingCount }} pending</p>
+          
+          <!-- Metric: Students -->
+          <div class="flex flex-col">
+            <div class="text-sm font-medium text-slate-500 mb-2">Students</div>
+            <div class="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight">{{ students.length }}</div>
+            <router-link to="/admin/students" class="mt-2 text-xs font-medium text-slate-400 hover:text-slate-900 transition-colors h-4 inline-flex items-center group">
+              View directory <span class="ml-1 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all">→</span>
+            </router-link>
           </div>
-          <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd"
-                d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z"
-                clip-rule="evenodd" />
-            </svg>
+          
+          <!-- Metric: Lecturers -->
+          <div class="flex flex-col">
+            <div class="text-sm font-medium text-slate-500 mb-2">Lecturers</div>
+            <div class="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight">{{ lecturers.length }}</div>
+            <router-link to="/admin/lecturers" class="mt-2 text-xs font-medium text-slate-400 hover:text-slate-900 transition-colors h-4 inline-flex items-center group">
+              Manage staff <span class="ml-1 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all">→</span>
+            </router-link>
           </div>
-        </div>
-      </div>
+          
+          <!-- Metric: Classes -->
+          <div class="flex flex-col">
+            <div class="text-sm font-medium text-slate-500 mb-2">Classes</div>
+            <div class="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight">{{ classes.length }}</div>
+            <router-link to="/admin/classes" class="mt-2 text-xs font-medium text-slate-400 hover:text-slate-900 transition-colors h-4 inline-flex items-center group">
+              Active curriculum <span class="ml-1 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all">→</span>
+            </router-link>
+          </div>
+          
+          <!-- Metric: Payments -->
+          <div class="flex flex-col">
+            <div class="text-sm font-medium text-slate-500 mb-2">Payments</div>
+            <div class="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight">{{ payments.length }}</div>
+            <router-link to="/admin/payments" class="mt-2 text-xs font-medium text-slate-400 hover:text-slate-900 transition-colors h-4 inline-flex items-center group">
+              Transactions <span class="ml-1 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all">→</span>
+            </router-link>
+          </div>
 
-      <!-- Classes Card -->
-      <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-3">
-          <span class="text-sm text-gray-500">Classes</span>
-          <span class="text-gray-300">•••</span>
         </div>
-        <div class="text-3xl font-bold text-gray-900">{{ classes.length }}</div>
-        <p class="text-xs text-purple-600 mt-1">Active classes</p>
-        <router-link to="/admin/classes" class="mt-3 block text-xs text-purple-600 hover:text-purple-800 font-medium">
-          Manage Classes →
-        </router-link>
-      </div>
+      </section>
 
-      <!-- Payments Card -->
-      <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-        <div class="flex items-center justify-between mb-3">
-          <span class="text-sm text-gray-500">Payments</span>
-          <span class="text-gray-300">•••</span>
+      <!-- Recent Activity (Flattened) -->
+      <section>
+        <div class="flex items-baseline justify-between mb-6">
+          <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-widest">Recent Activity</h2>
+          <span class="text-xs text-slate-400 font-medium">Last 10 events</span>
         </div>
-        <div class="text-3xl font-bold text-gray-900">{{ payments.length }}</div>
-        <p class="text-xs text-orange-600 mt-1">{{ pendingCount }} pending</p>
-        <router-link to="/admin/payments"
-          class="mt-3 block text-xs text-orange-600 hover:text-orange-800 font-medium">
-          View Transactions →
-        </router-link>
-      </div>
-
-      <!-- Full Activity Feed (Full Width) -->
-      <div class="col-span-2 md:col-span-4 bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-        <div class="flex items-center justify-between mb-4">
-          <span class="font-semibold text-gray-800">Recent Activity</span>
-          <span class="text-xs text-gray-400">Last 10</span>
+        
+        <div v-if="recentActivities.length === 0" class="py-8 text-slate-400 text-sm">
+          No recent activity recorded.
         </div>
-        <div v-if="recentActivities.length === 0" class="text-center py-8 text-gray-400 text-sm">
-          No recent activity
-        </div>
-        <div v-else class="space-y-3 max-h-64 overflow-y-auto">
+        
+        <div v-else class="space-y-0 border-t border-slate-200">
           <div v-for="(act, i) in recentActivities" :key="i"
-            class="flex items-start gap-3 py-2 border-b border-gray-50 last:border-0">
-            <div :class="['w-2 h-2 rounded-full mt-1.5', getDotColor(act.color)]"></div>
-            <div class="flex-1 min-w-0">
-              <p class="text-sm text-gray-800">{{ act.title }}</p>
-              <p class="text-xs text-gray-400 truncate">{{ act.description }}</p>
+            class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-6 py-4 border-b border-slate-100 hover:bg-slate-50 transition-colors group px-2 sm:px-4 -mx-2 sm:-mx-4 rounded-lg"
+          >
+            <div class="w-24 flex-shrink-0 text-xs text-slate-400 font-mono tracking-tight group-hover:text-slate-500 transition-colors">
+              {{ getRelativeTime(act.timestamp) }}
             </div>
-            <span class="text-xs text-gray-400">{{ getRelativeTime(act.timestamp) }}</span>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium text-slate-900 truncate">{{ act.title }}</p>
+            </div>
+            <div class="flex-[2] min-w-0">
+              <p class="text-sm text-slate-500 truncate">{{ act.description }}</p>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
     </div>
   </div>
 </template>
 
 <style scoped>
-.grid>div {
-  animation: fadeIn 0.3s ease-out;
-  animation-fill-mode: backwards;
-}
-
-.grid>div:nth-child(1) {
-  animation-delay: 0.05s;
-}
-
-.grid>div:nth-child(2) {
-  animation-delay: 0.1s;
-}
-
-.grid>div:nth-child(3) {
-  animation-delay: 0.15s;
-}
-
-.grid>div:nth-child(4) {
-  animation-delay: 0.2s;
-}
-
-.grid>div:nth-child(5) {
-  animation-delay: 0.25s;
-}
-
-.grid>div:nth-child(6) {
-  animation-delay: 0.3s;
-}
-
-.grid>div:nth-child(7) {
-  animation-delay: 0.35s;
-}
-
-.grid>div:nth-child(8) {
-  animation-delay: 0.4s;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+/* Removed decorative animations for a snappier product experience */
 </style>

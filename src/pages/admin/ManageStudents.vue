@@ -211,8 +211,8 @@ onMounted(() => {
     <div class="mb-6">
       <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
         <div>
-          <h1 class="text-2xl font-bold text-gray-800">Manage Students</h1>
-          <p class="text-gray-600 mt-1">Create, edit, and manage student records</p>
+          <h1 class="text-2xl font-bold text-slate-800">Manage Students</h1>
+          <p class="text-slate-600 mt-1">Create, edit, and manage student records</p>
         </div>
         <BaseButton @click="openAddModal" variant="primary" size="md">
           <template #icon>
@@ -225,13 +225,13 @@ onMounted(() => {
       </div>
 
       <!-- Filter Section -->
-      <div class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+      <div class="bg-white rounded-lg border border-slate-200 p-4 shadow-sm">
         <div class="flex flex-col md:flex-row gap-4 items-start md:items-center">
-          <label class="text-sm font-medium text-gray-700 whitespace-nowrap">Filter by Class:</label>
+          <label class="text-sm font-medium text-slate-700 whitespace-nowrap">Filter by Class:</label>
           <div class="w-full md:w-64">
             <select 
               v-model="selectedClassFilter"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-colors"
             >
               <option value="">All Classes</option>
               <option v-for="cls in classes" :key="cls.classid" :value="cls.classid">
@@ -239,7 +239,7 @@ onMounted(() => {
               </option>
             </select>
           </div>
-          <div class="text-sm text-gray-500">
+          <div class="text-sm text-slate-500">
             Showing {{ filteredStudents.length }} of {{ students.length }} students
           </div>
         </div>
@@ -247,48 +247,48 @@ onMounted(() => {
     </div>
 
     <!-- Students Table -->
-    <div v-if="isLoading" class="bg-white rounded-lg border border-gray-200 shadow-sm p-12 text-center">
-      <div class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
-      <p class="text-gray-600 mt-4">Loading students...</p>
+    <div v-if="isLoading" class="bg-white rounded-lg border border-slate-200 shadow-sm p-12 text-center">
+      <div class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-slate-600 border-r-transparent"></div>
+      <p class="text-slate-600 mt-4">Loading students...</p>
     </div>
 
-    <div v-else class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+    <div v-else class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full border-collapse">
           <thead>
-            <tr class="bg-gray-50 border-b border-gray-200">
-              <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider w-16">#</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Name</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Email</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Class</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Level</th>
-              <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+            <tr class="bg-slate-50 border-b border-slate-200">
+              <th class="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider w-16">#</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Name</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Email</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Class</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Level</th>
+              <th class="px-4 py-3 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="(student, index) in filteredStudents" :key="student.studentid" 
-              class="border-b border-gray-200 transition-colors"
-              :class="index % 2 === 0 ? 'bg-white' : 'bg-gray-50'"
+              class="border-b border-slate-200 transition-colors"
+              :class="index % 2 === 0 ? 'bg-white' : 'bg-slate-50'"
             >
-              <td class="px-4 py-3 text-right text-sm text-gray-500 font-medium">{{ index + 1 }}</td>
+              <td class="px-4 py-3 text-right text-sm text-slate-500 font-medium">{{ index + 1 }}</td>
               <td class="px-4 py-3">
-                <div class="text-sm font-semibold text-gray-900">{{ student.fullname }}</div>
+                <div class="text-sm font-semibold text-slate-900">{{ student.fullname }}</div>
               </td>
               <td class="px-4 py-3">
                 <a v-if="student.tbuser?.email" 
                   :href="`mailto:${student.tbuser.email}`"
-                  class="text-sm text-blue-600 hover:text-blue-800 hover:underline">
+                  class="text-sm text-slate-700 hover:text-slate-900 hover:underline">
                   {{ student.tbuser.email }}
                 </a>
-                <span v-else class="text-sm text-gray-400">No email</span>
+                <span v-else class="text-sm text-slate-400">No email</span>
               </td>
               <td class="px-4 py-3">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-700">
                   {{ getClassCode(student.classid) }}
                 </span>
               </td>
               <td class="px-4 py-3">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-indigo-100 text-indigo-800">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-700">
                   {{ getStudentLevel(student.classid) }}
                 </span>
               </td>
@@ -313,12 +313,12 @@ onMounted(() => {
             </tr>
             <tr v-if="filteredStudents.length === 0">
               <td colspan="6" class="px-4 py-12 text-center">
-                <div class="text-gray-400">
+                <div class="text-slate-400">
                   <svg class="mx-auto h-12 w-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
                   </svg>
-                  <p class="text-sm font-medium text-gray-900">No students found</p>
-                  <p class="text-sm text-gray-500 mt-1">
+                  <p class="text-sm font-medium text-slate-900">No students found</p>
+                  <p class="text-sm text-slate-500 mt-1">
                     {{ selectedClassFilter ? 'Try selecting a different class or clear the filter' : 'Click "Add Student" to create one' }}
                   </p>
                 </div>

@@ -167,7 +167,7 @@ const courseLink = (courseId) => ({ name: 'StudentCourseDetail', params: { id: c
 
     <section aria-label="Quick stats" class="grid grid-cols-2 gap-2 md:gap-4">
       <article
-        class="relative bg-[#e6f0ff] rounded-[18px] md:rounded-[20px] border border-gray-200 overflow-hidden min-h-[118px] md:min-h-[132px] flex flex-col md:flex-row group">
+        class="relative bg-brand-sky-subtle rounded-token-card-lg md:rounded-token-2xl border border-gray-200 overflow-hidden min-h-[118px] md:min-h-[132px] flex flex-col md:flex-row group">
 
         <div class="relative z-10 p-3.5 md:p-5 flex flex-col flex-grow md:w-[66%]">
           <div class="flex items-center gap-1.5 md:gap-2 text-blue-600 mb-1 md:mb-1.5">
@@ -204,7 +204,7 @@ const courseLink = (courseId) => ({ name: 'StudentCourseDetail', params: { id: c
       </article>
 
       <article
-        class="relative bg-[#e6f0ff] rounded-[18px] md:rounded-[20px] border border-gray-200 overflow-hidden min-h-[118px] md:min-h-[132px] flex flex-col md:flex-row group">
+        class="relative bg-brand-sky-subtle rounded-token-card-lg md:rounded-token-2xl border border-gray-200 overflow-hidden min-h-[118px] md:min-h-[132px] flex flex-col md:flex-row group">
 
         <div class="relative z-10 p-3.5 md:p-5 flex flex-col flex-grow md:w-[66%]">
           <div class="flex items-center gap-1.5 md:gap-2 text-indigo-600 mb-1 md:mb-1.5">

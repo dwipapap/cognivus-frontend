@@ -67,7 +67,7 @@ describe('BaseInput', () => {
       })
       
       expect(wrapper.text()).toContain('Email is required')
-      const errorElement = wrapper.find('.text-red-600')
+      const errorElement = wrapper.find('.text-brand-danger')
       expect(errorElement.exists()).toBe(true)
     })
   })
@@ -213,7 +213,7 @@ describe('BaseInput', () => {
       const classes = input.classes().join(' ')
       
       expect(classes).toContain('red')
-      expect(wrapper.find('.text-red-600').exists()).toBe(true)
+      expect(wrapper.find('.text-brand-danger').exists()).toBe(true)
     })
 
     it('should apply normal styles when no error', () => {
@@ -281,7 +281,7 @@ describe('BaseInput', () => {
       })
       
       const input = wrapper.find('input')
-      expect(input.classes()).toContain('bg-gray-50')
+      expect(input.classes()).toContain('bg-surface-subtle')
     })
 
     it('should apply filled variant classes', () => {

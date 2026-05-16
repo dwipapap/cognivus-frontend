@@ -198,7 +198,7 @@ const handleGoogleLogin = () => {
 
             <BaseButton
               type="submit"
-              variant="glass-primary"
+              variant="primary"
               size="lg"
               block
               :loading="isSubmitting"
@@ -217,7 +217,7 @@ const handleGoogleLogin = () => {
           <!-- Google Login Button -->
           <BaseButton
             @click="handleGoogleLogin"
-            variant="glass"
+            variant="secondary"
             size="lg"
             block
           >

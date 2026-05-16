@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue';
+import { useId } from '../../composables/useId';
 
-// Props definition
 const props = defineProps({
   modelValue: {
     type: [String, Number, Boolean, Object],
@@ -55,40 +55,46 @@ const props = defineProps({
   }
 });
 
-// Emits definition
 const emit = defineEmits(['update:modelValue', 'change']);
 
-// Refs
 const selectRef = ref(null);
 
-// Computed properties
-const selectId = computed(() => `select-${Math.random().toString(36).substr(2, 9)}`);
+const selectId = computed(() => useId('select'));
+
+const errorId = computed(() => props.error ? useId('select-error') : '');
+const helpId = computed(() => emit('help') ? useId('select-help') : '');
+
+const describedBy = computed(() => {
+  const parts = [];
+  if (errorId.value) parts.push(errorId.value);
+  return parts.length ? parts.join(' ') : undefined;
+});
 
 const selectClasses = computed(() => {
-  const baseClasses = 'block w-full rounded-lg border text-gray-900 transition-colors focus:ring-2 focus:outline-none cursor-pointer';
-  
+  const baseClasses = 'block w-full rounded-token-lg border text-ink transition-colors duration-token-default focus:ring-2 focus:outline-none cursor-pointer';
+
   const sizeClasses = {
     sm: 'text-sm p-2',
     md: 'text-sm p-2.5',
     lg: 'text-base p-3'
   };
-  
+
   const variantClasses = {
-    default: props.error 
+    default: props.error
       ? 'bg-red-50 border-red-300 text-red-900 focus:ring-red-500 focus:border-red-500'
-      : 'bg-gray-50 border-gray-300 focus:ring-blue-500 focus:border-blue-500',
+      : 'bg-surface-subtle border-divider focus:ring-brand-primary-ring focus:border-brand-primary',
     filled: props.error
       ? 'bg-red-100 border-red-300 text-red-900 focus:ring-red-500 focus:border-red-500'
-      : 'bg-blue-50 border-blue-300 focus:ring-blue-500 focus:border-blue-500',
+      : 'bg-blue-50 border-blue-300 focus:ring-brand-primary-ring focus:border-brand-primary',
     outline: props.error
       ? 'bg-transparent border-red-300 text-red-900 focus:ring-red-500 focus:border-red-500'
-      : 'bg-transparent border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+      : 'bg-transparent border-divider focus:ring-brand-primary-ring focus:border-brand-primary'
   };
-  
-  const disabledClasses = props.disabled 
-    ? 'opacity-50 cursor-not-allowed' 
+
+  const disabledClasses = props.disabled
+    ? 'opacity-50 cursor-not-allowed'
     : '';
-  
+
   return [
     baseClasses,
     sizeClasses[props.size],
@@ -99,7 +105,7 @@ const selectClasses = computed(() => {
 
 const labelClasses = computed(() => {
   const baseClasses = 'block mb-2 text-sm font-medium';
-  const colorClasses = props.error ? 'text-red-700' : 'text-gray-900';
+  const colorClasses = props.error ? 'text-red-700' : 'text-ink';
   return `${baseClasses} ${colorClasses}`;
 });
 
@@ -112,7 +118,6 @@ const normalizedOptions = computed(() => {
   });
 });
 
-// Methods
 const handleChange = (event) => {
   const value = event.target.value;
   emit('update:modelValue', value);
@@ -123,7 +128,6 @@ const focus = () => {
   selectRef.value?.focus();
 };
 
-// Expose methods
 defineExpose({
   focus,
   blur: () => selectRef.value?.blur()
@@ -132,17 +136,15 @@ defineExpose({
 
 <template>
   <div class="w-full">
-    <!-- Label -->
-    <label 
-      v-if="label" 
-      :for="selectId" 
+    <label
+      v-if="label"
+      :for="selectId"
       :class="labelClasses"
     >
       {{ label }}
-      <span v-if="required" class="text-red-500 ml-1">*</span>
+      <span v-if="required" class="text-brand-danger ml-1">*</span>
     </label>
 
-    <!-- Select Element -->
     <select
       :id="selectId"
       ref="selectRef"
@@ -151,22 +153,21 @@ defineExpose({
       :disabled="disabled"
       :multiple="multiple"
       :class="selectClasses"
+      :aria-describedby="describedBy"
+      :aria-invalid="!!error"
       @change="handleChange"
     >
-      <!-- Placeholder option -->
-      <option 
-        v-if="!multiple && placeholder && !$slots.default" 
-        value="" 
+      <option
+        v-if="!multiple && placeholder && !$slots.default"
+        value=""
         disabled
         :selected="modelValue === ''"
       >
         {{ placeholder }}
       </option>
 
-      <!-- Slot content (priority over options prop) -->
       <slot v-if="$slots.default"></slot>
 
-      <!-- Options from prop -->
       <option
         v-else
         v-for="option in normalizedOptions"
@@ -177,13 +178,11 @@ defineExpose({
       </option>
     </select>
 
-    <!-- Error Message -->
-    <p v-if="error" class="mt-2 text-sm text-red-600">
+    <p v-if="error" :id="errorId" class="mt-2 text-sm text-brand-danger">
       {{ error }}
     </p>
 
-    <!-- Help Text Slot -->
-    <div v-if="$slots.help" class="mt-2 text-sm text-gray-600">
+    <div v-if="$slots.help" :id="helpId" class="mt-2 text-sm text-ink-muted">
       <slot name="help"></slot>
     </div>
   </div>

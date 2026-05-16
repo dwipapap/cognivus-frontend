@@ -86,14 +86,14 @@ const handleSave = async () => {
       <!-- Left Column (8 units) -->
       <div class="lg:col-span-8 space-y-8">
         <!-- Section: Identity -->
-        <section class="bg-white rounded-2xl p-6 border border-blue-100 shadow-sm transition-all duration-300 hover:shadow-md">
+        <section class="bg-white rounded-lg p-6 border border-slate-200">
           <div class="flex items-center gap-3 mb-6">
-            <div class="p-2 bg-blue-50 rounded-lg">
-              <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="p-2 bg-slate-100 rounded-lg">
+              <svg class="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
               </svg>
             </div>
-            <h3 class="text-lg font-bold text-gray-900 tracking-tight">Lecturer Profile</h3>
+            <h3 class="text-lg font-semibold text-slate-900 tracking-tight">Lecturer Profile</h3>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -143,14 +143,14 @@ const handleSave = async () => {
         </section>
 
         <!-- Section: Account -->
-        <section class="bg-white rounded-2xl p-6 border border-blue-100 shadow-sm transition-all duration-300 hover:shadow-md">
+        <section class="bg-white rounded-lg p-6 border border-slate-200">
           <div class="flex items-center gap-3 mb-6">
-            <div class="p-2 bg-blue-50 rounded-lg">
-              <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="p-2 bg-slate-100 rounded-lg">
+              <svg class="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
               </svg>
             </div>
-            <h3 class="text-lg font-bold text-gray-900 tracking-tight">Security & Access</h3>
+            <h3 class="text-lg font-semibold text-slate-900 tracking-tight">Security & Access</h3>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -196,15 +196,15 @@ const handleSave = async () => {
       <!-- Right Column (4 units) -->
       <div class="lg:col-span-4 space-y-8">
         <!-- Section: Professional Info -->
-        <section class="bg-blue-600 rounded-2xl p-6 border border-blue-500 shadow-lg text-white">
+        <section class="bg-slate-900 rounded-lg p-6 border border-slate-800 text-white">
           <div class="flex items-center gap-3 mb-6">
-            <div class="p-2 bg-white/10 rounded-lg">
+            <div class="p-2 bg-slate-800 rounded-lg">
               <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/>
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
               </svg>
             </div>
-            <h3 class="text-lg font-bold tracking-tight">Professional Info</h3>
+            <h3 class="text-lg font-semibold tracking-tight">Professional Info</h3>
           </div>
 
           <div class="space-y-5">
@@ -213,7 +213,7 @@ const handleSave = async () => {
               label="Latest Education"
               placeholder="e.g., M.Sc in Computer Science"
               variant="filled"
-              class="[&_label]:text-blue-50 [&_input]:bg-blue-700/30 [&_input]:border-blue-400/50 [&_input]:text-white [&_input]:placeholder-blue-300"
+              class="[&_label]:text-slate-300 [&_input]:bg-slate-800/50 [&_input]:border-slate-600 [&_input]:text-white [&_input]:placeholder-slate-400"
             />
             
             <BaseTextarea 
@@ -222,16 +222,14 @@ const handleSave = async () => {
               placeholder="Full physical address"
               :rows="4"
               variant="filled"
-              class="[&_label]:text-blue-50 [&_textarea]:bg-blue-700/30 [&_textarea]:border-blue-400/50 [&_textarea]:text-white [&_textarea]:placeholder-blue-300"
+              class="[&_label]:text-slate-300 [&_textarea]:bg-slate-800/50 [&_textarea]:border-slate-600 [&_textarea]:text-white [&_textarea]:placeholder-slate-400"
             />
           </div>
         </section>
 
         <!-- Help Card -->
-        <section class="bg-white rounded-2xl p-6 border border-blue-100 shadow-sm relative overflow-hidden">
-          <div class="absolute top-0 right-0 -mr-8 -mt-8 w-24 h-24 bg-blue-50 rounded-full"></div>
-          
-          <h4 class="text-sm font-bold text-blue-900 mb-4 flex items-center gap-2">
+        <section class="bg-white rounded-lg p-6 border border-slate-200">
+          <h4 class="text-sm font-semibold text-slate-900 mb-4 flex items-center gap-2">
             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
             </svg>
@@ -244,9 +242,9 @@ const handleSave = async () => {
               'Email must be unique and valid.',
               'Passwords require at least 8 characters.',
               'Phone number for direct coordination.'
-            ]" :key="idx" class="flex items-start gap-2.5 group">
-              <div class="mt-1 w-1.5 h-1.5 rounded-full bg-blue-400 group-hover:scale-125 transition-transform"></div>
-              <span class="text-xs text-gray-600 leading-relaxed">{{ item }}</span>
+            ]" :key="idx" class="flex items-start gap-2.5">
+              <div class="mt-1 w-1.5 h-1.5 rounded-full bg-slate-400"></div>
+              <span class="text-xs text-slate-600 leading-relaxed">{{ item }}</span>
             </li>
           </ul>
         </section>
@@ -254,8 +252,8 @@ const handleSave = async () => {
     </div>
 
     <!-- Sticky Actions -->
-    <div class="mt-10 flex items-center justify-between gap-4 pt-6 border-t border-blue-50">
-      <span class="hidden sm:block text-xs text-gray-400 font-medium">
+    <div class="mt-10 flex items-center justify-between gap-4 pt-6 border-t border-slate-200">
+      <span class="hidden sm:block text-xs text-slate-400 font-medium">
         * Fields marked with asterisk are required
       </span>
       <div class="flex items-center gap-3 w-full sm:w-auto">
@@ -272,7 +270,7 @@ const handleSave = async () => {
           type="submit" 
           variant="primary" 
           size="lg"
-          class="flex-1 sm:flex-none shadow-blue-200"
+          class="flex-1 sm:flex-none"
           :loading="isSubmitting"
         >
           <template #icon>

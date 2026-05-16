@@ -105,64 +105,72 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="p-6">
+  <div>
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
       <div>
-        <h1 class="text-2xl font-bold text-gray-800">Manage Levels</h1>
-        <p class="text-gray-600 mt-1">Create, edit, and manage course levels</p>
+        <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">Levels</h1>
+        <p class="text-sm text-slate-500 mt-1">Course levels in progression order</p>
       </div>
       <BaseButton @click="openAddModal" variant="primary">
-        <span class="mr-2">+</span> Add Level
+        Add Level
       </BaseButton>
     </div>
 
     <!-- Loading State -->
-        <!-- Loading State -->
-    <div v-if="isLoading" class="max-w-2xl mx-auto py-20">
-      <LoadingSpinner size="lg" color="blue" :center="true" />
-      <p class="text-center text-gray-600 mt-4">Loading levels...</p>
+    <div v-if="isLoading" class="py-20 flex justify-center">
+      <LoadingSpinner size="lg" color="slate" :center="true" />
     </div>
 
-    <!-- Levels Grid -->
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div
-        v-for="level in paginatedLevels"
-        :key="level.levelid"
-        class="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-6 hover:shadow-xl hover:-translate-y-1 transition-all duration-200"
-      >
-        <div class="flex items-start justify-between mb-3">
-          <div class="flex-shrink-0 h-12 w-12 bg-gradient-to-br from-purple-400 to-pink-500 rounded-lg flex items-center justify-center text-white font-bold text-xl">
-            {{ level.name?.charAt(0) || '?' }}
+    <!-- Levels List -->
+    <div v-else>
+      <div class="border border-slate-200 rounded-lg overflow-hidden">
+        <div class="bg-slate-50 border-b border-slate-200 px-6 py-3 flex items-center gap-4">
+          <span class="text-xs font-semibold text-slate-500 uppercase w-12">Step</span>
+          <span class="text-xs font-semibold text-slate-500 uppercase flex-1">Name</span>
+          <span class="text-xs font-semibold text-slate-500 uppercase flex-[2]">Description</span>
+          <span class="text-xs font-semibold text-slate-500 uppercase w-40 text-right">Actions</span>
+        </div>
+        <div class="divide-y divide-slate-100">
+          <div
+            v-for="(level, index) in paginatedLevels"
+            :key="level.levelid"
+            class="px-6 py-4 flex items-center gap-4 hover:bg-slate-50 transition-colors"
+          >
+            <span class="w-12 text-sm font-mono text-slate-400">{{ (currentPage - 1) * itemsPerPage + index + 1 }}</span>
+            <span class="flex-1 text-sm font-medium text-slate-900">{{ level.name }}</span>
+            <span class="flex-[2] text-sm text-slate-600">{{ level.description || '-' }}</span>
+            <div class="w-40 flex justify-end gap-2">
+              <button @click="openEditModal(level)" class="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
+                Edit
+              </button>
+              <button @click="handleDelete(level)" class="text-sm font-medium text-red-600 hover:text-red-800 transition-colors">
+                Delete
+              </button>
+            </div>
           </div>
-          <div class="flex gap-2">
-            <button @click="openEditModal(level)" class="text-blue-600 hover:text-blue-800 font-medium text-sm">
-              Edit
-            </button>
-            <button @click="handleDelete(level)" class="text-red-600 hover:text-red-800 font-medium text-sm">
-              Delete
-            </button>
+
+          <!-- Empty State -->
+          <div v-if="levels.length === 0" class="px-6 py-12 text-center text-slate-400">
+            <p class="text-sm">No levels found</p>
           </div>
         </div>
-        <h3 class="text-lg font-bold text-gray-800 mb-2">{{ level.name }}</h3>
-        <p class="text-sm text-gray-600">{{ level.description || 'No description' }}</p>
       </div>
 
-      <!-- Empty State -->
-      <div v-if="levels.length === 0" class="col-span-full text-center py-12 bg-white/80 backdrop-blur-sm rounded-xl shadow-lg">
-        <p class="text-gray-500">No levels found. Click "Add Level" to create one.</p>
+      <!-- Pagination -->
+      <div v-if="levels.length > itemsPerPage" class="flex items-center justify-between mt-4">
+        <p class="text-sm text-slate-500">
+          Page {{ currentPage }} of {{ totalPages }}
+        </p>
+        <div class="flex gap-2">
+          <BaseButton @click="prevPage" :disabled="currentPage === 1" variant="secondary">
+            Previous
+          </BaseButton>
+          <BaseButton @click="nextPage" :disabled="currentPage === totalPages" variant="secondary">
+            Next
+          </BaseButton>
+        </div>
       </div>
-    </div>
-
-    <!-- Pagination -->
-    <div v-if="levels.length > itemsPerPage" class="flex justify-center items-center gap-4 mt-6">
-      <BaseButton @click="prevPage" :disabled="currentPage === 1" variant="secondary">
-        Previous
-      </BaseButton>
-      <span class="text-gray-700">Page {{ currentPage }} of {{ totalPages }}</span>
-      <BaseButton @click="nextPage" :disabled="currentPage === totalPages" variant="secondary">
-        Next
-      </BaseButton>
     </div>
 
     <!-- Form Modal -->

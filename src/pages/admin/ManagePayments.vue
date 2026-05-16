@@ -31,7 +31,7 @@ const getStatusBadge = (status) => {
     error: 'bg-red-100 text-red-800 border-red-200',
     failed: 'bg-red-100 text-red-800 border-red-200'
   };
-  return classes[status] || 'bg-gray-100 text-gray-800 border-gray-200';
+  return classes[status] || 'bg-slate-100 text-slate-800 border-slate-200';
 };
 
 const filteredPayments = computed(() => {
@@ -85,7 +85,6 @@ const fetchPayments = async () => {
     }
   } catch (error) {
     showNotification('error', 'Failed to load payment data.');
-    console.error('Failed to fetch payments:', error);
   } finally {
     isLoading.value = false;
   }
@@ -99,7 +98,7 @@ const fetchStudents = async () => {
       students.value = response.data.data;
     }
   } catch (error) {
-    console.error('Failed to fetch students:', error);
+    // Failed to fetch students
   }
 };
 
@@ -159,8 +158,8 @@ onMounted(() => {
     <div class="mb-6">
       <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
         <div>
-          <h1 class="text-2xl font-bold text-gray-800">Manage Payments</h1>
-          <p class="text-gray-600 mt-1">View and monitor all student payment transactions</p>
+          <h1 class="text-2xl font-bold text-slate-800">Manage Payments</h1>
+          <p class="text-slate-600 mt-1">View and monitor all student payment transactions</p>
         </div>
         <div class="flex gap-2">
           <BaseButton @click="refreshPayments" variant="secondary" size="md">
@@ -184,9 +183,9 @@ onMounted(() => {
 
       <!-- Statistics Cards -->
       <div class="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 mb-6">
-        <div class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
-          <div class="text-sm text-gray-600 mb-1">Total Payments</div>
-          <div class="text-2xl font-bold text-gray-900">{{ stats.total }}</div>
+        <div class="bg-white rounded-lg border border-slate-200 p-4 shadow-sm">
+          <div class="text-sm text-slate-600 mb-1">Total Payments</div>
+          <div class="text-2xl font-bold text-slate-900">{{ stats.total }}</div>
         </div>
         <div class="bg-white rounded-lg border border-yellow-200 p-4 shadow-sm">
           <div class="text-sm text-yellow-700 mb-1">Pending</div>
@@ -200,32 +199,32 @@ onMounted(() => {
           <div class="text-sm text-red-700 mb-1">Failed</div>
           <div class="text-2xl font-bold text-red-800">{{ stats.failed }}</div>
         </div>
-        <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-4 shadow-sm col-span-2 md:col-span-1">
-          <div class="text-sm text-blue-100 mb-1">Total Revenue</div>
+        <div class="bg-slate-900 rounded-lg p-4 shadow-sm col-span-2 md:col-span-1">
+          <div class="text-sm text-slate-300 mb-1">Total Revenue</div>
           <div class="text-lg md:text-xl font-bold text-white truncate">{{ formatCurrency(stats.totalRevenue) }}</div>
         </div>
       </div>
 
       <!-- Filters Section -->
-      <div class="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+      <div class="bg-white rounded-lg border border-slate-200 p-4 shadow-sm">
         <div class="flex flex-col lg:flex-row gap-4">
           <!-- Search -->
           <div class="flex-1">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
+            <label class="block text-sm font-medium text-slate-700 mb-2">Search</label>
             <input 
               v-model="searchQuery"
               type="text"
               placeholder="Search by student name, order ID, or transaction ID..."
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-colors"
             />
           </div>
 
           <!-- Status Filter -->
           <div class="w-full lg:w-48">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+            <label class="block text-sm font-medium text-slate-700 mb-2">Status</label>
             <select 
               v-model="statusFilter"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-colors"
             >
               <option value="">All Status</option>
               <option value="pending">Pending</option>
@@ -236,10 +235,10 @@ onMounted(() => {
 
           <!-- Payment Type Filter -->
           <div class="w-full lg:w-48">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Payment Type</label>
+            <label class="block text-sm font-medium text-slate-700 mb-2">Payment Type</label>
             <select 
               v-model="typeFilter"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-colors"
             >
               <option value="">All Types</option>
               <option value="semester">Semester</option>
@@ -249,57 +248,57 @@ onMounted(() => {
           </div>
         </div>
 
-        <div class="mt-3 text-sm text-gray-500">
+        <div class="mt-3 text-sm text-slate-500">
           Showing {{ filteredPayments.length }} of {{ payments.length }} payments
         </div>
       </div>
     </div>
 
     <!-- Loading State -->
-    <div v-if="isLoading" class="bg-white rounded-lg border border-gray-200 shadow-sm p-12 text-center">
-      <div class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
-      <p class="text-gray-600 mt-4">Loading payments...</p>
+    <div v-if="isLoading" class="bg-white rounded-lg border border-slate-200 shadow-sm p-12 text-center">
+      <div class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-slate-600 border-r-transparent"></div>
+      <p class="text-slate-600 mt-4">Loading payments...</p>
     </div>
 
     <template v-else>
       <!-- Desktop Table View -->
-      <div class="hidden md:block bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+      <div class="hidden md:block bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full border-collapse">
           <thead>
-            <tr class="bg-gray-50 border-b border-gray-200">
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-20">ID</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Student</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Order ID</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Transaction ID</th>
-              <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Amount</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Type</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Date</th>
-              <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
+            <tr class="bg-slate-50 border-b border-slate-200">
+              <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider w-20">ID</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Student</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Order ID</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Transaction ID</th>
+              <th class="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Amount</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Type</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Status</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Date</th>
+              <th class="px-4 py-3 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="(payment, index) in filteredPayments" :key="payment.paymentid" 
-              class="border-b border-gray-200 hover:bg-gray-50 transition-colors"
-              :class="index % 2 === 0 ? 'bg-white' : 'bg-gray-50'"
+              class="border-b border-slate-200 transition-colors"
+              :class="index % 2 === 0 ? 'bg-white' : 'bg-slate-50'"
             >
-              <td class="px-4 py-3 text-sm text-gray-500 font-medium">#{{ payment.paymentid }}</td>
+              <td class="px-4 py-3 text-sm text-slate-500 font-medium">#{{ payment.paymentid }}</td>
               <td class="px-4 py-3">
-                <div class="text-sm font-semibold text-gray-900">{{ getStudentName(payment.studentid) }}</div>
-                <div class="text-xs text-gray-500">ID: {{ payment.studentid }}</div>
+                <div class="text-sm font-semibold text-slate-900">{{ getStudentName(payment.studentid) }}</div>
+                <div class="text-xs text-slate-500">ID: {{ payment.studentid }}</div>
               </td>
               <td class="px-4 py-3">
-                <code class="text-xs bg-gray-100 px-2 py-1 rounded text-gray-700">{{ payment.midtrans_orderid || '-' }}</code>
+                <code class="text-xs bg-slate-100 px-2 py-1 rounded text-slate-700">{{ payment.midtrans_orderid || '-' }}</code>
               </td>
               <td class="px-4 py-3">
-                <code class="text-xs bg-gray-100 px-2 py-1 rounded text-gray-700">{{ payment.midtrans_transactionid || '-' }}</code>
+                <code class="text-xs bg-slate-100 px-2 py-1 rounded text-slate-700">{{ payment.midtrans_transactionid || '-' }}</code>
               </td>
               <td class="px-4 py-3 text-right">
-                <span class="text-sm font-semibold text-gray-900">{{ formatCurrency(payment.amount) }}</span>
+                <span class="text-sm font-semibold text-slate-900">{{ formatCurrency(payment.amount) }}</span>
               </td>
               <td class="px-4 py-3">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800 capitalize">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-700 capitalize">
                   {{ payment.payment_type }}
                 </span>
               </td>
@@ -310,7 +309,7 @@ onMounted(() => {
                 </span>
               </td>
               <td class="px-4 py-3">
-                <div class="text-sm text-gray-900">{{ formatDate(payment.created_at) }}</div>
+                <div class="text-sm text-slate-900">{{ formatDate(payment.created_at) }}</div>
               </td>
               <td class="px-4 py-3">
                 <div class="flex justify-center">
@@ -326,12 +325,12 @@ onMounted(() => {
             </tr>
             <tr v-if="filteredPayments.length === 0">
               <td colspan="9" class="px-4 py-12 text-center">
-                <div class="text-gray-400">
+                <div class="text-slate-400">
                   <svg class="mx-auto h-12 w-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
                   </svg>
-                  <p class="text-sm font-medium text-gray-900">No payments found</p>
-                  <p class="text-sm text-gray-500 mt-1">
+                  <p class="text-sm font-medium text-slate-900">No payments found</p>
+                  <p class="text-sm text-slate-500 mt-1">
                     {{ searchQuery || statusFilter || typeFilter ? 'Try adjusting your filters' : 'No payment records available' }}
                   </p>
                 </div>
@@ -345,12 +344,12 @@ onMounted(() => {
       <!-- Mobile Card View -->
       <div class="md:hidden space-y-3">
         <div v-for="payment in filteredPayments" :key="payment.paymentid"
-        class="bg-white rounded-lg border border-gray-200 shadow-sm p-4"
+        class="bg-white rounded-lg border border-slate-200 shadow-sm p-4"
       >
         <div class="flex justify-between items-start mb-3">
           <div>
-            <div class="text-sm font-semibold text-gray-900">{{ getStudentName(payment.studentid) }}</div>
-            <div class="text-xs text-gray-500">Payment #{{ payment.paymentid }}</div>
+            <div class="text-sm font-semibold text-slate-900">{{ getStudentName(payment.studentid) }}</div>
+            <div class="text-xs text-slate-500">Payment #{{ payment.paymentid }}</div>
           </div>
           <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium border capitalize" 
             :class="getStatusBadge(payment.status)">
@@ -360,20 +359,20 @@ onMounted(() => {
 
         <div class="space-y-2 text-sm">
           <div class="flex justify-between">
-            <span class="text-gray-600">Amount:</span>
-            <span class="font-semibold text-gray-900">{{ formatCurrency(payment.amount) }}</span>
+            <span class="text-slate-600">Amount:</span>
+            <span class="font-semibold text-slate-900">{{ formatCurrency(payment.amount) }}</span>
           </div>
           <div class="flex justify-between">
-            <span class="text-gray-600">Type:</span>
+            <span class="text-slate-600">Type:</span>
             <span class="capitalize">{{ payment.payment_type }}</span>
           </div>
           <div class="flex justify-between">
-            <span class="text-gray-600">Date:</span>
+            <span class="text-slate-600">Date:</span>
             <span>{{ formatDate(payment.created_at) }}</span>
           </div>
         </div>
 
-        <div class="mt-3 pt-3 border-t border-gray-200">
+        <div class="mt-3 pt-3 border-t border-slate-200">
           <BaseButton 
             @click="openDetailsModal(payment)" 
             variant="secondary" 
@@ -385,12 +384,12 @@ onMounted(() => {
         </div>
       </div>
 
-      <div v-if="filteredPayments.length === 0" class="bg-white rounded-lg border border-gray-200 shadow-sm p-8 text-center">
-        <svg class="mx-auto h-12 w-12 mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div v-if="filteredPayments.length === 0" class="bg-white rounded-lg border border-slate-200 shadow-sm p-8 text-center">
+        <svg class="mx-auto h-12 w-12 mb-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
         </svg>
-        <p class="text-sm font-medium text-gray-900">No payments found</p>
-        <p class="text-sm text-gray-500 mt-1">
+        <p class="text-sm font-medium text-slate-900">No payments found</p>
+        <p class="text-sm text-slate-500 mt-1">
           {{ searchQuery || statusFilter || typeFilter ? 'Try adjusting your filters' : 'No payment records available' }}
         </p>
       </div>
@@ -413,11 +412,11 @@ onMounted(() => {
         <div v-if="selectedPayment" class="space-y-4">
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Payment ID</label>
-              <p class="text-sm text-gray-900">#{{ selectedPayment.paymentid }}</p>
+              <label class="block text-sm font-medium text-slate-700 mb-1">Payment ID</label>
+              <p class="text-sm text-slate-900">#{{ selectedPayment.paymentid }}</p>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+              <label class="block text-sm font-medium text-slate-700 mb-1">Status</label>
               <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium border capitalize" 
                 :class="getStatusBadge(selectedPayment.status)">
                 {{ selectedPayment.status }}
@@ -426,45 +425,45 @@ onMounted(() => {
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Student</label>
-            <p class="text-sm text-gray-900">{{ getStudentName(selectedPayment.studentid) }}</p>
-            <p class="text-xs text-gray-500">Student ID: {{ selectedPayment.studentid }}</p>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Student</label>
+            <p class="text-sm text-slate-900">{{ getStudentName(selectedPayment.studentid) }}</p>
+            <p class="text-xs text-slate-500">Student ID: {{ selectedPayment.studentid }}</p>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Amount</label>
-            <p class="text-lg font-bold text-gray-900">{{ formatCurrency(selectedPayment.amount) }}</p>
+            <label class="block text-sm font-medium text-slate-700 mb-1">Amount</label>
+            <p class="text-lg font-bold text-slate-900">{{ formatCurrency(selectedPayment.amount) }}</p>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Payment Type</label>
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800 capitalize">
+            <label class="block text-sm font-medium text-slate-700 mb-1">Payment Type</label>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-700 capitalize">
               {{ selectedPayment.payment_type }}
             </span>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Midtrans Order ID</label>
-            <code class="block text-sm bg-gray-100 px-3 py-2 rounded text-gray-700">
+            <label class="block text-sm font-medium text-slate-700 mb-1">Midtrans Order ID</label>
+            <code class="block text-sm bg-slate-100 px-3 py-2 rounded text-slate-700">
               {{ selectedPayment.midtrans_orderid || '-' }}
             </code>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Midtrans Transaction ID</label>
-            <code class="block text-sm bg-gray-100 px-3 py-2 rounded text-gray-700">
+            <label class="block text-sm font-medium text-slate-700 mb-1">Midtrans Transaction ID</label>
+            <code class="block text-sm bg-slate-100 px-3 py-2 rounded text-slate-700">
               {{ selectedPayment.midtrans_transactionid || '-' }}
             </code>
           </div>
 
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Created At</label>
-              <p class="text-sm text-gray-900">{{ formatDate(selectedPayment.created_at) }}</p>
+              <label class="block text-sm font-medium text-slate-700 mb-1">Created At</label>
+              <p class="text-sm text-slate-900">{{ formatDate(selectedPayment.created_at) }}</p>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Updated At</label>
-              <p class="text-sm text-gray-900">{{ formatDate(selectedPayment.updated_at) }}</p>
+              <label class="block text-sm font-medium text-slate-700 mb-1">Updated At</label>
+              <p class="text-sm text-slate-900">{{ formatDate(selectedPayment.updated_at) }}</p>
             </div>
           </div>
         </div>

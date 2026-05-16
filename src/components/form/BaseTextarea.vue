@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue';
+import { useId } from '../../composables/useId';
 
-// Props definition
 const props = defineProps({
   modelValue: {
     type: String,
@@ -55,41 +55,47 @@ const props = defineProps({
   }
 });
 
-// Emits definition
 const emit = defineEmits(['update:modelValue', 'focus', 'blur', 'input']);
 
-// Refs
 const textareaRef = ref(null);
 
-// Computed properties
-const textareaId = computed(() => `textarea-${Math.random().toString(36).substr(2, 9)}`);
+const textareaId = computed(() => useId('textarea'));
+
+const errorId = computed(() => props.error ? useId('textarea-error') : '');
+const helpId = computed(() => emit('help') ? useId('textarea-help') : '');
+
+const describedBy = computed(() => {
+  const parts = [];
+  if (errorId.value) parts.push(errorId.value);
+  return parts.length ? parts.join(' ') : undefined;
+});
 
 const textareaClasses = computed(() => {
-  const baseClasses = 'block w-full rounded-lg border text-gray-900 transition-colors focus:ring-2 focus:outline-none p-2.5 text-sm';
-  
+  const baseClasses = 'block w-full rounded-token-lg border text-ink transition-colors duration-token-default focus:ring-2 focus:outline-none p-2.5 text-sm';
+
   const variantClasses = {
-    default: props.error 
+    default: props.error
       ? 'bg-red-50 border-red-300 text-red-900 placeholder-red-700 focus:ring-red-500 focus:border-red-500'
-      : 'bg-gray-50 border-gray-300 focus:ring-blue-500 focus:border-blue-500',
+      : 'bg-surface-subtle border-divider focus:ring-brand-primary-ring focus:border-brand-primary',
     filled: props.error
       ? 'bg-red-100 border-red-300 text-red-900 placeholder-red-700 focus:ring-red-500 focus:border-red-500'
-      : 'bg-blue-50 border-blue-300 focus:ring-blue-500 focus:border-blue-500',
+      : 'bg-blue-50 border-blue-300 focus:ring-brand-primary-ring focus:border-brand-primary',
     outline: props.error
       ? 'bg-transparent border-red-300 text-red-900 placeholder-red-700 focus:ring-red-500 focus:border-red-500'
-      : 'bg-transparent border-gray-300 focus:ring-blue-500 focus:border-blue-500'
+      : 'bg-transparent border-divider focus:ring-brand-primary-ring focus:border-brand-primary'
   };
-  
-  const disabledClasses = props.disabled 
-    ? 'opacity-50 cursor-not-allowed' 
+
+  const disabledClasses = props.disabled
+    ? 'opacity-50 cursor-not-allowed'
     : '';
-    
+
   const resizeClasses = {
     none: 'resize-none',
     vertical: 'resize-y',
     horizontal: 'resize-x',
     both: 'resize'
   };
-  
+
   return [
     baseClasses,
     variantClasses[props.variant],
@@ -100,7 +106,7 @@ const textareaClasses = computed(() => {
 
 const labelClasses = computed(() => {
   const baseClasses = 'block mb-2 text-sm font-medium';
-  const colorClasses = props.error ? 'text-red-700' : 'text-gray-900';
+  const colorClasses = props.error ? 'text-red-700' : 'text-ink';
   return `${baseClasses} ${colorClasses}`;
 });
 
@@ -112,7 +118,6 @@ const isOverLimit = computed(() => {
   return props.maxlength && characterCount.value > props.maxlength;
 });
 
-// Methods
 const handleInput = (event) => {
   const value = event.target.value;
   emit('update:modelValue', value);
@@ -128,7 +133,6 @@ const handleBlur = (event) => {
 };
 
 const handleKeydown = (event) => {
-  // Ensure space key is allowed in textarea fields
   if (event.key === ' ') {
     event.stopPropagation();
   }
@@ -138,7 +142,6 @@ const focus = () => {
   textareaRef.value?.focus();
 };
 
-// Expose methods
 defineExpose({
   focus,
   blur: () => textareaRef.value?.blur(),
@@ -148,17 +151,15 @@ defineExpose({
 
 <template>
   <div class="w-full">
-    <!-- Label -->
-    <label 
-      v-if="label" 
-      :for="textareaId" 
+    <label
+      v-if="label"
+      :for="textareaId"
       :class="labelClasses"
     >
       {{ label }}
-      <span v-if="required" class="text-red-500 ml-1">*</span>
+      <span v-if="required" class="text-brand-danger ml-1">*</span>
     </label>
 
-    <!-- Textarea Element -->
     <textarea
       :id="textareaId"
       ref="textareaRef"
@@ -170,19 +171,20 @@ defineExpose({
       :rows="rows"
       :maxlength="maxlength"
       :class="textareaClasses"
+      :aria-describedby="describedBy"
+      :aria-invalid="!!error"
       @input="handleInput"
       @focus="handleFocus"
       @blur="handleBlur"
       @keydown="handleKeydown"
     ></textarea>
 
-    <!-- Character Count -->
     <div v-if="showCount || maxlength" class="flex justify-between mt-1">
       <div></div>
-      <div 
+      <div
         :class="[
           'text-xs',
-          isOverLimit ? 'text-red-600' : 'text-gray-500'
+          isOverLimit ? 'text-brand-danger' : 'text-ink-muted'
         ]"
       >
         <span v-if="showCount">{{ characterCount }}</span>
@@ -190,13 +192,11 @@ defineExpose({
       </div>
     </div>
 
-    <!-- Error Message -->
-    <p v-if="error" class="mt-2 text-sm text-red-600">
+    <p v-if="error" :id="errorId" class="mt-2 text-sm text-brand-danger">
       {{ error }}
     </p>
 
-    <!-- Help Text Slot -->
-    <div v-if="$slots.help" class="mt-2 text-sm text-gray-600">
+    <div v-if="$slots.help" :id="helpId" class="mt-2 text-sm text-ink-muted">
       <slot name="help"></slot>
     </div>
   </div>

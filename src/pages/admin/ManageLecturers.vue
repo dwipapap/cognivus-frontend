@@ -115,8 +115,8 @@ onMounted(fetchLecturers);
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
       <div>
-        <h1 class="text-2xl font-bold text-gray-800">Manage Lecturers</h1>
-        <p class="text-gray-600 mt-1">Create, edit, and manage lecturer records</p>
+        <h1 class="text-2xl font-bold text-slate-800">Manage Lecturers</h1>
+        <p class="text-slate-600 mt-1">Create, edit, and manage lecturer records</p>
       </div>
       <BaseButton @click="openAddModal" variant="primary">
         <span class="mr-2">+</span> Add Lecturer
@@ -125,46 +125,46 @@ onMounted(fetchLecturers);
 
     <!-- Loading State -->
     <div v-if="isLoading" class="flex justify-center items-center py-20">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-600"></div>
     </div>
 
     <!-- Lecturers Table -->
-    <div v-else class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div v-else class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full">
           <thead>
-            <tr class="bg-gray-50 border-b border-gray-200">
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider w-16">#</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Name</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Email</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Class Assignment</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Education</th>
-              <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
+            <tr class="bg-slate-50 border-b border-slate-200">
+              <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider w-16">#</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Name</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Email</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Class Assignment</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Education</th>
+              <th class="px-6 py-4 text-center text-xs font-semibold text-slate-700 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody>
             <tr 
               v-for="(lecturer, index) in paginatedLecturers" 
               :key="lecturer.lecturerid"
-              :class="index % 2 === 0 ? 'bg-white' : 'bg-gray-50'"
-              class="border-b border-gray-100 hover:bg-blue-50 transition-colors"
+              :class="index % 2 === 0 ? 'bg-white' : 'bg-slate-50'"
+              class="border-b border-slate-100 transition-colors"
             >
               <!-- Row Number -->
-              <td class="px-6 py-4 text-sm text-gray-500 text-right">
+              <td class="px-6 py-4 text-sm text-slate-500 text-right">
                 {{ (currentPage - 1) * itemsPerPage + index + 1 }}
               </td>
 
               <!-- Name -->
               <td class="px-6 py-4">
-                <div class="text-sm font-medium text-gray-900">{{ lecturer.fullname }}</div>
-                <div class="text-xs text-gray-500">{{ lecturer.tbuser?.username || 'No username' }}</div>
+                <div class="text-sm font-medium text-slate-900">{{ lecturer.fullname }}</div>
+                <div class="text-xs text-slate-500">{{ lecturer.tbuser?.username || 'No username' }}</div>
               </td>
 
               <!-- Email -->
               <td class="px-6 py-4">
                 <a 
                   :href="`mailto:${lecturer.tbuser?.email}`"
-                  class="text-sm text-blue-600 hover:text-blue-800 hover:underline"
+                  class="text-sm text-slate-700 hover:text-slate-900 hover:underline"
                 >
                   {{ lecturer.tbuser?.email || '-' }}
                 </a>
@@ -176,19 +176,19 @@ onMounted(fetchLecturers);
                   <div 
                     v-for="cls in lecturer.tbclass" 
                     :key="cls.classid"
-                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mr-1 mb-1"
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700 mr-1 mb-1"
                   >
                     {{ cls.class_code }}
-                    <span v-if="cls.level" class="ml-1 text-blue-600">
+                    <span v-if="cls.level" class="ml-1 text-slate-500">
                       ({{ cls.level.name }})
                     </span>
                   </div>
                 </div>
-                <span v-else class="text-sm text-gray-400 italic">Not assigned</span>
+                <span v-else class="text-sm text-slate-400 italic">Not assigned</span>
               </td>
 
               <!-- Education -->
-              <td class="px-6 py-4 text-sm text-gray-700">
+              <td class="px-6 py-4 text-sm text-slate-700">
                 {{ lecturer.lasteducation || '-' }}
               </td>
 
@@ -214,8 +214,8 @@ onMounted(fetchLecturers);
             </tr>
             <tr v-if="lecturers.length === 0">
               <td colspan="6" class="px-6 py-12 text-center">
-                <div class="flex flex-col items-center justify-center text-gray-500">
-                  <svg class="w-12 h-12 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="flex flex-col items-center justify-center text-slate-500">
+                  <svg class="w-12 h-12 mb-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
                   </svg>
                   <p class="text-sm font-medium">No lecturers found</p>
@@ -228,8 +228,8 @@ onMounted(fetchLecturers);
       </div>
 
       <!-- Pagination -->
-      <div v-if="totalPages > 1" class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
-        <p class="text-sm text-gray-600">
+      <div v-if="totalPages > 1" class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+        <p class="text-sm text-slate-600">
           Showing <span class="font-medium">{{ (currentPage - 1) * itemsPerPage + 1 }}</span> to 
           <span class="font-medium">{{ Math.min(currentPage * itemsPerPage, lecturers.length) }}</span> of 
           <span class="font-medium">{{ lecturers.length }}</span> lecturers
@@ -238,7 +238,7 @@ onMounted(fetchLecturers);
           <button
             @click="goToPage(currentPage - 1)"
             :disabled="currentPage === 1"
-            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             Previous
           </button>
@@ -249,8 +249,8 @@ onMounted(fetchLecturers);
             :class="[
               'px-4 py-2 text-sm font-medium rounded-lg transition-colors',
               currentPage === page
-                ? 'bg-blue-600 text-white border border-blue-600'
-                : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                ? 'bg-slate-900 text-white border border-slate-900'
+                : 'text-slate-700 bg-white border border-slate-300 hover:bg-slate-50'
             ]"
           >
             {{ page }}
@@ -258,7 +258,7 @@ onMounted(fetchLecturers);
           <button
             @click="goToPage(currentPage + 1)"
             :disabled="currentPage === totalPages"
-            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             Next
           </button>
