@@ -257,7 +257,7 @@ onMounted(fetchProfile);
       <div class="flex flex-col sm:flex-row gap-3 mt-8 pt-6 border-t border-blue-200">
         <BaseButton
           type="button"
-          variant="glass-secondary"
+          variant="secondary"
           @click="handleCancel"
           class="flex-1"
         >
@@ -266,7 +266,7 @@ onMounted(fetchProfile);
         
         <BaseButton
           type="submit"
-          variant="glass-primary"
+          variant="primary"
           :loading="isSubmitting"
           class="flex-1"
         >

@@ -360,7 +360,7 @@ const hasChanges = computed(() => {
       <div class="lg:col-span-3 flex flex-col bg-white rounded-2xl border border-blue-100 shadow-sm overflow-hidden">
         <div class="bg-blue-50/50 px-5 py-4 border-b border-blue-100 flex items-center justify-between">
           <div class="flex items-center gap-2">
-            <div class="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]"></div>
+            <div class="w-2 h-2 rounded-full bg-blue-500 shadow-glow-primary"></div>
             <h3 class="text-sm font-bold text-blue-900 uppercase tracking-wider">Enrolled</h3>
           </div>
           <div class="flex items-center gap-2">

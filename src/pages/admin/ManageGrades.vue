@@ -43,7 +43,6 @@ const fetchStudents = async () => {
     }
   } catch (error) {
     errorMessage.value = 'Failed to load students';
-    console.error('Error fetching students:', error);
   } finally {
     isLoading.value = false;
   }
@@ -110,7 +109,6 @@ const uploadGradeReport = async () => {
     }, 3000);
   } catch (error) {
     errorMessage.value = 'Failed to upload grade report';
-    console.error('Error uploading:', error);
   } finally {
     isUploading.value = false;
   }
@@ -135,44 +133,39 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="max-w-7xl mx-auto px-4 py-8">
-    <h1 class="text-4xl font-bold text-gray-900 mb-8">Manage Grade Reports</h1>
+  <div class="px-4 py-8">
+    <h1 class="text-2xl font-semibold text-slate-900 tracking-tight mb-6">Grade Reports</h1>
 
     <!-- Messages -->
-    <div v-if="successMessage" class="mb-6 bg-green-50 border border-green-200 rounded-xl p-4">
-      <p class="text-green-800">{{ successMessage }}</p>
+    <div v-if="successMessage" class="mb-6 border border-green-200 rounded-lg p-4">
+      <p class="text-sm text-green-800">{{ successMessage }}</p>
     </div>
-    <div v-if="errorMessage" class="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
-      <p class="text-red-800">{{ errorMessage }}</p>
+    <div v-if="errorMessage" class="mb-6 border border-red-200 rounded-lg p-4">
+      <p class="text-sm text-red-800">{{ errorMessage }}</p>
     </div>
 
     <!-- Loading -->
-        <!-- Loading State -->
-    <div v-if="isLoading" class="max-w-2xl mx-auto py-20">
-      <LoadingSpinner size="lg" color="blue" :center="true" />
-      <p class="text-center text-gray-600 mt-4">Loading grades...</p>
+    <div v-if="isLoading" class="py-20 flex justify-center">
+      <LoadingSpinner size="lg" color="slate" :center="true" />
     </div>
 
     <!-- Main Content -->
-    <div v-else class="space-y-6">
-      <div class="bg-white rounded-2xl shadow-lg p-6">
-        <div class="flex justify-between items-center mb-6">
-          <h2 class="text-2xl font-bold text-gray-900">Upload Grade Report</h2>
-          <button
-            @click="showUploadModal = true"
-            class="inline-flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-full hover:bg-blue-700 hover:scale-105 active:scale-95 transition-all shadow-md hover:shadow-lg font-semibold"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-            Upload Report
-          </button>
-        </div>
-
-        <p class="text-gray-600">
-          Upload PDF grade reports for students. Reports will be linked to student records.
-        </p>
+    <div v-else class="border border-slate-200 rounded-lg p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-lg font-medium text-slate-900">Upload Grade Report</h2>
+        <button
+          @click="showUploadModal = true"
+          class="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 text-white text-sm font-medium rounded-lg hover:bg-slate-800 transition-colors"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          Upload Report
+        </button>
       </div>
+      <p class="text-sm text-slate-500">
+        Upload PDF grade reports for students. Reports will be linked to student records.
+      </p>
     </div>
 
     <!-- Upload Modal -->
@@ -193,12 +186,12 @@ onMounted(() => {
       <template #content>
         <div class="space-y-6">
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">
+            <label class="block text-sm font-semibold text-slate-700 mb-2">
               Select Student <span class="text-red-500">*</span>
             </label>
             <select
               v-model="formData.studentid"
-              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+              class="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-colors"
             >
               <option value="">-- Select Student --</option>
               <option v-for="student in students" :key="student.studentid" :value="student.studentid">
@@ -208,59 +201,59 @@ onMounted(() => {
           </div>
 
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">
+            <label class="block text-sm font-semibold text-slate-700 mb-2">
               Test Type <span class="text-red-500">*</span>
             </label>
             <input
               v-model="formData.test_type"
               type="text"
-              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+              class="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-colors"
               placeholder="e.g., TOEFL, IELTS, Placement Test"
             />
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Listening Score</label>
+              <label class="block text-sm font-semibold text-slate-700 mb-2">Listening Score</label>
               <input
                 v-model="formData.listening_score"
                 type="number"
                 min="0"
                 max="100"
-                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                class="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-colors"
                 placeholder="0-100"
               />
             </div>
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Speaking Score</label>
+              <label class="block text-sm font-semibold text-slate-700 mb-2">Speaking Score</label>
               <input
                 v-model="formData.speaking_score"
                 type="number"
                 min="0"
                 max="100"
-                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                class="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-colors"
                 placeholder="0-100"
               />
             </div>
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Reading Score</label>
+              <label class="block text-sm font-semibold text-slate-700 mb-2">Reading Score</label>
               <input
                 v-model="formData.reading_score"
                 type="number"
                 min="0"
                 max="100"
-                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                class="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-colors"
                 placeholder="0-100"
               />
             </div>
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Writing Score</label>
+              <label class="block text-sm font-semibold text-slate-700 mb-2">Writing Score</label>
               <input
                 v-model="formData.writing_score"
                 type="number"
                 min="0"
                 max="100"
-                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                class="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-colors"
                 placeholder="0-100"
               />
             </div>
@@ -276,10 +269,10 @@ onMounted(() => {
           />
 
           <!-- Action Buttons -->
-          <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
+          <div class="flex justify-end gap-3 pt-4 border-t border-slate-200">
             <BaseButton 
               type="button" 
-              variant="glass-secondary" 
+              variant="secondary" 
               @click="resetUploadForm"
               :disabled="isUploading"
               size="lg"
@@ -288,7 +281,7 @@ onMounted(() => {
             </BaseButton>
             <BaseButton 
               type="button" 
-              variant="glass-primary" 
+              variant="primary" 
               @click="uploadGradeReport"
               :loading="isUploading"
               size="lg"

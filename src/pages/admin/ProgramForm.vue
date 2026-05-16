@@ -1,66 +1,54 @@
 <template>
   <form @submit.prevent="handleSave" class="relative">
     <div class="space-y-6">
-      <!-- Section Header -->
       <div class="flex items-center gap-3 mb-2">
-        <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shadow-sm border border-blue-100">
+        <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-700 border border-slate-200">
           <IconProgram class="w-5 h-5" />
         </div>
         <div>
-          <h4 class="text-sm font-bold text-blue-900 uppercase tracking-wider">Program Details</h4>
-          <p class="text-xs text-blue-500 font-medium">Define the core identity of this academic program</p>
+          <h4 class="text-sm font-semibold text-slate-900 uppercase tracking-wider">Program Details</h4>
+          <p class="text-xs text-slate-500">Define the core identity of this academic program</p>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 gap-6 bg-white p-6 rounded-2xl border border-blue-100 shadow-sm relative overflow-hidden">
-        <!-- Decorative subtle pattern -->
-        <div class="absolute top-0 right-0 -mr-16 -mt-16 w-48 h-48 bg-blue-50/50 rounded-full blur-3xl pointer-events-none"></div>
-        <div class="absolute bottom-0 left-0 -ml-16 -mb-16 w-40 h-40 bg-blue-50/30 rounded-full blur-2xl pointer-events-none"></div>
-
-        <!-- Name -->
-        <div class="relative group">
+      <div class="grid grid-cols-1 gap-6 bg-white p-6 rounded-lg border border-slate-200">
+        <div>
           <BaseInput
             v-bind="getFieldProps('name')"
             label="Program Name"
             required
             placeholder="e.g., Intensive English, Regular Academic"
             variant="outline"
-            class="transition-all duration-300 group-hover:shadow-sm"
           >
             <template #icon>
-              <IconEdit class="w-4 h-4 text-blue-400" />
+              <IconEdit class="w-4 h-4 text-slate-400" />
             </template>
           </BaseInput>
         </div>
 
-        <!-- Description -->
-        <div class="relative group">
+        <div>
           <BaseTextarea
             v-bind="getFieldProps('description')"
             label="Program Description"
             :rows="4"
             placeholder="Briefly describe the program's objectives and curriculum structure..."
             variant="outline"
-            class="transition-all duration-300 group-hover:shadow-sm"
           />
         </div>
       </div>
 
-      <!-- Footer Info -->
-      <div class="bg-blue-50/50 rounded-xl p-4 flex items-start gap-3 border border-blue-100/50">
-        <IconInfo class="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" />
-        <p class="text-xs text-blue-700 leading-relaxed">
+      <div class="bg-slate-50 rounded-lg p-4 flex items-start gap-3 border border-slate-200">
+        <IconInfo class="w-5 h-5 text-slate-500 mt-0.5 flex-shrink-0" />
+        <p class="text-xs text-slate-600 leading-relaxed">
           Ensure the program name is unique and descriptive. This information will be visible to students during enrollment.
         </p>
       </div>
 
-      <!-- Actions -->
-      <div class="flex items-center justify-end gap-4 pt-4 border-t border-blue-50">
+      <div class="flex items-center justify-end gap-4 pt-4 border-t border-slate-200">
         <BaseButton 
           type="button" 
-          variant="glass-secondary" 
+          variant="secondary" 
           @click="$emit('cancel')"
-          class="!rounded-xl font-bold uppercase tracking-tight text-xs h-11"
         >
           Cancel
         </BaseButton>
@@ -68,7 +56,6 @@
           type="submit" 
           variant="primary" 
           :loading="isSubmitting"
-          class="!rounded-xl px-8 shadow-blue-200 shadow-lg font-bold uppercase tracking-tight text-xs h-11"
         >
           <template #icon v-if="!isSubmitting">
             <IconSave class="w-4 h-4" />

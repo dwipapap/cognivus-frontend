@@ -221,14 +221,14 @@ const handleLogout = async () => {
 
       <!-- Mobile Bottom Navigation -->
       <nav class="fixed bottom-4 left-4 right-4 h-14 bg-transparent md:hidden z-50">
-        <div class="h-full bg-white rounded-[28px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100 overflow-hidden relative">
+        <div class="h-full bg-surface rounded-token-4xl shadow-nav-mobile border border-gray-100 overflow-hidden relative">
           <ul class="h-full flex relative z-10">
             <!-- Sliding Indicator -->
             <div 
               class="absolute top-1 bottom-1 w-1/3 px-1.5 z-0 transition-transform duration-300 ease-out"
               :style="{ transform: `translateX(${activeTabIndex * 100}%)` }"
             >
-              <div class="w-full h-full bg-[#e0f2fe] rounded-[24px]"></div>
+              <div class="w-full h-full bg-brand-sky-light rounded-token-3xl"></div>
             </div>
 
             <li class="flex-1 flex justify-center items-center z-10">

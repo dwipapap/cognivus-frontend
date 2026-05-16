@@ -91,7 +91,7 @@ const handleStudentSave = async (studentData) => {
 
 <template>
   <div class="space-y-6">
-    <div v-if="isEditMode" class="border-b border-gray-200">
+    <div v-if="isEditMode" class="border-b border-slate-200">
       <nav class="-mb-px flex space-x-8" aria-label="Tabs">
         <button
           type="button"
@@ -99,8 +99,8 @@ const handleStudentSave = async (studentData) => {
           :class="[
             'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors',
             activeTab === 'details'
-              ? 'border-blue-600 text-blue-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              ? 'border-slate-900 text-slate-900'
+              : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
           ]"
         >
           <div class="flex items-center gap-2">
@@ -116,8 +116,8 @@ const handleStudentSave = async (studentData) => {
           :class="[
             'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors',
             activeTab === 'students'
-              ? 'border-blue-600 text-blue-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              ? 'border-slate-900 text-slate-900'
+              : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
           ]"
         >
           <div class="flex items-center gap-2">
@@ -138,14 +138,14 @@ const handleStudentSave = async (studentData) => {
           <!-- Left Column: Class Information -->
           <div class="space-y-8">
             <!-- Class Details Section -->
-            <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm transition-all hover:shadow-md">
+            <div class="bg-white rounded-lg p-6 border border-slate-200">
               <div class="flex items-center gap-3 mb-6">
-                <div class="p-2 bg-blue-50 rounded-lg">
-                  <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="p-2 bg-slate-100 rounded-lg">
+                  <svg class="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                   </svg>
                 </div>
-                <h3 class="text-base font-bold text-gray-900">Class Information</h3>
+                <h3 class="text-base font-semibold text-slate-900">Class Information</h3>
               </div>
               
               <div class="space-y-5">
@@ -173,14 +173,14 @@ const handleStudentSave = async (studentData) => {
             </div>
 
             <!-- Description Section -->
-            <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm transition-all hover:shadow-md">
+            <div class="bg-white rounded-lg p-6 border border-slate-200">
               <div class="flex items-center gap-3 mb-6">
-                <div class="p-2 bg-blue-50 rounded-lg">
-                  <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="p-2 bg-slate-100 rounded-lg">
+                  <svg class="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/>
                   </svg>
                 </div>
-                <h3 class="text-base font-bold text-gray-900">Description</h3>
+                <h3 class="text-base font-semibold text-slate-900">Description</h3>
               </div>
               
               <BaseTextarea 
@@ -195,14 +195,14 @@ const handleStudentSave = async (studentData) => {
           <!-- Right Column: Assignment & Schedule -->
           <div class="space-y-8">
             <!-- Lecturer Assignment Section -->
-            <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm transition-all hover:shadow-md">
+            <div class="bg-white rounded-lg p-6 border border-slate-200">
               <div class="flex items-center gap-3 mb-6">
-                <div class="p-2 bg-blue-50 rounded-lg">
-                  <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="p-2 bg-slate-100 rounded-lg">
+                  <svg class="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
                   </svg>
                 </div>
-                <h3 class="text-base font-bold text-gray-900">Lecturer Assignment</h3>
+                <h3 class="text-base font-semibold text-slate-900">Lecturer Assignment</h3>
               </div>
               
               <div class="space-y-5">
@@ -231,14 +231,14 @@ const handleStudentSave = async (studentData) => {
             </div>
 
             <!-- Class Schedule Section -->
-            <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm transition-all hover:shadow-md">
+            <div class="bg-white rounded-lg p-6 border border-slate-200">
               <div class="flex items-center gap-3 mb-6">
-                <div class="p-2 bg-blue-50 rounded-lg">
-                  <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="p-2 bg-slate-100 rounded-lg">
+                  <svg class="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                   </svg>
                 </div>
-                <h3 class="text-base font-bold text-gray-900">Class Schedule</h3>
+                <h3 class="text-base font-semibold text-slate-900">Class Schedule</h3>
               </div>
               
               <div class="space-y-6">
@@ -265,8 +265,8 @@ const handleStudentSave = async (studentData) => {
                 </div>
 
                 <!-- Secondary Schedule -->
-                <div class="space-y-4 pt-4 border-t border-gray-50">
-                  <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Secondary Session (Optional)</p>
+                <div class="space-y-4 pt-4 border-t border-slate-200">
+                  <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Secondary Session (Optional)</p>
                   <div class="grid grid-cols-2 gap-4">
                     <BaseSelect 
                       v-bind="getFieldProps('schedule_day_2')" 
@@ -303,13 +303,12 @@ const handleStudentSave = async (studentData) => {
         </div>
 
         <!-- Actions Footer -->
-        <div class="flex justify-end gap-4 pt-8 border-t border-gray-100">
+        <div class="flex justify-end gap-4 pt-8 border-t border-slate-200">
           <BaseButton 
             type="button" 
             variant="secondary" 
             @click="$emit('close')"
             class="px-8"
-            rounded="full"
           >
             Cancel
           </BaseButton>
@@ -317,8 +316,7 @@ const handleStudentSave = async (studentData) => {
             type="submit" 
             variant="primary" 
             :loading="isSubmitting"
-            class="px-8 shadow-lg shadow-blue-200"
-            rounded="full"
+            class="px-8"
           >
             <template #icon>
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

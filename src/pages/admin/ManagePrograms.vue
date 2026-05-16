@@ -108,85 +108,94 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="p-6">
+  <div>
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
       <div>
-        <h1 class="text-2xl font-bold text-gray-800">Manage Programs</h1>
-        <p class="text-gray-600 mt-1">Create, edit, and manage program types</p>
+        <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">Programs</h1>
+        <p class="text-sm text-slate-500 mt-1">Program types and descriptions</p>
       </div>
       <BaseButton @click="openAddModal" variant="primary">
-        <span class="mr-2">+</span> Add Program
+        Add Program
       </BaseButton>
     </div>
 
     <!-- Loading State -->
-        <!-- Loading State -->
-    <div v-if="isLoading" class="max-w-2xl mx-auto py-20">
-      <LoadingSpinner size="lg" color="blue" :center="true" />
-      <p class="text-center text-gray-600 mt-4">Loading programs...</p>
+    <div v-if="isLoading" class="py-20 flex justify-center">
+      <LoadingSpinner size="lg" color="slate" :center="true" />
     </div>
 
-    <!-- Programs Grid -->
+    <!-- Programs Table -->
     <div v-else>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-        <div
-          v-for="program in paginatedPrograms"
-          :key="program.programid"
-          class="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-6 hover:shadow-xl transition-all hover:-translate-y-1"
-        >
-          <div class="flex items-start justify-between mb-3">
-            <div class="flex-shrink-0 h-12 w-12 bg-gradient-to-br from-green-400 to-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-xl">
-              {{ program.name?.charAt(0) || '?' }}
-            </div>
-            <div class="flex gap-2">
-              <button @click="openEditModal(program)" class="text-blue-600 hover:text-blue-800 font-medium text-sm">
-                Edit
-              </button>
-              <button @click="handleDelete(program)" class="text-red-600 hover:text-red-800 font-medium text-sm">
-                Delete
-              </button>
-            </div>
-          </div>
-          <h3 class="text-lg font-bold text-gray-800 mb-2">{{ program.name }}</h3>
-          <p class="text-sm text-gray-600">{{ program.description || 'No description' }}</p>
-        </div>
-
-        <!-- Empty State -->
-        <div v-if="programs.length === 0" class="col-span-full text-center py-12 bg-white/80 backdrop-blur-sm rounded-xl shadow-lg">
-          <p class="text-gray-500">No programs found. Click "Add Program" to create one.</p>
-        </div>
+      <div class="border border-slate-200 rounded-lg overflow-hidden">
+        <table class="w-full">
+          <thead>
+            <tr class="bg-slate-50 border-b border-slate-200">
+              <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase w-16">#</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Name</th>
+              <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Description</th>
+              <th class="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase w-40">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr 
+              v-for="(program, index) in paginatedPrograms" 
+              :key="program.programid"
+              class="border-b border-slate-100 hover:bg-slate-50 transition-colors"
+            >
+              <td class="px-6 py-4 text-sm text-slate-500">{{ (currentPage - 1) * itemsPerPage + index + 1 }}</td>
+              <td class="px-6 py-4 text-sm font-medium text-slate-900">{{ program.name }}</td>
+              <td class="px-6 py-4 text-sm text-slate-600">{{ program.description || '-' }}</td>
+              <td class="px-6 py-4">
+                <div class="flex justify-end gap-2">
+                  <BaseButton @click="openEditModal(program)" variant="secondary" size="sm">Edit</BaseButton>
+                  <BaseButton @click="handleDelete(program)" variant="danger" size="sm">Delete</BaseButton>
+                </div>
+              </td>
+            </tr>
+            <tr v-if="programs.length === 0">
+              <td colspan="4" class="px-6 py-12 text-center text-slate-400">
+                <p class="text-sm">No programs found</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       <!-- Pagination -->
-      <div v-if="totalPages > 1" class="flex items-center justify-center gap-2 mt-6">
-        <button
-          @click="goToPage(currentPage - 1)"
-          :disabled="currentPage === 1"
-          class="px-3 py-1 border border-gray-300 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 bg-white"
-        >
-          Previous
-        </button>
-        <button
-          v-for="page in totalPages"
-          :key="page"
-          @click="goToPage(page)"
-          :class="[
-            'px-3 py-1 border rounded-lg text-sm',
-            currentPage === page
-              ? 'bg-blue-600 text-white border-blue-600'
-              : 'bg-white border-gray-300 hover:bg-gray-50'
-          ]"
-        >
-          {{ page }}
-        </button>
-        <button
-          @click="goToPage(currentPage + 1)"
-          :disabled="currentPage === totalPages"
-          class="px-3 py-1 border border-gray-300 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 bg-white"
-        >
-          Next
-        </button>
+      <div v-if="totalPages > 1" class="flex items-center justify-between mt-4">
+        <p class="text-sm text-slate-500">
+          Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to {{ Math.min(currentPage * itemsPerPage, programs.length) }} of {{ programs.length }}
+        </p>
+        <div class="flex gap-2">
+          <button
+            @click="goToPage(currentPage - 1)"
+            :disabled="currentPage === 1"
+            class="px-3 py-1.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            Previous
+          </button>
+          <button
+            v-for="page in totalPages"
+            :key="page"
+            @click="goToPage(page)"
+            :class="[
+              'px-3 py-1.5 text-sm font-medium rounded-lg transition-colors',
+              currentPage === page
+                ? 'bg-slate-900 text-white border border-slate-900'
+                : 'text-slate-700 bg-white border border-slate-300 hover:bg-slate-50'
+            ]"
+          >
+            {{ page }}
+          </button>
+          <button
+            @click="goToPage(currentPage + 1)"
+            :disabled="currentPage === totalPages"
+            class="px-3 py-1.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            Next
+          </button>
+        </div>
       </div>
     </div>
 

@@ -85,9 +85,9 @@ const getBgColor = (color) => {
         yellow: 'bg-yellow-100 hover:bg-yellow-200',
         orange: 'bg-orange-100 hover:bg-orange-200',
         purple: 'bg-purple-100 hover:bg-purple-200',
-        gray: 'bg-gray-100 hover:bg-gray-200'
+        gray: 'bg-slate-100 hover:bg-slate-200'
     };
-    return colors[color] || 'bg-gray-100 hover:bg-gray-200';
+    return colors[color] || 'bg-slate-100 hover:bg-slate-200';
 };
 
 /** Get icon color class */
@@ -100,9 +100,9 @@ const getIconColor = (color) => {
         yellow: 'text-yellow-600',
         orange: 'text-orange-600',
         purple: 'text-purple-600',
-        gray: 'text-gray-600'
+        gray: 'text-slate-600'
     };
-    return colors[color] || 'text-gray-600';
+    return colors[color] || 'text-slate-600';
 };
 </script>
 
@@ -110,14 +110,14 @@ const getIconColor = (color) => {
     <div>
         <!-- Header -->
         <div class="mb-6">
-            <h1 class="text-3xl font-bold text-gray-900">External Links</h1>
-            <p class="text-gray-500 mt-1">Quick access to external services and tools</p>
+            <h1 class="text-3xl font-bold text-slate-900">External Links</h1>
+            <p class="text-slate-500 mt-1">Quick access to external services and tools</p>
         </div>
 
         <!-- Links Grid -->
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             <a v-for="link in externalLinks" :key="link.name" :href="link.url" target="_blank" rel="noopener noreferrer"
-                :class="[getBgColor(link.color), 'group rounded-2xl p-6 transition-all duration-200 hover:shadow-lg hover:-translate-y-1 border border-transparent hover:border-gray-200']">
+                :class="[getBgColor(link.color), 'group rounded-xl p-6 transition-colors border border-transparent hover:border-slate-200']">
                 <!-- Icon -->
                 <div :class="['w-12 h-12 rounded-xl flex items-center justify-center mb-4', getIconColor(link.color)]">
                     <!-- Database -->
@@ -176,11 +176,11 @@ const getIconColor = (color) => {
                 </div>
 
                 <!-- Text -->
-                <h3 class="font-semibold text-gray-800 group-hover:text-gray-900">{{ link.name }}</h3>
-                <p class="text-xs text-gray-500 mt-1">{{ link.description }}</p>
+                <h3 class="font-semibold text-slate-800 group-hover:text-slate-900">{{ link.name }}</h3>
+                <p class="text-xs text-slate-500 mt-1">{{ link.description }}</p>
 
                 <!-- External icon indicator -->
-                <div class="mt-3 flex items-center text-xs text-gray-400">
+                <div class="mt-3 flex items-center text-xs text-slate-400">
                     <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -191,63 +191,12 @@ const getIconColor = (color) => {
         </div>
 
         <!-- Category Legend -->
-        <div class="mt-8 p-4 bg-gray-50 rounded-xl">
-            <p class="text-sm text-gray-500">
-                <span class="font-medium text-gray-700">Tip:</span>
+        <div class="mt-8 p-4 bg-slate-50 rounded-xl">
+            <p class="text-sm text-slate-500">
+                <span class="font-medium text-slate-700">Tip:</span>
                 All links open in a new tab. Edit the links in <code
-                    class="bg-gray-200 px-1.5 py-0.5 rounded text-xs">ExternalLinks.vue</code> to customize.
+                    class="bg-slate-200 px-1.5 py-0.5 rounded text-xs">ExternalLinks.vue</code> to customize.
             </p>
         </div>
     </div>
 </template>
-
-<style scoped>
-.grid>a {
-    animation: fadeIn 0.3s ease-out;
-    animation-fill-mode: backwards;
-}
-
-.grid>a:nth-child(1) {
-    animation-delay: 0.05s;
-}
-
-.grid>a:nth-child(2) {
-    animation-delay: 0.1s;
-}
-
-.grid>a:nth-child(3) {
-    animation-delay: 0.15s;
-}
-
-.grid>a:nth-child(4) {
-    animation-delay: 0.2s;
-}
-
-.grid>a:nth-child(5) {
-    animation-delay: 0.25s;
-}
-
-.grid>a:nth-child(6) {
-    animation-delay: 0.3s;
-}
-
-.grid>a:nth-child(7) {
-    animation-delay: 0.35s;
-}
-
-.grid>a:nth-child(8) {
-    animation-delay: 0.4s;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-</style>

@@ -1,6 +1,105 @@
 @import "tailwindcss";
 @import "./assets/performance-glassmorphism.css";
 
+@theme {
+  --color-brand-primary: #2563eb;
+  --color-brand-primary-hover: #1d4ed8;
+  --color-brand-primary-active: #1e40af;
+  --color-brand-primary-disabled: #93c5fd;
+  --color-brand-primary-ring: rgba(37, 99, 235, 0.3);
+
+  --color-brand-sky-light: #e0f2fe;
+  --color-brand-sky-subtle: #e6f0ff;
+
+  --color-brand-success: #16a34a;
+  --color-brand-success-hover: #15803d;
+  --color-brand-success-active: #166534;
+  --color-brand-success-disabled: #86efac;
+  --color-brand-success-ring: rgba(22, 163, 74, 0.3);
+
+  --color-brand-danger: #dc2626;
+  --color-brand-danger-hover: #b91c1c;
+  --color-brand-danger-active: #991b1b;
+  --color-brand-danger-disabled: #fca5a5;
+  --color-brand-danger-ring: rgba(220, 38, 38, 0.3);
+
+  --color-brand-warning: #eab308;
+  --color-brand-warning-hover: #ca8a04;
+  --color-brand-warning-active: #a16207;
+  --color-brand-warning-disabled: #fde047;
+  --color-brand-warning-ring: rgba(234, 179, 8, 0.3);
+
+  --color-brand-info: #0891b2;
+  --color-brand-info-hover: #0e7490;
+  --color-brand-info-active: #155e75;
+  --color-brand-info-disabled: #67e8f9;
+  --color-brand-info-ring: rgba(8, 145, 178, 0.3);
+
+  --color-surface-canvas: #f9fafb;
+  --color-surface: #ffffff;
+  --color-surface-subtle: #f3f4f6;
+  --color-surface-overlay: rgba(0, 0, 0, 0.6);
+
+  --color-ink: #111827;
+  --color-ink-muted: #6b7280;
+  --color-ink-subtle: #9ca3af;
+
+  --color-divider: #e5e7eb;
+  --color-divider-strong: #d1d5db;
+
+  --radius-token-sm: 2px;
+  --radius-token-md: 6px;
+  --radius-token-lg: 8px;
+  --radius-token-xl: 12px;
+  --radius-token-2xl: 16px;
+  --radius-token-3xl: 24px;
+  --radius-token-card-lg: 18px;
+  --radius-token-4xl: 28px;
+  --radius-token-full: 9999px;
+
+  --shadow-card-rest: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-card-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+  --shadow-modal-overlay: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --shadow-input-rest: 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow-nav-mobile: 0 8px 30px rgba(0, 0, 0, 0.12);
+  --shadow-glow-primary: 0 0 8px rgba(59, 130, 246, 0.6);
+
+  --transition-duration-token-fast: 150ms;
+  --transition-duration-token-default: 200ms;
+  --transition-duration-token-slow: 250ms;
+
+  --transition-timing-function-token-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-timing-function-token-ease-out: cubic-bezier(0, 0, 0.2, 1);
+
+  --font-display: Figtree, system-ui, -apple-system, sans-serif;
+  --text-token-display: 2.25rem;
+  --text-token-display--line-height: 1.1;
+  --text-token-display--font-weight: 700;
+  --text-token-display--letter-spacing: -0.02em;
+
+  --text-token-headline: 1.5rem;
+  --text-token-headline--line-height: 1.2;
+  --text-token-headline--font-weight: 600;
+  --text-token-headline--letter-spacing: -0.01em;
+
+  --text-token-title: 1.125rem;
+  --text-token-title--line-height: 1.3;
+  --text-token-title--font-weight: 500;
+
+  --text-token-body: 1rem;
+  --text-token-body--line-height: 1.5;
+  --text-token-body--font-weight: 400;
+
+  --text-token-label: 0.875rem;
+  --text-token-label--line-height: 1.4;
+  --text-token-label--font-weight: 500;
+  --text-token-label--letter-spacing: 0.02em;
+
+  --text-token-caption: 0.75rem;
+  --text-token-caption--line-height: 1.4;
+  --text-token-caption--font-weight: 400;
+}
+
 :root {
   font-family: 'Figtree', system-ui, -apple-system, sans-serif;
   line-height: 1.5;

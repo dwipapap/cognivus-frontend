@@ -211,8 +211,8 @@ onMounted(() => {
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
       <div>
-        <h1 class="text-2xl font-bold text-gray-800">Manage Classes</h1>
-        <p class="text-gray-600 mt-1">Create, edit, and manage class records</p>
+        <h1 class="text-2xl font-bold text-slate-800">Manage Classes</h1>
+        <p class="text-slate-600 mt-1">Create, edit, and manage class records</p>
       </div>
       <BaseButton @click="openAddModal" variant="primary" rounded="full">
         <span class="mr-2">+</span> Add Class
@@ -221,65 +221,65 @@ onMounted(() => {
 
     <!-- Loading State -->
     <div v-if="isLoading" class="flex justify-center items-center py-20">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-600"></div>
     </div>
 
-    <div v-else class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div v-else class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full">
           <thead>
-            <tr class="bg-gray-50 border-b border-gray-200">
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider w-16">#</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Class Code</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Schedule</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Level</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Lecturer</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Description</th>
-              <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
+            <tr class="bg-slate-50 border-b border-slate-200">
+              <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider w-16">#</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Class Code</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Schedule</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Level</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Lecturer</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Description</th>
+              <th class="px-6 py-4 text-center text-xs font-semibold text-slate-700 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody>
             <tr 
               v-for="(classItem, index) in paginatedClasses" 
               :key="classItem.classid"
-              :class="index % 2 === 0 ? 'bg-white' : 'bg-gray-50'"
-              class="border-b border-gray-100 hover:bg-blue-50 transition-colors"
+              :class="index % 2 === 0 ? 'bg-white' : 'bg-slate-50'"
+              class="border-b border-slate-100 transition-colors"
             >
               <!-- Row Number -->
-              <td class="px-6 py-4 text-sm text-gray-500 text-right">
+              <td class="px-6 py-4 text-sm text-slate-500 text-right">
                 {{ (currentPage - 1) * itemsPerPage + index + 1 }}
               </td>
 
               <!-- Class Code -->
               <td class="px-6 py-4">
-                <div class="text-sm font-medium text-gray-900">{{ classItem.class_code }}</div>
+                <div class="text-sm font-medium text-slate-900">{{ classItem.class_code }}</div>
               </td>
 
               <!-- Schedule -->
               <td class="px-6 py-4">
                 <div v-if="formatSchedule(classItem)" class="flex items-center gap-1.5">
-                  <svg class="w-4 h-4 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg class="w-4 h-4 text-slate-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                   </svg>
-                  <span class="text-sm text-gray-700 font-medium">{{ formatSchedule(classItem) }}</span>
+                  <span class="text-sm text-slate-700 font-medium">{{ formatSchedule(classItem) }}</span>
                 </div>
-                <span v-else class="text-sm text-gray-400 italic">No schedule</span>
+                <span v-else class="text-sm text-slate-400 italic">No schedule</span>
               </td>
 
               <!-- Level -->
               <td class="px-6 py-4">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
                   {{ getLevelName(classItem.levelid) }}
                 </span>
               </td>
 
               <!-- Lecturer -->
-              <td class="px-6 py-4 text-sm text-gray-700">
+              <td class="px-6 py-4 text-sm text-slate-700">
                 {{ getLecturerName(classItem.lecturerid) }}
               </td>
 
               <!-- Description -->
-              <td class="px-6 py-4 text-sm text-gray-600">
+              <td class="px-6 py-4 text-sm text-slate-600">
                 {{ classItem.description || '-' }}
               </td>
 
@@ -307,8 +307,8 @@ onMounted(() => {
             </tr>
             <tr v-if="classes.length === 0">
               <td colspan="7" class="px-6 py-12 text-center">
-                <div class="flex flex-col items-center justify-center text-gray-500">
-                  <svg class="w-12 h-12 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="flex flex-col items-center justify-center text-slate-500">
+                  <svg class="w-12 h-12 mb-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                   </svg>
                   <p class="text-sm font-medium">No classes found</p>
@@ -321,8 +321,8 @@ onMounted(() => {
       </div>
 
       <!-- Pagination -->
-      <div v-if="totalPages > 1" class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
-        <p class="text-sm text-gray-600">
+      <div v-if="totalPages > 1" class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+        <p class="text-sm text-slate-600">
           Showing <span class="font-medium">{{ (currentPage - 1) * itemsPerPage + 1 }}</span> to 
           <span class="font-medium">{{ Math.min(currentPage * itemsPerPage, classes.length) }}</span> of 
           <span class="font-medium">{{ classes.length }}</span> classes
@@ -331,7 +331,7 @@ onMounted(() => {
           <button
             @click="goToPage(currentPage - 1)"
             :disabled="currentPage === 1"
-            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-full hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-full hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             Previous
           </button>
@@ -342,8 +342,8 @@ onMounted(() => {
             :class="[
               'px-4 py-2 text-sm font-medium rounded-full transition-colors',
               currentPage === page
-                ? 'bg-blue-600 text-white border border-blue-600 shadow-sm shadow-blue-200'
-                : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50'
+                ? 'bg-slate-900 text-white border border-slate-900'
+                : 'text-slate-700 bg-white border border-slate-300 hover:bg-slate-50'
             ]"
           >
             {{ page }}
@@ -351,7 +351,7 @@ onMounted(() => {
           <button
             @click="goToPage(currentPage + 1)"
             :disabled="currentPage === totalPages"
-            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-full hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-full hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             Next
           </button>

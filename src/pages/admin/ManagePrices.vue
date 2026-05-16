@@ -224,8 +224,8 @@ onMounted(() => {
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
       <div>
-        <h1 class="text-2xl font-bold text-gray-800">Manage Prices</h1>
-        <p class="text-gray-600 mt-1">Manage class and ancillary pricing</p>
+        <h1 class="text-2xl font-bold text-slate-800">Manage Prices</h1>
+        <p class="text-slate-600 mt-1">Manage class and ancillary pricing</p>
       </div>
       <BaseButton v-if="activeTab === 'classes'" @click="openAddModal" variant="primary">
         <span class="mr-2">+</span> Add Class Price
@@ -236,69 +236,69 @@ onMounted(() => {
     </div>
 
     <!-- Tab Navigation -->
-    <div class="flex border-b border-gray-200 mb-6">
+    <div class="flex gap-6 mb-6 border-b border-slate-200">
       <button @click="activeTab = 'classes'" :class="[
-        'px-6 py-3 text-sm font-medium border-b-2 transition-colors',
+        'pb-3 text-sm font-medium border-b-2 transition-colors -mb-px',
         activeTab === 'classes'
-          ? 'text-blue-600 border-blue-600'
-          : 'text-gray-500 border-transparent hover:text-gray-700'
+          ? 'text-slate-900 border-slate-900'
+          : 'text-slate-500 border-transparent hover:text-slate-700'
       ]">
-        Classes Price
+        Classes
       </button>
       <button @click="activeTab = 'ancillary'" :class="[
-        'px-6 py-3 text-sm font-medium border-b-2 transition-colors',
+        'pb-3 text-sm font-medium border-b-2 transition-colors -mb-px',
         activeTab === 'ancillary'
-          ? 'text-blue-600 border-blue-600'
-          : 'text-gray-500 border-transparent hover:text-gray-700'
+          ? 'text-slate-900 border-slate-900'
+          : 'text-slate-500 border-transparent hover:text-slate-700'
       ]">
-        Ancillary Price
+        Ancillary
       </button>
     </div>
 
     <!-- Classes Price Tab Content -->
     <div v-if="activeTab === 'classes'">
       <div v-if="isLoading" class="flex justify-center items-center py-20">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-600"></div>
       </div>
 
-      <div v-else class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div v-else class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full">
             <thead>
-              <tr class="bg-gray-50 border-b border-gray-200">
-                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider w-16">#</th>
-                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Level</th>
-                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Program
+              <tr class="bg-slate-50 border-b border-slate-200">
+                <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider w-16">#</th>
+                <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Level</th>
+                <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Program
                 </th>
-                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Name</th>
-                <th class="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">Total
+                <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Name</th>
+                <th class="px-6 py-4 text-right text-xs font-semibold text-slate-700 uppercase tracking-wider">Total
                   Price</th>
-                <th class="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">Monthly
+                <th class="px-6 py-4 text-right text-xs font-semibold text-slate-700 uppercase tracking-wider">Monthly
                   Price</th>
-                <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions
+                <th class="px-6 py-4 text-center text-xs font-semibold text-slate-700 uppercase tracking-wider">Actions
                 </th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="(priceItem, index) in paginatedPrices" :key="priceItem.priceid"
-                :class="index % 2 === 0 ? 'bg-white' : 'bg-gray-50'"
-                class="border-b border-gray-100 hover:bg-blue-50 transition-colors">
-                <td class="px-6 py-4 text-sm text-gray-500 text-right">
+                :class="index % 2 === 0 ? 'bg-white' : 'bg-slate-50'"
+                class="border-b border-slate-100 transition-colors">
+                <td class="px-6 py-4 text-sm text-slate-500 text-right">
                   {{ (currentPage - 1) * itemsPerPage + index + 1 }}
                 </td>
                 <td class="px-6 py-4">
                   <span
-                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
                     {{ getLevelName(priceItem.levelid) }}
                   </span>
                 </td>
                 <td class="px-6 py-4">
                   <span
-                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
                     {{ getProgramName(priceItem.programid) }}
                   </span>
                 </td>
-                <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ priceItem.name || '-' }}</td>
+                <td class="px-6 py-4 text-sm font-medium text-slate-900">{{ priceItem.name || '-' }}</td>
                 <td class="px-6 py-4 text-right text-sm font-semibold text-green-600">{{ formatCurrency(priceItem.harga)
                   }}</td>
                 <td class="px-6 py-4 text-right text-sm font-semibold text-blue-600">{{
@@ -311,7 +311,7 @@ onMounted(() => {
                 </td>
               </tr>
               <tr v-if="prices.length === 0">
-                <td colspan="7" class="px-6 py-12 text-center text-gray-500">
+                <td colspan="7" class="px-6 py-12 text-center text-slate-500">
                   <p class="text-sm font-medium">No prices found</p>
                 </td>
               </tr>
@@ -321,18 +321,18 @@ onMounted(() => {
 
         <!-- Pagination -->
         <div v-if="totalPages > 1"
-          class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-between">
-          <p class="text-sm text-gray-600">
+          class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+          <p class="text-sm text-slate-600">
             Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to {{ Math.min(currentPage * itemsPerPage, prices.length)
             }} of {{ prices.length }}
           </p>
           <div class="flex gap-2">
             <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1"
-              class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50">
+              class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50">
               Previous
             </button>
             <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages"
-              class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50">
+              class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50">
               Next
             </button>
           </div>
@@ -343,30 +343,30 @@ onMounted(() => {
     <!-- Ancillary Price Tab Content -->
     <div v-else>
       <div v-if="isAncillaryLoading" class="flex justify-center items-center py-20">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-600"></div>
       </div>
 
-      <div v-else class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div v-else class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full">
             <thead>
-              <tr class="bg-gray-50 border-b border-gray-200">
-                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider w-16">#</th>
-                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Name</th>
-                <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Description
+              <tr class="bg-slate-50 border-b border-slate-200">
+                <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider w-16">#</th>
+                <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Name</th>
+                <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Description
                 </th>
-                <th class="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">Price</th>
-                <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions
+                <th class="px-6 py-4 text-right text-xs font-semibold text-slate-700 uppercase tracking-wider">Price</th>
+                <th class="px-6 py-4 text-center text-xs font-semibold text-slate-700 uppercase tracking-wider">Actions
                 </th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="(item, index) in ancillaryPrices" :key="item.apid"
-                :class="index % 2 === 0 ? 'bg-white' : 'bg-gray-50'"
-                class="border-b border-gray-100 hover:bg-blue-50 transition-colors">
-                <td class="px-6 py-4 text-sm text-gray-500 text-right">{{ index + 1 }}</td>
-                <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ item.name }}</td>
-                <td class="px-6 py-4 text-sm text-gray-600">{{ item.description || '-' }}</td>
+                :class="index % 2 === 0 ? 'bg-white' : 'bg-slate-50'"
+                class="border-b border-slate-100 transition-colors">
+                <td class="px-6 py-4 text-sm text-slate-500 text-right">{{ index + 1 }}</td>
+                <td class="px-6 py-4 text-sm font-medium text-slate-900">{{ item.name }}</td>
+                <td class="px-6 py-4 text-sm text-slate-600">{{ item.description || '-' }}</td>
                 <td class="px-6 py-4 text-right text-sm font-semibold text-green-600">{{ formatCurrency(item.price) }}
                 </td>
                 <td class="px-6 py-4">
@@ -377,7 +377,7 @@ onMounted(() => {
                 </td>
               </tr>
               <tr v-if="ancillaryPrices.length === 0">
-                <td colspan="5" class="px-6 py-12 text-center text-gray-500">
+                <td colspan="5" class="px-6 py-12 text-center text-slate-500">
                   <p class="text-sm font-medium">No ancillary prices found</p>
                 </td>
               </tr>

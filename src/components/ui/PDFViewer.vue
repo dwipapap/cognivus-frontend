@@ -15,7 +15,6 @@ const scale = ref(1);
 const isLoading = ref(true);
 const error = ref(null);
 
-// Watermark configuration
 const watermarkText = 'Property of ITTREnglish Course';
 const watermarkOptions = {
   columns: 3,
@@ -67,31 +66,31 @@ watch(() => props.src, () => {
 
 <template>
   <div class="pdf-viewer-container flex flex-col h-full">
-    <div class="sticky top-0 z-10 bg-white border-b border-gray-200 px-3 py-2 shadow-sm">
+    <div class="sticky top-0 z-10 bg-surface border-b border-divider px-3 py-2 shadow-card-rest">
       <div class="flex items-center justify-end gap-2">
         <div class="flex items-center gap-1.5">
           <button
             @click="zoomOut"
             :disabled="!canZoomOut"
-            class="px-2.5 py-1 rounded-lg bg-blue-600 text-white font-medium text-sm hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+            class="px-2.5 py-1 rounded-token-lg bg-brand-primary text-white font-medium text-sm hover:bg-brand-primary-hover disabled:bg-divider disabled:cursor-not-allowed transition-colors duration-token-default flex items-center justify-center"
             :class="{ 'opacity-50': !canZoomOut }"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
             </svg>
           </button>
-          
+
           <button
             @click="resetZoom"
-            class="px-3 py-1 rounded-lg bg-gray-100 text-gray-700 font-medium text-sm hover:bg-gray-200 transition-colors min-w-[70px]"
+            class="px-3 py-1 rounded-token-lg bg-surface-subtle text-ink font-medium text-sm hover:bg-divider transition-colors duration-token-default min-w-[70px]"
           >
             {{ zoomPercentage }}%
           </button>
-          
+
           <button
             @click="zoomIn"
             :disabled="!canZoomIn"
-            class="px-2.5 py-1 rounded-lg bg-blue-600 text-white font-medium text-sm hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+            class="px-2.5 py-1 rounded-token-lg bg-brand-primary text-white font-medium text-sm hover:bg-brand-primary-hover disabled:bg-divider disabled:cursor-not-allowed transition-colors duration-token-default flex items-center justify-center"
             :class="{ 'opacity-50': !canZoomIn }"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -102,42 +101,42 @@ watch(() => props.src, () => {
       </div>
     </div>
 
-    <div class="flex-1 overflow-y-auto bg-gray-100 p-4">
-      <LoadingSpinner 
-        v-if="isLoading" 
-        :overlay="false" 
-        :center="true" 
-        size="lg" 
-        color="blue"
+    <div class="flex-1 overflow-y-auto bg-surface-subtle p-4">
+      <LoadingSpinner
+        v-if="isLoading"
+        :overlay="false"
+        :center="true"
+        size="lg"
+        color="primary"
         text="Loading PDF..."
         class="py-12"
       />
 
       <div v-else-if="error" class="flex flex-col items-center justify-center py-12 text-center">
-        <svg class="w-16 h-16 text-red-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-16 h-16 text-brand-danger mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        <p class="text-red-600 font-medium mb-2">Error Loading PDF</p>
-        <p class="text-gray-600 text-sm">{{ error }}</p>
+        <p class="text-brand-danger font-medium mb-2">Error Loading PDF</p>
+        <p class="text-ink-muted text-sm">{{ error }}</p>
       </div>
 
       <div v-else class="flex flex-col items-center gap-4" @contextmenu.prevent>
-        <div 
-          v-for="page in pages" 
+        <div
+          v-for="page in pages"
           :key="page"
-          class="bg-white shadow-lg rounded-lg overflow-hidden"
+          class="bg-surface shadow-card-hover rounded-token-lg overflow-hidden"
         >
-          <VuePDF 
-            :pdf="pdf" 
-            :page="page" 
+          <VuePDF
+            :pdf="pdf"
+            :page="page"
             :scale="scale"
             :watermark-text="watermarkText"
             :watermark-options="watermarkOptions"
             class="w-full"
           />
         </div>
-        
-        <div v-if="pages > 0" class="text-sm text-gray-600 py-2">
+
+        <div v-if="pages > 0" class="text-sm text-ink-muted py-2">
           Total: {{ pages }} {{ pages === 1 ? 'page' : 'pages' }}
         </div>
       </div>
