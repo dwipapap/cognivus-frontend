@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { authStore } from '../store/auth';
 import apiClient from '../services/api';
@@ -30,6 +30,43 @@ const openForgotPassword = () => {
 const closeForgotPassword = () => {
   showForgotPassword.value = false;
 };
+
+// Responsive state for mobile slideover
+const isMobile = ref(false);
+
+function checkScreen() {
+  isMobile.value = window.innerWidth < 1024;
+}
+
+onMounted(() => {
+  checkScreen();
+  window.addEventListener('resize', checkScreen);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('resize', checkScreen);
+});
+
+// Slideover icon helpers
+const slideoverIconClass = computed(() => {
+  const classes = {
+    success: 'text-brand-success bg-brand-success/10',
+    error: 'text-brand-danger bg-brand-danger/10',
+    info: 'text-brand-primary bg-brand-primary/10',
+    warning: 'text-brand-warning bg-brand-warning/10'
+  };
+  return classes[modalType.value] || classes.info;
+});
+
+const slideoverIcon = computed(() => {
+  const icons = {
+    success: 'i-lucide-check-circle',
+    error: 'i-lucide-x-circle',
+    warning: 'i-lucide-alert-triangle',
+    info: 'i-lucide-info'
+  };
+  return icons[modalType.value] || icons.info;
+});
 
 const handleForgotPasswordSuccess = () => {
   closeForgotPassword();
@@ -249,16 +286,47 @@ const handleGoogleLogin = () => {
       </div>
     </div>
 
-    <!-- Modal Component -->
-    <Modal
-      alert
-      :show="showModal"
-      :type="modalType"
-      :title="modalTitle"
-      :message="modalMessage"
-      @close="closeModal"
-      @confirm="closeModal"
-    />
+    <!-- Desktop Modal -->
+    <template v-if="!isMobile">
+      <Modal
+        alert
+        :show="showModal"
+        :type="modalType"
+        :title="modalTitle"
+        :message="modalMessage"
+        @close="closeModal"
+        @confirm="closeModal"
+      />
+    </template>
+
+    <!-- Mobile Slideover (bottom sheet) -->
+    <USlideover
+      v-if="isMobile"
+      v-model:open="showModal"
+      side="bottom"
+      :title="modalTitle || undefined"
+      :close="false"
+      :ui="{
+        content: 'rounded-t-2xl min-h-[35vh]'
+      }"
+    >
+      <template #body>
+        <div class="flex flex-col items-center px-8 py-8 gap-4">
+          <div class="flex items-center justify-center w-16 h-16 rounded-token-full" :class="slideoverIconClass">
+            <UIcon :name="slideoverIcon" class="w-8 h-8" />
+          </div>
+          <h3 class="text-lg font-bold text-ink text-center">{{ modalTitle }}</h3>
+          <p v-if="modalMessage" class="text-sm text-ink-muted text-center leading-relaxed">{{ modalMessage }}</p>
+          <UButton
+            label="OK"
+            :color="modalType === 'error' ? 'error' : modalType === 'warning' ? 'warning' : 'primary'"
+            size="lg"
+            class="px-8 rounded-full"
+            @click="closeModal"
+          />
+        </div>
+      </template>
+    </USlideover>
 
     <!-- Forgot Password OTP Flow -->
     <OtpFlow
