@@ -1,7 +1,16 @@
 @import "tailwindcss";
+@import "@nuxt/ui";
 @import "./assets/performance-glassmorphism.css";
 
 @theme {
+  --color-primary: var(--color-brand-primary);
+  --color-secondary: var(--color-brand-sky-subtle);
+  --color-success: var(--color-brand-success);
+  --color-error: var(--color-brand-danger);
+  --color-warning: var(--color-brand-warning);
+  --color-info: var(--color-brand-info);
+  --color-neutral: var(--color-ink-muted);
+  
   --color-brand-primary: #2563eb;
   --color-brand-primary-hover: #1d4ed8;
   --color-brand-primary-active: #1e40af;
