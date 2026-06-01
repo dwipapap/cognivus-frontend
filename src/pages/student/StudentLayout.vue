@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, onMounted, onUnmounted } from 'vue';
+import { computed, ref, provide, onMounted, onUnmounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { authStore } from '../../store/auth';
 import { useStudentProfile } from '../../composables/useStudentProfile';
@@ -17,6 +17,9 @@ import IconCaret from '~icons/basil/caret-down-outline';
 const router = useRouter();
 const route = useRoute();
 const { studentProfile, isLoading: isProfileLoading, fetchStudentProfile } = useStudentProfile();
+
+const hideMobileNav = ref(false);
+provide('hideMobileNav', hideMobileNav);
 
 const activeTabIndex = computed(() => {
   const path = route.path;
@@ -229,7 +232,7 @@ const handleLogout = async () => {
       </aside>
 
       <!-- Mobile Bottom Navigation -->
-      <nav class="fixed bottom-4 left-4 right-4 h-14 bg-transparent md:hidden z-50">
+      <nav v-show="!hideMobileNav" class="fixed bottom-4 left-4 right-4 h-14 bg-transparent md:hidden z-50">
         <div class="h-full bg-surface rounded-token-4xl shadow-nav-mobile border border-gray-100 overflow-hidden relative">
           <ul class="h-full flex relative z-10">
             <!-- Sliding Indicator -->
