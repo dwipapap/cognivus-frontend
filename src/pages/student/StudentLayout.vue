@@ -9,6 +9,7 @@ import iconBoyImage from '../../assets/iconboy.webp';
 import iconGirlImage from '../../assets/icongirl.webp';
 import ittrLogo from '../../assets/ittrlogo.png';
 import IconGrade from '~icons/solar/graph-bold';
+import IconWallet from '~icons/solar/money-bag-bold';
 import IconUser from '~icons/basil/user-solid';
 import IconLogout from '~icons/basil/logout-solid';
 import IconCaret from '~icons/basil/caret-down-outline';
@@ -22,6 +23,7 @@ const activeTabIndex = computed(() => {
   if (path.includes('/dashboard')) return 0;
   if (path.includes('/courses')) return 1;
   if (path.includes('/grades')) return 2;
+  if (path.includes('/payment')) return 3;
   return 0;
 });
 
@@ -215,6 +217,13 @@ const handleLogout = async () => {
                 <span class="sidebar-text ml-3 opacity-0 whitespace-nowrap overflow-hidden">Grades</span>
               </router-link>
             </li>
+            <li>
+              <router-link to="/student/payment"
+                class="nav-item flex items-center px-3 py-2 text-sm font-medium rounded-lg group">
+                <IconWallet class="w-5 h-5 flex-shrink-0" />
+                <span class="sidebar-text ml-3 opacity-0 whitespace-nowrap overflow-hidden">Payment</span>
+              </router-link>
+            </li>
           </ul>
         </nav>
       </aside>
@@ -225,7 +234,7 @@ const handleLogout = async () => {
           <ul class="h-full flex relative z-10">
             <!-- Sliding Indicator -->
             <div 
-              class="absolute top-1 bottom-1 w-1/3 px-1.5 z-0 transition-transform duration-300 ease-out"
+              class="absolute top-1 bottom-1 w-1/4 px-1.5 z-0 transition-transform duration-300 ease-out"
               :style="{ transform: `translateX(${activeTabIndex * 100}%)` }"
             >
               <div class="w-full h-full bg-brand-sky-light rounded-token-3xl"></div>
@@ -247,6 +256,12 @@ const handleLogout = async () => {
               <router-link to="/student/grades" class="mobile-nav-item flex flex-col items-center gap-0.5 w-full h-full justify-center transition-colors duration-200">
                 <IconGrade class="w-5 h-5" />
                 <span class="text-[10px] font-medium">Grades</span>
+              </router-link>
+            </li>
+            <li class="flex-1 flex justify-center items-center z-10">
+              <router-link to="/student/payment" class="mobile-nav-item flex flex-col items-center gap-0.5 w-full h-full justify-center transition-colors duration-200">
+                <IconWallet class="w-5 h-5" />
+                <span class="text-[10px] font-medium">Bayar</span>
               </router-link>
             </li>
           </ul>
