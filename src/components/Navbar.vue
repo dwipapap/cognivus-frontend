@@ -1,34 +1,31 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue'
 
-const isMobileMenuOpen = ref(false);
+const isMobileMenuOpen = ref(false)
 
 const toggleMobileMenu = () => {
-  isMobileMenuOpen.value = !isMobileMenuOpen.value;
-};
+  isMobileMenuOpen.value = !isMobileMenuOpen.value
+}
 
 const closeMobileMenuOnOutsideClick = (event) => {
-  const mobileMenu = document.getElementById('navbar-default');
-  const menuButton = document.querySelector('[data-collapse-toggle="navbar-default"]');
-
+  const mobileMenu = document.getElementById('navbar-default')
   if (
     isMobileMenuOpen.value &&
     mobileMenu &&
-    menuButton &&
     !mobileMenu.contains(event.target) &&
-    !menuButton.contains(event.target)
+    !event.target.closest('[aria-label="Toggle menu"]')
   ) {
-    isMobileMenuOpen.value = false;
+    isMobileMenuOpen.value = false
   }
-};
+}
 
 onMounted(() => {
-  document.addEventListener('click', closeMobileMenuOnOutsideClick);
-});
+  document.addEventListener('click', closeMobileMenuOnOutsideClick)
+})
 
 onUnmounted(() => {
-  document.removeEventListener('click', closeMobileMenuOnOutsideClick);
-});
+  document.removeEventListener('click', closeMobileMenuOnOutsideClick)
+})
 </script>
 
 <template>
@@ -49,14 +46,15 @@ onUnmounted(() => {
       </div>
 
       <div class="ml-auto flex items-center gap-1 xs:gap-2 sm:gap-3 md:gap-4 flex-nowrap min-w-0">
-        <button @click="toggleMobileMenu" type="button"
-                class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-ink-muted rounded-token-lg md:hidden hover:bg-white/40 focus:outline-none focus:ring-2 focus:ring-divider transition-all duration-token-default"
-                aria-controls="navbar-default" :aria-expanded="isMobileMenuOpen">
-          <span class="sr-only">Open main menu</span>
-          <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1h15M1 7h15M1 13h15"/>
-          </svg>
-        </button>
+        <UButton
+          icon="i-lucide-menu"
+          color="neutral"
+          variant="ghost"
+          square
+          aria-label="Toggle menu"
+          class="md:hidden"
+          @click="toggleMobileMenu"
+        />
 
         <router-link to="/login"
                     class="flex items-center gap-2 h-10 sm:h-12 px-3 sm:px-4 rounded-token-full sm:rounded-4xl bg-white/30 backdrop-blur-sm border border-white/50 shadow-input-rest hover:bg-white/40 transition-all duration-token-default text-ink hover:text-brand-primary font-medium text-sm whitespace-nowrap">
