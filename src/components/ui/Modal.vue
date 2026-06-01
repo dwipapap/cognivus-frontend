@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { VisuallyHidden, DialogTitle, DialogDescription } from 'reka-ui'
 
 const props = defineProps({
@@ -21,7 +21,9 @@ const props = defineProps({
   confirmLabel: { type: String, default: 'OK' },
   cancelLabel: { type: String, default: 'Cancel' },
   showCancel: { type: Boolean, default: false },
-  alert: { type: Boolean, default: false }
+  alert: { type: Boolean, default: false },
+  responsiveDrawer: { type: Boolean, default: false },
+  drawerHeight: { type: String, default: '' }
 })
 
 const emit = defineEmits(['close', 'confirm', 'cancel', 'update:show'])
@@ -69,6 +71,19 @@ const sizeMap = {
   fullscreen: 'w-[95vw] max-w-none'
 }
 
+const isMobile = ref(false)
+let mql = null
+
+onMounted(() => {
+  mql = window.matchMedia('(max-width: 767px)')
+  isMobile.value = mql.matches
+  mql.addEventListener('change', (e) => { isMobile.value = e.matches })
+})
+
+onUnmounted(() => {
+  mql?.removeEventListener('change', () => {})
+})
+
 function onClose() {
   emit('close')
 }
@@ -94,7 +109,54 @@ const typeIcon = computed(() => {
 </script>
 
 <template>
+  <UDrawer
+    v-if="responsiveDrawer && isMobile"
+    v-model:open="open"
+    :title="!alert ? modalTitle : undefined"
+    :description="!alert ? (message || undefined) : undefined"
+    :dismissible="!persistent"
+    side="bottom"
+    handle
+    :ui="drawerHeight ? { content: `h-[${drawerHeight}]` } : undefined"
+  >
+    <template v-if="alert" #body>
+      <div class="flex flex-col items-center px-8 py-8 gap-4">
+        <div v-if="$slots.icon" class="flex-shrink-0">
+          <slot name="icon" />
+        </div>
+        <div
+          v-else
+          :class="['flex items-center justify-center w-16 h-16 rounded-token-full', iconColorClass]"
+        >
+          <UIcon :name="typeIcon" class="w-8 h-8" />
+        </div>
+        <h3 class="text-lg font-bold text-ink text-center">
+          {{ modalTitle }}
+        </h3>
+        <p v-if="message" class="text-sm text-ink-muted text-center leading-relaxed">
+          {{ message }}
+        </p>
+        <UButton
+          :label="confirmLabel"
+          :color="type === 'error' ? 'error' : type === 'warning' ? 'warning' : 'primary'"
+          size="lg"
+          class="px-8 rounded-full"
+          @click="onClose"
+        />
+      </div>
+    </template>
+
+    <template v-if="!alert" #body>
+      <slot name="content">
+        <p v-if="message" class="text-sm sm:text-base text-ink-muted px-6 py-4">
+          {{ message }}
+        </p>
+      </slot>
+    </template>
+  </UDrawer>
+
   <UModal
+    v-else
     v-model:open="open"
     :title="modalTitle"
     :description="message || undefined"
