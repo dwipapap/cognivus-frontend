@@ -286,14 +286,14 @@ onMounted(() => {
               <!-- Actions -->
               <td class="px-6 py-4">
                 <div class="flex justify-center gap-2">
-                  <BaseButton 
-                    @click="openEditModal(classItem)" 
-                    variant="secondary"
-                    size="sm"
-                    rounded="full"
-                  >
-                    Edit
-                  </BaseButton>
+                    <BaseButton 
+                      @click="openEditModal(classItem)" 
+                      variant="primary" 
+                      size="sm"
+                      rounded="full"
+                    >
+                      Edit
+                    </BaseButton>
                   <BaseButton 
                     @click="handleDelete(classItem)" 
                     variant="danger"

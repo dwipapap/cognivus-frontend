@@ -498,13 +498,13 @@ onMounted(() => {
                     >
                       Certificate
                     </BaseButton>
-                    <BaseButton
-                      size="sm"
-                      variant="secondary"
-                      @click="router.push({ name: 'AdminEditGrade', params: { userid: studentId, gradeid: grade.gradeid } })"
-                    >
-                      Edit
-                    </BaseButton>
+                      <BaseButton
+                        size="sm"
+                        variant="primary"
+                        @click="router.push({ name: 'AdminEditGrade', params: { userid: studentId, gradeid: grade.gradeid } })"
+                      >
+                        Edit
+                      </BaseButton>
                   </div>
                 </td>
               </tr>

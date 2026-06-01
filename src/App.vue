@@ -2,11 +2,9 @@
 </script>
 
 <template>
-  <div>
-    <main>
-      <router-view />
-    </main>
-  </div>
+  <UApp>
+    <router-view />
+  </UApp>
 </template>
 
 <style>

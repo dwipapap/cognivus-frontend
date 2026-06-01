@@ -98,14 +98,12 @@ const toggleMobileMenu = () => {
 // Close mobile menu when clicking outside
 const closeMobileMenuOnOutsideClick = (event) => {
   const mobileMenu = document.getElementById('navbar-default');
-  const menuButton = document.querySelector('[data-collapse-toggle="navbar-default"]');
 
   if (
     isMobileMenuOpen.value &&
     mobileMenu &&
-    menuButton &&
     !mobileMenu.contains(event.target) &&
-    !menuButton.contains(event.target)
+    !event.target.closest('[aria-controls="navbar-default"]')
   ) {
     isMobileMenuOpen.value = false;
   }
@@ -180,14 +178,15 @@ onUnmounted(() => {
         <!-- Right: Mobile menu button + Login -->
         <div class="flex items-center gap-3">
           <!-- Mobile menu button -->
-          <button @click="toggleMobileMenu" type="button"
-            class="inline-flex items-center p-2 w-10 h-10 justify-center text-gray-500 rounded-lg md:hidden hover:bg-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-            aria-controls="navbar-default" :aria-expanded="isMobileMenuOpen">
-            <span class="sr-only">Open main menu</span>
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
+          <UButton
+            icon="i-lucide-menu"
+            color="neutral"
+            variant="ghost"
+            square
+            aria-label="Toggle menu"
+            class="md:hidden"
+            @click="toggleMobileMenu"
+          />
 
           <!-- Login Button -->
           <router-link to="/login"

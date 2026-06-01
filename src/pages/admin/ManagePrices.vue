@@ -305,7 +305,7 @@ onMounted(() => {
                   formatCurrency(priceItem.monthlyprice) }}</td>
                 <td class="px-6 py-4">
                   <div class="flex justify-center gap-2">
-                    <BaseButton @click="openEditModal(priceItem)" variant="secondary" size="sm">Edit</BaseButton>
+                    <BaseButton @click="openEditModal(priceItem)" variant="primary" size="sm">Edit</BaseButton>
                     <BaseButton @click="handleDelete(priceItem)" variant="danger" size="sm">Delete</BaseButton>
                   </div>
                 </td>
@@ -371,7 +371,7 @@ onMounted(() => {
                 </td>
                 <td class="px-6 py-4">
                   <div class="flex justify-center gap-2">
-                    <BaseButton @click="openAncillaryEditModal(item)" variant="secondary" size="sm">Edit</BaseButton>
+                    <BaseButton @click="openAncillaryEditModal(item)" variant="primary" size="sm">Edit</BaseButton>
                     <BaseButton @click="handleAncillaryDelete(item)" variant="danger" size="sm">Delete</BaseButton>
                   </div>
                 </td>
