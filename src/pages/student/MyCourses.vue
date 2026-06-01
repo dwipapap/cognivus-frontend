@@ -5,6 +5,21 @@ import { useClassDetails } from '../../composables/useClassDetails';
 import { courseAPI } from '../../services/api';
 import { formatDate } from '../../utils/formatters';
 import IconArrowRight from '~icons/basil/arrow-right-solid';
+import IconBookOpen from '~icons/lucide/book-open';
+import IconGraduationCap from '~icons/lucide/graduation-cap';
+import IconFileText from '~icons/lucide/file-text';
+import IconPenTool from '~icons/lucide/pen-tool';
+import IconGlobe from '~icons/lucide/globe';
+
+const courseIcons = [
+  IconBookOpen,
+  IconGraduationCap,
+  IconFileText,
+  IconPenTool,
+  IconGlobe,
+];
+
+const getIconComponent = (index) => courseIcons[index % courseIcons.length];
 
 const { studentProfile, isLoading: profileLoading, fetchStudentProfile } = useStudentProfile();
 
@@ -15,6 +30,13 @@ const { classInfo, levelName, lecturerName, isLoading: classLoading, error: clas
 const courses = ref([]);
 const coursesLoading = ref(false);
 const coursesError = ref(null);
+const searchQuery = ref('');
+
+const filteredCourses = computed(() => {
+  if (!searchQuery.value) return courses.value;
+  const q = searchQuery.value.toLowerCase();
+  return courses.value.filter(course => course.title?.toLowerCase().includes(q));
+});
 
 /** Fetch courses for the class */
 const fetchCourses = async () => {
@@ -54,7 +76,7 @@ const errorMessage = computed(() => {
 <template>
   <div class="space-y-6">
     <!-- Class Info Card -->
-    <div class="relative bg-blue-600 rounded-2xl p-6 md:p-8 shadow-lg overflow-hidden">
+    <div class="relative bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 md:p-8 shadow-lg overflow-hidden">
       <!-- Diagonal Book Graphics -->
       <div class="absolute top-0 right-0 w-1/2 h-full pointer-events-none overflow-hidden">
         <div class="absolute -top-10 -right-10 w-40 h-48 bg-blue-400/30 rounded-lg transform rotate-12"></div>
@@ -86,59 +108,62 @@ const errorMessage = computed(() => {
     <div v-else-if="errorMessage" class="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
       <p class="text-red-800 mb-4">{{ errorMessage }}</p>
       <button v-if="classError" @click="retryClass"
-        class="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 rounded-full transition-all shadow-md hover:shadow-lg hover:scale-105 active:scale-95 mr-2">
+        class="inline-flex items-center px-3 py-2 md:px-4 text-xs md:text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors mr-2">
         Retry Class Details
       </button>
       <button v-if="coursesError" @click="fetchCourses"
-        class="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 rounded-full transition-all shadow-md hover:shadow-lg hover:scale-105 active:scale-95">
+        class="inline-flex items-center px-3 py-2 md:px-4 text-xs md:text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors">
         Retry Courses
       </button>
     </div>
 
     <!-- Course List -->
     <div v-else
-      class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-6 md:p-8 shadow-sm hover:shadow-md transition-all duration-200">
+      class="bg-gradient-to-br from-blue-50/80 to-indigo-50/80 border border-blue-100/80 rounded-2xl p-6 md:p-8 shadow-sm">
       <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-4 md:mb-6">Course Materials</h2>
 
-      <div v-if="courses.length === 0" class="py-12 text-center text-gray-500">
-        No course materials available yet.
+      <div v-if="filteredCourses.length === 0 && !searchQuery" class="py-12 text-center text-gray-500">
+        <p class="font-medium text-gray-500">Your course materials will appear here once your lecturer uploads them.</p>
+        <p class="text-sm text-gray-400 mt-2">Check back after your next class.</p>
+      </div>
+      <div v-else-if="filteredCourses.length === 0 && searchQuery" class="py-12 text-center text-gray-500">
+        <p class="font-medium text-gray-500">No courses match "{{ searchQuery }}"</p>
+        <p class="text-sm text-gray-400 mt-2">Try a different search term.</p>
       </div>
 
-      <div v-else class="space-y-3 md:space-y-4">
-        <router-link v-for="course in courses" :key="course.courseid"
+      <!-- Search -->
+      <div class="mb-4 md:mb-6">
+        <UInput
+          v-model="searchQuery"
+          icon="i-lucide-search"
+          placeholder="Search courses..."
+          size="lg"
+          class="w-full"
+        />
+      </div>
+
+      <!-- Course Rows -->
+      <div v-if="filteredCourses.length > 0" class="space-y-2 md:space-y-3">
+        <router-link
+          v-for="(course, index) in filteredCourses"
+          :key="course.courseid"
           :to="{ name: 'StudentCourseDetail', params: { id: course.courseid } }"
-          class="block bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-md overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-transform duration-200">
-          <div class="flex items-center gap-3 md:gap-4 p-4 md:p-5">
-            <!-- Book Icon with styled background -->
-            <div class="flex-shrink-0">
-              <div
-                class="relative w-10 h-10 md:w-14 md:h-14 flex items-center justify-center rounded-lg bg-gradient-to-br from-white/20 to-blue-100/40 shadow-sm overflow-visible">
-                <!-- Layered decorative shapes with a subtle bluish tint -->
-                <span
-                  class="absolute -left-2 -top-2 w-5 h-5 md:w-7 md:h-7 bg-blue-100/30 rounded-md transform rotate-12"></span>
-                <span
-                  class="absolute right-0 bottom-0 w-4 h-8 md:w-6 md:h-10 bg-blue-200/25 rounded-md transform rotate-6"></span>
+          class="flex items-center gap-3 md:gap-4 p-4 md:p-5 rounded-xl shadow-md border border-white/20 bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5"
+        >
+          <!-- Icon from Nuxt UI lucide set -->
+          <div class="flex-shrink-0 w-10 h-10 md:w-12 md:h-12 bg-white/20 rounded-full flex items-center justify-center shadow-inner">
+            <component :is="getIconComponent(index)" class="w-5 h-5 md:w-6 md:h-6 text-white" />
+          </div>
 
-                <!-- Book SVG (kept visual weight but slightly smaller to fit the background) -->
-                <svg class="w-6 h-6 md:w-10 md:h-10 text-white z-10" fill="currentColor" viewBox="0 0 24 24"
-                  aria-hidden="true">
-                  <rect x="4" y="4" width="4" height="16" rx="1" opacity="0.7" />
-                  <rect x="10" y="2" width="4" height="18" rx="1" opacity="0.85" />
-                  <rect x="16" y="6" width="4" height="14" rx="1" />
-                </svg>
-              </div>
-            </div>
+          <!-- Content -->
+          <div class="flex-1 min-w-0">
+            <h3 class="text-sm md:text-base font-semibold md:font-bold text-white mb-0.5 truncate">{{ course.title }}</h3>
+            <p class="text-xs text-white/70">{{ formatDate(course.upload_date) }}</p>
+          </div>
 
-            <!-- Content -->
-            <div class="flex-1 min-w-0">
-              <h3 class="text-base md:text-lg font-semibold md:font-bold text-white mb-1">{{ course.title }}</h3>
-              <p class="text-xs text-white/70">{{ formatDate(course.upload_date) }}</p>
-            </div>
-
-            <!-- Arrow Icon -->
-            <div class="flex-shrink-0">
-              <IconArrowRight class="w-6 h-6 text-white" />
-            </div>
+          <!-- Arrow -->
+          <div class="flex-shrink-0 text-white/50">
+            <IconArrowRight class="w-5 h-5 md:w-6 md:h-6" />
           </div>
         </router-link>
       </div>
