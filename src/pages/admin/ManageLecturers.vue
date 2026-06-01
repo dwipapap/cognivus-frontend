@@ -195,13 +195,13 @@ onMounted(fetchLecturers);
               <!-- Actions -->
               <td class="px-6 py-4">
                 <div class="flex justify-center gap-2">
-                  <BaseButton 
-                    @click="openEditModal(lecturer)" 
-                    variant="secondary"
-                    size="sm"
-                  >
-                    Edit
-                  </BaseButton>
+                    <BaseButton 
+                      @click="openEditModal(lecturer)" 
+                      variant="primary" 
+                      size="sm"
+                    >
+                      Edit
+                    </BaseButton>
                   <BaseButton 
                     @click="handleDelete(lecturer)" 
                     variant="danger"

@@ -141,9 +141,9 @@ onMounted(() => {
             <span class="flex-1 text-sm font-medium text-slate-900">{{ level.name }}</span>
             <span class="flex-[2] text-sm text-slate-600">{{ level.description || '-' }}</span>
             <div class="w-40 flex justify-end gap-2">
-              <button @click="openEditModal(level)" class="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
+              <BaseButton @click="openEditModal(level)" variant="primary" size="sm">
                 Edit
-              </button>
+              </BaseButton>
               <button @click="handleDelete(level)" class="text-sm font-medium text-red-600 hover:text-red-800 transition-colors">
                 Delete
               </button>

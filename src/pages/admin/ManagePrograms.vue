@@ -148,7 +148,7 @@ onMounted(() => {
               <td class="px-6 py-4 text-sm text-slate-600">{{ program.description || '-' }}</td>
               <td class="px-6 py-4">
                 <div class="flex justify-end gap-2">
-                  <BaseButton @click="openEditModal(program)" variant="secondary" size="sm">Edit</BaseButton>
+                  <BaseButton @click="openEditModal(program)" variant="primary" size="sm">Edit</BaseButton>
                   <BaseButton @click="handleDelete(program)" variant="danger" size="sm">Delete</BaseButton>
                 </div>
               </td>
