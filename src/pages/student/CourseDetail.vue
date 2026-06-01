@@ -148,7 +148,7 @@ onMounted(() => {
           <h1 class="text-xl md:text-3xl font-bold mb-1 md:mb-2 break-words">{{ course.title }}</h1>
           <p class="text-white/80 text-xs md:text-sm">{{ formatDate(course.upload_date) }}</p>
         </div>
-        <div v-if="course.course_code" class="flex-shrink-0 px-3 py-1.5 md:px-4 md:py-2 bg-white/20 backdrop-blur-sm rounded-lg text-xs md:text-sm font-semibold">
+        <div v-if="course.course_code" class="flex-shrink-0 px-3 py-1.5 md:px-4 md:py-2 bg-blue-700/80 rounded-lg text-xs md:text-sm font-semibold">
           {{ course.course_code }}
         </div>
       </div>
@@ -200,7 +200,8 @@ onMounted(() => {
         <!-- No Materials -->
         <div v-if="courseFiles.length === 0 && !course.video_link" class="text-center py-8 md:py-12 text-gray-500">
           <IconFolder class="w-12 h-12 md:w-16 md:h-16 mx-auto mb-2 md:mb-3 text-gray-300" />
-          <p class="font-medium text-sm md:text-base">No materials available yet.</p>
+          <p class="font-medium text-sm md:text-base">Your lecturer hasn't uploaded materials yet.</p>
+          <p class="text-xs text-gray-400 mt-1">Course materials and video lessons will appear here once added.</p>
         </div>
 
         <!-- Materials Grid -->
@@ -237,7 +238,7 @@ onMounted(() => {
             :href="`https://www.youtube.com/watch?v=${getYouTubeId(course.video_link)}`" 
             target="_blank"
             rel="noopener noreferrer"
-            class="flex items-center gap-3 md:gap-4 p-3 md:p-4 bg-gradient-to-br from-red-600 to-red-700 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5"
+            class="flex items-center gap-3 md:gap-4 p-3 md:p-4 bg-red-600 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5"
           >
             <!-- Video Thumbnail -->
             <div class="flex-shrink-0 w-14 h-16 md:w-16 md:h-16 bg-white rounded-lg flex items-center justify-center">
@@ -276,12 +277,23 @@ onMounted(() => {
       :hide-footer="true"
       title="Course Material"
       type="info"
+      :responsive-drawer="true"
+      drawer-height="75dvh"
     >
       <template #content>
-        <PDFViewer 
-          v-if="selectedPdfUrl"
-          :src="selectedPdfUrl"
-        />
+        <Suspense>
+          <template #default>
+            <PDFViewer v-if="selectedPdfUrl" :src="selectedPdfUrl" />
+          </template>
+          <template #fallback>
+            <div class="flex items-center justify-center h-64">
+              <div class="text-center">
+                <div class="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-3"></div>
+                <p class="text-sm text-gray-500">Loading PDF viewer...</p>
+              </div>
+            </div>
+          </template>
+        </Suspense>
       </template>
     </Modal>
   </div>
