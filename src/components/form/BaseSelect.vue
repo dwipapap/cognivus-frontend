@@ -10,7 +10,11 @@ const props = defineProps({
   disabled: Boolean,
   required: Boolean,
   valueKey: { type: String, default: 'value' },
-  labelKey: { type: String, default: 'label' }
+  labelKey: { type: String, default: 'label' },
+  searchable: Boolean,
+  multiple: Boolean,
+  clearable: Boolean,
+  loading: Boolean
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -34,6 +38,10 @@ function onUpdate(value) {
       :items="items"
       :placeholder="placeholder"
       :disabled="disabled"
+      :searchable="searchable"
+      :multiple="multiple"
+      :clearable="clearable"
+      :loading="loading"
       :value-key="valueKey"
       :label-key="labelKey"
       :color="error ? 'error' : 'primary'"
