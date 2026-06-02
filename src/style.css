@@ -71,7 +71,6 @@
   --shadow-modal-overlay: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   --shadow-input-rest: 0 1px 2px rgba(0, 0, 0, 0.03);
   --shadow-nav-mobile: 0 8px 30px rgba(0, 0, 0, 0.12);
-  --shadow-glow-primary: 0 0 8px rgba(59, 130, 246, 0.6);
 
   --transition-duration-token-fast: 150ms;
   --transition-duration-token-default: 200ms;
@@ -128,6 +127,8 @@
 }
 
 :root {
+  --ui-radius: 0.75rem;
+
   font-family: 'Figtree', system-ui, -apple-system, sans-serif;
   line-height: 1.5;
   font-weight: 400;
