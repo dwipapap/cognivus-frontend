@@ -2,7 +2,8 @@
 import { ref, onMounted, computed } from 'vue';
 import { classAPI, levelAPI, lecturerAPI, studentAPI } from '../../services/api';
 import Modal from '../../components/ui/Modal.vue';
-import BaseButton from '../../components/ui/BaseButton.vue';
+
+import { useConfirm } from '@/composables/useConfirm'
 import ClassForm from './ClassForm.vue';
 
 const classes = ref([]);
@@ -11,10 +12,9 @@ const lecturers = ref([]);
 const students = ref([]);
 const isLoading = ref(true);
 const showFormModal = ref(false);
-const showNotificationModal = ref(false);
-const notificationMessage = ref('');
-const notificationType = ref('info');
 const selectedClass = ref(null);
+
+const { open: confirmOpen, message: confirmMessage, confirm, onConfirm, onCancel } = useConfirm()
 const isEditMode = ref(false);
 const currentPage = ref(1);
 const itemsPerPage = 15;
@@ -30,13 +30,6 @@ const paginatedClasses = computed(() => {
 const totalPages = computed(() => {
   return Math.ceil(classes.value.length / itemsPerPage);
 });
-
-/** Go to specific page */
-const goToPage = (page) => {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page;
-  }
-};
 
 /** Get level name by ID */
 const getLevelName = (levelId) => {
@@ -80,7 +73,7 @@ const fetchClasses = async () => {
       classes.value = response.data.data;
     }
   } catch (error) {
-    showNotification('error', 'Failed to load class data.');
+    toast.add({ title: 'Error', description: 'Failed to load class data.', color: 'error' });
   } finally {
     isLoading.value = false;
   }
@@ -110,13 +103,6 @@ const fetchOptions = async () => {
   }
 };
 
-/** Show notification modal */
-const showNotification = (type, message) => {
-  notificationType.value = type;
-  notificationMessage.value = message;
-  showNotificationModal.value = true;
-};
-
 /** Open modal to add new class */
 const openAddModal = () => {
   isEditMode.value = false;
@@ -135,16 +121,16 @@ const handleSave = async (formData) => {
   try {
     if (isEditMode.value) {
       await classAPI.updateClass(selectedClass.value.classid, formData);
-      showNotification('success', 'Class updated successfully.');
+      toast.add({ title: 'Success', description: 'Class updated successfully.', color: 'success' });
     } else {
       await classAPI.createClass(formData);
-      showNotification('success', 'Class created successfully.');
+      toast.add({ title: 'Success', description: 'Class created successfully.', color: 'success' });
     }
     showFormModal.value = false;
     fetchClasses();
   } catch (error) {
     const message = error.response?.data?.message || 'An error occurred.';
-    showNotification('error', `Failed to save class: ${message}`);
+    toast.add({ title: 'Error', description: `Failed to save class: ${message}`, color: 'error' });
   }
 };
 
@@ -177,25 +163,25 @@ const handleStudentSave = async (studentData) => {
 
     await Promise.all(updatePromises);
 
-    showNotification('success', `Successfully updated ${toAdd.length + toRemove.length} student(s).`);
+    toast.add({ title: 'Success', description: `Successfully updated ${toAdd.length + toRemove.length} student(s).`, color: 'success' });
     showFormModal.value = false;
     
     await fetchOptions();
   } catch (error) {
     const message = error.response?.data?.message || 'An error occurred.';
-    showNotification('error', `Failed to update students: ${message}`);
+    toast.add({ title: 'Error', description: `Failed to update students: ${message}`, color: 'error' });
   }
 };
 
 /** Delete class */
 const handleDelete = async (classItem) => {
-  if (confirm(`Delete class "${classItem.class_code}"? This action cannot be undone.`)) {
+  if (await confirm(`Delete class "${classItem.class_code}"? This action cannot be undone.`)) {
     try {
       await classAPI.deleteClass(classItem.classid);
-      showNotification('success', 'Class deleted successfully.');
+      toast.add({ title: 'Success', description: 'Class deleted successfully.', color: 'success' });
       fetchClasses();
     } catch (error) {
-      showNotification('error', 'Failed to delete class.');
+      toast.add({ title: 'Error', description: 'Failed to delete class.', color: 'error' });
     }
   }
 };
@@ -211,106 +197,91 @@ onMounted(() => {
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
       <div>
-        <h1 class="text-2xl font-bold text-slate-800">Manage Classes</h1>
-        <p class="text-slate-600 mt-1">Create, edit, and manage class records</p>
+        <h1 class="text-2xl font-bold text-default">Manage Classes</h1>
+        <p class="text-toned mt-1">Create, edit, and manage class records</p>
       </div>
-      <BaseButton @click="openAddModal" variant="primary" rounded="full">
-        <span class="mr-2">+</span> Add Class
-      </BaseButton>
+      <UButton @click="openAddModal" color="primary" variant="solid" icon="i-lucide-plus">
+        Add Class
+      </UButton>
     </div>
 
-    <!-- Loading State -->
-    <div v-if="isLoading" class="flex justify-center items-center py-20">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-600"></div>
+    <div v-if="isLoading" class="flex justify-center py-16">
+      <UIcon name="i-lucide-loader-circle" class="w-8 h-8 animate-spin text-muted" />
     </div>
 
-    <div v-else class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+    <div v-else class="bg-default rounded-xl shadow-sm border border-default overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full">
           <thead>
-            <tr class="bg-slate-50 border-b border-slate-200">
-              <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider w-16">#</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Class Code</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Schedule</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Level</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Lecturer</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Description</th>
-              <th class="px-6 py-4 text-center text-xs font-semibold text-slate-700 uppercase tracking-wider">Actions</th>
+            <tr class="bg-muted border-b border-default">
+              <th class="px-6 py-4 text-left text-xs font-semibold text-default uppercase tracking-wider w-16">#</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-default uppercase tracking-wider">Class Code</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-default uppercase tracking-wider">Schedule</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-default uppercase tracking-wider">Level</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-default uppercase tracking-wider">Lecturer</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-default uppercase tracking-wider">Description</th>
+              <th class="px-6 py-4 text-center text-xs font-semibold text-default uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody>
             <tr 
               v-for="(classItem, index) in paginatedClasses" 
               :key="classItem.classid"
-              :class="index % 2 === 0 ? 'bg-white' : 'bg-slate-50'"
-              class="border-b border-slate-100 transition-colors"
+              :class="index % 2 === 0 ? 'bg-default' : 'bg-muted'"
+              class="border-b border-muted transition-colors"
             >
               <!-- Row Number -->
-              <td class="px-6 py-4 text-sm text-slate-500 text-right">
+              <td class="px-6 py-4 text-sm text-muted text-right">
                 {{ (currentPage - 1) * itemsPerPage + index + 1 }}
               </td>
 
               <!-- Class Code -->
               <td class="px-6 py-4">
-                <div class="text-sm font-medium text-slate-900">{{ classItem.class_code }}</div>
+                <div class="text-sm font-medium text-default">{{ classItem.class_code }}</div>
               </td>
 
               <!-- Schedule -->
               <td class="px-6 py-4">
                 <div v-if="formatSchedule(classItem)" class="flex items-center gap-1.5">
-                  <svg class="w-4 h-4 text-slate-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                  </svg>
-                  <span class="text-sm text-slate-700 font-medium">{{ formatSchedule(classItem) }}</span>
+                  <UIcon name="i-lucide-clock" class="w-4 h-4 text-toned flex-shrink-0" />
+                  <span class="text-sm text-default font-medium">{{ formatSchedule(classItem) }}</span>
                 </div>
-                <span v-else class="text-sm text-slate-400 italic">No schedule</span>
+                <span v-else class="text-sm text-muted italic">No schedule</span>
               </td>
 
               <!-- Level -->
               <td class="px-6 py-4">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-muted text-default">
                   {{ getLevelName(classItem.levelid) }}
                 </span>
               </td>
 
               <!-- Lecturer -->
-              <td class="px-6 py-4 text-sm text-slate-700">
+              <td class="px-6 py-4 text-sm text-default">
                 {{ getLecturerName(classItem.lecturerid) }}
               </td>
 
               <!-- Description -->
-              <td class="px-6 py-4 text-sm text-slate-600">
+              <td class="px-6 py-4 text-sm text-toned">
                 {{ classItem.description || '-' }}
               </td>
 
               <!-- Actions -->
               <td class="px-6 py-4">
                 <div class="flex justify-center gap-2">
-                    <BaseButton 
-                      @click="openEditModal(classItem)" 
-                      variant="primary" 
-                      size="sm"
-                      rounded="full"
-                    >
+                    <UButton @click="openEditModal(classItem)" color="primary" variant="solid" size="sm">
                       Edit
-                    </BaseButton>
-                  <BaseButton 
-                    @click="handleDelete(classItem)" 
-                    variant="danger"
-                    size="sm"
-                    rounded="full"
-                  >
+                    </UButton>
+                  <UButton @click="handleDelete(classItem)" color="error" variant="solid" size="sm">
                     Delete
-                  </BaseButton>
+                  </UButton>
                 </div>
               </td>
             </tr>
             <tr v-if="classes.length === 0">
               <td colspan="7" class="px-6 py-12 text-center">
-                <div class="flex flex-col items-center justify-center text-slate-500">
-                  <svg class="w-12 h-12 mb-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                  </svg>
+                <div class="flex flex-col items-center justify-center text-muted">
+                  <UIcon name="i-lucide-folder" class="w-12 h-12 mb-3 text-muted" />
                   <p class="text-sm font-medium">No classes found</p>
                   <p class="text-xs mt-1">Click "Add Class" to create one.</p>
                 </div>
@@ -320,42 +291,13 @@ onMounted(() => {
         </table>
       </div>
 
-      <!-- Pagination -->
-      <div v-if="totalPages > 1" class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
-        <p class="text-sm text-slate-600">
+      <div v-if="totalPages > 1" class="px-6 py-4 bg-muted border-t border-default flex items-center justify-between">
+        <p class="text-sm text-toned">
           Showing <span class="font-medium">{{ (currentPage - 1) * itemsPerPage + 1 }}</span> to 
           <span class="font-medium">{{ Math.min(currentPage * itemsPerPage, classes.length) }}</span> of 
           <span class="font-medium">{{ classes.length }}</span> classes
         </p>
-        <div class="flex gap-2">
-          <button
-            @click="goToPage(currentPage - 1)"
-            :disabled="currentPage === 1"
-            class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-full hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            Previous
-          </button>
-          <button
-            v-for="page in totalPages"
-            :key="page"
-            @click="goToPage(page)"
-            :class="[
-              'px-4 py-2 text-sm font-medium rounded-full transition-colors',
-              currentPage === page
-                ? 'bg-slate-900 text-white border border-slate-900'
-                : 'text-slate-700 bg-white border border-slate-300 hover:bg-slate-50'
-            ]"
-          >
-            {{ page }}
-          </button>
-          <button
-            @click="goToPage(currentPage + 1)"
-            :disabled="currentPage === totalPages"
-            class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-full hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            Next
-          </button>
-        </div>
+        <UPagination v-model:page="currentPage" :total="classes.length" :max="itemsPerPage" :sibling-count="1" size="sm" />
       </div>
     </div>
 
@@ -369,9 +311,7 @@ onMounted(() => {
       :hide-footer="true"
     >
       <template #icon>
-        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-        </svg>
+        <UIcon name="i-lucide-users" class="w-6 h-6 text-white" />
       </template>
       <template #content>
         <ClassForm
@@ -388,12 +328,12 @@ onMounted(() => {
       </template>
     </Modal>
 
-    <!-- Notification Modal -->
-    <Modal 
-      :show="showNotificationModal" 
-      :type="notificationType" 
-      :message="notificationMessage" 
-      @close="showNotificationModal = false" 
-    />
   </div>
+
+  <UModal v-model:open="confirmOpen" :title="confirmMessage">
+    <template #footer>
+      <UButton label="Cancel" color="neutral" variant="outline" @click="onCancel" />
+      <UButton label="Delete" color="error" @click="onConfirm" />
+    </template>
+  </UModal>
 </template>

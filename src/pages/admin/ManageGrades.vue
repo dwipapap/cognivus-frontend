@@ -1,17 +1,29 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { studentAPI, reportFileAPI, gradeAPI } from '../../services/api';
-import BaseFileUpload from '../../components/form/BaseFileUpload.vue';
-import BaseButton from '../../components/ui/BaseButton.vue';
-import LoadingSpinner from '../../components/ui/LoadingSpinner.vue';
+
+
 import Modal from '../../components/ui/Modal.vue';
 import { useForm } from '../../composables/useForm';
+import { useConfirm } from '@/composables/useConfirm'
 
 const students = ref([]);
+const existingGrades = ref([]);
 const isLoading = ref(true);
 const successMessage = ref('');
 const errorMessage = ref('');
 const showUploadModal = ref(false);
+
+const gradeColumns = [
+  { key: 'test_type', label: 'Test Type' },
+  { key: 'listening_score', label: 'Listening' },
+  { key: 'speaking_score', label: 'Speaking' },
+  { key: 'reading_score', label: 'Reading' },
+  { key: 'writing_score', label: 'Writing' },
+  { key: 'final_score', label: 'Final' },
+  { key: 'date_taken', label: 'Date' },
+  { key: 'actions', label: 'Actions' },
+];
 
 /** Form for uploading grade report */
 const { formData, errors, getFieldProps, reset } = useForm(
@@ -32,6 +44,8 @@ const { formData, errors, getFieldProps, reset } = useForm(
 
 const uploadFile = ref(null);
 const isUploading = ref(false);
+
+const { confirm } = useConfirm()
 
 /** Fetch all students */
 const fetchStudents = async () => {
@@ -121,6 +135,31 @@ const resetUploadForm = () => {
   showUploadModal.value = false;
 };
 
+/** Fetch all grades */
+const fetchGrades = async () => {
+  try {
+    const response = await gradeAPI.getAllGrades();
+    if (response.data.success) {
+      existingGrades.value = response.data.data;
+    }
+  } catch (error) {
+    console.error('Failed to fetch grades:', error);
+  }
+};
+
+/** Handle delete grade */
+const handleDeleteGrade = async (grade) => {
+  if (!await confirm(`Delete this grade record?`)) return;
+  try {
+    await gradeAPI.deleteGrade(grade.gradeid);
+    successMessage.value = 'Grade deleted successfully';
+    fetchGrades();
+    setTimeout(() => { successMessage.value = ''; }, 3000);
+  } catch (error) {
+    errorMessage.value = 'Failed to delete grade';
+  }
+};
+
 /** Get student name */
 const getStudentName = (studentid) => {
   const student = students.value.find(s => s.studentid === studentid);
@@ -129,12 +168,13 @@ const getStudentName = (studentid) => {
 
 onMounted(() => {
   fetchStudents();
+  fetchGrades();
 });
 </script>
 
 <template>
   <div class="px-4 py-8">
-    <h1 class="text-2xl font-semibold text-slate-900 tracking-tight mb-6">Grade Reports</h1>
+    <h1 class="text-2xl font-semibold text-default tracking-tight mb-6">Grade Reports</h1>
 
     <!-- Messages -->
     <div v-if="successMessage" class="mb-6 border border-green-200 rounded-lg p-4">
@@ -145,25 +185,36 @@ onMounted(() => {
     </div>
 
     <!-- Loading -->
-    <div v-if="isLoading" class="py-20 flex justify-center">
-      <LoadingSpinner size="lg" color="slate" :center="true" />
+    <div v-if="isLoading" class="flex justify-center py-16">
+      <UIcon name="i-lucide-loader-circle" class="w-8 h-8 animate-spin text-muted" />
+    </div>
+
+    <!-- Grades Table -->
+    <div v-if="existingGrades.length > 0" class="mb-8">
+      <h2 class="text-lg font-medium text-default mb-4">Existing Grades</h2>
+      <UTable :data="existingGrades" :columns="gradeColumns" class="border border-default rounded-lg">
+        <template #actions-data="{ row }">
+          <div class="flex gap-2">
+            <UButton color="primary" variant="solid" size="sm" @click="$router.push({ name: 'AdminEditGrade', params: { userid: row.studentid, gradeid: row.gradeid } })">
+              Edit
+            </UButton>
+            <UButton color="error" variant="solid" size="sm" @click="handleDeleteGrade(row)">
+              Delete
+            </UButton>
+          </div>
+        </template>
+      </UTable>
     </div>
 
     <!-- Main Content -->
-    <div v-else class="border border-slate-200 rounded-lg p-6">
+    <div class="border border-default rounded-lg p-6">
       <div class="flex justify-between items-center mb-4">
-        <h2 class="text-lg font-medium text-slate-900">Upload Grade Report</h2>
-        <button
-          @click="showUploadModal = true"
-          class="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 text-white text-sm font-medium rounded-lg hover:bg-slate-800 transition-colors"
-        >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-          </svg>
+        <h2 class="text-lg font-medium text-default">Upload Grade Report</h2>
+        <UButton color="primary" variant="solid" @click="showUploadModal = true" icon="i-lucide-upload">
           Upload Report
-        </button>
+        </UButton>
       </div>
-      <p class="text-sm text-slate-500">
+      <p class="text-sm text-muted">
         Upload PDF grade reports for students. Reports will be linked to student records.
       </p>
     </div>
@@ -178,121 +229,45 @@ onMounted(() => {
       :hide-footer="true"
     >
       <template #icon>
-        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
+        <UIcon name="i-lucide-file-text" class="w-6 h-6 text-white" />
       </template>
 
       <template #content>
         <div class="space-y-6">
-          <div>
-            <label class="block text-sm font-semibold text-slate-700 mb-2">
-              Select Student <span class="text-red-500">*</span>
-            </label>
-            <select
-              v-model="formData.studentid"
-              class="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-colors"
-            >
-              <option value="">-- Select Student --</option>
-              <option v-for="student in students" :key="student.studentid" :value="student.studentid">
-                {{ student.fullname }} ({{ student.tbuser?.email }})
-              </option>
-            </select>
-          </div>
+          <UFormField label="Select Student" required>
+            <USelect v-model="formData.studentid" :items="students.map(s => ({ label: s.fullname + ' (' + (s.tbuser?.email || '') + ')', value: s.studentid }))" placeholder="-- Select Student --" searchable />
+          </UFormField>
 
-          <div>
-            <label class="block text-sm font-semibold text-slate-700 mb-2">
-              Test Type <span class="text-red-500">*</span>
-            </label>
-            <input
-              v-model="formData.test_type"
-              type="text"
-              class="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-colors"
-              placeholder="e.g., TOEFL, IELTS, Placement Test"
-            />
-          </div>
+          <UFormField label="Test Type" required>
+            <UInput v-model="formData.test_type" placeholder="e.g., TOEFL, IELTS, Placement Test" />
+          </UFormField>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-semibold text-slate-700 mb-2">Listening Score</label>
-              <input
-                v-model="formData.listening_score"
-                type="number"
-                min="0"
-                max="100"
-                class="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-colors"
-                placeholder="0-100"
-              />
-            </div>
-            <div>
-              <label class="block text-sm font-semibold text-slate-700 mb-2">Speaking Score</label>
-              <input
-                v-model="formData.speaking_score"
-                type="number"
-                min="0"
-                max="100"
-                class="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-colors"
-                placeholder="0-100"
-              />
-            </div>
-            <div>
-              <label class="block text-sm font-semibold text-slate-700 mb-2">Reading Score</label>
-              <input
-                v-model="formData.reading_score"
-                type="number"
-                min="0"
-                max="100"
-                class="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-colors"
-                placeholder="0-100"
-              />
-            </div>
-            <div>
-              <label class="block text-sm font-semibold text-slate-700 mb-2">Writing Score</label>
-              <input
-                v-model="formData.writing_score"
-                type="number"
-                min="0"
-                max="100"
-                class="w-full px-4 py-3 border-2 border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-colors"
-                placeholder="0-100"
-              />
-            </div>
+            <UFormField label="Listening Score">
+              <UInput v-model="formData.listening_score" type="number" min="0" max="100" placeholder="0-100" />
+            </UFormField>
+            <UFormField label="Speaking Score">
+              <UInput v-model="formData.speaking_score" type="number" min="0" max="100" placeholder="0-100" />
+            </UFormField>
+            <UFormField label="Reading Score">
+              <UInput v-model="formData.reading_score" type="number" min="0" max="100" placeholder="0-100" />
+            </UFormField>
+            <UFormField label="Writing Score">
+              <UInput v-model="formData.writing_score" type="number" min="0" max="100" placeholder="0-100" />
+            </UFormField>
           </div>
 
-          <BaseFileUpload
-            v-model="uploadFile"
-            label="Upload Grade Report PDF"
-            accept=".pdf"
-            :max-size="5"
-            :required="true"
-            hint="PDF files only (max 5MB)"
-          />
+          <UFormField label="Upload Report File" hint="PDF or Word document (max 10MB)">
+            <UInput type="file" accept=".pdf,.doc,.docx" @change="e => uploadFile = e.target.files[0]" />
+          </UFormField>
 
-          <!-- Action Buttons -->
-          <div class="flex justify-end gap-3 pt-4 border-t border-slate-200">
-            <BaseButton 
-              type="button" 
-              variant="secondary" 
-              @click="resetUploadForm"
-              :disabled="isUploading"
-              size="lg"
-            >
+          <div class="flex justify-end gap-3 pt-4 border-t border-default">
+            <UButton type="button" color="neutral" variant="outline" @click="resetUploadForm" :disabled="isUploading">
               Cancel
-            </BaseButton>
-            <BaseButton 
-              type="button" 
-              variant="primary" 
-              @click="uploadGradeReport"
-              :loading="isUploading"
-              size="lg"
-            >
-              <span v-if="!isUploading">
-                <svg class="w-5 h-5 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                </svg>
-                Upload Report
-              </span>
-            </BaseButton>
+            </UButton>
+            <UButton type="button" color="primary" variant="solid" @click="uploadGradeReport" :loading="isUploading" icon="i-lucide-upload">
+              Upload Report
+            </UButton>
           </div>
         </div>
       </template>

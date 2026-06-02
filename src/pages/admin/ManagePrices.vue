@@ -2,13 +2,17 @@
 import { ref, onMounted, computed } from 'vue';
 import { priceAPI, levelAPI, programAPI, ancillaryPriceAPI } from '../../services/api';
 import Modal from '../../components/ui/Modal.vue';
-import BaseButton from '../../components/ui/BaseButton.vue';
-import BaseInput from '../../components/form/BaseInput.vue';
+import { useConfirm } from '@/composables/useConfirm'
+
 import PriceForm from './PriceForm.vue';
 import { formatCurrency } from '../../utils/formatters';
 
 // Tab state
-const activeTab = ref('classes');
+const activeTab = ref('0');
+const tabItems = [
+  { label: 'Classes', slot: 'classes' },
+  { label: 'Ancillary', slot: 'ancillary' }
+];
 
 // Classes Price state
 const prices = ref([]);
@@ -16,10 +20,9 @@ const levels = ref([]);
 const programs = ref([]);
 const isLoading = ref(true);
 const showFormModal = ref(false);
-const showNotificationModal = ref(false);
-const notificationMessage = ref('');
-const notificationType = ref('info');
 const selectedPrice = ref(null);
+
+const { open: confirmOpen, message: confirmMessage, confirm, onConfirm, onCancel } = useConfirm()
 const isEditMode = ref(false);
 const currentPage = ref(1);
 const itemsPerPage = 15;
@@ -44,13 +47,6 @@ const totalPages = computed(() => {
   return Math.ceil(prices.value.length / itemsPerPage);
 });
 
-/** Go to specific page */
-const goToPage = (page) => {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page;
-  }
-};
-
 /** Get level name */
 const getLevelName = (levelId) => {
   const level = levels.value.find(l => l.levelid === levelId);
@@ -72,7 +68,7 @@ const fetchPrices = async () => {
       prices.value = response.data.data;
     }
   } catch (error) {
-    showNotification('error', 'Failed to load price data.');
+    toast.add({ title: 'Error', description: 'Failed to load price data.', color: 'error' });
   } finally {
     isLoading.value = false;
   }
@@ -107,17 +103,10 @@ const fetchAncillaryPrices = async () => {
       ancillaryPrices.value = response.data.data;
     }
   } catch (error) {
-    showNotification('error', 'Failed to load ancillary prices.');
+    toast.add({ title: 'Error', description: 'Failed to load ancillary prices.', color: 'error' });
   } finally {
     isAncillaryLoading.value = false;
   }
-};
-
-/** Show notification */
-const showNotification = (type, message) => {
-  notificationType.value = type;
-  notificationMessage.value = message;
-  showNotificationModal.value = true;
 };
 
 /** Open add modal for class price */
@@ -139,28 +128,28 @@ const handleSave = async (formData) => {
   try {
     if (isEditMode.value) {
       await priceAPI.updatePrice(selectedPrice.value.priceid, formData);
-      showNotification('success', 'Price updated successfully.');
+      toast.add({ title: 'Success', description: 'Price updated successfully.', color: 'success' });
     } else {
       await priceAPI.createPrice(formData);
-      showNotification('success', 'Price created successfully.');
+      toast.add({ title: 'Success', description: 'Price created successfully.', color: 'success' });
     }
     showFormModal.value = false;
     fetchPrices();
   } catch (error) {
     const message = error.response?.data?.message || 'An error occurred.';
-    showNotification('error', `Failed to save price: ${message}`);
+    toast.add({ title: 'Error', description: `Failed to save price: ${message}`, color: 'error' });
   }
 };
 
 /** Delete class price */
 const handleDelete = async (priceItem) => {
-  if (confirm(`Delete this price? This action cannot be undone.`)) {
+  if (await confirm(`Delete price for ${getLevelName(priceItem.levelid)} — ${getProgramName(priceItem.programid)}? This cannot be undone.`)) {
     try {
       await priceAPI.deletePrice(priceItem.priceid);
-      showNotification('success', 'Price deleted successfully.');
+      toast.add({ title: 'Success', description: 'Price deleted successfully.', color: 'success' });
       fetchPrices();
     } catch (error) {
-      showNotification('error', 'Failed to delete price.');
+      toast.add({ title: 'Error', description: 'Failed to delete price.', color: 'error' });
     }
   }
 };
@@ -188,26 +177,26 @@ const handleAncillarySave = async () => {
   try {
     if (isAncillaryEditMode.value) {
       await ancillaryPriceAPI.update(selectedAncillary.value.apid, ancillaryForm.value);
-      showNotification('success', 'Ancillary price updated.');
+      toast.add({ title: 'Success', description: 'Ancillary price updated.', color: 'success' });
     } else {
       await ancillaryPriceAPI.create(ancillaryForm.value);
-      showNotification('success', 'Ancillary price created.');
+      toast.add({ title: 'Success', description: 'Ancillary price created.', color: 'success' });
     }
     showAncillaryModal.value = false;
     fetchAncillaryPrices();
   } catch (error) {
-    showNotification('error', 'Failed to save ancillary price.');
+    toast.add({ title: 'Error', description: 'Failed to save ancillary price.', color: 'error' });
   }
 };
 
 const handleAncillaryDelete = async (item) => {
-  if (confirm(`Delete "${item.name}"? This cannot be undone.`)) {
+  if (await confirm(`Delete "${item.name}"? This cannot be undone.`)) {
     try {
       await ancillaryPriceAPI.delete(item.apid);
-      showNotification('success', 'Ancillary price deleted.');
+      toast.add({ title: 'Success', description: 'Ancillary price deleted.', color: 'success' });
       fetchAncillaryPrices();
     } catch (error) {
-      showNotification('error', 'Failed to delete ancillary price.');
+      toast.add({ title: 'Error', description: 'Failed to delete ancillary price.', color: 'error' });
     }
   }
 };
@@ -224,177 +213,145 @@ onMounted(() => {
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
       <div>
-        <h1 class="text-2xl font-bold text-slate-800">Manage Prices</h1>
-        <p class="text-slate-600 mt-1">Manage class and ancillary pricing</p>
+        <h1 class="text-2xl font-bold text-default">Manage Prices</h1>
+        <p class="text-toned mt-1">Manage class and ancillary pricing</p>
       </div>
-      <BaseButton v-if="activeTab === 'classes'" @click="openAddModal" variant="primary">
-        <span class="mr-2">+</span> Add Class Price
-      </BaseButton>
-      <BaseButton v-else @click="openAncillaryAddModal" variant="primary">
-        <span class="mr-2">+</span> Add Ancillary Price
-      </BaseButton>
+      <UButton v-if="activeTab === '0'" @click="openAddModal" color="primary" variant="solid" icon="i-lucide-plus">
+        Add Class Price
+      </UButton>
+      <UButton v-else @click="openAncillaryAddModal" color="primary" variant="solid" icon="i-lucide-plus">
+        Add Ancillary Price
+      </UButton>
     </div>
 
-    <!-- Tab Navigation -->
-    <div class="flex gap-6 mb-6 border-b border-slate-200">
-      <button @click="activeTab = 'classes'" :class="[
-        'pb-3 text-sm font-medium border-b-2 transition-colors -mb-px',
-        activeTab === 'classes'
-          ? 'text-slate-900 border-slate-900'
-          : 'text-slate-500 border-transparent hover:text-slate-700'
-      ]">
-        Classes
-      </button>
-      <button @click="activeTab = 'ancillary'" :class="[
-        'pb-3 text-sm font-medium border-b-2 transition-colors -mb-px',
-        activeTab === 'ancillary'
-          ? 'text-slate-900 border-slate-900'
-          : 'text-slate-500 border-transparent hover:text-slate-700'
-      ]">
-        Ancillary
-      </button>
-    </div>
-
-    <!-- Classes Price Tab Content -->
-    <div v-if="activeTab === 'classes'">
-      <div v-if="isLoading" class="flex justify-center items-center py-20">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-600"></div>
-      </div>
-
-      <div v-else class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full">
-            <thead>
-              <tr class="bg-slate-50 border-b border-slate-200">
-                <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider w-16">#</th>
-                <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Level</th>
-                <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Program
-                </th>
-                <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Name</th>
-                <th class="px-6 py-4 text-right text-xs font-semibold text-slate-700 uppercase tracking-wider">Total
-                  Price</th>
-                <th class="px-6 py-4 text-right text-xs font-semibold text-slate-700 uppercase tracking-wider">Monthly
-                  Price</th>
-                <th class="px-6 py-4 text-center text-xs font-semibold text-slate-700 uppercase tracking-wider">Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(priceItem, index) in paginatedPrices" :key="priceItem.priceid"
-                :class="index % 2 === 0 ? 'bg-white' : 'bg-slate-50'"
-                class="border-b border-slate-100 transition-colors">
-                <td class="px-6 py-4 text-sm text-slate-500 text-right">
-                  {{ (currentPage - 1) * itemsPerPage + index + 1 }}
-                </td>
-                <td class="px-6 py-4">
-                  <span
-                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
-                    {{ getLevelName(priceItem.levelid) }}
-                  </span>
-                </td>
-                <td class="px-6 py-4">
-                  <span
-                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
-                    {{ getProgramName(priceItem.programid) }}
-                  </span>
-                </td>
-                <td class="px-6 py-4 text-sm font-medium text-slate-900">{{ priceItem.name || '-' }}</td>
-                <td class="px-6 py-4 text-right text-sm font-semibold text-green-600">{{ formatCurrency(priceItem.harga)
-                  }}</td>
-                <td class="px-6 py-4 text-right text-sm font-semibold text-blue-600">{{
-                  formatCurrency(priceItem.monthlyprice) }}</td>
-                <td class="px-6 py-4">
-                  <div class="flex justify-center gap-2">
-                    <BaseButton @click="openEditModal(priceItem)" variant="primary" size="sm">Edit</BaseButton>
-                    <BaseButton @click="handleDelete(priceItem)" variant="danger" size="sm">Delete</BaseButton>
-                  </div>
-                </td>
-              </tr>
-              <tr v-if="prices.length === 0">
-                <td colspan="7" class="px-6 py-12 text-center text-slate-500">
-                  <p class="text-sm font-medium">No prices found</p>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+    <UTabs v-model="activeTab" :items="tabItems">
+      <template #classes>
+        <div v-if="isLoading" class="flex justify-center py-16">
+          <UIcon name="i-lucide-loader-circle" class="w-8 h-8 animate-spin text-muted" />
         </div>
 
-        <!-- Pagination -->
-        <div v-if="totalPages > 1"
-          class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
-          <p class="text-sm text-slate-600">
-            Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to {{ Math.min(currentPage * itemsPerPage, prices.length)
-            }} of {{ prices.length }}
-          </p>
-          <div class="flex gap-2">
-            <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1"
-              class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50">
-              Previous
-            </button>
-            <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages"
-              class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50">
-              Next
-            </button>
+        <div v-else class="bg-default rounded-xl shadow-sm border border-default overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead>
+                <tr class="bg-muted border-b border-default">
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-default uppercase tracking-wider w-16">#</th>
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-default uppercase tracking-wider">Level</th>
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-default uppercase tracking-wider">Program
+                  </th>
+                  <th class="px-6 py-4 text-left text-xs font-semibold text-default uppercase tracking-wider">Name</th>
+                  <th class="px-6 py-4 text-right text-xs font-semibold text-default uppercase tracking-wider">Total
+                    Price</th>
+                  <th class="px-6 py-4 text-right text-xs font-semibold text-default uppercase tracking-wider">Monthly
+                    Price</th>
+                  <th class="px-6 py-4 text-center text-xs font-semibold text-default uppercase tracking-wider">Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(priceItem, index) in paginatedPrices" :key="priceItem.priceid"
+                  :class="index % 2 === 0 ? 'bg-default' : 'bg-muted'"
+                  class="border-b border-muted transition-colors">
+                  <td class="px-6 py-4 text-sm text-muted text-right">
+                    {{ (currentPage - 1) * itemsPerPage + index + 1 }}
+                  </td>
+                  <td class="px-6 py-4">
+                    <span
+                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-muted text-default">
+                      {{ getLevelName(priceItem.levelid) }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4">
+                    <span
+                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-muted text-default">
+                      {{ getProgramName(priceItem.programid) }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 text-sm font-medium text-default">{{ priceItem.name || '-' }}</td>
+                  <td class="px-6 py-4 text-right text-sm font-semibold text-default">{{ formatCurrency(priceItem.harga)
+                    }}</td>
+                  <td class="px-6 py-4 text-right text-sm font-semibold text-default">{{
+                    formatCurrency(priceItem.monthlyprice) }}</td>
+                  <td class="px-6 py-4">
+                    <div class="flex justify-center gap-2">
+                      <UButton @click="openEditModal(priceItem)" color="primary" variant="solid" size="sm">Edit</UButton>
+                      <UButton @click="handleDelete(priceItem)" color="error" variant="solid" size="sm">Delete</UButton>
+                    </div>
+                  </td>
+                </tr>
+                <tr v-if="prices.length === 0">
+                  <td colspan="7" class="px-6 py-12 text-center text-muted">
+                    <p class="text-sm font-medium">No class prices set up yet</p>
+                    <p class="text-xs mt-1">Add one to get started.</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div v-if="totalPages > 1"
+            class="px-6 py-4 bg-muted border-t border-default flex items-center justify-between">
+            <p class="text-sm text-toned">
+              Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to {{ Math.min(currentPage * itemsPerPage, prices.length) }} of {{ prices.length }}
+            </p>
+            <UPagination v-model:page="currentPage" :total="prices.length" :max="itemsPerPage" :sibling-count="1" size="sm" />
           </div>
         </div>
-      </div>
-    </div>
+      </template>
 
-    <!-- Ancillary Price Tab Content -->
-    <div v-else>
-      <div v-if="isAncillaryLoading" class="flex justify-center items-center py-20">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-600"></div>
-      </div>
+      <template #ancillary>
+        <div v-if="isAncillaryLoading" class="flex justify-center py-16">
+          <UIcon name="i-lucide-loader-circle" class="w-8 h-8 animate-spin text-muted" />
+        </div>
 
-      <div v-else class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <div v-else class="bg-default rounded-xl shadow-sm border border-default overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full">
             <thead>
-              <tr class="bg-slate-50 border-b border-slate-200">
-                <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider w-16">#</th>
-                <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Name</th>
-                <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Description
+              <tr class="bg-muted border-b border-default">
+                <th class="px-6 py-4 text-left text-xs font-semibold text-default uppercase tracking-wider w-16">#</th>
+                <th class="px-6 py-4 text-left text-xs font-semibold text-default uppercase tracking-wider">Name</th>
+                <th class="px-6 py-4 text-left text-xs font-semibold text-default uppercase tracking-wider">Description
                 </th>
-                <th class="px-6 py-4 text-right text-xs font-semibold text-slate-700 uppercase tracking-wider">Price</th>
-                <th class="px-6 py-4 text-center text-xs font-semibold text-slate-700 uppercase tracking-wider">Actions
+                <th class="px-6 py-4 text-right text-xs font-semibold text-default uppercase tracking-wider">Price</th>
+                <th class="px-6 py-4 text-center text-xs font-semibold text-default uppercase tracking-wider">Actions
                 </th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="(item, index) in ancillaryPrices" :key="item.apid"
-                :class="index % 2 === 0 ? 'bg-white' : 'bg-slate-50'"
-                class="border-b border-slate-100 transition-colors">
-                <td class="px-6 py-4 text-sm text-slate-500 text-right">{{ index + 1 }}</td>
-                <td class="px-6 py-4 text-sm font-medium text-slate-900">{{ item.name }}</td>
-                <td class="px-6 py-4 text-sm text-slate-600">{{ item.description || '-' }}</td>
-                <td class="px-6 py-4 text-right text-sm font-semibold text-green-600">{{ formatCurrency(item.price) }}
+                :class="index % 2 === 0 ? 'bg-default' : 'bg-muted'"
+                class="border-b border-muted transition-colors">
+                <td class="px-6 py-4 text-sm text-muted text-right">{{ index + 1 }}</td>
+                <td class="px-6 py-4 text-sm font-medium text-default">{{ item.name }}</td>
+                <td class="px-6 py-4 text-sm text-toned">{{ item.description || '-' }}</td>
+                <td class="px-6 py-4 text-right text-sm font-semibold text-default">{{ formatCurrency(item.price) }}
                 </td>
                 <td class="px-6 py-4">
                   <div class="flex justify-center gap-2">
-                    <BaseButton @click="openAncillaryEditModal(item)" variant="primary" size="sm">Edit</BaseButton>
-                    <BaseButton @click="handleAncillaryDelete(item)" variant="danger" size="sm">Delete</BaseButton>
+                    <UButton @click="openAncillaryEditModal(item)" color="primary" variant="solid" size="sm">Edit</UButton>
+                    <UButton @click="handleAncillaryDelete(item)" color="error" variant="solid" size="sm">Delete</UButton>
                   </div>
                 </td>
               </tr>
               <tr v-if="ancillaryPrices.length === 0">
-                <td colspan="5" class="px-6 py-12 text-center text-slate-500">
-                  <p class="text-sm font-medium">No ancillary prices found</p>
+                <td colspan="5" class="px-6 py-12 text-center text-muted">
+                  <p class="text-sm font-medium">No ancillary prices yet</p>
+                  <p class="text-xs mt-1">Add one to get started.</p>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
-    </div>
+      </template>
+    </UTabs>
 
     <!-- Class Price Form Modal -->
     <Modal :show="showFormModal" @close="showFormModal = false" :persistent="true"
       :title="isEditMode ? 'Edit Price' : 'Add New Price'" size="5xl" :hide-footer="true">
       <template #icon>
-        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
+        <UIcon name="i-lucide-tag" class="w-6 h-6 text-white" />
       </template>
       <template #content>
         <PriceForm :price-item="selectedPrice" :is-edit-mode="isEditMode" :levels="levels" :programs="programs"
@@ -407,26 +364,35 @@ onMounted(() => {
       :title="isAncillaryEditMode ? 'Edit Ancillary Price' : 'Add Ancillary Price'" size="md"
       :hide-footer="true">
       <template #icon>
-        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z" />
-        </svg>
+        <UIcon name="i-lucide-wallet" class="w-6 h-6 text-white" />
       </template>
       <template #content>
         <form @submit.prevent="handleAncillarySave" class="space-y-4">
-          <BaseInput v-model="ancillaryForm.name" label="Name" placeholder="e.g., Final Exam" required />
-          <BaseInput v-model="ancillaryForm.description" label="Description" placeholder="Fee description" />
-          <BaseInput v-model="ancillaryForm.price" label="Price" type="number" placeholder="e.g., 200000" required />
-          <div class="flex justify-end gap-3 pt-4">
-            <BaseButton type="button" variant="secondary" @click="showAncillaryModal = false">Cancel</BaseButton>
-            <BaseButton type="submit" variant="primary">{{ isAncillaryEditMode ? 'Update' : 'Create' }}</BaseButton>
+          <UFormField label="Name" required>
+            <UInput v-model="ancillaryForm.name" placeholder="e.g., Final Exam" />
+          </UFormField>
+          <UFormField label="Description">
+            <UInput v-model="ancillaryForm.description" placeholder="Optional" />
+          </UFormField>
+          <UFormField label="Price" required>
+            <UInput v-model="ancillaryForm.price" type="number" placeholder="e.g., 200000" />
+          </UFormField>
+          <div class="flex justify-end gap-3 pt-6 border-t border-default">
+            <UButton type="button" color="neutral" variant="outline" @click="showAncillaryModal = false">Cancel</UButton>
+            <UButton type="submit" color="primary" variant="solid" icon="i-lucide-check">
+              {{ isAncillaryEditMode ? 'Update' : 'Create' }}
+            </UButton>
           </div>
         </form>
       </template>
     </Modal>
 
-    <!-- Notification Modal -->
-    <Modal :show="showNotificationModal" :type="notificationType" :message="notificationMessage"
-      @close="showNotificationModal = false" :hide-footer="true" />
   </div>
+
+  <UModal v-model:open="confirmOpen" :title="confirmMessage">
+    <template #footer>
+      <UButton label="Cancel" color="neutral" variant="outline" @click="onCancel" />
+      <UButton label="Delete" color="error" @click="onConfirm" />
+    </template>
+  </UModal>
 </template>

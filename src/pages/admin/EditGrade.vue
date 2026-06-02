@@ -2,17 +2,14 @@
   <!-- Back Button -->
   <button
     @click="goBack"
-    class="mb-6 inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
+    class="mb-6 inline-flex items-center gap-2 text-sm font-medium text-muted hover:text-default transition-colors"
   >
-    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-    </svg>
+    <UIcon name="i-lucide-arrow-left" class="w-4 h-4" />
     Back to Student
   </button>
 
-  <!-- Loading -->
-  <div v-if="isLoading" class="py-20 flex justify-center">
-    <LoadingSpinner size="lg" color="slate" :center="true" />
+  <div v-if="isLoading" class="flex justify-center py-16">
+    <UIcon name="i-lucide-loader-circle" class="w-8 h-8 animate-spin text-muted" />
   </div>
 
   <!-- Error -->
@@ -25,151 +22,82 @@
   <div v-else-if="student && grade" class="space-y-8 mb-8">
     <!-- Page Header -->
     <div>
-      <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">{{ isNewGrade ? 'Add New Grade' : 'Edit Grade' }}</h1>
-      <p class="text-sm text-slate-500 mt-1">
-        {{ student.fullname }}<span class="text-slate-300 mx-2">·</span>{{ student.tbuser?.email }}
+      <h1 class="text-2xl font-semibold text-default tracking-tight">{{ isNewGrade ? 'Add New Grade' : 'Edit Grade' }}</h1>
+      <p class="text-sm text-muted mt-1">
+        {{ student.fullname }}<span class="text-muted mx-2">·</span>{{ student.tbuser?.email }}
       </p>
     </div>
 
     <!-- Grade Form -->
     <form @submit.prevent="handleSave" class="space-y-6">
       <!-- Test Type -->
-      <BaseSelect
-        v-bind="getFieldProps('test_type')"
-        label="Test Type"
-        required
-        :options="['Final Test', 'Midterm Exam', 'Final Exam', 'Completion']"
-        placeholder="Select test type"
-      />
+      <UFormField label="Test Type" required>
+        <USelect v-bind="getFieldProps('test_type')" :items="['Final Test', 'Midterm Exam', 'Final Exam', 'Completion']" placeholder="Select test type" />
+      </UFormField>
 
       <!-- Skill Scores -->
       <div>
-        <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-4">Skill Scores</h3>
+        <h3 class="text-xs font-semibold text-muted uppercase tracking-widest mb-4">Skill Scores</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <BaseInput
-            v-bind="getFieldProps('listening_score')"
-            type="number"
-            label="Listening"
-            placeholder="0-100"
-            min="0"
-            max="100"
-          />
-          <BaseInput
-            v-bind="getFieldProps('speaking_score')"
-            type="number"
-            label="Speaking"
-            placeholder="0-100"
-            min="0"
-            max="100"
-          />
-          <BaseInput
-            v-bind="getFieldProps('reading_score')"
-            type="number"
-            label="Reading"
-            placeholder="0-100"
-            min="0"
-            max="100"
-          />
-          <BaseInput
-            v-bind="getFieldProps('writing_score')"
-            type="number"
-            label="Writing"
-            placeholder="0-100"
-            min="0"
-            max="100"
-          />
-          <BaseInput
-            v-bind="getFieldProps('vocabulary_score')"
-            type="number"
-            label="Vocabulary"
-            placeholder="0-100"
-            min="0"
-            max="100"
-          />
-          <BaseInput
-            v-bind="getFieldProps('grammar_score')"
-            type="number"
-            label="Grammar"
-            placeholder="0-100"
-            min="0"
-            max="100"
-          />
+          <UFormField label="Listening">
+            <UInput v-bind="getFieldProps('listening_score')" type="number" placeholder="0-100" min="0" max="100" />
+          </UFormField>
+          <UFormField label="Speaking">
+            <UInput v-bind="getFieldProps('speaking_score')" type="number" placeholder="0-100" min="0" max="100" />
+          </UFormField>
+          <UFormField label="Reading">
+            <UInput v-bind="getFieldProps('reading_score')" type="number" placeholder="0-100" min="0" max="100" />
+          </UFormField>
+          <UFormField label="Writing">
+            <UInput v-bind="getFieldProps('writing_score')" type="number" placeholder="0-100" min="0" max="100" />
+          </UFormField>
+          <UFormField label="Vocabulary">
+            <UInput v-bind="getFieldProps('vocabulary_score')" type="number" placeholder="0-100" min="0" max="100" />
+          </UFormField>
+          <UFormField label="Grammar">
+            <UInput v-bind="getFieldProps('grammar_score')" type="number" placeholder="0-100" min="0" max="100" />
+          </UFormField>
         </div>
       </div>
 
       <!-- Final Score & Date -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <BaseInput
-          v-bind="getFieldProps('final_score')"
-          type="number"
-          label="Final Score"
-          placeholder="0-100"
-          min="0"
-          max="100"
-        />
-        <BaseInput
-          v-bind="getFieldProps('date_taken')"
-          type="date"
-          label="Date Taken"
-        />
+        <UFormField label="Final Score">
+          <UInput v-bind="getFieldProps('final_score')" type="number" placeholder="0-100" min="0" max="100" />
+        </UFormField>
+        <UFormField label="Date Taken">
+          <UInput v-bind="getFieldProps('date_taken')" type="date" />
+        </UFormField>
       </div>
 
       <!-- Description -->
-      <BaseTextarea
-        v-bind="getFieldProps('description')"
-        label="Description"
-        :rows="3"
-        placeholder="Optional notes about this grade"
-      />
+      <UFormField label="Description">
+        <UTextarea v-bind="getFieldProps('description')" :rows="3" placeholder="Optional notes about this grade" />
+      </UFormField>
 
       <!-- File Upload -->
-      <BaseFileUpload
-        v-model="uploadFiles"
-        label="Upload Report File (Optional)"
-        accept=".pdf,.doc,.docx"
-        :max-size="10"
-        :multiple="false"
-        hint="PDF or Word document (max 10MB)"
-      />
+      <UFormField label="Upload Report File" hint="PDF or Word document (max 10MB)">
+        <UInput type="file" accept=".pdf,.doc,.docx" @change="e => uploadFiles = e.target.files" />
+      </UFormField>
 
       <!-- Actions -->
-      <div class="flex flex-wrap gap-3 pt-6 border-t border-slate-200">
-        <button
-          type="submit"
-          :disabled="isSubmitting"
-          class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-slate-900 text-white text-sm font-medium rounded-lg hover:bg-slate-800 disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors"
-        >
-          <svg v-if="!isSubmitting" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-          </svg>
-          <svg v-else class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-          {{ isSubmitting ? (isNewGrade ? 'Adding...' : 'Updating...') : (isNewGrade ? 'Add Grade' : 'Update Grade') }}
-        </button>
-
-        <button
+      <div class="flex flex-wrap gap-3 pt-6 border-t border-default">
+        <UButton type="submit" color="primary" variant="solid" :loading="isSubmitting" icon="i-lucide-check">
+          {{ isNewGrade ? 'Save Grade' : 'Update Grade' }}
+        </UButton>
+        <UButton
           v-if="!isNewGrade"
           type="button"
+          color="error"
+          variant="outline"
+          :loading="isDeleting"
           @click="handleDelete"
-          :disabled="isDeleting"
-          class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-medium text-red-700 bg-white border border-red-200 rounded-lg hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          <svg v-if="!isDeleting" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-          </svg>
           {{ isDeleting ? 'Deleting...' : 'Delete' }}
-        </button>
-
-        <button
-          type="button"
-          @click="goBack"
-          :disabled="isSubmitting || isDeleting"
-          class="inline-flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
+        </UButton>
+        <UButton type="button" color="neutral" variant="outline" @click="goBack">
           Cancel
-        </button>
+        </UButton>
       </div>
 
       <!-- Success Message -->
@@ -183,6 +111,13 @@
       </div>
     </form>
   </div>
+
+  <UModal v-model:open="confirmOpen" :title="confirmMessage">
+    <template #footer>
+      <UButton label="Cancel" color="neutral" variant="outline" @click="onCancel" />
+      <UButton label="Delete" color="error" @click="onConfirm" />
+    </template>
+  </UModal>
 </template>
 
 <script setup>
@@ -190,16 +125,13 @@ import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { studentAPI, gradeAPI } from '../../services/api';
 import { useForm } from '../../composables/useForm';
-import BaseFileUpload from '../../components/form/BaseFileUpload.vue';
-import BaseInput from '../../components/form/BaseInput.vue';
-import BaseSelect from '../../components/form/BaseSelect.vue';
-import BaseTextarea from '../../components/form/BaseTextarea.vue';
-import LoadingSpinner from '../../components/ui/LoadingSpinner.vue';
+import { useConfirm } from '@/composables/useConfirm'
 
 const route = useRoute();
 const router = useRouter();
 const userid = route.params.userid;
 const gradeid = route.params.gradeid;
+const isNewGrade = ref(false);
 
 const student = ref(null);
 const grade = ref(null);
@@ -208,8 +140,6 @@ const isDeleting = ref(false);
 const errorMessage = ref('');
 const successMessage = ref('');
 const submitError = ref('');
-const isNewGrade = ref(false);
-
 const { formData, errors, isSubmitting, submit, getFieldProps } = useForm(
   {
     test_type: '',
@@ -230,11 +160,13 @@ const { formData, errors, isSubmitting, submit, getFieldProps } = useForm(
 
 const uploadFiles = ref([]);
 
+const { open: confirmOpen, message: confirmMessage, confirm, onConfirm, onCancel } = useConfirm()
+
 /** Fetch student and grade data */
 const fetchData = async () => {
   try {
     isLoading.value = true;
-    isNewGrade.value = gradeid === 'new';
+    isNewGrade.value = gradeid === 'new' || !gradeid;
     
     const studentRes = await studentAPI.getStudentById(userid);
 
@@ -312,7 +244,9 @@ const handleSave = async () => {
       };
 
       const fileToUpload = uploadFiles.value && uploadFiles.value.length > 0 ? uploadFiles.value[0] : null;
-      const response = await gradeAPI.updateGrade(gradeid, payload, fileToUpload);
+      const response = isNewGrade.value
+        ? await gradeAPI.createGrade(payload, fileToUpload)
+        : await gradeAPI.updateGrade(gradeid, payload, fileToUpload);
 
       if (response.data.success) {
         successMessage.value = isNewGrade.value ? 'Grade added successfully' : 'Grade updated successfully';
@@ -330,7 +264,7 @@ const handleSave = async () => {
 
 /** Delete grade */
 const handleDelete = async () => {
-  if (!confirm('Are you sure you want to delete this grade? This action cannot be undone.')) {
+  if (!await confirm('Are you sure you want to delete this grade? This action cannot be undone.')) {
     return;
   }
 

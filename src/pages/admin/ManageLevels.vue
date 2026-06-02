@@ -2,17 +2,17 @@
 import { ref, computed, onMounted } from 'vue';
 import { levelAPI } from '../../services/api';
 import Modal from '../../components/ui/Modal.vue';
-import BaseButton from '../../components/ui/BaseButton.vue';
-import LoadingSpinner from '../../components/ui/LoadingSpinner.vue';
+
+import { useConfirm } from '@/composables/useConfirm'
+
 import LevelForm from './LevelForm.vue';
 
 const levels = ref([]);
 const isLoading = ref(true);
 const showFormModal = ref(false);
-const showNotificationModal = ref(false);
-const notificationMessage = ref('');
-const notificationType = ref('info');
 const selectedLevel = ref(null);
+
+const { open: confirmOpen, message: confirmMessage, confirm, onConfirm, onCancel } = useConfirm()
 const isEditMode = ref(false);
 const currentPage = ref(1);
 const itemsPerPage = 9; // 3x3 grid
@@ -25,14 +25,6 @@ const paginatedLevels = computed(() => {
   return levels.value.slice(start, end);
 });
 
-const nextPage = () => {
-  if (currentPage.value < totalPages.value) currentPage.value++;
-};
-
-const prevPage = () => {
-  if (currentPage.value > 1) currentPage.value--;
-};
-
 /** Fetch all levels */
 const fetchLevels = async () => {
   try {
@@ -42,17 +34,10 @@ const fetchLevels = async () => {
       levels.value = response.data.data;
     }
   } catch (error) {
-    showNotification('error', 'Failed to load level data.');
+    toast.add({ title: 'Error', description: 'Failed to load level data.', color: 'error' });
   } finally {
     isLoading.value = false;
   }
-};
-
-/** Show notification */
-const showNotification = (type, message) => {
-  notificationType.value = type;
-  notificationMessage.value = message;
-  showNotificationModal.value = true;
 };
 
 /** Open add modal */
@@ -74,28 +59,28 @@ const handleSave = async (formData) => {
   try {
     if (isEditMode.value) {
       await levelAPI.updateLevel(selectedLevel.value.levelid, formData);
-      showNotification('success', 'Level updated successfully!');
+      toast.add({ title: 'Success', description: 'Level updated successfully!', color: 'success' });
     } else {
       await levelAPI.createLevel(formData);
-      showNotification('success', 'Level created successfully!');
+      toast.add({ title: 'Success', description: 'Level created successfully!', color: 'success' });
     }
     showFormModal.value = false;
     fetchLevels();
   } catch (error) {
-    showNotification('error', error.response?.data?.message || 'Failed to save level.');
+    toast.add({ title: 'Error', description: error.response?.data?.message || 'Failed to save level.', color: 'error' });
   }
 };
 
 /** Handle delete */
 const handleDelete = async (level) => {
-  if (!confirm(`Delete level "${level.name}"?`)) return;
+  if (!await confirm(`Delete level "${level.name}"?`)) return;
 
   try {
     await levelAPI.deleteLevel(level.levelid);
-    showNotification('success', 'Level deleted successfully!');
+    toast.add({ title: 'Success', description: 'Level deleted successfully!', color: 'success' });
     fetchLevels();
   } catch (error) {
-    showNotification('error', 'Failed to delete level.');
+    toast.add({ title: 'Error', description: 'Failed to delete level.', color: 'error' });
   }
 };
 
@@ -109,41 +94,41 @@ onMounted(() => {
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
       <div>
-        <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">Levels</h1>
-        <p class="text-sm text-slate-500 mt-1">Course levels in progression order</p>
+        <h1 class="text-2xl font-semibold text-default tracking-tight">Levels</h1>
+        <p class="text-sm text-muted mt-1">Course levels in progression order</p>
       </div>
-      <BaseButton @click="openAddModal" variant="primary">
+      <UButton @click="openAddModal" color="primary" variant="solid" icon="i-lucide-plus">
         Add Level
-      </BaseButton>
+      </UButton>
     </div>
 
     <!-- Loading State -->
-    <div v-if="isLoading" class="py-20 flex justify-center">
-      <LoadingSpinner size="lg" color="slate" :center="true" />
+    <div v-if="isLoading" class="flex justify-center py-16">
+      <UIcon name="i-lucide-loader-circle" class="w-8 h-8 animate-spin text-muted" />
     </div>
 
     <!-- Levels List -->
     <div v-else>
-      <div class="border border-slate-200 rounded-lg overflow-hidden">
-        <div class="bg-slate-50 border-b border-slate-200 px-6 py-3 flex items-center gap-4">
-          <span class="text-xs font-semibold text-slate-500 uppercase w-12">Step</span>
-          <span class="text-xs font-semibold text-slate-500 uppercase flex-1">Name</span>
-          <span class="text-xs font-semibold text-slate-500 uppercase flex-[2]">Description</span>
-          <span class="text-xs font-semibold text-slate-500 uppercase w-40 text-right">Actions</span>
+      <div class="border border-default rounded-lg overflow-hidden">
+        <div class="bg-muted border-b border-default px-6 py-3 flex items-center gap-4">
+          <span class="text-xs font-semibold text-muted uppercase w-12">Step</span>
+          <span class="text-xs font-semibold text-muted uppercase flex-1">Name</span>
+          <span class="text-xs font-semibold text-muted uppercase flex-[2]">Description</span>
+          <span class="text-xs font-semibold text-muted uppercase w-40 text-right">Actions</span>
         </div>
-        <div class="divide-y divide-slate-100">
+        <div class="divide-y divide-muted">
           <div
             v-for="(level, index) in paginatedLevels"
             :key="level.levelid"
-            class="px-6 py-4 flex items-center gap-4 hover:bg-slate-50 transition-colors"
+            class="px-6 py-4 flex items-center gap-4 hover:bg-elevated transition-colors"
           >
-            <span class="w-12 text-sm font-mono text-slate-400">{{ (currentPage - 1) * itemsPerPage + index + 1 }}</span>
-            <span class="flex-1 text-sm font-medium text-slate-900">{{ level.name }}</span>
-            <span class="flex-[2] text-sm text-slate-600">{{ level.description || '-' }}</span>
+            <span class="w-12 text-sm font-mono text-muted">{{ (currentPage - 1) * itemsPerPage + index + 1 }}</span>
+            <span class="flex-1 text-sm font-medium text-default">{{ level.name }}</span>
+            <span class="flex-[2] text-sm text-toned">{{ level.description || '-' }}</span>
             <div class="w-40 flex justify-end gap-2">
-              <BaseButton @click="openEditModal(level)" variant="primary" size="sm">
+              <UButton @click="openEditModal(level)" color="primary" variant="solid" size="sm">
                 Edit
-              </BaseButton>
+              </UButton>
               <button @click="handleDelete(level)" class="text-sm font-medium text-red-600 hover:text-red-800 transition-colors">
                 Delete
               </button>
@@ -151,41 +136,32 @@ onMounted(() => {
           </div>
 
           <!-- Empty State -->
-          <div v-if="levels.length === 0" class="px-6 py-12 text-center text-slate-400">
-            <p class="text-sm">No levels found</p>
+          <div v-if="levels.length === 0" class="px-6 py-12 text-center text-muted">
+            <p class="text-sm font-medium">No levels created yet</p>
+            <p class="text-xs mt-1">Click 'Add Level' to get started.</p>
           </div>
         </div>
       </div>
 
-      <!-- Pagination -->
       <div v-if="levels.length > itemsPerPage" class="flex items-center justify-between mt-4">
-        <p class="text-sm text-slate-500">
+        <p class="text-sm text-muted">
           Page {{ currentPage }} of {{ totalPages }}
         </p>
-        <div class="flex gap-2">
-          <BaseButton @click="prevPage" :disabled="currentPage === 1" variant="secondary">
-            Previous
-          </BaseButton>
-          <BaseButton @click="nextPage" :disabled="currentPage === totalPages" variant="secondary">
-            Next
-          </BaseButton>
-        </div>
+        <UPagination v-model:page="currentPage" :total="levels.length" :max="itemsPerPage" :sibling-count="1" size="sm" />
       </div>
     </div>
 
     <!-- Form Modal -->
-    <Modal 
-      :show="showFormModal" 
-      @close="showFormModal = false" 
-      :persistent="true" 
-      size="6xl"
+    <Modal
+      :show="showFormModal"
+      @close="showFormModal = false"
+      :persistent="true"
+      size="4xl"
       :title="isEditMode ? 'Edit Level' : 'Add New Level'"
       :hide-footer="true"
     >
       <template #icon>
-        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
-        </svg>
+        <UIcon name="i-lucide-bar-chart-3" class="w-6 h-6 text-white" />
       </template>
       <template #content>
         <LevelForm
@@ -197,12 +173,12 @@ onMounted(() => {
       </template>
     </Modal>
 
-    <!-- Notification Modal -->
-    <Modal 
-      :show="showNotificationModal" 
-      @close="showNotificationModal = false"
-      :type="notificationType"
-      :message="notificationMessage"
-    />
   </div>
+
+  <UModal v-model:open="confirmOpen" :title="confirmMessage">
+    <template #footer>
+      <UButton label="Cancel" color="neutral" variant="outline" @click="onCancel" />
+      <UButton label="Delete" color="error" @click="onConfirm" />
+    </template>
+  </UModal>
 </template>
