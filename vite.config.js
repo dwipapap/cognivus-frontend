@@ -12,6 +12,16 @@ export default defineConfig({
       colors: {
         primary: 'blue',
         neutral: 'slate'
+      },
+      button: {
+        defaultVariants: {
+          class: 'rounded-full shadow-md'
+        }
+      },
+      modal: {
+        slots: {
+          content: 'rounded-3xl'
+        }
       }
     }),
     Icons({

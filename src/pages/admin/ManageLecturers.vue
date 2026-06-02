@@ -2,17 +2,19 @@
 import { ref, onMounted, computed } from 'vue';
 import { lecturerAPI, userAPI } from '../../services/api';
 import Modal from '../../components/ui/Modal.vue';
-import BaseButton from '../../components/ui/BaseButton.vue';
+
+import { useConfirm } from '@/composables/useConfirm'
 import LecturerForm from './LecturerForm.vue';
 
 const lecturers = ref([]);
 const isLoading = ref(true);
 const showFormModal = ref(false);
-const showNotificationModal = ref(false);
-const notificationMessage = ref('');
-const notificationType = ref('info');
 const selectedLecturer = ref(null);
+
+const { open: confirmOpen, message: confirmMessage, confirm, onConfirm, onCancel } = useConfirm()
 const isEditMode = ref(false);
+
+const getUserId = (lecturer) => lecturer.tbuser?.userid || lecturer.userid;
 const currentPage = ref(1);
 const itemsPerPage = 15;
 
@@ -28,13 +30,6 @@ const totalPages = computed(() => {
   return Math.ceil(lecturers.value.length / itemsPerPage);
 });
 
-/** Go to specific page */
-const goToPage = (page) => {
-  if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page;
-  }
-};
-
 const fetchLecturers = async () => {
   try {
     isLoading.value = true;
@@ -43,16 +38,10 @@ const fetchLecturers = async () => {
       lecturers.value = response.data.data;
     }
   } catch (error) {
-    showNotification('error', 'Failed to load lecturer data.');
+    toast.add({ title: 'Error', description: 'Failed to load lecturer data.', color: 'error' });
   } finally {
     isLoading.value = false;
   }
-};
-
-const showNotification = (type, message) => {
-  notificationType.value = type;
-  notificationMessage.value = message;
-  showNotificationModal.value = true;
 };
 
 const openAddModal = () => {
@@ -80,29 +69,29 @@ const handleSave = async ({ lecturerData, userData }) => {
         await userAPI.updateUser(lecturerId, userData);
       }
       
-      showNotification('success', 'Lecturer data has been successfully updated.');
+      toast.add({ title: 'Success', description: 'Lecturer data has been successfully updated.', color: 'success' });
     } else {
       // In create mode, all data goes to lecturer endpoint
       const allData = { ...lecturerData, ...userData };
       await lecturerAPI.createLecturer(allData);
-      showNotification('success', 'New lecturer has been successfully created.');
+      toast.add({ title: 'Success', description: 'New lecturer has been successfully created.', color: 'success' });
     }
     showFormModal.value = false;
     fetchLecturers();
   } catch (error) {
     const message = error.response?.data?.message || 'An error occurred.';
-    showNotification('error', `Failed to save lecturer: ${message}`);
+    toast.add({ title: 'Error', description: `Failed to save lecturer: ${message}`, color: 'error' });
   }
 };
 
 const handleDelete = async (lecturer) => {
-  if (confirm(`Are you sure you want to delete ${lecturer.fullname}? This action cannot be undone.`)) {
+  if (await confirm(`Are you sure you want to delete ${lecturer.fullname}? This action cannot be undone.`)) {
     try {
-      await lecturerAPI.deleteLecturer(lecturer.lecturerid);
-      showNotification('success', 'Lecturer has been deleted.');
+      await lecturerAPI.deleteLecturer(getUserId(lecturer));
+      toast.add({ title: 'Success', description: 'Lecturer has been deleted.', color: 'success' });
       fetchLecturers();
     } catch (error) {
-      showNotification('error', 'Failed to delete lecturer.');
+      toast.add({ title: 'Error', description: 'Failed to delete lecturer.', color: 'error' });
     }
   }
 };
@@ -115,56 +104,55 @@ onMounted(fetchLecturers);
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
       <div>
-        <h1 class="text-2xl font-bold text-slate-800">Manage Lecturers</h1>
-        <p class="text-slate-600 mt-1">Create, edit, and manage lecturer records</p>
+        <h1 class="text-2xl font-bold text-default">Manage Lecturers</h1>
+        <p class="text-toned mt-1">Create, edit, and manage lecturer records</p>
       </div>
-      <BaseButton @click="openAddModal" variant="primary">
-        <span class="mr-2">+</span> Add Lecturer
-      </BaseButton>
+      <UButton @click="openAddModal" color="primary" variant="solid" icon="i-lucide-plus">
+        Add Lecturer
+      </UButton>
     </div>
 
-    <!-- Loading State -->
-    <div v-if="isLoading" class="flex justify-center items-center py-20">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-600"></div>
+    <div v-if="isLoading" class="flex justify-center py-16">
+      <UIcon name="i-lucide-loader-circle" class="w-8 h-8 animate-spin text-muted" />
     </div>
 
     <!-- Lecturers Table -->
-    <div v-else class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+    <div v-else class="bg-default rounded-xl shadow-sm border border-default overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full">
           <thead>
-            <tr class="bg-slate-50 border-b border-slate-200">
-              <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider w-16">#</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Name</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Email</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Class Assignment</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">Education</th>
-              <th class="px-6 py-4 text-center text-xs font-semibold text-slate-700 uppercase tracking-wider">Actions</th>
+            <tr class="bg-muted border-b border-default">
+              <th class="px-6 py-4 text-left text-xs font-semibold text-default uppercase tracking-wider w-16">#</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-default uppercase tracking-wider">Name</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-default uppercase tracking-wider">Email</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-default uppercase tracking-wider">Class Assignment</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-default uppercase tracking-wider">Education</th>
+              <th class="px-6 py-4 text-center text-xs font-semibold text-default uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody>
             <tr 
               v-for="(lecturer, index) in paginatedLecturers" 
               :key="lecturer.lecturerid"
-              :class="index % 2 === 0 ? 'bg-white' : 'bg-slate-50'"
-              class="border-b border-slate-100 transition-colors"
+              :class="index % 2 === 0 ? 'bg-default' : 'bg-muted'"
+              class="border-b border-muted transition-colors"
             >
               <!-- Row Number -->
-              <td class="px-6 py-4 text-sm text-slate-500 text-right">
+              <td class="px-6 py-4 text-sm text-muted text-right">
                 {{ (currentPage - 1) * itemsPerPage + index + 1 }}
               </td>
 
               <!-- Name -->
               <td class="px-6 py-4">
-                <div class="text-sm font-medium text-slate-900">{{ lecturer.fullname }}</div>
-                <div class="text-xs text-slate-500">{{ lecturer.tbuser?.username || 'No username' }}</div>
+                <div class="text-sm font-medium text-default">{{ lecturer.fullname }}</div>
+                <div class="text-xs text-muted">{{ lecturer.tbuser?.username || 'No username' }}</div>
               </td>
 
               <!-- Email -->
               <td class="px-6 py-4">
                 <a 
                   :href="`mailto:${lecturer.tbuser?.email}`"
-                  class="text-sm text-slate-700 hover:text-slate-900 hover:underline"
+                  class="text-sm text-default hover:text-default hover:underline"
                 >
                   {{ lecturer.tbuser?.email || '-' }}
                 </a>
@@ -176,48 +164,38 @@ onMounted(fetchLecturers);
                   <div 
                     v-for="cls in lecturer.tbclass" 
                     :key="cls.classid"
-                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-700 mr-1 mb-1"
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-muted text-default mr-1 mb-1"
                   >
                     {{ cls.class_code }}
-                    <span v-if="cls.level" class="ml-1 text-slate-500">
+                    <span v-if="cls.level" class="ml-1 text-muted">
                       ({{ cls.level.name }})
                     </span>
                   </div>
                 </div>
-                <span v-else class="text-sm text-slate-400 italic">Not assigned</span>
+                <span v-else class="text-sm text-muted italic">Not assigned</span>
               </td>
 
               <!-- Education -->
-              <td class="px-6 py-4 text-sm text-slate-700">
+              <td class="px-6 py-4 text-sm text-default">
                 {{ lecturer.lasteducation || '-' }}
               </td>
 
               <!-- Actions -->
               <td class="px-6 py-4">
                 <div class="flex justify-center gap-2">
-                    <BaseButton 
-                      @click="openEditModal(lecturer)" 
-                      variant="primary" 
-                      size="sm"
-                    >
+                    <UButton @click="openEditModal(lecturer)" color="primary" variant="solid" size="sm">
                       Edit
-                    </BaseButton>
-                  <BaseButton 
-                    @click="handleDelete(lecturer)" 
-                    variant="danger"
-                    size="sm"
-                  >
+                    </UButton>
+                  <UButton @click="handleDelete(lecturer)" color="error" variant="solid" size="sm">
                     Delete
-                  </BaseButton>
+                  </UButton>
                 </div>
               </td>
             </tr>
             <tr v-if="lecturers.length === 0">
               <td colspan="6" class="px-6 py-12 text-center">
-                <div class="flex flex-col items-center justify-center text-slate-500">
-                  <svg class="w-12 h-12 mb-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-                  </svg>
+                <div class="flex flex-col items-center justify-center text-muted">
+                  <UIcon name="i-lucide-users" class="w-12 h-12 mb-3 text-muted" />
                   <p class="text-sm font-medium">No lecturers found</p>
                   <p class="text-xs mt-1">Click "Add Lecturer" to create one.</p>
                 </div>
@@ -227,42 +205,13 @@ onMounted(fetchLecturers);
         </table>
       </div>
 
-      <!-- Pagination -->
-      <div v-if="totalPages > 1" class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
-        <p class="text-sm text-slate-600">
+      <div v-if="totalPages > 1" class="px-6 py-4 bg-muted border-t border-default flex items-center justify-between">
+        <p class="text-sm text-toned">
           Showing <span class="font-medium">{{ (currentPage - 1) * itemsPerPage + 1 }}</span> to 
           <span class="font-medium">{{ Math.min(currentPage * itemsPerPage, lecturers.length) }}</span> of 
           <span class="font-medium">{{ lecturers.length }}</span> lecturers
         </p>
-        <div class="flex gap-2">
-          <button
-            @click="goToPage(currentPage - 1)"
-            :disabled="currentPage === 1"
-            class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            Previous
-          </button>
-          <button
-            v-for="page in totalPages"
-            :key="page"
-            @click="goToPage(page)"
-            :class="[
-              'px-4 py-2 text-sm font-medium rounded-lg transition-colors',
-              currentPage === page
-                ? 'bg-slate-900 text-white border border-slate-900'
-                : 'text-slate-700 bg-white border border-slate-300 hover:bg-slate-50'
-            ]"
-          >
-            {{ page }}
-          </button>
-          <button
-            @click="goToPage(currentPage + 1)"
-            :disabled="currentPage === totalPages"
-            class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            Next
-          </button>
-        </div>
+        <UPagination v-model:page="currentPage" :total="lecturers.length" :max="itemsPerPage" :sibling-count="1" size="sm" />
       </div>
     </div>
 
@@ -276,9 +225,7 @@ onMounted(fetchLecturers);
       :hide-footer="true"
     >
       <template #icon>
-        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-        </svg>
+        <UIcon name="i-lucide-users" class="w-6 h-6 text-white" />
       </template>
       <template #content>
         <LecturerForm
@@ -290,13 +237,12 @@ onMounted(fetchLecturers);
       </template>
     </Modal>
 
-    <!-- Notification Modal -->
-    <Modal 
-      :show="showNotificationModal" 
-      :type="notificationType" 
-      :message="notificationMessage" 
-      @close="showNotificationModal = false"
-      :hide-footer="true"
-    />
   </div>
+
+  <UModal v-model:open="confirmOpen" :title="confirmMessage">
+    <template #footer>
+      <UButton label="Cancel" color="neutral" variant="outline" @click="onCancel" />
+      <UButton label="Delete" color="error" @click="onConfirm" />
+    </template>
+  </UModal>
 </template>

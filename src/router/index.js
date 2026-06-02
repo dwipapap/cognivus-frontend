@@ -212,7 +212,7 @@ const routes = [
       {
         path: 'students/:userid/add-grade',
         name: 'AdminAddGrade',
-        component: () => import('../pages/admin/AddGrade.vue'),
+        component: () => import('../pages/admin/EditGrade.vue'),
       },
       {
         path: 'students/:userid/grades/:gradeid/edit',

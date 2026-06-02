@@ -3,7 +3,7 @@ import { ref, onMounted, computed } from 'vue';
 import { paymentAPI, studentAPI } from '../../services/api';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 import Modal from '../../components/ui/Modal.vue';
-import BaseButton from '../../components/ui/BaseButton.vue';
+
 
 const payments = ref([]);
 const students = ref([]);
@@ -16,6 +16,8 @@ const selectedPayment = ref(null);
 const searchQuery = ref('');
 const statusFilter = ref('');
 const typeFilter = ref('');
+const paymentPage = ref(1);
+const paymentPageSize = 20;
 
 const getStudentName = (studentid) => {
   if (!studentid) return 'Unknown';
@@ -31,7 +33,7 @@ const getStatusBadge = (status) => {
     error: 'bg-red-100 text-red-800 border-red-200',
     failed: 'bg-red-100 text-red-800 border-red-200'
   };
-  return classes[status] || 'bg-slate-100 text-slate-800 border-slate-200';
+  return classes[status] || 'bg-muted text-default border-default';
 };
 
 const filteredPayments = computed(() => {
@@ -60,6 +62,12 @@ const filteredPayments = computed(() => {
 
   // Sort by created_at descending (newest first)
   return result.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+});
+
+const paginatedPayments = computed(() => {
+  const start = (paymentPage.value - 1) * paymentPageSize;
+  const end = start + paymentPageSize;
+  return filteredPayments.value.slice(start, end);
 });
 
 /** Payment statistics */
@@ -121,6 +129,19 @@ const refreshPayments = async () => {
   showNotification('success', 'Payment data refreshed successfully!');
 };
 
+/** Update payment status */
+const updatePaymentStatus = async (status) => {
+  if (!selectedPayment.value) return;
+  try {
+    await paymentAPI.updatePaymentStatus(selectedPayment.value.paymentid, status);
+    toast.add({ title: 'Success', description: `Payment marked as ${status}`, color: 'success' });
+    showDetailsModal.value = false;
+    fetchPayments();
+  } catch (error) {
+    toast.add({ title: 'Error', description: 'Failed to update payment status.', color: 'error' });
+  }
+};
+
 /** Export to CSV */
 const exportToCSV = () => {
   const headers = ['Payment ID', 'Student Name', 'Order ID', 'Transaction ID', 'Amount', 'Type', 'Status', 'Date'];
@@ -158,147 +179,127 @@ onMounted(() => {
     <div class="mb-6">
       <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
         <div>
-          <h1 class="text-2xl font-bold text-slate-800">Manage Payments</h1>
-          <p class="text-slate-600 mt-1">View and monitor all student payment transactions</p>
+          <h1 class="text-2xl font-bold text-default">Manage Payments</h1>
+          <p class="text-toned mt-1">View and monitor all student payment transactions</p>
         </div>
         <div class="flex gap-2">
-          <BaseButton @click="refreshPayments" variant="secondary" size="md">
-            <template #icon>
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-              </svg>
-            </template>
+          <UButton @click="refreshPayments" color="neutral" variant="soft" icon="i-lucide-refresh-cw">
             Refresh
-          </BaseButton>
-          <BaseButton @click="exportToCSV" variant="primary" size="md">
-            <template #icon>
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-              </svg>
-            </template>
+          </UButton>
+          <UButton @click="exportToCSV" color="primary" variant="solid" icon="i-lucide-download">
             Export CSV
-          </BaseButton>
+          </UButton>
         </div>
       </div>
 
       <!-- Statistics Cards -->
       <div class="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4 mb-6">
-        <div class="bg-white rounded-lg border border-slate-200 p-4 shadow-sm">
-          <div class="text-sm text-slate-600 mb-1">Total Payments</div>
-          <div class="text-2xl font-bold text-slate-900">{{ stats.total }}</div>
+        <div class="bg-default rounded-lg border border-default p-4 shadow-sm">
+          <div class="text-sm text-toned mb-1">Total Payments</div>
+          <div class="text-2xl font-bold text-default">{{ stats.total }}</div>
         </div>
-        <div class="bg-white rounded-lg border border-yellow-200 p-4 shadow-sm">
+        <div class="bg-default rounded-lg border border-yellow-200 p-4 shadow-sm">
           <div class="text-sm text-yellow-700 mb-1">Pending</div>
           <div class="text-2xl font-bold text-yellow-800">{{ stats.pending }}</div>
         </div>
-        <div class="bg-white rounded-lg border border-green-200 p-4 shadow-sm">
+        <div class="bg-default rounded-lg border border-green-200 p-4 shadow-sm">
           <div class="text-sm text-green-700 mb-1">Success</div>
           <div class="text-2xl font-bold text-green-800">{{ stats.success }}</div>
         </div>
-        <div class="bg-white rounded-lg border border-red-200 p-4 shadow-sm">
+        <div class="bg-default rounded-lg border border-red-200 p-4 shadow-sm">
           <div class="text-sm text-red-700 mb-1">Failed</div>
           <div class="text-2xl font-bold text-red-800">{{ stats.failed }}</div>
         </div>
-        <div class="bg-slate-900 rounded-lg p-4 shadow-sm col-span-2 md:col-span-1">
-          <div class="text-sm text-slate-300 mb-1">Total Revenue</div>
+        <div class="bg-inverted rounded-lg p-4 shadow-sm col-span-2 md:col-span-1">
+          <div class="text-sm text-muted mb-1">Total Revenue</div>
           <div class="text-lg md:text-xl font-bold text-white truncate">{{ formatCurrency(stats.totalRevenue) }}</div>
         </div>
       </div>
 
       <!-- Filters Section -->
-      <div class="bg-white rounded-lg border border-slate-200 p-4 shadow-sm">
+      <div class="bg-default rounded-lg border border-default p-4 shadow-sm">
         <div class="flex flex-col lg:flex-row gap-4">
           <!-- Search -->
           <div class="flex-1">
-            <label class="block text-sm font-medium text-slate-700 mb-2">Search</label>
-            <input 
-              v-model="searchQuery"
-              type="text"
-              placeholder="Search by student name, order ID, or transaction ID..."
-              class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-colors"
-            />
+            <UFormField label="Search">
+              <UInput v-model="searchQuery" placeholder="Search by student name, order ID, or transaction ID..." />
+            </UFormField>
           </div>
 
           <!-- Status Filter -->
           <div class="w-full lg:w-48">
-            <label class="block text-sm font-medium text-slate-700 mb-2">Status</label>
-            <select 
-              v-model="statusFilter"
-              class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-colors"
-            >
-              <option value="">All Status</option>
-              <option value="pending">Pending</option>
-              <option value="success">Success</option>
-              <option value="failed">Failed</option>
-            </select>
+            <UFormField label="Status">
+              <USelect v-model="statusFilter" :items="[
+                { label: 'Pending', value: 'pending' },
+                { label: 'Success', value: 'success' },
+                { label: 'Failed', value: 'failed' }
+              ]" placeholder="All Status" clearable />
+            </UFormField>
           </div>
 
           <!-- Payment Type Filter -->
           <div class="w-full lg:w-48">
-            <label class="block text-sm font-medium text-slate-700 mb-2">Payment Type</label>
-            <select 
-              v-model="typeFilter"
-              class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-colors"
-            >
-              <option value="">All Types</option>
-              <option value="semester">Semester</option>
-              <option value="monthly">Monthly</option>
-              <option value="exam">Exam</option>
-            </select>
+            <UFormField label="Payment Type">
+              <USelect v-model="typeFilter" :items="[
+                { label: 'Semester', value: 'semester' },
+                { label: 'Monthly', value: 'monthly' },
+                { label: 'Exam', value: 'exam' }
+              ]" placeholder="All Types" clearable />
+            </UFormField>
           </div>
         </div>
 
-        <div class="mt-3 text-sm text-slate-500">
+        <div class="mt-3 text-sm text-muted">
           Showing {{ filteredPayments.length }} of {{ payments.length }} payments
         </div>
       </div>
     </div>
 
     <!-- Loading State -->
-    <div v-if="isLoading" class="bg-white rounded-lg border border-slate-200 shadow-sm p-12 text-center">
-      <div class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-slate-600 border-r-transparent"></div>
-      <p class="text-slate-600 mt-4">Loading payments...</p>
+    <div v-if="isLoading" class="bg-default rounded-lg border border-default shadow-sm p-12 text-center">
+      <div class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-toned border-r-transparent"></div>
+      <p class="text-toned mt-4">Loading payments...</p>
     </div>
 
     <template v-else>
       <!-- Desktop Table View -->
-      <div class="hidden md:block bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+      <div class="hidden md:block bg-default rounded-lg border border-default shadow-sm overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full border-collapse">
           <thead>
-            <tr class="bg-slate-50 border-b border-slate-200">
-              <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider w-20">ID</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Student</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Order ID</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Transaction ID</th>
-              <th class="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider">Amount</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Type</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Status</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Date</th>
-              <th class="px-4 py-3 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider">Actions</th>
+            <tr class="bg-muted border-b border-default">
+              <th class="px-4 py-3 text-left text-xs font-semibold text-toned uppercase tracking-wider w-20">ID</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-toned uppercase tracking-wider">Student</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-toned uppercase tracking-wider">Order ID</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-toned uppercase tracking-wider">Transaction ID</th>
+              <th class="px-4 py-3 text-right text-xs font-semibold text-toned uppercase tracking-wider">Amount</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-toned uppercase tracking-wider">Type</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-toned uppercase tracking-wider">Status</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-toned uppercase tracking-wider">Date</th>
+              <th class="px-4 py-3 text-center text-xs font-semibold text-toned uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(payment, index) in filteredPayments" :key="payment.paymentid" 
-              class="border-b border-slate-200 transition-colors"
-              :class="index % 2 === 0 ? 'bg-white' : 'bg-slate-50'"
+            <tr v-for="(payment, index) in paginatedPayments" :key="payment.paymentid" 
+              class="border-b border-default transition-colors"
+              :class="index % 2 === 0 ? 'bg-default' : 'bg-muted'"
             >
-              <td class="px-4 py-3 text-sm text-slate-500 font-medium">#{{ payment.paymentid }}</td>
+              <td class="px-4 py-3 text-sm text-muted font-medium">#{{ payment.paymentid }}</td>
               <td class="px-4 py-3">
-                <div class="text-sm font-semibold text-slate-900">{{ getStudentName(payment.studentid) }}</div>
-                <div class="text-xs text-slate-500">ID: {{ payment.studentid }}</div>
+                <div class="text-sm font-semibold text-default">{{ getStudentName(payment.studentid) }}</div>
+                <div class="text-xs text-muted">ID: {{ payment.studentid }}</div>
               </td>
               <td class="px-4 py-3">
-                <code class="text-xs bg-slate-100 px-2 py-1 rounded text-slate-700">{{ payment.midtrans_orderid || '-' }}</code>
+                <code class="text-xs bg-muted px-2 py-1 rounded text-default">{{ payment.midtrans_orderid || '-' }}</code>
               </td>
               <td class="px-4 py-3">
-                <code class="text-xs bg-slate-100 px-2 py-1 rounded text-slate-700">{{ payment.midtrans_transactionid || '-' }}</code>
+                <code class="text-xs bg-muted px-2 py-1 rounded text-default">{{ payment.midtrans_transactionid || '-' }}</code>
               </td>
               <td class="px-4 py-3 text-right">
-                <span class="text-sm font-semibold text-slate-900">{{ formatCurrency(payment.amount) }}</span>
+                <span class="text-sm font-semibold text-default">{{ formatCurrency(payment.amount) }}</span>
               </td>
               <td class="px-4 py-3">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-700 capitalize">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-muted text-default capitalize">
                   {{ payment.payment_type }}
                 </span>
               </td>
@@ -309,28 +310,22 @@ onMounted(() => {
                 </span>
               </td>
               <td class="px-4 py-3">
-                <div class="text-sm text-slate-900">{{ formatDate(payment.created_at) }}</div>
+                <div class="text-sm text-default">{{ formatDate(payment.created_at) }}</div>
               </td>
               <td class="px-4 py-3">
                 <div class="flex justify-center">
-                  <BaseButton 
-                    @click="openDetailsModal(payment)" 
-                    variant="secondary" 
-                    size="sm"
-                  >
+                  <UButton @click="openDetailsModal(payment)" color="neutral" variant="soft" size="sm">
                     Details
-                  </BaseButton>
+                  </UButton>
                 </div>
               </td>
             </tr>
-            <tr v-if="filteredPayments.length === 0">
+            <tr v-if="paginatedPayments.length === 0">
               <td colspan="9" class="px-4 py-12 text-center">
-                <div class="text-slate-400">
-                  <svg class="mx-auto h-12 w-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
-                  </svg>
-                  <p class="text-sm font-medium text-slate-900">No payments found</p>
-                  <p class="text-sm text-slate-500 mt-1">
+                <div class="text-muted">
+                  <UIcon name="i-lucide-search" class="mx-auto h-12 w-12 mb-4" />
+                  <p class="text-sm font-medium text-default">No payments found</p>
+                  <p class="text-sm text-muted mt-1">
                     {{ searchQuery || statusFilter || typeFilter ? 'Try adjusting your filters' : 'No payment records available' }}
                   </p>
                 </div>
@@ -341,15 +336,22 @@ onMounted(() => {
       </div>
     </div>
 
+    <div v-if="filteredPayments.length > paymentPageSize" class="hidden md:flex items-center justify-between px-4 py-3 bg-muted border-t border-default">
+      <p class="text-sm text-toned">
+        Showing {{ (paymentPage - 1) * paymentPageSize + 1 }} to {{ Math.min(paymentPage * paymentPageSize, filteredPayments.length) }} of {{ filteredPayments.length }} payments
+      </p>
+      <UPagination v-model:page="paymentPage" :total="filteredPayments.length" :max="paymentPageSize" :sibling-count="1" size="sm" />
+    </div>
+
       <!-- Mobile Card View -->
       <div class="md:hidden space-y-3">
-        <div v-for="payment in filteredPayments" :key="payment.paymentid"
-        class="bg-white rounded-lg border border-slate-200 shadow-sm p-4"
+        <div v-for="payment in paginatedPayments" :key="payment.paymentid"
+        class="bg-default rounded-lg border border-default shadow-sm p-4"
       >
         <div class="flex justify-between items-start mb-3">
           <div>
-            <div class="text-sm font-semibold text-slate-900">{{ getStudentName(payment.studentid) }}</div>
-            <div class="text-xs text-slate-500">Payment #{{ payment.paymentid }}</div>
+            <div class="text-sm font-semibold text-default">{{ getStudentName(payment.studentid) }}</div>
+            <div class="text-xs text-muted">Payment #{{ payment.paymentid }}</div>
           </div>
           <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium border capitalize" 
             :class="getStatusBadge(payment.status)">
@@ -359,37 +361,30 @@ onMounted(() => {
 
         <div class="space-y-2 text-sm">
           <div class="flex justify-between">
-            <span class="text-slate-600">Amount:</span>
-            <span class="font-semibold text-slate-900">{{ formatCurrency(payment.amount) }}</span>
+            <span class="text-toned">Amount:</span>
+            <span class="font-semibold text-default">{{ formatCurrency(payment.amount) }}</span>
           </div>
           <div class="flex justify-between">
-            <span class="text-slate-600">Type:</span>
+            <span class="text-toned">Type:</span>
             <span class="capitalize">{{ payment.payment_type }}</span>
           </div>
           <div class="flex justify-between">
-            <span class="text-slate-600">Date:</span>
+            <span class="text-toned">Date:</span>
             <span>{{ formatDate(payment.created_at) }}</span>
           </div>
         </div>
 
-        <div class="mt-3 pt-3 border-t border-slate-200">
-          <BaseButton 
-            @click="openDetailsModal(payment)" 
-            variant="secondary" 
-            size="sm"
-            class="w-full"
-          >
+        <div class="mt-3 pt-3 border-t border-default">
+          <UButton @click="openDetailsModal(payment)" color="neutral" variant="soft" size="sm" class="w-full">
             View Details
-          </BaseButton>
+          </UButton>
         </div>
       </div>
 
-      <div v-if="filteredPayments.length === 0" class="bg-white rounded-lg border border-slate-200 shadow-sm p-8 text-center">
-        <svg class="mx-auto h-12 w-12 mb-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
-        </svg>
-        <p class="text-sm font-medium text-slate-900">No payments found</p>
-        <p class="text-sm text-slate-500 mt-1">
+      <div v-if="filteredPayments.length === 0" class="bg-default rounded-lg border border-default shadow-sm p-8 text-center">
+        <UIcon name="i-lucide-search" class="mx-auto h-12 w-12 mb-4 text-muted" />
+        <p class="text-sm font-medium text-default">No payments found</p>
+        <p class="text-sm text-muted mt-1">
           {{ searchQuery || statusFilter || typeFilter ? 'Try adjusting your filters' : 'No payment records available' }}
         </p>
       </div>
@@ -404,19 +399,17 @@ onMounted(() => {
       title="Payment Details"
     >
       <template #icon>
-        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-        </svg>
+        <UIcon name="i-lucide-wallet" class="w-6 h-6 text-white" />
       </template>
       <template #content>
         <div v-if="selectedPayment" class="space-y-4">
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-1">Payment ID</label>
-              <p class="text-sm text-slate-900">#{{ selectedPayment.paymentid }}</p>
+              <label class="block text-sm font-medium text-default mb-1">Payment ID</label>
+              <p class="text-sm text-default">#{{ selectedPayment.paymentid }}</p>
             </div>
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-1">Status</label>
+              <label class="block text-sm font-medium text-default mb-1">Status</label>
               <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium border capitalize" 
                 :class="getStatusBadge(selectedPayment.status)">
                 {{ selectedPayment.status }}
@@ -425,53 +418,58 @@ onMounted(() => {
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">Student</label>
-            <p class="text-sm text-slate-900">{{ getStudentName(selectedPayment.studentid) }}</p>
-            <p class="text-xs text-slate-500">Student ID: {{ selectedPayment.studentid }}</p>
+            <label class="block text-sm font-medium text-default mb-1">Student</label>
+            <p class="text-sm text-default">{{ getStudentName(selectedPayment.studentid) }}</p>
+            <p class="text-xs text-muted">Student ID: {{ selectedPayment.studentid }}</p>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">Amount</label>
-            <p class="text-lg font-bold text-slate-900">{{ formatCurrency(selectedPayment.amount) }}</p>
+            <label class="block text-sm font-medium text-default mb-1">Amount</label>
+            <p class="text-lg font-bold text-default">{{ formatCurrency(selectedPayment.amount) }}</p>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">Payment Type</label>
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-700 capitalize">
+            <label class="block text-sm font-medium text-default mb-1">Payment Type</label>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-muted text-default capitalize">
               {{ selectedPayment.payment_type }}
             </span>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">Midtrans Order ID</label>
-            <code class="block text-sm bg-slate-100 px-3 py-2 rounded text-slate-700">
+            <label class="block text-sm font-medium text-default mb-1">Midtrans Order ID</label>
+            <code class="block text-sm bg-muted px-3 py-2 rounded text-default">
               {{ selectedPayment.midtrans_orderid || '-' }}
             </code>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">Midtrans Transaction ID</label>
-            <code class="block text-sm bg-slate-100 px-3 py-2 rounded text-slate-700">
+            <label class="block text-sm font-medium text-default mb-1">Midtrans Transaction ID</label>
+            <code class="block text-sm bg-muted px-3 py-2 rounded text-default">
               {{ selectedPayment.midtrans_transactionid || '-' }}
             </code>
           </div>
 
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-1">Created At</label>
-              <p class="text-sm text-slate-900">{{ formatDate(selectedPayment.created_at) }}</p>
+              <label class="block text-sm font-medium text-default mb-1">Created At</label>
+              <p class="text-sm text-default">{{ formatDate(selectedPayment.created_at) }}</p>
             </div>
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-1">Updated At</label>
-              <p class="text-sm text-slate-900">{{ formatDate(selectedPayment.updated_at) }}</p>
+              <label class="block text-sm font-medium text-default mb-1">Updated At</label>
+              <p class="text-sm text-default">{{ formatDate(selectedPayment.updated_at) }}</p>
             </div>
+          </div>
+
+          <div v-if="selectedPayment?.status === 'pending' || selectedPayment?.status === 'failed'" class="flex gap-2 mt-4 pt-4 border-t border-default">
+            <UButton label="Mark as Success" color="success" @click="updatePaymentStatus('success')" />
+            <UButton label="Mark as Failed" color="error" variant="soft" @click="updatePaymentStatus('failed')" />
           </div>
         </div>
       </template>
       <template #footer>
-        <BaseButton @click="showDetailsModal = false" variant="secondary">
+        <UButton @click="showDetailsModal = false" color="neutral" variant="outline">
           Close
-        </BaseButton>
+        </UButton>
       </template>
     </Modal>
 

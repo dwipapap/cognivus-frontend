@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { studentAPI, lecturerAPI, classAPI, dashboardAPI, paymentAPI } from '@/services/api';
-import LoadingSpinner from '@/components/ui/LoadingSpinner.vue';
+
 import { formatCurrency } from '../../utils/formatters';
 
 const students = ref([]);
@@ -67,40 +67,40 @@ onMounted(fetchDashboardData);
     <!-- Header -->
     <header class="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
       <div>
-        <h1 class="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight">Dashboard</h1>
-        <p class="text-slate-500 mt-2">Overview of the institution's key metrics and recent activity.</p>
+        <h1 class="text-2xl md:text-3xl font-semibold text-default tracking-tight">Dashboard</h1>
+        <p class="text-muted mt-2">Overview of the institution's key metrics and recent activity.</p>
       </div>
       <div class="flex items-center gap-3 sm:gap-4 flex-wrap">
-        <router-link to="/admin/lecturers" class="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">
+        <router-link to="/admin/lecturers" class="text-sm font-medium text-muted hover:text-default transition-colors">
           Add Staff
         </router-link>
-        <span class="text-slate-300">•</span>
-        <router-link to="/admin/classes" class="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">
+        <span class="text-muted">•</span>
+        <router-link to="/admin/classes" class="text-sm font-medium text-muted hover:text-default transition-colors">
           Create Class
         </router-link>
-        <span class="text-slate-300">•</span>
-        <router-link to="/admin/prices" class="text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">
+        <span class="text-muted">•</span>
+        <router-link to="/admin/prices" class="text-sm font-medium text-muted hover:text-default transition-colors">
           Manage Prices
         </router-link>
       </div>
     </header>
 
     <!-- Loading -->
-    <div v-if="isLoading" class="py-20 flex justify-center">
-      <LoadingSpinner size="lg" color="slate" :center="true" />
+    <div v-if="isLoading" class="flex justify-center py-16">
+      <UIcon name="i-lucide-loader-circle" class="w-8 h-8 animate-spin text-muted" />
     </div>
 
     <div v-else class="space-y-16">
       <!-- Key Metrics Ledger (replaces cards) -->
       <section>
-        <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-6">Key Metrics</h2>
-        <div class="grid grid-cols-2 md:grid-cols-5 gap-8 md:gap-6 border-y border-slate-200 py-8">
+        <h2 class="text-xs font-semibold text-muted uppercase tracking-widest mb-6">Key Metrics</h2>
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-8 md:gap-6 border-y border-default py-8">
           
           <!-- Metric: Revenue -->
           <div class="flex flex-col">
-            <div class="text-sm font-medium text-slate-500 mb-2">Total Revenue</div>
-            <div class="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight">{{ formatCurrency(totalRevenue) }}</div>
-            <div class="mt-2 text-xs text-slate-500 h-4 flex items-center">
+            <div class="text-sm font-medium text-muted mb-2">Total Revenue</div>
+            <div class="text-2xl md:text-3xl font-semibold text-default tracking-tight">{{ formatCurrency(totalRevenue) }}</div>
+            <div class="mt-2 text-xs text-muted h-4 flex items-center">
               <span v-if="pendingCount > 0" class="inline-flex items-center gap-1.5">
                 <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
                 {{ pendingCount }} pending
@@ -110,36 +110,36 @@ onMounted(fetchDashboardData);
           
           <!-- Metric: Students -->
           <div class="flex flex-col">
-            <div class="text-sm font-medium text-slate-500 mb-2">Students</div>
-            <div class="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight">{{ students.length }}</div>
-            <router-link to="/admin/students" class="mt-2 text-xs font-medium text-slate-400 hover:text-slate-900 transition-colors h-4 inline-flex items-center group">
+            <div class="text-sm font-medium text-muted mb-2">Students</div>
+            <div class="text-2xl md:text-3xl font-semibold text-default tracking-tight">{{ students.length }}</div>
+            <router-link to="/admin/students" class="mt-2 text-xs font-medium text-muted hover:text-default transition-colors h-4 inline-flex items-center group">
               View directory <span class="ml-1 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all">→</span>
             </router-link>
           </div>
           
           <!-- Metric: Lecturers -->
           <div class="flex flex-col">
-            <div class="text-sm font-medium text-slate-500 mb-2">Lecturers</div>
-            <div class="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight">{{ lecturers.length }}</div>
-            <router-link to="/admin/lecturers" class="mt-2 text-xs font-medium text-slate-400 hover:text-slate-900 transition-colors h-4 inline-flex items-center group">
+            <div class="text-sm font-medium text-muted mb-2">Lecturers</div>
+            <div class="text-2xl md:text-3xl font-semibold text-default tracking-tight">{{ lecturers.length }}</div>
+            <router-link to="/admin/lecturers" class="mt-2 text-xs font-medium text-muted hover:text-default transition-colors h-4 inline-flex items-center group">
               Manage staff <span class="ml-1 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all">→</span>
             </router-link>
           </div>
           
           <!-- Metric: Classes -->
           <div class="flex flex-col">
-            <div class="text-sm font-medium text-slate-500 mb-2">Classes</div>
-            <div class="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight">{{ classes.length }}</div>
-            <router-link to="/admin/classes" class="mt-2 text-xs font-medium text-slate-400 hover:text-slate-900 transition-colors h-4 inline-flex items-center group">
+            <div class="text-sm font-medium text-muted mb-2">Classes</div>
+            <div class="text-2xl md:text-3xl font-semibold text-default tracking-tight">{{ classes.length }}</div>
+            <router-link to="/admin/classes" class="mt-2 text-xs font-medium text-muted hover:text-default transition-colors h-4 inline-flex items-center group">
               Active curriculum <span class="ml-1 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all">→</span>
             </router-link>
           </div>
           
           <!-- Metric: Payments -->
           <div class="flex flex-col">
-            <div class="text-sm font-medium text-slate-500 mb-2">Payments</div>
-            <div class="text-2xl md:text-3xl font-semibold text-slate-900 tracking-tight">{{ payments.length }}</div>
-            <router-link to="/admin/payments" class="mt-2 text-xs font-medium text-slate-400 hover:text-slate-900 transition-colors h-4 inline-flex items-center group">
+            <div class="text-sm font-medium text-muted mb-2">Payments</div>
+            <div class="text-2xl md:text-3xl font-semibold text-default tracking-tight">{{ payments.length }}</div>
+            <router-link to="/admin/payments" class="mt-2 text-xs font-medium text-muted hover:text-default transition-colors h-4 inline-flex items-center group">
               Transactions <span class="ml-1 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all">→</span>
             </router-link>
           </div>
@@ -150,26 +150,26 @@ onMounted(fetchDashboardData);
       <!-- Recent Activity (Flattened) -->
       <section>
         <div class="flex items-baseline justify-between mb-6">
-          <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-widest">Recent Activity</h2>
-          <span class="text-xs text-slate-400 font-medium">Last 10 events</span>
+          <h2 class="text-xs font-semibold text-muted uppercase tracking-widest">Recent Activity</h2>
+          <span class="text-xs text-muted font-medium">Last 10 events</span>
         </div>
         
-        <div v-if="recentActivities.length === 0" class="py-8 text-slate-400 text-sm">
+        <div v-if="recentActivities.length === 0" class="py-8 text-muted text-sm">
           No recent activity recorded.
         </div>
         
-        <div v-else class="space-y-0 border-t border-slate-200">
+        <div v-else class="space-y-0 border-t border-default">
           <div v-for="(act, i) in recentActivities" :key="i"
-            class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-6 py-4 border-b border-slate-100 hover:bg-slate-50 transition-colors group px-2 sm:px-4 -mx-2 sm:-mx-4 rounded-lg"
+            class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-6 py-4 border-b border-muted hover:bg-elevated transition-colors group px-2 sm:px-4 -mx-2 sm:-mx-4 rounded-lg"
           >
-            <div class="w-24 flex-shrink-0 text-xs text-slate-400 font-mono tracking-tight group-hover:text-slate-500 transition-colors">
+            <div class="w-24 flex-shrink-0 text-xs text-muted font-mono tracking-tight group-hover:text-toned transition-colors">
               {{ getRelativeTime(act.timestamp) }}
             </div>
             <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium text-slate-900 truncate">{{ act.title }}</p>
+              <p class="text-sm font-medium text-default truncate">{{ act.title }}</p>
             </div>
             <div class="flex-[2] min-w-0">
-              <p class="text-sm text-slate-500 truncate">{{ act.description }}</p>
+              <p class="text-sm text-toned truncate">{{ act.description }}</p>
             </div>
           </div>
         </div>

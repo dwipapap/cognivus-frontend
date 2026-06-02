@@ -3,8 +3,7 @@ import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { studentAPI, userAPI, classAPI, levelAPI } from '../../services/api';
 import Modal from '../../components/ui/Modal.vue';
-import BaseButton from '../../components/ui/BaseButton.vue';
-import BaseSelect from '../../components/form/BaseSelect.vue';
+import { useConfirm } from '@/composables/useConfirm'
 import StudentForm from './StudentForm.vue';
 
 const router = useRouter();
@@ -13,12 +12,13 @@ const classes = ref([]);
 const levels = ref([]);
 const isLoading = ref(true);
 const showFormModal = ref(false);
-const showNotificationModal = ref(false);
-const notificationMessage = ref('');
-const notificationType = ref('info');
 const selectedStudent = ref(null);
+
+const { open: confirmOpen, message: confirmMessage, confirm, onConfirm, onCancel } = useConfirm()
 const isEditMode = ref(false);
 const selectedClassFilter = ref('');
+const studentPage = ref(1);
+const studentPageSize = 20;
 
 /** Get class code by classid */
 const getClassCode = (classid) => {
@@ -52,6 +52,12 @@ const filteredStudents = computed(() => {
   return students.value.filter(student => student.classid === selectedClassFilter.value);
 });
 
+const paginatedStudents = computed(() => {
+  const start = (studentPage.value - 1) * studentPageSize;
+  const end = start + studentPageSize;
+  return filteredStudents.value.slice(start, end);
+});
+
 /** Fetch all students */
 const fetchStudents = async () => {
   try {
@@ -61,7 +67,7 @@ const fetchStudents = async () => {
       students.value = response.data.data;
     }
   } catch (error) {
-    showNotification('error', 'Failed to load student data.');
+    toast.add({ title: 'Error', description: 'Failed to load student data.', color: 'error' });
   } finally {
     isLoading.value = false;
   }
@@ -91,17 +97,17 @@ const fetchLevels = async () => {
   }
 };
 
-/** Show notification */
-const showNotification = (type, message) => {
-  notificationType.value = type;
-  notificationMessage.value = message;
-  showNotificationModal.value = true;
-};
-
 /** Open add modal */
 const openAddModal = () => {
   isEditMode.value = false;
   selectedStudent.value = null;
+  showFormModal.value = true;
+};
+
+/** Open edit modal */
+const openEditModal = (student) => {
+  isEditMode.value = true;
+  selectedStudent.value = student;
   showFormModal.value = true;
 };
 
@@ -149,7 +155,7 @@ const handleSave = async (formData) => {
         await userAPI.updateUser(userId, userData);
       }
 
-      showNotification('success', 'Student updated successfully!');
+      toast.add({ title: 'Success', description: 'Student updated successfully!', color: 'success' });
     } else {
       // Create mode: combine all data
       const createData = {
@@ -166,19 +172,19 @@ const handleSave = async (formData) => {
       };
       
       await studentAPI.createStudent(createData);
-      showNotification('success', 'Student created successfully!');
+      toast.add({ title: 'Success', description: 'Student created successfully!', color: 'success' });
     }
     
     showFormModal.value = false;
     fetchStudents();
   } catch (error) {
-    showNotification('error', error.response?.data?.message || 'Failed to save student.');
+    toast.add({ title: 'Error', description: error.response?.data?.message || 'Failed to save student.', color: 'error' });
   }
 };
 
 /** Handle delete */
 const handleDelete = async (student) => {
-  if (!confirm(`Delete student "${student.fullname}"? This will permanently remove all student and user account data.`)) return;
+  if (!await confirm(`Delete student "${student.fullname}"? This will permanently remove all student and user account data.`)) return;
 
   try {
     // Get userid for deletion (backend expects userid, not studentid)
@@ -191,10 +197,10 @@ const handleDelete = async (student) => {
     await studentAPI.deleteStudent(userId);
     await userAPI.deleteUser(userId);
     
-    showNotification('success', 'Student and user account deleted successfully!');
+    toast.add({ title: 'Success', description: 'Student and user account deleted successfully!', color: 'success' });
     fetchStudents();
   } catch (error) {
-    showNotification('error', error.response?.data?.message || 'Failed to delete student.');
+    toast.add({ title: 'Error', description: error.response?.data?.message || 'Failed to delete student.', color: 'error' });
   }
 };
 
@@ -211,35 +217,24 @@ onMounted(() => {
     <div class="mb-6">
       <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
         <div>
-          <h1 class="text-2xl font-bold text-slate-800">Manage Students</h1>
-          <p class="text-slate-600 mt-1">Create, edit, and manage student records</p>
+          <h1 class="text-2xl font-bold text-default">Manage Students</h1>
+          <p class="text-toned mt-1">Create, edit, and manage student records</p>
         </div>
-        <BaseButton @click="openAddModal" variant="primary" size="md">
-          <template #icon>
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
-          </template>
+        <UButton @click="openAddModal" color="primary" variant="solid" icon="i-lucide-plus">
           Add Student
-        </BaseButton>
+        </UButton>
       </div>
 
       <!-- Filter Section -->
-      <div class="bg-white rounded-lg border border-slate-200 p-4 shadow-sm">
+      <div class="bg-default rounded-lg border border-default p-4 shadow-sm">
         <div class="flex flex-col md:flex-row gap-4 items-start md:items-center">
-          <label class="text-sm font-medium text-slate-700 whitespace-nowrap">Filter by Class:</label>
+          <label class="text-sm font-medium text-default whitespace-nowrap">Filter by Class:</label>
           <div class="w-full md:w-64">
-            <select 
-              v-model="selectedClassFilter"
-              class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-colors"
-            >
-              <option value="">All Classes</option>
-              <option v-for="cls in classes" :key="cls.classid" :value="cls.classid">
-                {{ cls.class_code }} - {{ cls.level?.name || 'Unknown Level' }}
-              </option>
-            </select>
+            <UFormField label="Class">
+              <USelect v-model="selectedClassFilter" :items="classes.map(cls => ({ label: cls.class_code + ' - ' + (cls.level?.name || 'Unknown Level'), value: cls.classid }))" placeholder="All Classes" clearable />
+            </UFormField>
           </div>
-          <div class="text-sm text-slate-500">
+          <div class="text-sm text-muted">
             Showing {{ filteredStudents.length }} of {{ students.length }} students
           </div>
         </div>
@@ -247,78 +242,71 @@ onMounted(() => {
     </div>
 
     <!-- Students Table -->
-    <div v-if="isLoading" class="bg-white rounded-lg border border-slate-200 shadow-sm p-12 text-center">
-      <div class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-slate-600 border-r-transparent"></div>
-      <p class="text-slate-600 mt-4">Loading students...</p>
+    <div v-if="isLoading" class="bg-default rounded-lg border border-default shadow-sm p-12 text-center">
+      <div class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-toned border-r-transparent"></div>
+      <p class="text-toned mt-4">Loading students...</p>
     </div>
 
-    <div v-else class="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+    <div v-else class="bg-default rounded-lg border border-default shadow-sm overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full border-collapse">
           <thead>
-            <tr class="bg-slate-50 border-b border-slate-200">
-              <th class="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wider w-16">#</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Name</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Email</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Class</th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Level</th>
-              <th class="px-4 py-3 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider">Actions</th>
+            <tr class="bg-muted border-b border-default">
+              <th class="px-4 py-3 text-right text-xs font-semibold text-toned uppercase tracking-wider w-16">#</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-toned uppercase tracking-wider">Name</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-toned uppercase tracking-wider">Email</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-toned uppercase tracking-wider">Class</th>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-toned uppercase tracking-wider">Level</th>
+              <th class="px-4 py-3 text-center text-xs font-semibold text-toned uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(student, index) in filteredStudents" :key="student.studentid" 
-              class="border-b border-slate-200 transition-colors"
-              :class="index % 2 === 0 ? 'bg-white' : 'bg-slate-50'"
+            <tr v-for="(student, index) in paginatedStudents" :key="student.studentid" 
+              class="border-b border-default transition-colors"
+              :class="index % 2 === 0 ? 'bg-default' : 'bg-muted'"
             >
-              <td class="px-4 py-3 text-right text-sm text-slate-500 font-medium">{{ index + 1 }}</td>
+              <td class="px-4 py-3 text-right text-sm text-muted font-medium">{{ (studentPage - 1) * studentPageSize + index + 1 }}</td>
               <td class="px-4 py-3">
-                <div class="text-sm font-semibold text-slate-900">{{ student.fullname }}</div>
+                <div class="text-sm font-semibold text-default">{{ student.fullname }}</div>
               </td>
               <td class="px-4 py-3">
                 <a v-if="student.tbuser?.email" 
                   :href="`mailto:${student.tbuser.email}`"
-                  class="text-sm text-slate-700 hover:text-slate-900 hover:underline">
+                  class="text-sm text-default hover:text-default hover:underline">
                   {{ student.tbuser.email }}
                 </a>
-                <span v-else class="text-sm text-slate-400">No email</span>
+                <span v-else class="text-sm text-muted">No email</span>
               </td>
               <td class="px-4 py-3">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-700">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-muted text-default">
                   {{ getClassCode(student.classid) }}
                 </span>
               </td>
               <td class="px-4 py-3">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-700">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-muted text-default">
                   {{ getStudentLevel(student.classid) }}
                 </span>
               </td>
               <td class="px-4 py-3">
                 <div class="flex justify-center gap-2">
-                  <BaseButton 
-                    @click="viewStudentDetail(student)" 
-                    variant="secondary" 
-                    size="sm"
-                  >
+                  <UButton @click="viewStudentDetail(student)" color="neutral" variant="soft" size="sm">
                     View
-                  </BaseButton>
-                  <BaseButton 
-                    @click="handleDelete(student)" 
-                    variant="danger" 
-                    size="sm"
-                  >
+                  </UButton>
+                  <UButton @click="openEditModal(student)" color="primary" variant="solid" size="sm">
+                    Edit
+                  </UButton>
+                  <UButton @click="handleDelete(student)" color="error" variant="solid" size="sm">
                     Delete
-                  </BaseButton>
+                  </UButton>
                 </div>
               </td>
             </tr>
-            <tr v-if="filteredStudents.length === 0">
+            <tr v-if="paginatedStudents.length === 0">
               <td colspan="6" class="px-4 py-12 text-center">
-                <div class="text-slate-400">
-                  <svg class="mx-auto h-12 w-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-                  </svg>
-                  <p class="text-sm font-medium text-slate-900">No students found</p>
-                  <p class="text-sm text-slate-500 mt-1">
+                <div class="text-muted">
+                  <UIcon name="i-lucide-users" class="mx-auto h-12 w-12 mb-4" />
+                  <p class="text-sm font-medium text-default">No students found</p>
+                  <p class="text-sm text-muted mt-1">
                     {{ selectedClassFilter ? 'Try selecting a different class or clear the filter' : 'Click "Add Student" to create one' }}
                   </p>
                 </div>
@@ -327,6 +315,13 @@ onMounted(() => {
           </tbody>
         </table>
       </div>
+    </div>
+
+    <div v-if="filteredStudents.length > studentPageSize" class="flex items-center justify-between px-4 py-3 bg-muted border-t border-default">
+      <p class="text-sm text-toned">
+        Showing {{ (studentPage - 1) * studentPageSize + 1 }} to {{ Math.min(studentPage * studentPageSize, filteredStudents.length) }} of {{ filteredStudents.length }} students
+      </p>
+      <UPagination v-model:page="studentPage" :total="filteredStudents.length" :max="studentPageSize" :sibling-count="1" size="sm" />
     </div>
 
     <!-- Form Modal -->
@@ -339,9 +334,7 @@ onMounted(() => {
       :hide-footer="true"
     >
       <template #icon>
-        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-        </svg>
+        <UIcon name="i-lucide-users" class="w-6 h-6 text-white" />
       </template>
       <template #content>
         <StudentForm
@@ -354,12 +347,12 @@ onMounted(() => {
       </template>
     </Modal>
 
-    <!-- Notification Modal -->
-    <Modal 
-      :show="showNotificationModal" 
-      @close="showNotificationModal = false" 
-      :type="notificationType"
-      :message="notificationMessage"
-    />
   </div>
+
+  <UModal v-model:open="confirmOpen" :title="confirmMessage">
+    <template #footer>
+      <UButton label="Cancel" color="neutral" variant="outline" @click="onCancel" />
+      <UButton label="Delete" color="error" @click="onConfirm" />
+    </template>
+  </UModal>
 </template>

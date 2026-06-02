@@ -3,12 +3,8 @@ import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { studentAPI, gradeAPI, paymentAPI, userAPI, classAPI, levelAPI } from '../../services/api';
 import { useForm } from '../../composables/useForm';
-import LoadingSpinner from '../../components/ui/LoadingSpinner.vue';
-import BaseButton from '../../components/ui/BaseButton.vue';
-import BaseInput from '../../components/form/BaseInput.vue';
-import BaseSelect from '../../components/form/BaseSelect.vue';
-import BaseTextarea from '../../components/form/BaseTextarea.vue';
-import Modal from '../../components/ui/Modal.vue';
+
+
 import { formatDate, getAverageScore, getInitials } from '../../utils/formatters';
 
 const route = useRoute();
@@ -22,9 +18,7 @@ const grades = ref([]);
 const transactions = ref([]);
 const isLoading = ref(true);
 const errorMessage = ref('');
-const showNotificationModal = ref(false);
-const notificationMessage = ref('');
-const notificationType = ref('info');
+
 
 // Form for editing
 const { formData, errors, isSubmitting, submit, getFieldProps } = useForm(
@@ -49,12 +43,7 @@ const { formData, errors, isSubmitting, submit, getFieldProps } = useForm(
   }
 );
 
-/** Show notification */
-const showNotification = (type, message) => {
-  notificationType.value = type;
-  notificationMessage.value = message;
-  showNotificationModal.value = true;
-};
+
 
 /** Get gender display */
 const getGenderDisplay = (code) => {
@@ -71,7 +60,7 @@ const getStatusBadge = (status) => {
     error: 'bg-red-100 text-red-800 border-red-200',
     failed: 'bg-red-100 text-red-800 border-red-200'
   };
-  return classes[status] || 'bg-slate-100 text-slate-800 border-slate-200';
+  return classes[status] || 'bg-muted text-default border-default';
 };
 
 /** Fetch student data */
@@ -215,10 +204,10 @@ const handleSave = async () => {
         await userAPI.updateUser(userId, userData);
       }
 
-      showNotification('success', 'Student updated successfully!');
+      toast.add({ title: 'Success', description: 'Student updated successfully!', color: 'success' });
       fetchStudentData(); // Refresh data
     } catch (error) {
-      showNotification('error', error.response?.data?.message || 'Failed to save student.');
+      toast.add({ title: 'Error', description: error.response?.data?.message || 'Failed to save student.', color: 'error' });
     }
   });
 };
@@ -244,7 +233,7 @@ const handleDownloadCertificate = async (gradeId, testType) => {
     window.URL.revokeObjectURL(url);
   } catch (error) {
     console.error('Error downloading certificate:', error);
-    showNotification('error', 'Failed to download certificate. Please try again.');
+    toast.add({ title: 'Error', description: 'Failed to download certificate. Please try again.', color: 'error' });
   }
 };
 
@@ -264,55 +253,50 @@ onMounted(() => {
     <div class="mb-8">
       <button
         @click="goBack"
-        class="mb-4 inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
+        class="mb-4 inline-flex items-center gap-2 text-sm font-medium text-muted hover:text-default transition-colors"
       >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-        </svg>
+        <UIcon name="i-lucide-arrow-left" class="w-4 h-4" />
         Back to Students
       </button>
-      <h1 class="text-2xl font-semibold text-slate-900 tracking-tight">Student Details</h1>
+      <h1 class="text-2xl font-semibold text-default tracking-tight">Student Details</h1>
     </div>
 
     <!-- Loading -->
-    <div v-if="isLoading" class="py-20 flex justify-center">
-      <LoadingSpinner size="lg" color="slate" :center="true" />
+    <div v-if="isLoading" class="flex justify-center py-16">
+      <UIcon name="i-lucide-loader-circle" class="w-8 h-8 animate-spin text-muted" />
     </div>
 
     <!-- Error -->
     <div v-else-if="errorMessage" class="border border-red-200 rounded-lg p-6 text-center">
       <h3 class="text-sm font-semibold text-red-900 mb-1">Error Loading Data</h3>
       <p class="text-sm text-red-600 mb-4">{{ errorMessage }}</p>
-      <BaseButton 
-        variant="primary"
-        @click="fetchStudentData"
-      >
+      <UButton color="primary" variant="solid" @click="fetchStudentData">
         Try Again
-      </BaseButton>
+      </UButton>
     </div>
 
     <!-- Content -->
     <div v-else-if="student" class="space-y-8">
       <!-- Student Info Header -->
       <div class="flex items-start gap-6">
-        <div class="w-16 h-16 rounded-lg bg-slate-100 flex items-center justify-center text-xl font-semibold text-slate-700 flex-shrink-0">
+        <div class="w-16 h-16 rounded-lg bg-muted flex items-center justify-center text-xl font-semibold text-default flex-shrink-0">
           {{ getInitials(student.fullname) }}
         </div>
         <div class="flex-1 min-w-0">
           <div class="flex items-start justify-between gap-4">
             <div>
-              <h2 class="text-xl font-semibold text-slate-900">{{ student.fullname }}</h2>
-              <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-sm text-slate-500">
+              <h2 class="text-xl font-semibold text-default">{{ student.fullname }}</h2>
+              <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-sm text-muted">
                 <span>{{ student.tbuser?.email || 'No email' }}</span>
-                <span class="text-slate-300">·</span>
+                <span class="text-muted">·</span>
                 <span>{{ student.phone || 'No phone' }}</span>
-                <span class="text-slate-300">·</span>
+                <span class="text-muted">·</span>
                 <span>{{ classInfo?.class_code || 'No class' }}</span>
-                <span class="text-slate-300">·</span>
+                <span class="text-muted">·</span>
                 <span>{{ levelInfo?.name || 'No level' }}</span>
               </div>
             </div>
-            <span class="text-xs font-medium text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md flex-shrink-0">
+            <span class="text-xs font-medium text-muted bg-muted px-2.5 py-1 rounded-md flex-shrink-0">
               Student
             </span>
           </div>
@@ -322,32 +306,32 @@ onMounted(() => {
       <!-- Payment History -->
       <div>
         <div class="flex items-baseline justify-between mb-4">
-          <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-widest">Recent Payments</h2>
-          <span class="text-xs text-slate-400 font-medium">Latest 5</span>
+          <h2 class="text-xs font-semibold text-muted uppercase tracking-widest">Recent Payments</h2>
+          <span class="text-xs text-muted font-medium">Latest 5</span>
         </div>
         
         <div v-if="transactions.length === 0" class="py-12 text-center">
-          <p class="text-sm text-slate-400">No payment records found</p>
+          <p class="text-sm text-muted">No payment records found</p>
         </div>
         
         <div v-else class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-slate-200">
+          <table class="min-w-full divide-y divide-default">
             <thead>
               <tr>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">ID</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Date</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Amount</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Payment Type</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Status</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-muted uppercase">ID</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-muted uppercase">Date</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-muted uppercase">Amount</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-muted uppercase">Payment Type</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-muted uppercase">Status</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100">
+            <tbody class="divide-y divide-muted">
               <tr v-for="transaction in transactions" :key="transaction.paymentid">
-                <td class="px-4 py-3 text-sm font-medium text-slate-900">#{{ transaction.paymentid }}</td>
-                <td class="px-4 py-3 text-sm text-slate-600">{{ formatDate(transaction.created_at) }}</td>
-                <td class="px-4 py-3 text-sm font-medium text-slate-900">{{ transaction.amount ? `Rp ${transaction.amount.toLocaleString()}` : '-' }}</td>
+                <td class="px-4 py-3 text-sm font-medium text-default">#{{ transaction.paymentid }}</td>
+                <td class="px-4 py-3 text-sm text-toned">{{ formatDate(transaction.created_at) }}</td>
+                <td class="px-4 py-3 text-sm font-medium text-default">{{ transaction.amount ? `Rp ${transaction.amount.toLocaleString()}` : '-' }}</td>
                 <td class="px-4 py-3">
-                  <span class="text-sm text-slate-600 capitalize">{{ transaction.payment_type || '-' }}</span>
+                  <span class="text-sm text-toned capitalize">{{ transaction.payment_type || '-' }}</span>
                 </td>
                 <td class="px-4 py-3">
                   <span class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded capitalize" :class="getStatusBadge(transaction.status)">
@@ -362,86 +346,62 @@ onMounted(() => {
 
       <!-- Edit Form -->
       <div>
-        <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-4">Edit Student Information</h2>
+        <h2 class="text-xs font-semibold text-muted uppercase tracking-widest mb-4">Edit Student Information</h2>
         
         <form @submit.prevent="handleSave" class="space-y-6">
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <!-- Left Column -->
             <div class="space-y-4">
-              <h3 class="text-sm font-medium text-slate-900">Account Details</h3>
-              <BaseInput
-                v-bind="getFieldProps('username')"
-                label="Username"
-                placeholder="Leave blank to keep current"
-              />
-              <BaseInput
-                v-bind="getFieldProps('email')"
-                type="email"
-                label="Email"
-                placeholder="Leave blank to keep current"
-              />
-              <BaseInput
-                v-bind="getFieldProps('password')"
-                type="password"
-                label="Password"
-                placeholder="Leave blank to keep current"
-              />
+              <h3 class="text-sm font-medium text-default">Account Details</h3>
+              <UFormField label="Username">
+                <UInput v-bind="getFieldProps('username')" placeholder="Leave blank to keep current" />
+              </UFormField>
+              <UFormField label="Email">
+                <UInput v-bind="getFieldProps('email')" type="email" placeholder="Leave blank to keep current" />
+              </UFormField>
+              <UFormField label="Password">
+                <UInput v-bind="getFieldProps('password')" type="password" placeholder="Leave blank to keep current" />
+              </UFormField>
 
-              <h3 class="text-sm font-medium text-slate-900 pt-4">Personal Information</h3>
-              <BaseInput
-                v-bind="getFieldProps('fullname')"
-                label="Full Name"
-                required
-              />
-              <BaseSelect
-                v-bind="getFieldProps('gender')"
-                label="Gender"
-                required
-                :options="['Male', 'Female']"
-              />
-              <BaseInput
-                v-bind="getFieldProps('birthdate')"
-                type="date"
-                label="Birth Date"
-              />
-              <BaseInput
-                v-bind="getFieldProps('birthplace')"
-                label="Birth Place"
-              />
+              <h3 class="text-sm font-medium text-default pt-4">Personal Information</h3>
+              <UFormField label="Full Name" required>
+                <UInput v-bind="getFieldProps('fullname')" />
+              </UFormField>
+              <UFormField label="Gender" required>
+                <USelect v-bind="getFieldProps('gender')" :items="['Male', 'Female']" />
+              </UFormField>
+              <UFormField label="Birth Date">
+                <UInput v-bind="getFieldProps('birthdate')" type="date" />
+              </UFormField>
+              <UFormField label="Birth Place">
+                <UInput v-bind="getFieldProps('birthplace')" />
+              </UFormField>
             </div>
 
             <!-- Right Column -->
             <div class="space-y-4">
-              <h3 class="text-sm font-medium text-slate-900">Contact Information</h3>
-              <BaseInput
-                v-bind="getFieldProps('phone')"
-                type="tel"
-                label="Phone"
-              />
-              <BaseTextarea
-                v-bind="getFieldProps('address')"
-                label="Address"
-                :rows="3"
-                resize="none"
-              />
+              <h3 class="text-sm font-medium text-default">Contact Information</h3>
+              <UFormField label="Phone">
+                <UInput v-bind="getFieldProps('phone')" type="tel" />
+              </UFormField>
+              <UFormField label="Address">
+                <UTextarea v-bind="getFieldProps('address')" :rows="3" />
+              </UFormField>
 
-              <h3 class="text-sm font-medium text-slate-900 pt-4">Parent Information</h3>
-              <BaseInput
-                v-bind="getFieldProps('parentname')"
-                label="Parent Name"
-              />
-              <BaseInput
-                v-bind="getFieldProps('parentphone')"
-                type="tel"
-                label="Parent Phone"
-              />
+              <h3 class="text-sm font-medium text-default pt-4">Parent Information</h3>
+              <UFormField label="Parent Name">
+                <UInput v-bind="getFieldProps('parentname')" />
+              </UFormField>
+              <UFormField label="Parent Phone">
+                <UInput v-bind="getFieldProps('parentphone')" type="tel" />
+              </UFormField>
             </div>
           </div>
 
-          <div class="flex justify-end gap-3 pt-6 border-t border-slate-200">
-            <BaseButton type="submit" variant="primary" :loading="isSubmitting">
+          <div class="flex justify-end gap-3 pt-6 border-t border-default">
+            <UButton type="submit" color="primary" variant="solid" :loading="isSubmitting">
               Update Student
-            </BaseButton>
+            </UButton>
           </div>
         </form>
       </div>
@@ -449,62 +409,66 @@ onMounted(() => {
       <!-- Grades Section -->
       <div>
         <div class="flex items-baseline justify-between mb-4">
-          <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-widest">Academic Performance</h2>
-          <BaseButton
-            variant="primary"
+          <h2 class="text-xs font-semibold text-muted uppercase tracking-widest">Academic Performance</h2>
+          <UButton
+            color="primary"
+            variant="solid"
+            icon="i-lucide-plus"
             @click="router.push({ name: 'AdminAddGrade', params: { userid: studentId } })"
           >
             Add Grade
-          </BaseButton>
+          </UButton>
         </div>
         
         <div v-if="grades.length === 0" class="text-center py-16">
-          <p class="text-sm text-slate-400">No grades recorded</p>
+          <p class="text-sm text-muted">No grades recorded</p>
         </div>
         
         <div v-else class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-slate-200">
+          <table class="min-w-full divide-y divide-default">
             <thead>
               <tr>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Test Type</th>
-                <th class="px-4 py-3 text-center text-xs font-semibold text-slate-500 uppercase">Listening</th>
-                <th class="px-4 py-3 text-center text-xs font-semibold text-slate-500 uppercase">Speaking</th>
-                <th class="px-4 py-3 text-center text-xs font-semibold text-slate-500 uppercase">Reading</th>
-                <th class="px-4 py-3 text-center text-xs font-semibold text-slate-500 uppercase">Writing</th>
-                <th class="px-4 py-3 text-center text-xs font-semibold text-slate-500 uppercase">Grammar</th>
-                <th class="px-4 py-3 text-center text-xs font-semibold text-slate-500 uppercase">Vocabulary</th>
-                <th class="px-4 py-3 text-center text-xs font-semibold text-slate-500 uppercase">Final</th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Date</th>
-                <th class="px-4 py-3 text-right text-xs font-semibold text-slate-500 uppercase">Actions</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-muted uppercase">Test Type</th>
+                <th class="px-4 py-3 text-center text-xs font-semibold text-muted uppercase">Listening</th>
+                <th class="px-4 py-3 text-center text-xs font-semibold text-muted uppercase">Speaking</th>
+                <th class="px-4 py-3 text-center text-xs font-semibold text-muted uppercase">Reading</th>
+                <th class="px-4 py-3 text-center text-xs font-semibold text-muted uppercase">Writing</th>
+                <th class="px-4 py-3 text-center text-xs font-semibold text-muted uppercase">Grammar</th>
+                <th class="px-4 py-3 text-center text-xs font-semibold text-muted uppercase">Vocabulary</th>
+                <th class="px-4 py-3 text-center text-xs font-semibold text-muted uppercase">Final</th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-muted uppercase">Date</th>
+                <th class="px-4 py-3 text-right text-xs font-semibold text-muted uppercase">Actions</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100">
-              <tr v-for="grade in grades" :key="grade.gradeid" class="hover:bg-slate-50 transition-colors">
-                <td class="px-4 py-3 text-sm font-medium text-slate-900">{{ grade.test_type }}</td>
-                <td class="px-4 py-3 text-center text-sm text-slate-600">{{ grade.listening_score || '-' }}</td>
-                <td class="px-4 py-3 text-center text-sm text-slate-600">{{ grade.speaking_score || '-' }}</td>
-                <td class="px-4 py-3 text-center text-sm text-slate-600">{{ grade.reading_score || '-' }}</td>
-                <td class="px-4 py-3 text-center text-sm text-slate-600">{{ grade.writing_score || '-' }}</td>
-                <td class="px-4 py-3 text-center text-sm text-slate-600">{{ grade.grammar_score || '-' }}</td>
-                <td class="px-4 py-3 text-center text-sm text-slate-600">{{ grade.vocabulary_score || '-' }}</td>
-                <td class="px-4 py-3 text-center text-sm font-semibold text-slate-900">{{ grade.final_score ?? '-' }}</td>
-                <td class="px-4 py-3 text-sm text-slate-500">{{ formatDate(grade.date_taken) }}</td>
+            <tbody class="divide-y divide-muted">
+              <tr v-for="grade in grades" :key="grade.gradeid" class="hover:bg-elevated transition-colors">
+                <td class="px-4 py-3 text-sm font-medium text-default">{{ grade.test_type }}</td>
+                <td class="px-4 py-3 text-center text-sm text-toned">{{ grade.listening_score || '-' }}</td>
+                <td class="px-4 py-3 text-center text-sm text-toned">{{ grade.speaking_score || '-' }}</td>
+                <td class="px-4 py-3 text-center text-sm text-toned">{{ grade.reading_score || '-' }}</td>
+                <td class="px-4 py-3 text-center text-sm text-toned">{{ grade.writing_score || '-' }}</td>
+                <td class="px-4 py-3 text-center text-sm text-toned">{{ grade.grammar_score || '-' }}</td>
+                <td class="px-4 py-3 text-center text-sm text-toned">{{ grade.vocabulary_score || '-' }}</td>
+                <td class="px-4 py-3 text-center text-sm font-semibold text-default">{{ grade.final_score ?? '-' }}</td>
+                <td class="px-4 py-3 text-sm text-muted">{{ formatDate(grade.date_taken) }}</td>
                 <td class="px-4 py-3 text-right">
                   <div class="flex justify-end gap-2">
-                    <BaseButton
+                    <UButton
                       size="sm"
-                      variant="secondary"
+                      color="neutral"
+                      variant="soft"
                       @click="handleDownloadCertificate(grade.gradeid, grade.test_type)"
                     >
                       Certificate
-                    </BaseButton>
-                      <BaseButton
+                    </UButton>
+                      <UButton
                         size="sm"
-                        variant="primary"
+                        color="primary"
+                        variant="solid"
                         @click="router.push({ name: 'AdminEditGrade', params: { userid: studentId, gradeid: grade.gradeid } })"
                       >
                         Edit
-                      </BaseButton>
+                      </UButton>
                   </div>
                 </td>
               </tr>
@@ -514,12 +478,6 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- Notification Modal -->
-    <Modal 
-      :show="showNotificationModal" 
-      @close="showNotificationModal = false" 
-      :type="notificationType"
-      :message="notificationMessage"
-    />
+
   </div>
 </template>
