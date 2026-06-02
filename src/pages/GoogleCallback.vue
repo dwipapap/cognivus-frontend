@@ -61,9 +61,9 @@ onMounted(async () => {
               : studentResponse.data.data;
             
             // Check if critical fields are missing (indicates first-time login)
-            // Using OR logic: if ANY of these fields is missing, it's first-time
+            // Only phone and address are checked — birthdate is optional in NewUser
+            // and would cause a redirect loop if included here
             const isFirstTime = !studentData.phone || 
-                               !studentData.birthdate || 
                                !studentData.address;
             
             if (isFirstTime) {

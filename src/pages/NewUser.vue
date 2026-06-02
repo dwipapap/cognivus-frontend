@@ -1,4 +1,9 @@
 <script setup>
+// This page is the first-time onboarding for students who just signed in via Google.
+// It writes the username + password directly via the user update API (no OTP).
+// Staff do not reach this page.
+// Note: username and password are required even for Google-primary students —
+// they serve as a fallback login method.
 import { ref, onMounted, nextTick } from 'vue';
 import { studentAPI, userAPI } from '../services/api';
 import { authStore } from '../store/auth';
