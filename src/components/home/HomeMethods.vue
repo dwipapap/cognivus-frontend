@@ -1,36 +1,32 @@
 <template>
-  <section class="bg-cream py-16 md:py-24">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="reveal text-center max-w-3xl mx-auto mb-12">
-        <p class="text-sm font-medium tracking-wide text-coral-red uppercase mb-3">Metode Belajar</p>
-        <h2 class="text-3xl md:text-4xl font-bold text-default leading-tight">
-          Pilih Kursus Belajar Bahasa Inggris yang Sesuai
-        </h2>
-      </div>
+  <section class="mx-4 my-8">
+    <div
+        class="reveal bg-[var(--color-hero-sky)] rounded-3xl px-6 py-8 md:px-10 md:py-10 flex flex-col md:flex-row gap-8 md:gap-0 items-start"
+      >
+        <div class="md:w-1/3 md:pr-10 md:border-r md:border-white/20">
+          <h2 class="text-3xl md:text-4xl font-bold text-white leading-tight">
+            Metode<br />
+            <span class="italic text-sun-yellow">Belajar</span>
+          </h2>
+          <p class="mt-4 text-sm text-white/75 leading-relaxed max-w-xs">
+            Kursus bahasa Inggris terpercaya dengan instruktur berpengalaman, kapan saja.
+          </p>
+        </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" data-reveal-stagger="0.08" data-reveal="scale-in">
-        <div
-          v-for="(card, i) in cards"
-          :key="i"
-          class="reveal group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-200 hover:-translate-y-1 flex flex-col"
-          :data-delay="i * 60"
-        >
-          <div class="h-2" :class="card.barColor"></div>
-          <div class="p-6 flex flex-col flex-1">
-            <h3 class="text-2xl font-black mb-1" :class="card.headingColor">{{ card.level }}</h3>
-            <p class="text-sm font-medium text-muted mb-4">{{ card.subtitle }}</p>
-            <p class="text-sm text-muted leading-relaxed mb-6 flex-1">{{ card.description }}</p>
-            <button
-              type="button"
-              :class="card.ctaClass"
-              class="self-start rounded-full px-6 py-2 text-sm font-medium transition-all duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-offset-2"
-            >
-              Hubungi Kami
-            </button>
+        <div class="md:w-2/3 md:pl-10 grid grid-cols-2 lg:grid-cols-4 gap-8">
+          <div
+            v-for="(card, i) in cards"
+            :key="i"
+            class="flex flex-col items-center text-center"
+          >
+            <div class="w-14 h-14 rounded-full bg-white flex items-center justify-center mb-4">
+              <UIcon :name="card.icon" class="size-6" :class="card.iconColor" />
+            </div>
+            <h3 class="text-white font-semibold text-base mb-1">{{ card.level }}</h3>
+            <p class="text-white/70 text-sm leading-relaxed">{{ card.description }}</p>
           </div>
         </div>
       </div>
-    </div>
   </section>
 </template>
 
@@ -38,35 +34,27 @@
 const cards = [
   {
     level: 'Pre Elementary',
-    subtitle: 'English for Young Learner',
-    description: 'Dapatkan kelas pembelajaran bahasa Inggris Pre Elementary (English for Young Learner). Maksimum per kelas 10 orang.',
-    barColor: 'bg-swatch-blue',
-    headingColor: 'text-swatch-blue',
-    ctaClass: 'bg-swatch-blue text-white hover:bg-swatch-blue/90'
+    icon: 'i-lucide-book-open',
+    iconColor: 'text-swatch-blue',
+    description: 'Dapatkan kelas pembelajaran bahasa Inggris Pre Elementary (English for Young Learner). Maksimum per kelas 10 orang.'
   },
   {
     level: 'Elementary',
-    subtitle: 'Pemula',
-    description: 'Dapatkan kelas pembelajaran bahasa Inggris Elementary (Pemula). Maksimum per kelas 10 orang.',
-    barColor: 'bg-sun-yellow',
-    headingColor: 'text-sun-yellow-deep',
-    ctaClass: 'bg-sun-yellow text-ink-warm hover:bg-sun-yellow-deep'
+    icon: 'i-lucide-pencil',
+    iconColor: 'text-sun-yellow-deep',
+    description: 'Dapatkan kelas pembelajaran bahasa Inggris Elementary (Pemula). Maksimum per kelas 10 orang.'
   },
   {
     level: 'Intermediate',
-    subtitle: 'Mahir',
-    description: 'Dapatkan kelas pembelajaran bahasa Inggris Intermediate (Mahir). Maksimum per kelas 10 orang.',
-    barColor: 'bg-swatch-red',
-    headingColor: 'text-swatch-red',
-    ctaClass: 'bg-swatch-red text-white hover:bg-swatch-red/90'
+    icon: 'i-lucide-graduation-cap',
+    iconColor: 'text-swatch-red',
+    description: 'Dapatkan kelas pembelajaran bahasa Inggris Intermediate (Mahir). Maksimum per kelas 10 orang.'
   },
   {
     level: 'Advanced',
-    subtitle: 'Ahli',
-    description: 'Dapatkan kelas pembelajaran bahasa Inggris Advanced (Ahli). Maksimum per kelas 10 orang.',
-    barColor: 'bg-ink-warm',
-    headingColor: 'text-ink-warm',
-    ctaClass: 'bg-ink-warm text-white hover:bg-ink-warm/90'
+    icon: 'i-lucide-award',
+    iconColor: 'text-swatch-magenta',
+    description: 'Dapatkan kelas pembelajaran bahasa Inggris Advanced (Ahli). Maksimum per kelas 10 orang.'
   }
 ]
 </script>

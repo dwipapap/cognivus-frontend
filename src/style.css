@@ -124,6 +124,11 @@
   --color-pastel-peach: oklch(0.92 0.05 50);
   --color-pastel-lavender: oklch(0.92 0.04 295);
   --color-pastel-sky: oklch(0.92 0.04 230);
+
+  --color-card-green: oklch(0.88 0.08 145);
+  --color-card-orange: oklch(0.88 0.09 65);
+  --color-card-purple: oklch(0.88 0.07 310);
+  --color-card-blue: oklch(0.88 0.06 240);
 }
 
 :root {
