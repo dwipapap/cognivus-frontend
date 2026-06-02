@@ -272,7 +272,7 @@ const handleLogout = async () => {
       </nav>
 
       <!-- Main Content Area -->
-      <main class="main-content flex-1 p-4 md:p-6 lg:p-8 overflow-auto md:ml-24 mb-20 md:mb-0 transition-all duration-300 ease-in-out">
+      <main class="main-content flex-1 p-4 md:p-6 lg:p-8 overflow-auto md:ml-24 transition-all duration-300 ease-in-out" :class="{ 'mb-20 md:mb-0': !hideMobileNav }">
         <router-view />
       </main>
     </div>

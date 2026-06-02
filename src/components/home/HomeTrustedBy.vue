@@ -11,11 +11,11 @@
         :repeat="5"
       >
         <div
-          v-for="i in 6"
-          :key="i"
-          class="flex items-center justify-center w-36 h-16 border-2 border-dashed border-default rounded-lg px-4 mx-4 md:mx-6 shrink-0"
+          v-for="logo in logos"
+          :key="logo.alt"
+          class="flex items-center justify-center w-36 h-16 px-4 mx-4 md:mx-6 shrink-0"
         >
-          <span class="text-xs text-muted text-center">Partner / Institusi {{ i }}</span>
+          <img :src="logo.src" :alt="logo.alt" class="max-h-full max-w-full object-contain" />
         </div>
       </UMarquee>
     </div>
@@ -23,4 +23,9 @@
 </template>
 
 <script setup>
+const logos = [
+  { src: '/logo/kemenkes.webp', alt: 'Kemenkes' },
+  { src: '/logo/mandirisyariah.webp', alt: 'Mandiri Syariah' },
+  { src: '/logo/panasonic.webp', alt: 'Panasonic' },
+]
 </script>

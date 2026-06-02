@@ -25,7 +25,7 @@ useScrollReveal()
       <HomeWhyITTR />
       <HomeLearningGoals />
       <HomeMethods />
-      <ScallopDivider fill="oklch(0.62 0.15 230)" />
+      <ScallopDivider fill="white" />
       <HomeByLevel />
       <HomeInstructors />
       <HomeTestimonials />

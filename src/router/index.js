@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { authStore } from '../store/auth';
-import apiClient from '../services/api';
+import apiClient, { studentAPI } from '../services/api';
 
 /**
  * Lazy-loaded route components.
@@ -293,27 +293,30 @@ router.beforeEach(async (to, from, next) => {
     userRole
   });
 
-  // Special handling for NewUser page - only allow users without password
+  // Special handling for NewUser page - only allow users without complete profile
   if (to.name === 'NewUser') {
     if (!isAuthenticated) {
       return next({ name: 'Login' });
     }
     
-    // Check if user actually needs to complete profile (no password set)
+    // Check if student profile is already complete (has phone and address)
+    // If complete, redirect to dashboard (no need for NewUser page)
     try {
       const userId = authStore.user?.id;
       if (userId) {
-        const response = await apiClient.get(`/users/${userId}`);
+        const response = await studentAPI.getStudentById(userId);
         if (response.data.success) {
-          const userData = response.data.data;
-          // If user has password, redirect to dashboard (they don't need NewUser page)
-          if (userData.password && userData.password !== null) {
+          const studentData = Array.isArray(response.data.data)
+            ? response.data.data[0]
+            : response.data.data;
+          // Profile is complete if phone AND address are present
+          if (studentData?.phone && studentData?.address) {
             return next({ name: getDefaultDashboard(userRole) });
           }
         }
       }
     } catch (error) {
-      console.error('Error checking password status:', error);
+      console.error('Error checking student profile:', error);
       // On error, allow access (fail gracefully)
     }
     
