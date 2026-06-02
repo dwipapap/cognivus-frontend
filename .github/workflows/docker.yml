@@ -43,3 +43,8 @@ jobs:
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}
+            VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }}
+            VITE_ENCRYPTION_KEY=${{ secrets.VITE_ENCRYPTION_KEY }}
+            VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}
