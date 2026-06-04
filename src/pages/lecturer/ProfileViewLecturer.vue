@@ -55,7 +55,7 @@ const handleImageError = (event) => {
   <!-- Profile Content -->
   <div v-else-if="lecturerProfile" class="space-y-8 mb-8">
     <!-- Profile Header Card -->
-    <div class="relative bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl shadow-lg overflow-hidden">
+    <div class="relative bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg overflow-hidden">
       <div class="absolute top-0 right-0 w-1/2 h-full pointer-events-none overflow-hidden opacity-20">
         <div class="absolute -top-10 -right-10 w-40 h-48 bg-white rounded-lg transform rotate-12"></div>
         <div class="absolute top-20 -right-5 w-32 h-40 bg-white rounded-lg transform rotate-12"></div>

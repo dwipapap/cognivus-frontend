@@ -343,7 +343,7 @@ onMounted(() => {
   <!-- Main Dashboard Content -->
   <div v-else>
     <!-- Welcome Section -->
-    <div class="bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 rounded-3xl shadow-lg mb-8 overflow-hidden">
+    <div class="bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 rounded-xl shadow-lg mb-8 overflow-hidden">
       <div class="flex flex-col lg:flex-row items-center">
         <!-- Left: Text Content -->
         <div class="flex-1 p-5 md:p-8 lg:p-12">
@@ -471,7 +471,7 @@ onMounted(() => {
 
       <!-- Top-Left Large Card: Active Classes & Today's Schedule (Span 2 cols, 1 row) -->
       <div
-        class="lg:col-span-2 lg:row-span-1 bg-blue-50 border border-gray-100 shadow-lg rounded-3xl p-6 hover:shadow-xl transition-all duration-300">
+        class="lg:col-span-2 lg:row-span-1 bg-blue-50 border border-gray-100 shadow-lg rounded-xl p-6 hover:shadow-xl transition-all duration-300">
         <div class="flex items-start justify-between mb-6">
           <div>
             <p class="text-sm font-medium text-gray-500 mb-2">Active Classes</p>
@@ -534,7 +534,7 @@ onMounted(() => {
       <div class="lg:col-span-1 lg:row-span-1 grid grid-cols-1 gap-4">
         <!-- Total Students Card -->
         <div
-          class="relative bg-blue-50 border border-gray-100 shadow-lg rounded-3xl p-5 hover:shadow-xl transition-all duration-300">
+          class="relative bg-blue-50 border border-gray-100 shadow-lg rounded-xl p-5 hover:shadow-xl transition-all duration-300">
           <div class="absolute top-4 right-4">
             <div class="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center">
               <IconUsersGroup class="w-6 h-6 text-blue-600" />
@@ -549,7 +549,7 @@ onMounted(() => {
 
         <!-- Total Classes Card -->
         <div
-          class="relative bg-blue-50 border border-gray-100 shadow-lg rounded-3xl p-5 hover:shadow-xl transition-all duration-300">
+          class="relative bg-blue-50 border border-gray-100 shadow-lg rounded-xl p-5 hover:shadow-xl transition-all duration-300">
           <div class="absolute top-4 right-4">
             <div class="w-10 h-10 bg-indigo-500/10 rounded-lg flex items-center justify-center">
               <IconBook class="w-6 h-6 text-indigo-600" />
