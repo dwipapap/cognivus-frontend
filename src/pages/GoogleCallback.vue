@@ -1,10 +1,10 @@
 <script setup>
-import { onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { authStore } from '../store/auth';
-import apiClient, { studentAPI } from '../services/api';
-import LoadingSpinner from '../components/ui/LoadingSpinner.vue';
-import ittrLogo from '../assets/ittrlogo.png';
+import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { authStore } from '../store/auth'
+import apiClient, { studentAPI } from '../services/api'
+import LoadingSpinner from '../components/ui/LoadingSpinner.vue'
+import ittrLogo from '../assets/ittrlogo.png'
 
 const router = useRouter();
 const error = ref(null);
@@ -22,12 +22,12 @@ onMounted(async () => {
     const givenName = urlParams.get('given_name');
     const familyName = urlParams.get('family_name');
 
-    if (!token || !role || !id || !username || !email) {
+    if (!token || !role || !id || !username || !email || isNaN(parseInt(id, 10))) {
       throw new Error('Invalid authentication response');
     }
 
     const user = {
-      id: parseInt(id),
+      id: parseInt(id, 10),
       username,
       email,
       user_metadata: {
@@ -43,7 +43,7 @@ onMounted(async () => {
     statusMessage.value = 'Checking account status...';
     
     try {
-      const response = await apiClient.get(`/users/${id}`);
+      const response = await apiClient.get(`/users/${id}`, { timeout: 15000 });
       
       if (response.data.success) {
         const userData = response.data.data;
@@ -59,13 +59,17 @@ onMounted(async () => {
             const studentData = Array.isArray(studentResponse.data.data)
               ? studentResponse.data.data[0]
               : studentResponse.data.data;
-            
-            // Check if critical fields are missing (indicates first-time login)
-            // Only phone and address are checked — birthdate is optional in NewUser
-            // and would cause a redirect loop if included here
-            const isFirstTime = !studentData.phone || 
+
+            if (!studentData) {
+              statusMessage.value = 'Setting up your account...';
+              await new Promise(resolve => setTimeout(resolve, 500));
+              router.push('/new-user');
+              return;
+            }
+
+            const isFirstTime = !studentData.phone ||
                                !studentData.address;
-            
+
             if (isFirstTime) {
               statusMessage.value = 'Setting up your account...';
               await new Promise(resolve => setTimeout(resolve, 500));
@@ -85,7 +89,11 @@ onMounted(async () => {
       }
     } catch (checkError) {
       console.error('Error checking user status:', checkError);
-      // Continue to dashboard if check fails (fail gracefully)
+      error.value = 'Unable to verify your account. Please try logging in again.';
+      setTimeout(() => {
+        router.push('/login');
+      }, 3000);
+      return;
     }
 
     statusMessage.value = 'Redirecting to dashboard...';
