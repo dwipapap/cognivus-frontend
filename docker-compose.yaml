@@ -9,8 +9,8 @@
 # https://github.com/docker/awesome-compose
 services:
   server:
-    build:
-      context: .
+    image: ghcr.io/dwipapap/cognivus-frontend:latest
+    pull_policy: always
     environment:
       NODE_ENV: production
     ports:
