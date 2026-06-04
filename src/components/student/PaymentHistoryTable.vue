@@ -53,7 +53,7 @@ const previousPage = () => { if (hasPrevious.value) emit('page-change', props.cu
 </script>
 
 <template>
-  <div class="payment-section-glass rounded-3xl md:rounded-2xl px-4 py-5 md:p-6 shadow-md border border-gray-200">
+  <div class="payment-section-glass rounded-xl md:rounded-xl px-4 py-5 md:p-6 shadow-md border border-gray-200">
     <div class="flex justify-between items-center mb-4 md:mb-5">
       <h2 class="text-lg font-bold text-gray-800">Payment History</h2>
       <BaseButton variant="secondary" size="sm" icon :disabled="loading" @click="emit('refresh')"
@@ -77,7 +77,7 @@ const previousPage = () => { if (hasPrevious.value) emit('page-change', props.cu
 
     <div v-else>
       <!-- Desktop: Table (lg+) -->
-      <div class="hidden lg:block overflow-x-auto rounded-xl">
+      <div class="hidden lg:block overflow-x-auto rounded-lg">
         <table class="w-full">
           <thead>
             <tr class="bg-gray-50/80">
@@ -109,7 +109,7 @@ const previousPage = () => { if (hasPrevious.value) emit('page-change', props.cu
       <!-- Mobile: Stacked list (< lg) -->
       <div class="lg:hidden space-y-3">
         <div v-for="payment in paginated" :key="payment.paymentid"
-          class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
+          class="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
           <div class="flex items-center justify-between mb-3">
             <span class="text-xs text-gray-500">{{ formatDate(payment.created_at) }}</span>
             <span class="px-2.5 py-0.5 text-xs font-semibold rounded-full capitalize" :class="statusClass(payment.status)">

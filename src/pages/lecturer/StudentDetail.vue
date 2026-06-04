@@ -126,7 +126,7 @@ onMounted(() => {
       </div>
 
       <!-- Error -->
-      <div v-else-if="errorMessage" class="bg-red-50 border border-red-100 rounded-2xl p-6 text-center">
+      <div v-else-if="errorMessage" class="bg-red-50 border border-red-100 rounded-lg p-6 text-center">
         <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -149,7 +149,7 @@ onMounted(() => {
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
           
           <!-- Student Information Card -->
-          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
             <!-- Decorative Header -->
             <div class="h-24 bg-gradient-to-r from-blue-600 to-indigo-600 relative overflow-hidden">
               <div class="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
@@ -159,7 +159,7 @@ onMounted(() => {
             
             <div class="px-8 pb-8">
               <div class="relative flex justify-between items-end -mt-12 mb-6">
-                <div class="w-24 h-24 rounded-2xl border-4 border-white bg-white shadow-lg flex items-center justify-center text-3xl font-bold text-indigo-600 bg-gradient-to-br from-indigo-50 to-blue-50">
+                <div class="w-24 h-24 rounded-lg border-4 border-white bg-white shadow-lg flex items-center justify-center text-3xl font-bold text-indigo-600 bg-gradient-to-br from-indigo-50 to-blue-50">
                   {{ getInitials(student.fullname) }}
                 </div>
                 <span class="mb-2 px-3 py-1 bg-blue-50 text-blue-700 text-xs font-bold uppercase tracking-wider rounded-full border border-blue-100">
@@ -207,11 +207,11 @@ onMounted(() => {
                   Parent Information
                 </h3>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                  <div class="bg-gray-50 rounded-lg p-4 border border-gray-100">
                     <label class="text-xs text-gray-500 block mb-1">Parent Name</label>
                     <p class="font-semibold text-gray-900">{{ student.parentname || '-' }}</p>
                   </div>
-                  <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                  <div class="bg-gray-50 rounded-lg p-4 border border-gray-100">
                     <label class="text-xs text-gray-500 block mb-1">Parent Phone</label>
                     <p class="font-semibold text-gray-900">{{ student.parentphone || '-' }}</p>
                   </div>
@@ -221,7 +221,7 @@ onMounted(() => {
           </div>
 
           <!-- Payment History Card -->
-          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col h-full">
+          <div class="bg-white rounded-lg shadow-sm border border-gray-100 flex flex-col h-full">
             <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/30">
               <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
                 <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -277,7 +277,7 @@ onMounted(() => {
         </div>
 
         <!-- Grades Section -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
           <div class="p-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gray-50/30">
             <div>
               <h2 class="text-xl font-bold text-gray-900 flex items-center gap-2">

@@ -102,7 +102,7 @@ onMounted(() => {
 <template>
   <!-- Loading State -->
   <div v-if="isLoading" class="space-y-4 md:space-y-6 animate-pulse">
-    <div class="rounded-2xl shadow-lg p-5 md:p-8 bg-blue-100 border border-blue-200">
+    <div class="rounded-lg shadow-lg p-5 md:p-8 bg-blue-100 border border-blue-200">
       <div class="h-8 w-2/3 bg-blue-200 rounded mb-3"></div>
       <div class="h-4 w-40 bg-blue-200 rounded mb-6"></div>
       <div class="flex flex-wrap gap-3">
@@ -112,16 +112,16 @@ onMounted(() => {
       </div>
     </div>
 
-    <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 border border-gray-100 space-y-4">
+    <div class="bg-white rounded-lg shadow-lg p-4 md:p-6 border border-gray-100 space-y-4">
       <div class="h-7 w-56 bg-gray-200 rounded"></div>
-      <div class="h-20 w-full bg-gray-100 rounded-xl"></div>
-      <div class="h-28 w-full bg-gray-100 rounded-xl"></div>
-      <div class="h-28 w-full bg-gray-100 rounded-xl"></div>
+      <div class="h-20 w-full bg-gray-100 rounded-lg"></div>
+      <div class="h-28 w-full bg-gray-100 rounded-lg"></div>
+      <div class="h-28 w-full bg-gray-100 rounded-lg"></div>
     </div>
   </div>
 
   <!-- Error State -->
-  <div v-else-if="errorMessage" class="bg-red-50 border border-red-200 rounded-xl p-4 md:p-6 text-center">
+  <div v-else-if="errorMessage" class="bg-red-50 border border-red-200 rounded-lg p-4 md:p-6 text-center">
     <p class="text-red-800 mb-4 text-sm md:text-base">{{ errorMessage }}</p>
     <button 
       v-if="courseError"
@@ -142,7 +142,7 @@ onMounted(() => {
   <!-- Course Content -->
   <div v-else-if="course" class="space-y-4 md:space-y-6 mb-8">
     <!-- Course Header -->
-    <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl md:rounded-2xl shadow-lg p-5 md:p-8 text-white">
+    <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg md:rounded-lg shadow-lg p-5 md:p-8 text-white">
       <div class="flex items-start justify-between gap-3 mb-4">
         <div class="flex-1 min-w-0">
           <h1 class="text-xl md:text-3xl font-bold mb-1 md:mb-2 break-words">{{ course.title }}</h1>
@@ -171,7 +171,7 @@ onMounted(() => {
     </div>
 
     <!-- Course Materials and Class Notes Combined Section -->
-    <section class="bg-white rounded-xl shadow-lg p-4 md:p-6">
+    <section class="bg-white rounded-lg shadow-lg p-4 md:p-6">
       <!-- Class Notes -->
       <div v-if="course.description" class="mb-6 md:mb-8">
         <div class="flex items-center gap-2 md:gap-3 mb-3 md:mb-4">
@@ -211,7 +211,7 @@ onMounted(() => {
             v-for="file in courseFiles" 
             :key="file.cfid"
             @click="openMaterial(getFileUrl(file), 'Learning Materials')"
-            class="flex items-center gap-3 md:gap-4 p-3 md:p-4 bg-blue-600 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 cursor-pointer text-left"
+            class="flex items-center gap-3 md:gap-4 p-3 md:p-4 bg-blue-600 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 cursor-pointer text-left"
           >
             <!-- PDF Thumbnail -->
             <div class="flex-shrink-0 w-14 h-16 md:w-16 md:h-16 bg-white rounded-lg flex items-center justify-center">
@@ -238,7 +238,7 @@ onMounted(() => {
             :href="`https://www.youtube.com/watch?v=${getYouTubeId(course.video_link)}`" 
             target="_blank"
             rel="noopener noreferrer"
-            class="flex items-center gap-3 md:gap-4 p-3 md:p-4 bg-red-600 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5"
+            class="flex items-center gap-3 md:gap-4 p-3 md:p-4 bg-red-600 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5"
           >
             <!-- Video Thumbnail -->
             <div class="flex-shrink-0 w-14 h-16 md:w-16 md:h-16 bg-white rounded-lg flex items-center justify-center">
@@ -278,7 +278,7 @@ onMounted(() => {
       title="Course Material"
       type="info"
       :responsive-drawer="true"
-      drawer-height="75dvh"
+      drawer-height="100dvh"
     >
       <template #content>
         <Suspense>

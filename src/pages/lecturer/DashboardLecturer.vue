@@ -305,7 +305,7 @@ onMounted(() => {
   </div>
 
   <!-- Error State -->
-  <div v-else-if="showError" class="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+  <div v-else-if="showError" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
     <div class="flex items-center justify-between">
       <div class="flex items-center">
         <svg class="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -323,7 +323,7 @@ onMounted(() => {
   </div>
 
   <!-- Dashboard Data Error -->
-  <div v-else-if="dataError" class="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+  <div v-else-if="dataError" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
     <div class="flex items-center justify-between">
       <div class="flex items-center">
         <svg class="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -478,7 +478,7 @@ onMounted(() => {
             <p class="text-5xl font-bold text-gray-900 mb-2">{{ myClasses.length }}</p>
             <p class="text-sm text-gray-400">Total teaching assignments</p>
           </div>
-          <div class="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center">
+          <div class="w-12 h-12 bg-blue-500/10 rounded-lg flex items-center justify-center">
             <IconCheckCircle class="w-7 h-7 text-blue-600" />
           </div>
         </div>
@@ -505,7 +505,7 @@ onMounted(() => {
           <!-- Schedule Grid -->
           <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             <div v-for="cls in myClasses.slice(0, 6)" :key="cls.classid"
-              class="bg-blue-50 rounded-2xl p-3 border border-gray-100 hover:border-blue-200 hover:shadow-md transition-all duration-200">
+              class="bg-blue-50 rounded-lg p-3 border border-gray-100 hover:border-blue-200 hover:shadow-md transition-all duration-200">
               <div class="flex items-start gap-2">
                 <div
                   class="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -536,7 +536,7 @@ onMounted(() => {
         <div
           class="relative bg-blue-50 border border-gray-100 shadow-lg rounded-3xl p-5 hover:shadow-xl transition-all duration-300">
           <div class="absolute top-4 right-4">
-            <div class="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center">
+            <div class="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center">
               <IconUsersGroup class="w-6 h-6 text-blue-600" />
             </div>
           </div>
@@ -551,7 +551,7 @@ onMounted(() => {
         <div
           class="relative bg-blue-50 border border-gray-100 shadow-lg rounded-3xl p-5 hover:shadow-xl transition-all duration-300">
           <div class="absolute top-4 right-4">
-            <div class="w-10 h-10 bg-indigo-500/10 rounded-xl flex items-center justify-center">
+            <div class="w-10 h-10 bg-indigo-500/10 rounded-lg flex items-center justify-center">
               <IconBook class="w-6 h-6 text-indigo-600" />
             </div>
           </div>
@@ -567,14 +567,14 @@ onMounted(() => {
       <div class="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-4">
 
         <!-- Left: Quick Actions -->
-        <div class="bg-blue-50 border border-gray-100 shadow-lg rounded-2xl p-4 flex flex-col">
+        <div class="bg-blue-50 border border-gray-100 shadow-lg rounded-lg p-4 flex flex-col">
           <h2 class="text-sm font-bold text-gray-900 mb-3">Quick Actions</h2>
           <div class="grid grid-cols-2 gap-2 flex-1">
             <button v-for="action in quickActions" :key="action.title" @click="action.action" class="group h-full">
               <div
-                class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-blue-200 transition-all duration-200 flex flex-col items-center justify-center text-center h-full">
+                class="bg-white rounded-lg p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-blue-200 transition-all duration-200 flex flex-col items-center justify-center text-center h-full">
                 <div
-                  :class="`w-11 h-11 ${action.color} rounded-xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform duration-200 mb-2`">
+                  :class="`w-11 h-11 ${action.color} rounded-lg flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform duration-200 mb-2`">
                   <IconDocument v-if="action.icon === 'grade'" class="w-5 h-5 text-white" />
                   <IconUpload v-else-if="action.icon === 'upload'" class="w-5 h-5 text-white" />
                 </div>
@@ -588,7 +588,7 @@ onMounted(() => {
         </div>
 
         <!-- Center: Schedule Calendar -->
-        <div class="bg-blue-50 border border-gray-100 shadow-lg rounded-2xl p-4">
+        <div class="bg-blue-50 border border-gray-100 shadow-lg rounded-lg p-4">
           <!-- Header with navigation -->
           <div class="flex items-center justify-between mb-3">
             <div class="flex items-center gap-2">
@@ -654,7 +654,7 @@ onMounted(() => {
 
         <!-- Right: Daily Inspiration (beautiful design) -->
         <div
-          class="bg-gradient-to-br from-blue-500 to-indigo-600 border border-blue-400 shadow-lg rounded-2xl p-5 flex flex-col justify-between relative overflow-hidden">
+          class="bg-gradient-to-br from-blue-500 to-indigo-600 border border-blue-400 shadow-lg rounded-lg p-5 flex flex-col justify-between relative overflow-hidden">
           <!-- Decorative background pattern -->
           <div class="absolute top-0 right-0 w-32 h-32 opacity-10">
             <svg viewBox="0 0 100 100" fill="currentColor" class="text-white">

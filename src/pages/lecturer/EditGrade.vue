@@ -16,7 +16,7 @@
   </div>
 
   <!-- Error -->
-  <div v-else-if="errorMessage" class="bg-red-50 border border-red-200 rounded-2xl p-6 text-center max-w-2xl mx-auto mb-8">
+  <div v-else-if="errorMessage" class="bg-red-50 border border-red-200 rounded-lg p-6 text-center max-w-2xl mx-auto mb-8">
     <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
       <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -29,7 +29,7 @@
   <!-- Content -->
   <div v-else-if="student && grade" class="space-y-8 mb-8">
     <!-- Header Card with Student Info -->
-    <div class="relative bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-lg overflow-hidden">
+    <div class="relative bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-lg overflow-hidden">
       <!-- Decorative Graphics -->
       <div class="absolute top-0 right-0 w-1/2 h-full pointer-events-none overflow-hidden">
         <div class="absolute -top-10 -right-10 w-40 h-48 bg-blue-400/30 rounded-lg transform rotate-12 flex items-center justify-center">
@@ -71,9 +71,9 @@
     </div>
 
     <!-- Grade Form Card -->
-    <form @submit.prevent="handleSave" class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-6 md:p-8 shadow-sm hover:shadow-md transition-all duration-200">
+    <form @submit.prevent="handleSave" class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-lg p-6 md:p-8 shadow-sm hover:shadow-md transition-all duration-200">
       <div class="flex items-center gap-3 mb-6">
-        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-sm">
+        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-sm">
           <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
           </svg>
@@ -83,7 +83,7 @@
 
         <div class="space-y-6">
           <!-- Test Type -->
-          <div class="bg-white rounded-xl p-5 shadow-sm border border-blue-100/50">
+          <div class="bg-white rounded-lg p-5 shadow-sm border border-blue-100/50">
             <BaseSelect
               v-bind="getFieldProps('test_type')"
               label="Test Type"
@@ -94,7 +94,7 @@
           </div>
 
           <!-- Skill Scores Section -->
-          <div class="bg-white rounded-xl p-5 shadow-sm border border-blue-100/50">
+          <div class="bg-white rounded-lg p-5 shadow-sm border border-blue-100/50">
             <div class="flex items-center gap-2 mb-4">
               <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -160,7 +160,7 @@
 
           <!-- Final Score & Date -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="bg-white rounded-xl p-5 shadow-sm border border-blue-100/50">
+            <div class="bg-white rounded-lg p-5 shadow-sm border border-blue-100/50">
               <BaseInput
                 v-bind="getFieldProps('final_score')"
                 type="number"
@@ -171,7 +171,7 @@
               />
             </div>
 
-            <div class="bg-white rounded-xl p-5 shadow-sm border border-blue-100/50">
+            <div class="bg-white rounded-lg p-5 shadow-sm border border-blue-100/50">
               <BaseInput
                 v-bind="getFieldProps('date_taken')"
                 type="date"
@@ -181,7 +181,7 @@
           </div>
 
           <!-- Description -->
-          <div class="bg-white rounded-xl p-5 shadow-sm border border-blue-100/50">
+          <div class="bg-white rounded-lg p-5 shadow-sm border border-blue-100/50">
             <BaseTextarea
               v-bind="getFieldProps('description')"
               label="Description"
@@ -191,7 +191,7 @@
           </div>
 
           <!-- File Upload -->
-          <div class="bg-white rounded-xl p-5 shadow-sm border border-blue-100/50">
+          <div class="bg-white rounded-lg p-5 shadow-sm border border-blue-100/50">
             <BaseFileUpload
               v-model="uploadFiles"
               label="Upload New Report File (Optional)"
@@ -250,7 +250,7 @@
         </div>
 
         <!-- Success Message -->
-        <div v-if="successMessage" class="mt-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4">
+        <div v-if="successMessage" class="mt-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-4">
           <div class="flex items-center gap-3">
             <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
               <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -262,7 +262,7 @@
         </div>
 
         <!-- Error Message -->
-        <div v-if="submitError" class="mt-4 bg-gradient-to-r from-red-50 to-rose-50 border border-red-200 rounded-xl p-4">
+        <div v-if="submitError" class="mt-4 bg-gradient-to-r from-red-50 to-rose-50 border border-red-200 rounded-lg p-4">
           <div class="flex items-center gap-3">
             <div class="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0">
               <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

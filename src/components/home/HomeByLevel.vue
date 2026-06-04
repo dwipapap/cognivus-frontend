@@ -11,7 +11,7 @@
         <div
           v-for="(program, i) in programs"
           :key="i"
-          class="reveal group rounded-2xl overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
+          class="reveal group rounded-lg overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
           :class="program.bg"
           :data-delay="i * 80"
         >

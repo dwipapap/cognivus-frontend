@@ -39,8 +39,8 @@ const getIconColor = (color) => {
 
     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
       <a v-for="link in externalLinks" :key="link.name" :href="link.url" target="_blank" rel="noopener noreferrer"
-                :class="[getBgColor(link.color), 'group rounded-xl p-6 transition-colors border border-transparent hover:border-default']">
-        <div :class="['w-12 h-12 rounded-xl flex items-center justify-center mb-4', getIconColor(link.color)]">
+                :class="[getBgColor(link.color), 'group rounded-lg p-6 transition-colors border border-transparent hover:border-default']">
+        <div :class="['w-12 h-12 rounded-lg flex items-center justify-center mb-4', getIconColor(link.color)]">
           <UIcon :name="link.icon" class="w-8 h-8" />
         </div>
 
@@ -55,7 +55,7 @@ const getIconColor = (color) => {
       </a>
     </div>
 
-        <div class="mt-8 p-4 bg-elevated rounded-xl">
+        <div class="mt-8 p-4 bg-elevated rounded-lg">
             <p class="text-sm text-muted">
                 <span class="font-medium text-default">Tip:</span>
                 All links open in a new tab. Edit the links in <code

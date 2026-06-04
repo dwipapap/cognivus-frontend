@@ -162,7 +162,7 @@ const handleLogout = async () => {
               <div 
                 v-if="showDropdown" 
                 ref="profileDropdownRef"
-                class="fixed w-56 origin-top-right profile-dropdown-glass rounded-xl shadow-lg border border-white/20 overflow-hidden z-[9999]"
+                class="fixed w-56 origin-top-right profile-dropdown-glass rounded-lg shadow-lg border border-white/20 overflow-hidden z-[9999]"
                 :class="{'dropdown-enter': isDropdownVisible, 'dropdown-leave': !isDropdownVisible}"
                 :style="dropdownPosition"
               >

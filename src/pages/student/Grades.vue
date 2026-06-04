@@ -11,6 +11,7 @@ import IconDocument from '~icons/basil/document-solid';
 import IconClose from '~icons/basil/cross-outline';
 import IconInfo from '~icons/basil/info-circle-outline';
 import { formatDate, getAverageScore } from '../../utils/formatters';
+import PageHeaderCard from '../../components/student/PageHeaderCard.vue';
 
 const { studentProfile, isLoading: isProfileLoading, fetchStudentProfile } = useStudentProfile();
 
@@ -30,12 +31,12 @@ const fetchGrades = async () => {
   try {
     isLoadingGrades.value = true;
     errorMessage.value = '';
-    
+
     const response = await gradeAPI.getGradeById(studentProfile.value.studentid);
-    
+
     if (response.data.success) {
-      grades.value = Array.isArray(response.data.data) 
-        ? response.data.data 
+      grades.value = Array.isArray(response.data.data)
+        ? response.data.data
         : [];
     } else {
       errorMessage.value = response.data.message || 'Failed to load grades';
@@ -55,18 +56,18 @@ const fetchGrades = async () => {
 const handleDownloadCertificate = async (gradeId, testType) => {
   try {
     const response = await gradeAPI.downloadCertificate(gradeId);
-    
+
     // Create blob URL from response
     const blob = new Blob([response.data], { type: 'application/pdf' });
     const url = window.URL.createObjectURL(blob);
-    
+
     // Create temporary link and trigger download
     const link = document.createElement('a');
     link.href = url;
     link.download = `Certificate_${testType || 'Test'}.pdf`;
     document.body.appendChild(link);
     link.click();
-    
+
     // Cleanup
     document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
@@ -99,127 +100,113 @@ onMounted(() => {
 <template>
   <div class="space-y-8 mb-8">
     <!-- Header Card -->
-    <div class="relative bg-blue-600 rounded-2xl p-6 md:p-8 shadow-lg overflow-hidden">
-      <!-- Diagonal Book Graphics -->
-      <div class="absolute top-0 right-0 w-1/2 h-full pointer-events-none overflow-hidden">
-        <div class="absolute -top-10 -right-10 w-40 h-48 bg-blue-400/30 rounded-lg transform rotate-12"></div>
-        <div class="absolute top-20 -right-5 w-32 h-40 bg-blue-300/40 rounded-lg transform rotate-12"></div>
-        <div class="absolute top-40 right-10 w-28 h-36 bg-white/20 rounded-lg transform rotate-12"></div>
-      </div>
-
-      <!-- Content -->
-      <div class="relative z-10">
-        <p class="text-white/80 text-sm mb-1">{{ classInfo?.class_code ? classInfo.class_code : 'Academic Performance' }}</p>
-        <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">{{ levelName || 'Loading...' }}</h2>
-        <p class="text-white/70 text-sm md:text-base max-w-md">
-          Track your learning progress, view detailed test scores, and access your academic report files.
-        </p>
-      </div>
-    </div>
+    <PageHeaderCard
+      :eyebrow="classInfo?.class_code ? classInfo.class_code : 'Academic Performance'"
+      :title="levelName || 'Loading...'"
+      description="Track your learning progress and report files."
+      :show-decoration="true"
+    />
 
     <!-- Loading State -->
     <div v-if="isProfileLoading || isLoadingGrades || classLoading" class="animate-pulse">
-      <div class="bg-blue-50 border border-blue-100 rounded-2xl p-6 md:p-8 space-y-4">
+      <div class="bg-blue-50 border border-blue-100 rounded-lg p-6 md:p-8 space-y-4">
         <div class="h-8 w-44 bg-blue-100 rounded"></div>
-        <div class="h-16 w-full bg-white rounded-xl"></div>
-        <div class="h-16 w-full bg-white rounded-xl"></div>
-        <div class="h-16 w-full bg-white rounded-xl"></div>
+        <div class="h-16 w-full bg-white rounded-lg"></div>
+        <div class="h-16 w-full bg-white rounded-lg"></div>
+        <div class="h-16 w-full bg-white rounded-lg"></div>
       </div>
     </div>
 
     <!-- Error State -->
-    <div v-else-if="errorMessage" class="bg-red-50 border border-red-100 rounded-2xl p-6 text-center max-w-2xl mx-auto">
+    <div v-else-if="errorMessage" class="bg-red-50 border border-red-100 rounded-lg p-6 text-center max-w-2xl mx-auto">
       <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
         <IconWarning class="w-6 h-6 text-red-600" />
       </div>
       <h3 class="text-lg font-semibold text-red-900 mb-2">Error Loading Grades</h3>
       <p class="text-red-600 mb-6">{{ errorMessage }}</p>
-      <button 
+      <button
         @click="fetchGrades"
-        class="px-6 py-2.5 bg-red-600 text-white font-medium rounded-xl hover:bg-red-700 transition-colors shadow-sm"
+        class="px-6 py-2.5 bg-red-600 text-white font-medium rounded-full hover:bg-red-700 transition-colors shadow-sm"
       >
         Try Again
       </button>
     </div>
 
     <!-- Grades Table Container -->
-    <div v-else class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-6 md:p-8 shadow-sm hover:shadow-md transition-all duration-200">
+    <div v-else class="bg-white border border-gray-200 rounded-lg p-6 md:p-8 shadow-sm hover:shadow-md transition-all duration-200">
       <div class="mb-4 md:mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h2 class="text-xl md:text-2xl font-bold text-gray-900">Test Results</h2>
       </div>
-          
+
           <!-- Empty State -->
           <div v-if="grades.length === 0" class="text-center py-12 px-4">
-            <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
-              <IconDocument class="w-10 h-10 text-blue-200" />
+            <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+              <IconDocument class="w-10 h-10 text-gray-400" />
             </div>
             <h3 class="text-lg font-medium text-gray-900">No Grades Recorded Yet</h3>
             <p class="text-gray-500 mt-1 max-w-sm mx-auto">Your test scores and grades will appear here once they are recorded by your instructor.</p>
           </div>
-          
+
           <template v-else>
             <!-- Mobile Card View -->
             <div class="block md:hidden space-y-4">
-            <div 
-              v-for="grade in grades" 
+            <div
+              v-for="grade in grades"
               :key="grade.gradeid"
-              class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all"
+              class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
             >
-              <!-- Card Header -->
-              <div class="bg-gradient-to-r from-blue-500 to-indigo-600 px-4 py-3">
-                <h3 class="text-base font-semibold text-white">{{ grade.test_type || 'Standard Test' }}</h3>
-                <p class="text-xs text-white/80 mt-1 flex items-center gap-1.5">
-                  <IconCalendar class="w-3.5 h-3.5" />
-                  {{ formatDate(grade.date_taken) }}
-                </p>
-              </div>
-
-              <!-- Card Body -->
-              <div class="p-4 space-y-3">
-                <!-- Final Score Highlight -->
-                <div class="flex items-center justify-between bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-3">
-                  <span class="text-sm font-medium text-gray-700">Final Score</span>
-                  <span class="inline-flex items-center justify-center min-w-[3rem] h-10 px-3 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-bold text-lg shadow-md">
-                    {{ getAverageScore(grade) }}
-                  </span>
+              <div class="p-4 space-y-4">
+                <!-- Header & Final Score -->
+                <div class="flex items-start justify-between">
+                  <div>
+                    <h3 class="text-base font-semibold text-gray-900">{{ grade.test_type || 'Standard Test' }}</h3>
+                    <p class="text-sm text-gray-500 mt-1 flex items-center gap-1.5">
+                      <IconCalendar class="w-4 h-4" />
+                      {{ formatDate(grade.date_taken) }}
+                    </p>
+                  </div>
+                  <div class="flex flex-col items-end">
+                    <span class="text-xs font-medium text-gray-500 mb-1">Final Score</span>
+                    <span class="inline-flex items-center justify-center min-w-[3rem] h-8 px-3 rounded-full bg-blue-600 text-white font-bold text-sm shadow-sm">
+                      {{ getAverageScore(grade) }}
+                    </span>
+                  </div>
                 </div>
 
                 <!-- Individual Scores Grid -->
-                <div class="grid grid-cols-2 gap-3">
-                  <div class="bg-blue-50 rounded-lg p-3">
-                    <p class="text-xs font-medium text-gray-600 mb-1">Listening</p>
-                    <p class="text-lg font-bold text-blue-700">{{ grade.listening_score ?? '-' }}</p>
+                <div class="grid grid-cols-2 gap-y-4 border-t border-b border-gray-100 py-4">
+                  <div>
+                    <p class="text-xs font-medium text-gray-500 mb-0.5">Listening</p>
+                    <p class="text-base font-semibold text-gray-900">{{ grade.listening_score ?? '-' }}</p>
                   </div>
-                  <div class="bg-sky-50 rounded-lg p-3">
-                    <p class="text-xs font-medium text-gray-600 mb-1">Speaking</p>
-                    <p class="text-lg font-bold text-sky-700">{{ grade.speaking_score ?? '-' }}</p>
+                  <div>
+                    <p class="text-xs font-medium text-gray-500 mb-0.5">Speaking</p>
+                    <p class="text-base font-semibold text-gray-900">{{ grade.speaking_score ?? '-' }}</p>
                   </div>
-                  <div class="bg-indigo-50 rounded-lg p-3">
-                    <p class="text-xs font-medium text-gray-600 mb-1">Reading</p>
-                    <p class="text-lg font-bold text-indigo-700">{{ grade.reading_score ?? '-' }}</p>
+                  <div>
+                    <p class="text-xs font-medium text-gray-500 mb-0.5">Reading</p>
+                    <p class="text-base font-semibold text-gray-900">{{ grade.reading_score ?? '-' }}</p>
                   </div>
-                  <div class="bg-cyan-50 rounded-lg p-3">
-                    <p class="text-xs font-medium text-gray-600 mb-1">Writing</p>
-                    <p class="text-lg font-bold text-cyan-700">{{ grade.writing_score ?? '-' }}</p>
+                  <div>
+                    <p class="text-xs font-medium text-gray-500 mb-0.5">Writing</p>
+                    <p class="text-base font-semibold text-gray-900">{{ grade.writing_score ?? '-' }}</p>
                   </div>
                 </div>
 
                 <!-- Certificate Download -->
-                <div class="pt-2 border-t border-gray-100">
-                  <button
-                    @click="handleDownloadCertificate(grade.gradeid, grade.test_type)"
-                    class="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 hover:text-blue-700 transition-all border border-blue-100 shadow-sm"
-                  >
-                    <IconDocument class="w-4 h-4" />
-                    Download Certificate
-                  </button>
-                </div>
+                <button
+                  @click="handleDownloadCertificate(grade.gradeid, grade.test_type)"
+                  class="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-medium text-blue-600 bg-blue-50 rounded-full hover:bg-blue-100 transition-colors"
+                >
+                  <IconDocument class="w-4 h-4" />
+                  Download Certificate
+                </button>
               </div>
             </div>
           </div>
 
           <!-- Desktop Table View -->
-          <div class="hidden md:block overflow-x-auto bg-white rounded-xl shadow-sm border border-gray-100">
+          <div class="hidden md:block overflow-x-auto bg-white rounded-lg shadow-sm border border-gray-100">
             <table class="min-w-full divide-y divide-gray-100">
               <thead class="bg-gray-50">
                 <tr>
@@ -239,27 +226,27 @@ onMounted(() => {
                     <span class="font-medium text-gray-900 block">{{ grade.test_type || 'Standard Test' }}</span>
                   </td>
                   <td class="px-6 py-4 text-center text-sm text-gray-600">
-                    <span class="inline-flex items-center justify-center w-12 h-8 rounded-lg bg-blue-50 text-blue-700 font-medium">
+                    <span class="inline-flex items-center justify-center w-12 h-8 rounded-lg bg-gray-50 border border-gray-100 text-gray-700 font-medium">
                       {{ grade.listening_score ?? '-' }}
                     </span>
                   </td>
                   <td class="px-6 py-4 text-center text-sm text-gray-600">
-                    <span class="inline-flex items-center justify-center w-12 h-8 rounded-lg bg-sky-50 text-sky-700 font-medium">
+                    <span class="inline-flex items-center justify-center w-12 h-8 rounded-lg bg-gray-50 border border-gray-100 text-gray-700 font-medium">
                       {{ grade.speaking_score ?? '-' }}
                     </span>
                   </td>
                   <td class="px-6 py-4 text-center text-sm text-gray-600">
-                    <span class="inline-flex items-center justify-center w-12 h-8 rounded-lg bg-indigo-50 text-indigo-700 font-medium">
+                    <span class="inline-flex items-center justify-center w-12 h-8 rounded-lg bg-gray-50 border border-gray-100 text-gray-700 font-medium">
                       {{ grade.reading_score ?? '-' }}
                     </span>
                   </td>
                   <td class="px-6 py-4 text-center text-sm text-gray-600">
-                    <span class="inline-flex items-center justify-center w-12 h-8 rounded-lg bg-cyan-50 text-cyan-700 font-medium">
+                    <span class="inline-flex items-center justify-center w-12 h-8 rounded-lg bg-gray-50 border border-gray-100 text-gray-700 font-medium">
                       {{ grade.writing_score ?? '-' }}
                     </span>
                   </td>
                   <td class="px-6 py-4 text-center">
-                    <span class="inline-flex items-center justify-center min-w-[3rem] h-12 px-3 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-bold text-base shadow-md">
+                    <span class="inline-flex items-center justify-center min-w-[3rem] h-10 px-3 rounded-full bg-blue-600 text-white font-bold text-base shadow-sm">
                       {{ getAverageScore(grade) }}
                     </span>
                   </td>
@@ -285,8 +272,8 @@ onMounted(() => {
           </template>
 
           <!-- Summary Footer (optional) -->
-          <div v-if="grades.length > 0" class="mt-4 flex items-center justify-between text-xs md:text-sm px-2">
-            <div class="flex items-center gap-2 text-gray-600">
+          <div v-if="grades.length > 0" class="mt-6 flex items-center justify-between text-xs md:text-sm px-2">
+            <div class="flex items-center gap-2 text-gray-500">
               <IconInfo class="w-4 h-4 md:w-5 md:h-5 text-gray-400" />
               <span>Scores are updated by your instructor</span>
             </div>

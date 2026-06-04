@@ -117,7 +117,7 @@ onMounted(fetchLecturers);
     </div>
 
     <!-- Lecturers Table -->
-    <div v-else class="bg-default rounded-xl shadow-sm border border-default overflow-hidden">
+    <div v-else class="bg-default rounded-lg shadow-sm border border-default overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full">
           <thead>

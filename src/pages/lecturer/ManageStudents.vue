@@ -184,7 +184,7 @@ watch(
   <h1 class="text-4xl font-bold text-gray-900 mb-8">Manage Students</h1>
 
   <!-- Error Message -->
-  <div v-if="errorMessage" class="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
+  <div v-if="errorMessage" class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
     <div class="flex items-center justify-between">
       <p class="text-red-800">{{ errorMessage }}</p>
       <button 
@@ -204,7 +204,7 @@ watch(
   <!-- Main Content -->
   <div v-else-if="myClasses.length > 0" class="space-y-6">
     <!-- Class Selection -->
-    <div class="bg-white rounded-2xl border border-gray-100 shadow-xl shadow-blue-900/5 p-6 mb-8">
+    <div class="bg-white rounded-lg border border-gray-100 shadow-xl shadow-blue-900/5 p-6 mb-8">
       <div class="flex items-center gap-3 mb-6">
         <div class="w-2 h-6 bg-blue-600 rounded-full"></div>
         <h2 class="text-lg font-extrabold text-blue-900 tracking-tight uppercase">Select Class</h2>
@@ -230,7 +230,7 @@ watch(
             :key="cls.classid"
             @click="selectClass(cls)"
             :class="[
-              'group relative min-w-[140px] sm:min-w-[160px] md:min-w-[180px] md:max-w-[240px] flex-1 sm:flex-none p-3 md:p-5 rounded-2xl border transition-all duration-300 text-left',
+              'group relative min-w-[140px] sm:min-w-[160px] md:min-w-[180px] md:max-w-[240px] flex-1 sm:flex-none p-3 md:p-5 rounded-lg border transition-all duration-300 text-left',
               selectedClass?.classid === cls.classid
                 ? 'bg-blue-50/50 border-blue-600 ring-1 ring-blue-600 shadow-lg shadow-blue-500/15'
                 : 'bg-white border-gray-100 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-500/10 hover:-translate-y-1'
@@ -266,7 +266,7 @@ watch(
     </div>
 
     <!-- Students Section -->
-    <div v-if="selectedClass" class="bg-white rounded-2xl shadow-lg p-6">
+    <div v-if="selectedClass" class="bg-white rounded-lg shadow-lg p-6">
       <div class="mb-4">
         <h2 class="text-2xl font-bold text-gray-900">Students</h2>
         <p class="text-sm text-gray-600">Class: {{ selectedClass.class_code }}</p>
@@ -413,7 +413,7 @@ watch(
   </div>
 
   <!-- No Classes -->
-  <div v-else class="bg-white rounded-2xl shadow-lg p-12 text-center">
+  <div v-else class="bg-white rounded-lg shadow-lg p-12 text-center">
     <p class="text-gray-500 text-lg">You are not assigned to any classes yet.</p>
   </div>
 </template>

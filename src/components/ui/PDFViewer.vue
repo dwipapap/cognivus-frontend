@@ -29,6 +29,29 @@ const pageInput = ref('1')
 const showToc = ref(false)
 const isMobile = ref(false)
 
+const containerRef = ref<HTMLElement | null>(null)
+const vuePdfRef = ref<any>(null)
+const isFullscreen = ref(false)
+
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    containerRef.value?.requestFullscreen().catch(err => {
+      console.warn('Error attempting to enable fullscreen:', err.message)
+    })
+  } else {
+    document.exitFullscreen()
+  }
+}
+
+function handleFullscreenChange() {
+  isFullscreen.value = !!document.fullscreenElement
+  setTimeout(() => { vuePdfRef.value?.reload() }, 150)
+}
+
+function handleResize() {
+  if (fitWidth.value) vuePdfRef.value?.reload()
+}
+
 const zoomPct = computed(() => Math.round(scale.value * 100))
 const canZoomIn = computed(() => scale.value < 2)
 const canZoomOut = computed(() => scale.value > 0.5)
@@ -56,8 +79,12 @@ function zoomIn() {
 function zoomOut() {
   if (canZoomOut.value) { scale.value = Math.max(scale.value - 0.25, 0.5); fitWidth.value = false }
 }
-function resetZoom() { scale.value = 1; fitWidth.value = false }
-function toggleFitWidth() { fitWidth.value = !fitWidth.value; if (fitWidth.value) scale.value = 1 }
+function resetZoom() { scale.value = 1; fitWidth.value = false; setTimeout(() => vuePdfRef.value?.reload(), 50) }
+function toggleFitWidth() { 
+  fitWidth.value = !fitWidth.value
+  if (fitWidth.value) scale.value = 1 
+  setTimeout(() => vuePdfRef.value?.reload(), 50)
+}
 function rotateCW() { rotation.value = (rotation.value + 90) % 360 }
 
 function goToPage(n: number) {
@@ -88,8 +115,14 @@ onMounted(() => {
   isMobile.value = mql.matches
   mql.addEventListener('change', (e) => { isMobile.value = e.matches })
   if (isMobile.value) fitWidth.value = true
+  document.addEventListener('fullscreenchange', handleFullscreenChange)
+  window.addEventListener('resize', handleResize)
 })
-onUnmounted(() => { mql?.removeEventListener('change', () => {}) })
+onUnmounted(() => { 
+  mql?.removeEventListener('change', () => {}) 
+  document.removeEventListener('fullscreenchange', handleFullscreenChange)
+  window.removeEventListener('resize', handleResize)
+})
 
 function handleKeydown(e: KeyboardEvent) {
   const tag = (e.target as HTMLElement)?.tagName
@@ -130,7 +163,7 @@ watch(() => props.src, () => {
 </script>
 
 <template>
-  <div class="pdf-viewer-container flex flex-col h-full">
+  <div ref="containerRef" class="pdf-viewer-container flex flex-col h-full bg-surface">
     <div class="sticky top-0 z-20 bg-surface border-b border-divider px-2 sm:px-3 py-1.5 sm:py-2 shadow-card-rest">
       <div class="flex items-center gap-1 sm:gap-2">
         <UButton
@@ -190,6 +223,14 @@ watch(() => props.src, () => {
           variant="ghost"
           aria-label="Rotate clockwise"
           @click="rotateCW"
+        />
+        <UButton
+          :icon="isFullscreen ? 'i-lucide-shrink' : 'i-lucide-expand'"
+          size="sm"
+          color="neutral"
+          variant="ghost"
+          :aria-label="isFullscreen ? 'Exit full screen' : 'Full screen'"
+          @click="toggleFullscreen"
         />
 
         <div class="flex-1" />
@@ -299,8 +340,9 @@ watch(() => props.src, () => {
           class="flex flex-col items-center min-h-full"
           @contextmenu.prevent
         >
-          <div class="bg-surface shadow-card-hover rounded-token-lg overflow-hidden max-w-full">
+          <div :class="['bg-surface shadow-card-hover rounded-token-lg overflow-hidden max-w-full transition-all', fitWidth ? 'w-full' : '']">
             <VuePDF
+              ref="vuePdfRef"
               :pdf="pdf"
               :page="currentPage"
               :scale="fitWidth ? 1 : scale"

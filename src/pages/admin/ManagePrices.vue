@@ -230,7 +230,7 @@ onMounted(() => {
           <UIcon name="i-lucide-loader-circle" class="w-8 h-8 animate-spin text-muted" />
         </div>
 
-        <div v-else class="bg-default rounded-xl shadow-sm border border-default overflow-hidden">
+        <div v-else class="bg-default rounded-lg shadow-sm border border-default overflow-hidden">
           <div class="overflow-x-auto">
             <table class="w-full">
               <thead>
@@ -304,7 +304,7 @@ onMounted(() => {
           <UIcon name="i-lucide-loader-circle" class="w-8 h-8 animate-spin text-muted" />
         </div>
 
-      <div v-else class="bg-default rounded-xl shadow-sm border border-default overflow-hidden">
+      <div v-else class="bg-default rounded-lg shadow-sm border border-default overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full">
             <thead>

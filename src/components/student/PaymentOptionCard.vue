@@ -38,14 +38,14 @@ const checkBg = () => props.variant === 'ancillary' ? 'bg-blue-600' : 'bg-blue-5
     @keydown.enter="emit('select')"
     @keydown.space.prevent="emit('select')"
     :class="[
-      'payment-type-card cursor-pointer rounded-2xl p-3 md:p-4 border-2 transition-all duration-300 bg-white',
+      'payment-type-card cursor-pointer rounded-lg p-3 md:p-4 border-2 transition-all duration-300 bg-white',
       selected ? 'ring-2 ring-blue-200 shadow-lg' : 'hover:shadow-md',
       borderColor()
     ]"
   >
     <div class="flex items-start gap-2.5 md:gap-3">
       <div class="flex-shrink-0">
-        <div class="w-9 h-9 md:w-10 md:h-10 rounded-lg md:rounded-xl flex items-center justify-center transition-colors" :class="iconBg()">
+        <div class="w-9 h-9 md:w-10 md:h-10 rounded-lg md:rounded-lg flex items-center justify-center transition-colors" :class="iconBg()">
           <svg class="w-4 h-4 md:w-5 md:h-5" :class="iconColor()" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="iconPath"></path>
           </svg>

@@ -359,10 +359,10 @@ watch(
   <h1 class="text-4xl font-bold text-gray-900 mb-8">Manage Materials</h1>
 
     <!-- Messages -->
-    <div v-if="successMessage" class="mb-6 bg-green-50 border border-green-200 rounded-xl p-4">
+    <div v-if="successMessage" class="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
       <p class="text-green-800">{{ successMessage }}</p>
     </div>
-    <div v-if="errorMessage" class="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
+    <div v-if="errorMessage" class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
       <div class="flex items-center justify-between">
         <p class="text-red-800">{{ errorMessage }}</p>
         <button 
@@ -382,7 +382,7 @@ watch(
     <!-- Main Content -->
     <div v-else-if="myClasses.length > 0" class="space-y-6">
       <!-- Class Selection -->
-      <div class="bg-white rounded-2xl border border-gray-100 shadow-xl shadow-blue-900/5 p-6 mb-8">
+      <div class="bg-white rounded-lg border border-gray-100 shadow-xl shadow-blue-900/5 p-6 mb-8">
         <div class="flex items-center gap-3 mb-6">
           <div class="w-2 h-6 bg-blue-600 rounded-full"></div>
           <h2 class="text-lg font-extrabold text-blue-900 tracking-tight uppercase">Select Class</h2>
@@ -408,7 +408,7 @@ watch(
               :key="cls.classid"
               @click="selectedClass = cls"
               :class="[
-                'group relative min-w-0 md:flex-shrink-0 md:min-w-[180px] md:max-w-[240px] p-3 md:p-5 rounded-2xl border transition-all duration-300 text-left',
+                'group relative min-w-0 md:flex-shrink-0 md:min-w-[180px] md:max-w-[240px] p-3 md:p-5 rounded-lg border transition-all duration-300 text-left',
                 selectedClass?.classid === cls.classid
                   ? 'bg-blue-50/50 border-blue-600 ring-1 ring-blue-600 shadow-lg shadow-blue-500/15'
                   : 'bg-white border-gray-100 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-500/10 hover:-translate-y-1'
@@ -444,7 +444,7 @@ watch(
       </div>
 
       <!-- Materials Section -->
-      <div v-if="selectedClass" class="bg-white rounded-2xl shadow-lg p-6">
+      <div v-if="selectedClass" class="bg-white rounded-lg shadow-lg p-6">
         <div class="flex justify-between items-center mb-6">
           <div>
             <h2 class="text-2xl font-bold text-gray-900">Materials</h2>
@@ -471,7 +471,7 @@ watch(
               v-for="course in paginatedClassCourses"
             :key="course.courseid"
               v-memo="[course.courseid, course.title, getFileCount(course)]"
-              class="border border-gray-200 rounded-xl bg-white px-4 py-3 shadow-sm hover:shadow-md transition-all"
+              class="border border-gray-200 rounded-lg bg-white px-4 py-3 shadow-sm hover:shadow-md transition-all"
           >
               <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <div class="flex-1 min-w-0">
@@ -565,7 +565,7 @@ watch(
     </div>
 
     <!-- No Classes -->
-    <div v-else class="bg-white rounded-2xl shadow-lg p-12 text-center">
+    <div v-else class="bg-white rounded-lg shadow-lg p-12 text-center">
       <p class="text-gray-500 text-lg">You are not assigned to any classes yet.</p>
     </div>
 
