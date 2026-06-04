@@ -117,7 +117,7 @@ const typeIcon = computed(() => {
     :dismissible="!persistent"
     side="bottom"
     handle
-    :ui="drawerHeight ? { content: `h-[${drawerHeight}]` } : undefined"
+    :ui="drawerHeight ? { content: `h-[${drawerHeight}] flex flex-col !mt-0 !max-h-[100dvh]`, body: 'flex-1 overflow-hidden flex flex-col p-0' } : undefined"
   >
     <template v-if="alert" #body>
       <div class="flex flex-col items-center px-8 py-8 gap-4">

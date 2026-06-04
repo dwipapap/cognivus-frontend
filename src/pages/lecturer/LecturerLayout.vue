@@ -147,7 +147,7 @@ const handleLogout = async () => {
               <div 
                 v-if="showDropdown" 
                 ref="profileDropdownRef"
-                class="fixed w-56 origin-top-right profile-dropdown-glass rounded-xl shadow-lg border border-white/20 overflow-hidden z-[9999]"
+                class="fixed w-56 origin-top-right profile-dropdown-glass rounded-lg shadow-lg border border-white/20 overflow-hidden z-[9999]"
                 :class="{'dropdown-enter': isDropdownVisible, 'dropdown-leave': !isDropdownVisible}"
                 :style="dropdownPosition"
               >
@@ -211,7 +211,7 @@ const handleLogout = async () => {
 
       <!-- Mobile Bottom Navigation -->
       <nav class="mobile-nav fixed bottom-0 left-0 right-0 h-16 bg-transparent md:hidden z-50">
-        <div class="mobile-nav-glass h-full mb-0 rounded-3xl">
+        <div class="mobile-nav-glass h-full mb-0 rounded-xl">
           <ul class="h-full flex justify-around items-center px-6">
             <li>
               <router-link to="/lecturer/dashboard" class="mobile-nav-item flex flex-col items-center gap-1">

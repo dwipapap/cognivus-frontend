@@ -42,7 +42,7 @@ const handleImageError = (event) => {
   </div>
 
   <!-- Error State -->
-  <div v-else-if="errorMessage" class="bg-red-50 border border-red-200 rounded-2xl p-6 text-center max-w-2xl mx-auto mb-8">
+  <div v-else-if="errorMessage" class="bg-red-50 border border-red-200 rounded-lg p-6 text-center max-w-2xl mx-auto mb-8">
     <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
       <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -55,7 +55,7 @@ const handleImageError = (event) => {
   <!-- Profile Content -->
   <div v-else-if="lecturerProfile" class="space-y-8 mb-8">
     <!-- Profile Header Card -->
-    <div class="relative bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl shadow-lg overflow-hidden">
+    <div class="relative bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg overflow-hidden">
       <div class="absolute top-0 right-0 w-1/2 h-full pointer-events-none overflow-hidden opacity-20">
         <div class="absolute -top-10 -right-10 w-40 h-48 bg-white rounded-lg transform rotate-12"></div>
         <div class="absolute top-20 -right-5 w-32 h-40 bg-white rounded-lg transform rotate-12"></div>
@@ -107,9 +107,9 @@ const handleImageError = (event) => {
     </div>
 
     <!-- Profile Details Card -->
-    <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-6 md:p-8 shadow-sm">
+    <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-lg p-6 md:p-8 shadow-sm">
       <div class="flex items-center gap-3 mb-6">
-        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-sm">
+        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-sm">
           <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
           </svg>
@@ -119,7 +119,7 @@ const handleImageError = (event) => {
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Full Name -->
-        <div class="bg-white rounded-xl p-5 shadow-sm border border-blue-100/50">
+        <div class="bg-white rounded-lg p-5 shadow-sm border border-blue-100/50">
           <p class="text-sm font-semibold text-blue-600 mb-2 flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -130,7 +130,7 @@ const handleImageError = (event) => {
         </div>
 
         <!-- Birth Date -->
-        <div class="bg-white rounded-xl p-5 shadow-sm border border-blue-100/50">
+        <div class="bg-white rounded-lg p-5 shadow-sm border border-blue-100/50">
           <p class="text-sm font-semibold text-blue-600 mb-2 flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -141,7 +141,7 @@ const handleImageError = (event) => {
         </div>
 
         <!-- Birth Place -->
-        <div class="bg-white rounded-xl p-5 shadow-sm border border-blue-100/50">
+        <div class="bg-white rounded-lg p-5 shadow-sm border border-blue-100/50">
           <p class="text-sm font-semibold text-blue-600 mb-2 flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -153,7 +153,7 @@ const handleImageError = (event) => {
         </div>
 
         <!-- Gender -->
-        <div class="bg-white rounded-xl p-5 shadow-sm border border-blue-100/50">
+        <div class="bg-white rounded-lg p-5 shadow-sm border border-blue-100/50">
           <p class="text-sm font-semibold text-blue-600 mb-2 flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -164,7 +164,7 @@ const handleImageError = (event) => {
         </div>
 
         <!-- Phone -->
-        <div class="bg-white rounded-xl p-5 shadow-sm border border-blue-100/50">
+        <div class="bg-white rounded-lg p-5 shadow-sm border border-blue-100/50">
           <p class="text-sm font-semibold text-blue-600 mb-2 flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
@@ -175,7 +175,7 @@ const handleImageError = (event) => {
         </div>
 
         <!-- Address -->
-        <div class="bg-white rounded-xl p-5 shadow-sm border border-blue-100/50">
+        <div class="bg-white rounded-lg p-5 shadow-sm border border-blue-100/50">
           <p class="text-sm font-semibold text-blue-600 mb-2 flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />

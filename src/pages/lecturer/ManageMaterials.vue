@@ -8,8 +8,7 @@ import BaseTextarea from '../../components/form/BaseTextarea.vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
 import LoadingSpinner from '../../components/ui/LoadingSpinner.vue';
 import ConfirmDialog from '../../components/ui/ConfirmDialog.vue';
-import IconArrowLeft from '~icons/basil/arrow-left-solid';
-import IconArrowRight from '~icons/basil/arrow-right-solid';
+import ClassSidebar from '../../components/lecturer/ClassSidebar.vue';
 import IconPlus from '~icons/solar/add-circle-bold';
 import IconPen from '~icons/solar/pen-new-square-bold';
 import IconTrash from '~icons/solar/trash-bin-trash-bold';
@@ -34,10 +33,6 @@ const successMessage = ref('');
 const currentPage = ref(1);
 const itemsPerPage = 5;
 
-/** Class selector pagination */
-const classCurrentPage = ref(1);
-const classItemsPerPage = 5;
-
 /** Modal and form state */
 const showModal = ref(false);
 const editingCourse = ref(null);
@@ -59,25 +54,6 @@ const confirmConfig = ref({
   title: '',
   message: '',
   variant: 'danger'
-});
-
-/** Class selector pagination computed properties */
-const classTotalPages = computed(() => {
-  if (myClasses.value.length === 0) return 1;
-  return Math.ceil(myClasses.value.length / classItemsPerPage);
-});
-
-const shouldShowClassNavigation = computed(() => myClasses.value.length > classItemsPerPage);
-
-const paginatedClasses = computed(() => {
-  if (!shouldShowClassNavigation.value) return myClasses.value;
-  const start = (classCurrentPage.value - 1) * classItemsPerPage;
-  return myClasses.value.slice(start, start + classItemsPerPage);
-});
-
-const classJustifyMode = computed(() => {
-  const count = paginatedClasses.value.length;
-  return count <= 3 ? 'justify-center gap-4' : 'justify-start gap-3';
 });
 
 /** Get courses for selected class with file count */
@@ -323,11 +299,7 @@ const goToPage = (page) => {
   }
 };
 
-const goToClassPage = (page) => {
-  if (page >= 1 && page <= classTotalPages.value) {
-    classCurrentPage.value = page;
-  }
-};
+
 
 watch(() => selectedClass.value?.classid, () => {
   currentPage.value = 1;
@@ -339,9 +311,7 @@ watch(classCourses, () => {
   }
 });
 
-watch(myClasses, () => {
-  classCurrentPage.value = 1;
-});
+
 
 /** Auto-fetch classes when profile loads (handles both immediate and async cases) */
 watch(
@@ -359,10 +329,10 @@ watch(
   <h1 class="text-4xl font-bold text-gray-900 mb-8">Manage Materials</h1>
 
     <!-- Messages -->
-    <div v-if="successMessage" class="mb-6 bg-green-50 border border-green-200 rounded-xl p-4">
+    <div v-if="successMessage" class="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
       <p class="text-green-800">{{ successMessage }}</p>
     </div>
-    <div v-if="errorMessage" class="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
+    <div v-if="errorMessage" class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
       <div class="flex items-center justify-between">
         <p class="text-red-800">{{ errorMessage }}</p>
         <button 
@@ -380,79 +350,28 @@ watch(
     </div>
 
     <!-- Main Content -->
-    <div v-else-if="myClasses.length > 0" class="space-y-6">
-      <!-- Class Selection -->
-      <div class="bg-white rounded-2xl border border-gray-100 shadow-xl shadow-blue-900/5 p-6 mb-8">
-        <div class="flex items-center gap-3 mb-6">
-          <div class="w-2 h-6 bg-blue-600 rounded-full"></div>
-          <h2 class="text-lg font-extrabold text-blue-900 tracking-tight uppercase">Select Class</h2>
-        </div>
-        
-        <!-- Horizontal Card Selector with Pagination -->
-        <div class="flex items-center gap-2 md:gap-4">
-          <!-- Previous Button -->
-          <button
-            v-if="shouldShowClassNavigation"
-            @click="goToClassPage(classCurrentPage - 1)"
-            :disabled="classCurrentPage === 1"
-            class="flex-shrink-0 w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all duration-300 ring-1 ring-gray-200 bg-white text-gray-400 hover:ring-blue-500 hover:text-blue-600 hover:bg-blue-50 active:scale-90 disabled:opacity-20 disabled:cursor-not-allowed shadow-sm"
-            aria-label="Previous classes"
-          >
-            <IconArrowLeft class="w-4 h-4 md:w-5 md:h-5" />
-          </button>
-
-          <!-- Cards Container -->
-          <div class="flex-1 grid grid-cols-2 sm:grid-cols-3 md:flex md:flex-wrap gap-3 md:gap-4" :class="classJustifyMode">
-            <button
-              v-for="cls in paginatedClasses"
-              :key="cls.classid"
-              @click="selectedClass = cls"
-              :class="[
-                'group relative min-w-0 md:flex-shrink-0 md:min-w-[180px] md:max-w-[240px] p-3 md:p-5 rounded-2xl border transition-all duration-300 text-left',
-                selectedClass?.classid === cls.classid
-                  ? 'bg-blue-50/50 border-blue-600 ring-1 ring-blue-600 shadow-lg shadow-blue-500/15'
-                  : 'bg-white border-gray-100 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-500/10 hover:-translate-y-1'
-              ]"
-            >
-              <!-- Selected Indicator -->
-              <div 
-                v-if="selectedClass?.classid === cls.classid"
-                class="absolute top-2 right-2 md:top-3 md:right-3 w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-blue-600 animate-pulse"
-              ></div>
-
-              <span class="inline-block px-1.5 py-0.5 rounded-md bg-blue-50 text-[8px] md:text-[10px] font-bold text-blue-700 uppercase tracking-wider mb-1 md:mb-2">
-                {{ getLevelName(cls.levelid) }}
-              </span>
-              <h3 class="font-extrabold text-sm md:text-lg text-blue-900 truncate leading-tight mb-1">{{ cls.class_code }}</h3>
-              <p class="text-[10px] md:text-xs text-gray-500 line-clamp-2 leading-relaxed h-7 md:h-8 italic">
-                {{ cls.description || 'Professional academic path' }}
-              </p>
-            </button>
-          </div>
-
-          <!-- Next Button -->
-          <button
-            v-if="shouldShowClassNavigation"
-            @click="goToClassPage(classCurrentPage + 1)"
-            :disabled="classCurrentPage === classTotalPages"
-            class="flex-shrink-0 w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all duration-300 ring-1 ring-gray-200 bg-white text-gray-400 hover:ring-blue-500 hover:text-blue-600 hover:bg-blue-50 active:scale-90 disabled:opacity-20 disabled:cursor-not-allowed shadow-sm"
-            aria-label="Next classes"
-          >
-            <IconArrowRight class="w-4 h-4 md:w-5 md:h-5" />
-          </button>
-        </div>
+    <div v-else-if="myClasses.length > 0" class="flex flex-col md:flex-row gap-6 items-start">
+      
+      <!-- Sidebar Class Selector -->
+      <div class="w-full md:w-64 flex-shrink-0">
+        <ClassSidebar
+          :classes="myClasses"
+          :levels="levels"
+          :selected-class="selectedClass"
+          @select="selectedClass = $event"
+        />
       </div>
 
       <!-- Materials Section -->
-      <div v-if="selectedClass" class="bg-white rounded-2xl shadow-lg p-6">
-        <div class="flex justify-between items-center mb-6">
+      <div v-if="selectedClass" class="flex-1 min-w-0 flex flex-col gap-6">
+        <div class="flex justify-between items-end">
           <div>
-            <h2 class="text-2xl font-bold text-gray-900">Materials</h2>
-            <p class="text-sm text-gray-600">Class: {{ selectedClass.class_code }}</p>
+            <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Materials</h2>
+            <p class="text-sm text-gray-500 mt-1">Class: {{ selectedClass.class_code }}</p>
           </div>
           <button
             @click="openAddForm"
-            class="inline-flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-full hover:bg-blue-700 hover:scale-105 active:scale-95 transition-all shadow-md hover:shadow-lg font-semibold"
+            class="inline-flex items-center gap-2 px-6 py-2.5 bg-gray-900 text-white rounded-full hover:bg-gray-800 hover:scale-105 active:scale-95 transition-all shadow-md font-semibold"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -466,62 +385,58 @@ watch(
           No materials yet. Click "Add Material" to get started.
         </div>
 
-          <div v-else class="space-y-3">
-          <div
-              v-for="course in paginatedClassCourses"
-            :key="course.courseid"
-              v-memo="[course.courseid, course.title, getFileCount(course)]"
-              class="border border-gray-200 rounded-xl bg-white px-4 py-3 shadow-sm hover:shadow-md transition-all"
-          >
-              <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div v-else class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <ul class="divide-y divide-gray-100">
+            <li v-for="course in paginatedClassCourses" :key="course.courseid" class="px-6 py-4 hover:bg-gray-50 transition-colors">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div class="flex-1 min-w-0">
-                  <div class="flex flex-wrap items-center gap-2 mb-2">
+                  <div class="flex items-center gap-3 mb-1">
                     <h3 class="text-base font-semibold text-gray-900 truncate">{{ course.title }}</h3>
-                    <span v-if="course.course_code" class="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-600">
+                    <span v-if="course.course_code" class="text-xs font-medium text-gray-500">
                       {{ course.course_code }}
                     </span>
-                    <span v-if="getFileCount(course) > 0" class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-600">
+                  </div>
+                  <p class="text-sm text-gray-500 line-clamp-1 mb-2">{{ course.description }}</p>
+                  
+                  <div class="flex items-center gap-4 text-xs text-gray-400">
+                    <div v-if="getFileCount(course) > 0" class="flex items-center gap-1">
                       <span aria-hidden="true">📎</span>
                       {{ getFileCount(course) }} file{{ getFileCount(course) > 1 ? 's' : '' }}
-                    </span>
-                  </div>
-                  <p v-if="course.description" class="text-sm text-gray-600">{{ course.description }}</p>
-                  <div class="mt-2 flex flex-wrap items-center gap-3 text-xs text-gray-500">
+                    </div>
                     <span>Uploaded: {{ formatDate(course.upload_date) }}</span>
                     <a
                       v-if="course.video_link"
                       :href="course.video_link"
                       target="_blank"
-                      class="inline-flex items-center gap-1 rounded-md bg-rose-50 px-2 py-1 font-semibold text-rose-600 hover:bg-rose-100"
+                      class="flex items-center gap-1 text-rose-600 hover:text-rose-700 font-semibold"
                     >
                       <span aria-hidden="true">🎥</span>
                       Video
                     </a>
                   </div>
+                </div>
+                <div class="flex gap-2">
+                  <button
+                    @click="openEditForm(course)"
+                    class="px-4 py-1.5 text-xs font-semibold text-yellow-700 bg-yellow-50 hover:bg-yellow-100 rounded-full transition-colors"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    @click="deleteMaterial(course.courseid)"
+                    class="px-4 py-1.5 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 rounded-full transition-colors"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
-              <div class="flex gap-2 md:ml-4">
-                <button
-                  @click="openEditForm(course)"
-                  class="inline-flex items-center rounded-full border border-yellow-200 bg-gradient-to-r from-yellow-50 to-amber-50 px-4 py-1.5 text-xs font-semibold text-yellow-700 transition-all hover:from-yellow-100 hover:to-amber-100 hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
-                >
-                  Edit
-                </button>
-                <button
-                  @click="deleteMaterial(course.courseid)"
-                  class="inline-flex items-center rounded-full border border-red-200 bg-gradient-to-r from-red-50 to-rose-50 px-4 py-1.5 text-xs font-semibold text-red-700 transition-all hover:from-red-100 hover:to-rose-100 hover:scale-105 active:scale-95 shadow-sm hover:shadow-md"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
+            </li>
+          </ul>
         </div>
 
-          <div
-            v-if="shouldPaginate"
-            class="mt-4 flex flex-col gap-3 border-t border-gray-100 pt-4 md:flex-row md:items-center md:justify-between"
-          >
-            <p class="text-xs text-gray-500">
+        <!-- Pagination -->
+        <div v-if="shouldPaginate" class="mt-4 flex flex-col gap-3 border-t border-gray-100 pt-4 md:flex-row md:items-center md:justify-between">
+          <p class="text-xs text-gray-500">
               Showing
               {{ (currentPage - 1) * itemsPerPage + 1 }}
               -
@@ -565,7 +480,7 @@ watch(
     </div>
 
     <!-- No Classes -->
-    <div v-else class="bg-white rounded-2xl shadow-lg p-12 text-center">
+    <div v-else class="bg-white rounded-lg shadow-lg p-12 text-center">
       <p class="text-gray-500 text-lg">You are not assigned to any classes yet.</p>
     </div>
 
@@ -577,7 +492,7 @@ watch(
           class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
           @click.self="resetForm"
         >
-          <div class="bg-white rounded-3xl shadow-2xl w-full max-w-6xl max-h-[92vh] overflow-hidden flex flex-col border border-gray-100">
+          <div class="bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[92vh] overflow-hidden flex flex-col border border-gray-100">
             <!-- Modal Header -->
             <div class="sticky top-0 bg-white px-8 py-6 flex justify-between items-center z-10 border-b border-gray-100">
               <h3 class="text-xl font-bold text-gray-900">

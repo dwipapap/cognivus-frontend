@@ -191,7 +191,7 @@ onMounted(fetchProfile);
   <div class="min-h-screen bg-gradient-to-br from-blue-600 via-blue-500 to-blue-400 flex items-center justify-center p-4 font-sans">
     <!-- Loading State -->
     <div v-if="isLoading" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-        <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full">
+        <div class="bg-white p-8 rounded-lg shadow-2xl max-w-md w-full">
             <LoadingSpinner size="lg" color="blue" :center="true" />
             <p class="text-center text-gray-600 mt-4 font-medium">Loading profile data...</p>
         </div>

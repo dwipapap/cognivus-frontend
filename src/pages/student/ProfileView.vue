@@ -61,7 +61,7 @@ const avatarUrl = computed(() => {
   if (authStore.user?.user_metadata?.avatar_url) {
     return authStore.user.user_metadata.avatar_url;
   }
-  
+
   // Use gender-based icon from student profile
   const gender = studentProfile.value?.jenis_kelamin;
   if (gender === 'L') {
@@ -69,7 +69,7 @@ const avatarUrl = computed(() => {
   } else if (gender === 'P') {
     return iconGirlImage;
   }
-  
+
   // Default fallback
   return iconBoyImage;
 });
@@ -81,12 +81,12 @@ const handleImageError = (event) => {
 // Fetch class data after profile loads
 const fetchClassData = async () => {
   if (!studentProfile.value?.classid) return;
-  
+
   try {
     const classRes = await classAPI.getClassById(studentProfile.value.classid);
     if (classRes.data.success) {
       classCode.value = classRes.data.data.class_code || '-';
-      
+
       if (classRes.data.data.levelid) {
         const levelRes = await levelAPI.getLevelById(classRes.data.data.levelid);
         if (levelRes.data.success) {
@@ -102,7 +102,7 @@ const fetchClassData = async () => {
 
 <template>
   <!-- Welcome Banner -->
-  <div class="relative bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 rounded-3xl shadow-lg mb-8 overflow-hidden">
+  <div class="relative bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 rounded-xl shadow-lg mb-8 overflow-hidden">
     <!-- Diagonal ID Card Graphics -->
     <div class="absolute top-0 right-0 w-1/2 h-full pointer-events-none overflow-hidden">
       <div class="absolute -top-10 -right-10 w-40 h-48 bg-indigo-400/30 rounded-lg transform rotate-12 flex items-center justify-center">
@@ -135,8 +135,8 @@ const fetchClassData = async () => {
 
   <!-- Loading State -->
     <div v-if="isLoading" class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8 animate-pulse">
-      <div class="lg:col-span-1 bg-blue-100 rounded-3xl p-10 shadow-lg h-[540px]"></div>
-      <div class="lg:col-span-2 bg-blue-50 rounded-3xl p-10 shadow-lg">
+      <div class="lg:col-span-1 bg-blue-100 rounded-xl p-10 shadow-lg h-[540px]"></div>
+      <div class="lg:col-span-2 bg-blue-50 rounded-xl p-10 shadow-lg">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
           <div class="h-12 bg-blue-200 rounded-full"></div>
           <div class="h-12 bg-blue-200 rounded-full"></div>
@@ -151,7 +151,7 @@ const fetchClassData = async () => {
     </div>
 
       <!-- Error State -->
-      <div v-else-if="errorMessage" class="bg-red-50 border border-red-200 rounded-xl p-6">
+      <div v-else-if="errorMessage" class="bg-red-50 border border-red-200 rounded-lg p-6">
         <p class="text-red-800">{{ errorMessage }}</p>
       </div>
 
@@ -159,20 +159,20 @@ const fetchClassData = async () => {
       <div v-else-if="studentProfile" class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8">
         <!-- Left Profile Card -->
         <div class="lg:col-span-1">
-              <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-3xl p-10 text-white text-center shadow-lg h-full flex flex-col justify-between">
-                <img 
-                  :src="avatarUrl" 
+              <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-10 text-white text-center shadow-lg h-full flex flex-col justify-between">
+                <img
+                  :src="avatarUrl"
                   :alt="studentProfile.fullname"
                   class="w-24 h-24 md:w-48 md:h-48 rounded-full mx-auto object-cover border-4 border-white shadow-xl mb-6"
                   @error="handleImageError"
                 />
-                
+
                 <h2 class="text-3xl font-bold mb-3">{{ studentProfile.fullname || 'Student' }}</h2>
                 <p class="text-base text-white/90 mb-2">{{ levelName }}</p>
                 <p class="text-2xl font-semibold mb-4">{{ classCode }}</p>
                 <p class="text-base text-white/80 mb-8 break-words px-2">{{ authStore.user?.email || '-' }}</p>
 
-                <router-link 
+                <router-link
                   to="/student/profile"
                   class="inline-block w-full px-8 py-3.5 bg-white text-blue-600 font-semibold text-base rounded-full hover:bg-blue-50 transition-colors shadow-md"
                 >
@@ -192,7 +192,7 @@ const fetchClassData = async () => {
 
             <!-- Right Details Card -->
             <div class="lg:col-span-2">
-              <div class="bg-blue-50 rounded-3xl p-10 shadow-lg h-full">
+              <div class="bg-blue-50 rounded-xl p-10 shadow-lg h-full">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
                   <!-- Full Name -->
                   <div>

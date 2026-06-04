@@ -40,7 +40,7 @@
             </div>
           </div>
 
-          <div class="bg-white rounded-2xl p-5 shadow-lg w-full max-w-[200px] relative">
+          <div class="bg-white rounded-lg p-5 shadow-lg w-full max-w-[200px] relative">
             <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-b-[12px] border-b-white"></div>
             <p class="font-bold text-gray-900 text-sm md:text-base mb-1">{{ instructor.name }}</p>
             <p class="text-[#2ab5a3] text-xs md:text-sm font-medium mb-2">Examiners</p>

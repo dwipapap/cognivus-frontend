@@ -10,6 +10,7 @@ import IconGraduationCap from '~icons/lucide/graduation-cap';
 import IconFileText from '~icons/lucide/file-text';
 import IconPenTool from '~icons/lucide/pen-tool';
 import IconGlobe from '~icons/lucide/globe';
+import PageHeaderCard from '../../components/student/PageHeaderCard.vue';
 
 const courseIcons = [
   IconBookOpen,
@@ -76,36 +77,25 @@ const errorMessage = computed(() => {
 <template>
   <div class="space-y-6">
     <!-- Class Info Card -->
-    <div class="relative bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 md:p-8 shadow-lg overflow-hidden">
-      <!-- Diagonal Book Graphics -->
-      <div class="absolute top-0 right-0 w-1/2 h-full pointer-events-none overflow-hidden">
-        <div class="absolute -top-10 -right-10 w-40 h-48 bg-blue-400/30 rounded-lg transform rotate-12"></div>
-        <div class="absolute top-20 -right-5 w-32 h-40 bg-blue-300/40 rounded-lg transform rotate-12"></div>
-        <div class="absolute top-40 right-10 w-28 h-36 bg-white/20 rounded-lg transform rotate-12"></div>
-      </div>
-
-      <!-- Content -->
-      <div class="relative z-10">
-        <p class="text-white/80 text-sm mb-1">{{ classInfo?.class_code || 'Class Code' }}</p>
-        <h2 class="text-2xl md:text-3xl font-bold text-white mb-2">{{ levelName || 'Your Course Level' }}</h2>
-        <p class="text-white/70 text-sm md:text-base max-w-md">
-          {{ classInfo?.description || 'Access your course materials and learning resources' }}
-        </p>
-      </div>
-    </div>
+    <PageHeaderCard
+      :eyebrow="classInfo?.class_code || 'Class Code'"
+      :title="levelName || 'Your Course Level'"
+      :description="classInfo?.description || 'Access your course materials and learning resources'"
+      :show-decoration="true"
+    />
 
     <!-- Loading State -->
     <div v-if="isLoading || profileLoading" class="animate-pulse">
-      <div class="rounded-2xl p-6 md:p-8 bg-blue-50 border border-blue-100 space-y-4">
+      <div class="rounded-lg p-6 md:p-8 bg-blue-50 border border-blue-100 space-y-4">
         <div class="h-7 w-48 bg-blue-100 rounded"></div>
-        <div class="h-16 w-full bg-blue-100 rounded-xl"></div>
-        <div class="h-16 w-full bg-blue-100 rounded-xl"></div>
-        <div class="h-16 w-full bg-blue-100 rounded-xl"></div>
+        <div class="h-16 w-full bg-blue-100 rounded-lg"></div>
+        <div class="h-16 w-full bg-blue-100 rounded-lg"></div>
+        <div class="h-16 w-full bg-blue-100 rounded-lg"></div>
       </div>
     </div>
 
     <!-- Error State -->
-    <div v-else-if="errorMessage" class="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+    <div v-else-if="errorMessage" class="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
       <p class="text-red-800 mb-4">{{ errorMessage }}</p>
       <button v-if="classError" @click="retryClass"
         class="inline-flex items-center px-3 py-2 md:px-4 text-xs md:text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors mr-2">
@@ -119,7 +109,7 @@ const errorMessage = computed(() => {
 
     <!-- Course List -->
     <div v-else
-      class="bg-gradient-to-br from-blue-50/80 to-indigo-50/80 border border-blue-100/80 rounded-2xl p-6 md:p-8 shadow-sm">
+      class="bg-gradient-to-br from-blue-50/80 to-indigo-50/80 border border-blue-100/80 rounded-xl p-6 md:p-8 shadow-sm">
       <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-4 md:mb-6">Course Materials</h2>
 
       <div v-if="filteredCourses.length === 0 && !searchQuery" class="py-12 text-center text-gray-500">

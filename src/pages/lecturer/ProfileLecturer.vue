@@ -142,7 +142,7 @@ onMounted(fetchProfile);
   <!-- Main Content -->
   <div v-else class="space-y-8 mb-8">
     <!-- Header Card -->
-    <div class="relative bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg overflow-hidden">
+    <div class="relative bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg shadow-lg overflow-hidden">
       <div class="absolute top-0 right-0 w-1/2 h-full pointer-events-none overflow-hidden opacity-20">
         <div class="absolute -top-10 -right-10 w-40 h-48 bg-white rounded-lg transform rotate-12"></div>
         <div class="absolute top-20 -right-5 w-32 h-40 bg-white rounded-lg transform rotate-12"></div>
@@ -169,9 +169,9 @@ onMounted(fetchProfile);
     </div>
 
     <!-- Form Card -->
-    <form @submit.prevent="handleUpdateProfile" class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-6 md:p-8 shadow-sm">
+    <form @submit.prevent="handleUpdateProfile" class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-lg p-6 md:p-8 shadow-sm">
       <div class="flex items-center gap-3 mb-6">
-        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-sm">
+        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-sm">
           <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
           </svg>
@@ -181,7 +181,7 @@ onMounted(fetchProfile);
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Full Name -->
-        <div class="bg-white rounded-xl p-5 shadow-sm border border-blue-100/50">
+        <div class="bg-white rounded-lg p-5 shadow-sm border border-blue-100/50">
           <BaseInput
             v-bind="getFieldProps('fullname')"
             label="Full Name"
@@ -191,7 +191,7 @@ onMounted(fetchProfile);
         </div>
         
         <!-- Gender -->
-        <div class="bg-white rounded-xl p-5 shadow-sm border border-blue-100/50">
+        <div class="bg-white rounded-lg p-5 shadow-sm border border-blue-100/50">
           <BaseSelect
             v-bind="getFieldProps('gender')"
             label="Gender"
@@ -202,7 +202,7 @@ onMounted(fetchProfile);
         </div>
 
         <!-- Birthplace -->
-        <div class="bg-white rounded-xl p-5 shadow-sm border border-blue-100/50">
+        <div class="bg-white rounded-lg p-5 shadow-sm border border-blue-100/50">
           <BaseInput
             v-bind="getFieldProps('birthplace')"
             label="Birth Place"
@@ -212,7 +212,7 @@ onMounted(fetchProfile);
         </div>
 
         <!-- Birthdate -->
-        <div class="bg-white rounded-xl p-5 shadow-sm border border-blue-100/50">
+        <div class="bg-white rounded-lg p-5 shadow-sm border border-blue-100/50">
           <BaseInput
             v-bind="getFieldProps('birthdate')"
             type="date"
@@ -222,7 +222,7 @@ onMounted(fetchProfile);
         </div>
 
         <!-- Phone Number -->
-        <div class="bg-white rounded-xl p-5 shadow-sm border border-blue-100/50">
+        <div class="bg-white rounded-lg p-5 shadow-sm border border-blue-100/50">
           <BaseInput
             v-bind="getFieldProps('phone')"
             type="tel"
@@ -233,7 +233,7 @@ onMounted(fetchProfile);
         </div>
 
         <!-- Last Education -->
-        <div class="bg-white rounded-xl p-5 shadow-sm border border-blue-100/50">
+        <div class="bg-white rounded-lg p-5 shadow-sm border border-blue-100/50">
           <BaseInput
             v-bind="getFieldProps('lasteducation')"
             label="Education Level"
@@ -243,7 +243,7 @@ onMounted(fetchProfile);
         </div>
 
         <!-- Address -->
-        <div class="md:col-span-2 bg-white rounded-xl p-5 shadow-sm border border-blue-100/50">
+        <div class="md:col-span-2 bg-white rounded-lg p-5 shadow-sm border border-blue-100/50">
           <BaseTextarea
             v-bind="getFieldProps('address')"
             label="Address"
