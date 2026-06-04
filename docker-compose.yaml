@@ -11,6 +11,11 @@ services:
   server:
     build:
       context: .
+      args:
+        - VITE_SUPABASE_URL
+        - VITE_SUPABASE_ANON_KEY
+        - VITE_ENCRYPTION_KEY
+        - VITE_API_BASE_URL
     environment:
       NODE_ENV: production
     ports:
