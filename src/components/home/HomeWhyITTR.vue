@@ -14,7 +14,7 @@
           <div class="mt-8">
             <a
               href="#"
-              class="inline-flex items-center gap-2 bg-[#0094ce] text-white font-semibold px-8 py-3.5 rounded-full transition-all duration-200 hover:bg-[#239a8b] hover:-translate-y-0.5 hover:shadow-lg"
+              class="inline-flex items-center justify-center gap-2 bg-[#0094ce] text-white font-semibold px-8 py-4 sm:py-3.5 rounded-full transition-all duration-200 hover:bg-[#239a8b] hover:-translate-y-0.5 hover:shadow-lg w-full sm:w-auto"
             >
               Daftar Sekarang
             </a>
@@ -25,7 +25,7 @@
           <div
             v-for="(item, i) in topCards"
             :key="i"
-            class="relative rounded-3xl overflow-hidden min-h-[240px] group"
+            class="relative rounded-3xl overflow-hidden min-h-[180px] sm:min-h-[240px] group"
           >
             <img
               :src="item.image"
@@ -49,7 +49,7 @@
         <div
           v-for="(item, i) in bottomCards"
           :key="i"
-          class="relative rounded-3xl overflow-hidden min-h-[280px] group"
+          class="relative rounded-3xl overflow-hidden min-h-[200px] sm:min-h-[280px] group"
         >
           <img
             :src="item.image"

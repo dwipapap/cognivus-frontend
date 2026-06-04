@@ -20,16 +20,16 @@
         <p class="reveal mt-5 md:mt-6 text-base md:text-lg text-white/80 max-w-xl leading-relaxed" data-delay="80">
           Lembaga kursus bahasa Inggris terpercaya di Pekanbaru dengan pengalaman lebih dari 60 tahun. Bergabunglah dan raih tujuanmu.
         </p>
-        <div class="reveal mt-8 flex flex-wrap gap-4" data-delay="160">
+        <div class="reveal mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4" data-delay="160">
           <button
             type="button"
-            class="bg-[#0094ce] hover:bg-[#007bb5] text-white font-semibold px-7 py-3 rounded-full transition-all duration-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#0094ce]/50"
+            class="w-full sm:w-auto bg-[#0094ce] hover:bg-[#007bb5] text-white font-semibold px-7 py-4 sm:py-3 rounded-full transition-all duration-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#0094ce]/50 text-center"
           >
             Mulai Belajar
           </button>
           <button
             type="button"
-            class="group border-2 border-white/50 text-white hover:bg-white/10 hover:border-white font-semibold px-7 py-3 rounded-full transition-all duration-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 inline-flex items-center gap-2"
+            class="w-full sm:w-auto group border-2 border-white/50 text-white hover:bg-white/10 hover:border-white font-semibold px-7 py-4 sm:py-3 rounded-full transition-all duration-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/40 inline-flex items-center justify-center gap-2"
           >
             Lihat Program Kami
             <svg class="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -39,7 +39,7 @@
         </div>
       </div>
 
-      <div class="reveal mt-12 md:mt-16 flex gap-6 md:gap-10 text-white/60 text-sm font-medium tracking-wide" data-delay="240">
+      <div class="reveal mt-12 md:mt-16 flex flex-wrap gap-x-6 gap-y-2 md:gap-10 text-white/60 text-sm font-medium tracking-wide" data-delay="240">
         <span class="text-white">Learn</span>
         <span>Create</span>
         <span>Achieve</span>

@@ -66,15 +66,17 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <div v-show="isMobileMenuOpen" id="navbar-default" class="md:hidden">
-      <div class="px-4 pb-4 space-y-2 bg-white/40 backdrop-blur-sm border-t border-white/20 mt-2">
-        <router-link to="/" @click="isMobileMenuOpen = false" class="block py-2 px-3 text-ink hover:text-brand-primary hover:bg-white/30 rounded-token-md transition-colors duration-token-default">Home</router-link>
-        <a href="#" @click="isMobileMenuOpen = false" class="block py-2 px-3 text-ink hover:text-brand-primary hover:bg-white/30 rounded-token-md transition-colors duration-token-default">Article</a>
-        <a href="#" @click="isMobileMenuOpen = false" class="block py-2 px-3 text-ink hover:text-brand-primary hover:bg-white/30 rounded-token-md transition-colors duration-token-default">Programs</a>
-        <a href="#" @click="isMobileMenuOpen = false" class="block py-2 px-3 text-ink hover:text-brand-primary hover:bg-white/30 rounded-token-md transition-colors duration-token-default">Testimonials</a>
-        <a href="#" @click="isMobileMenuOpen = false" class="block py-2 px-3 text-ink hover:text-brand-primary hover:bg-white/30 rounded-token-md transition-colors duration-token-default">About Us</a>
+    <Transition name="mobile-nav">
+      <div v-if="isMobileMenuOpen" id="navbar-default" class="md:hidden">
+        <div class="px-4 pb-4 space-y-1 bg-white/40 backdrop-blur-sm border-t border-white/20 mt-2">
+          <router-link to="/" @click="isMobileMenuOpen = false" class="block py-3 px-3 text-ink hover:text-brand-primary hover:bg-white/30 rounded-token-md transition-colors duration-token-default">Home</router-link>
+          <a href="#" @click="isMobileMenuOpen = false" class="block py-3 px-3 text-ink hover:text-brand-primary hover:bg-white/30 rounded-token-md transition-colors duration-token-default">Article</a>
+          <a href="#" @click="isMobileMenuOpen = false" class="block py-3 px-3 text-ink hover:text-brand-primary hover:bg-white/30 rounded-token-md transition-colors duration-token-default">Programs</a>
+          <a href="#" @click="isMobileMenuOpen = false" class="block py-3 px-3 text-ink hover:text-brand-primary hover:bg-white/30 rounded-token-md transition-colors duration-token-default">Testimonials</a>
+          <a href="#" @click="isMobileMenuOpen = false" class="block py-3 px-3 text-ink hover:text-brand-primary hover:bg-white/30 rounded-token-md transition-colors duration-token-default">About Us</a>
+        </div>
       </div>
-    </div>
+    </Transition>
   </header>
 </template>
 
@@ -91,10 +93,30 @@ onUnmounted(() => {
   contain: layout style paint;
 }
 
+.mobile-nav-enter-active,
+.mobile-nav-leave-active {
+  transition: all 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+.mobile-nav-enter-from,
+.mobile-nav-leave-to {
+  opacity: 0;
+  max-height: 0;
+}
+.mobile-nav-enter-to,
+.mobile-nav-leave-from {
+  opacity: 1;
+  max-height: 400px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .header-glass {
     backdrop-filter: blur(2px) !important;
     -webkit-backdrop-filter: blur(2px) !important;
+    transition: none !important;
+  }
+  .mobile-nav-enter-active,
+  .mobile-nav-leave-active {
     transition: none !important;
   }
 }

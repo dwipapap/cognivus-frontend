@@ -22,7 +22,7 @@
         </p>
       </div>
 
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 items-start">
+      <div class="grid grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8 items-start">
         <div
           v-for="(instructor, i) in instructors"
           :key="i"
@@ -30,7 +30,7 @@
           :class="i % 2 === 0 ? 'lg:mt-0' : 'lg:mt-12'"
         >
           <div class="relative mb-4">
-            <div class="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-white shadow-lg">
+            <div class="w-20 h-20 sm:w-28 sm:h-28 md:w-36 md:h-36 lg:w-40 lg:h-40 rounded-full overflow-hidden border-4 border-white shadow-lg">
               <img
                 :src="instructor.image"
                 :alt="instructor.name"
@@ -40,10 +40,10 @@
             </div>
           </div>
 
-          <div class="bg-white rounded-lg p-5 shadow-lg w-full max-w-[200px] relative">
-            <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-b-[12px] border-b-white"></div>
-            <p class="font-bold text-gray-900 text-sm md:text-base mb-1">{{ instructor.name }}</p>
-            <p class="text-[#2ab5a3] text-xs md:text-sm font-medium mb-2">Examiners</p>
+          <div class="bg-white rounded-lg p-2.5 sm:p-4 md:p-5 shadow-lg w-full max-w-[120px] sm:max-w-[160px] md:max-w-[200px] relative">
+            <div class="absolute -top-2 sm:-top-3 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] sm:border-l-[10px] border-l-transparent border-r-[6px] sm:border-r-[10px] border-r-transparent border-b-[8px] sm:border-b-[12px] border-b-white"></div>
+            <p class="font-bold text-gray-900 text-[10px] sm:text-xs md:text-sm mb-0.5 md:mb-1 leading-tight">{{ instructor.name }}</p>
+            <p class="text-[#2ab5a3] text-[9px] sm:text-[10px] md:text-xs font-medium leading-tight">Examiners</p>
 
           </div>
         </div>

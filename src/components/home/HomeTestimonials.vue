@@ -14,7 +14,7 @@
           <div class="flex gap-1 mb-4">
             <UIcon v-for="s in 5" :key="s" name="i-lucide-star" class="w-5 h-5 text-sun-yellow" />
           </div>
-          <p class="text-2xl font-bold text-default leading-snug mb-6 italic">
+          <p class="text-xl sm:text-2xl font-bold text-default leading-snug mb-6 italic">
             "Pengalaman belajar di ITTR sangat menyenangkan. Metode pengajarannya mudah dipahami dan instrukturnya sangat sabar."
           </p>
           <div>

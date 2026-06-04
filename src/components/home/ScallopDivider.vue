@@ -1,5 +1,5 @@
 <template>
-  <div class="scallop-divider relative h-12 md:h-16 -mb-px overflow-hidden">
+  <div class="scallop-divider relative h-8 sm:h-12 md:h-16 -mb-px overflow-hidden">
     <svg
       viewBox="0 0 1440 100"
       preserveAspectRatio="none"
