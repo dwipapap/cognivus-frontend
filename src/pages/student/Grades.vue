@@ -193,14 +193,7 @@ onMounted(() => {
                   </div>
                 </div>
 
-                <!-- Certificate Download -->
-                <button
-                  @click="handleDownloadCertificate(grade.gradeid, grade.test_type)"
-                  class="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-medium text-blue-600 bg-blue-50 rounded-full hover:bg-blue-100 transition-colors"
-                >
-                  <IconDocument class="w-4 h-4" />
-                  Download Certificate
-                </button>
+                <!-- Certificate Download (Disabled) -->
               </div>
             </div>
           </div>
@@ -217,7 +210,6 @@ onMounted(() => {
                   <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Writing</th>
                   <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Final Score</th>
                   <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Date Taken</th>
-                  <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Certificate</th>
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-100">
@@ -255,15 +247,6 @@ onMounted(() => {
                       <IconCalendar class="w-4 h-4 text-gray-400" />
                       {{ formatDate(grade.date_taken) }}
                     </div>
-                  </td>
-                  <td class="px-6 py-4">
-                    <button
-                      @click="handleDownloadCertificate(grade.gradeid, grade.test_type)"
-                      class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-full hover:bg-blue-100 hover:text-blue-700 transition-all border border-blue-100 shadow-sm hover:shadow"
-                    >
-                      <IconDocument class="w-4 h-4" />
-                      Download
-                    </button>
                   </td>
                 </tr>
               </tbody>
