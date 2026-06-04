@@ -20,6 +20,7 @@ declare module 'vue' {
     BaseTextarea: typeof import('./src/components/form/BaseTextarea.vue')['default']
     BookSvg: typeof import('./src/components/home/illustrations/BookSvg.vue')['default']
     ButtonShowcase: typeof import('./src/components/demo/ButtonShowcase.vue')['default']
+    ClassSidebar: typeof import('./src/components/lecturer/ClassSidebar.vue')['default']
     ConfirmDialog: typeof import('./src/components/ui/ConfirmDialog.vue')['default']
     GlobeSvg: typeof import('./src/components/home/illustrations/GlobeSvg.vue')['default']
     GradCapSvg: typeof import('./src/components/home/illustrations/GradCapSvg.vue')['default']

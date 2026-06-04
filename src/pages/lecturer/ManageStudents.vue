@@ -5,8 +5,7 @@ import { useLecturerProfile } from '../../composables/useLecturerProfile';
 import { classAPI, studentAPI, levelAPI } from '../../services/api';
 import LoadingSpinner from '../../components/ui/LoadingSpinner.vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
-import IconArrowLeft from '~icons/basil/arrow-left-solid';
-import IconArrowRight from '~icons/basil/arrow-right-solid';
+import ClassSidebar from '../../components/lecturer/ClassSidebar.vue';
 import { getInitials } from '../../utils/formatters';
 
 const router = useRouter();
@@ -21,29 +20,6 @@ const errorMessage = ref('');
 const searchQuery = ref('');
 const currentPage = ref(1);
 const itemsPerPage = 15;
-
-/** Class selector pagination */
-const classCurrentPage = ref(1);
-const classItemsPerPage = 5;
-
-/** Class selector pagination computed properties */
-const classTotalPages = computed(() => {
-  if (myClasses.value.length === 0) return 1;
-  return Math.ceil(myClasses.value.length / classItemsPerPage);
-});
-
-const shouldShowClassNavigation = computed(() => myClasses.value.length > classItemsPerPage);
-
-const paginatedClasses = computed(() => {
-  if (!shouldShowClassNavigation.value) return myClasses.value;
-  const start = (classCurrentPage.value - 1) * classItemsPerPage;
-  return myClasses.value.slice(start, start + classItemsPerPage);
-});
-
-const classJustifyMode = computed(() => {
-  const count = paginatedClasses.value.length;
-  return count <= 3 ? 'justify-center gap-4' : 'justify-start gap-3';
-});
 
 /** Get students for selected class */
 const classStudents = computed(() => {
@@ -142,19 +118,12 @@ const getGenderLabel = (gender) => {
 const selectClass = (cls) => {
   selectedClass.value = cls;
   resetPagination();
-  classCurrentPage.value = 1;
 };
 
 /** Go to page */
 const goToPage = (page) => {
   if (page >= 1 && page <= totalPages.value) {
     currentPage.value = page;
-  }
-};
-
-const goToClassPage = (page) => {
-  if (page >= 1 && page <= classTotalPages.value) {
-    classCurrentPage.value = page;
   }
 };
 
@@ -202,101 +171,52 @@ watch(
   </div>
 
   <!-- Main Content -->
-  <div v-else-if="myClasses.length > 0" class="space-y-6">
-    <!-- Class Selection -->
-    <div class="bg-white rounded-lg border border-gray-100 shadow-xl shadow-blue-900/5 p-6 mb-8">
-      <div class="flex items-center gap-3 mb-6">
-        <div class="w-2 h-6 bg-blue-600 rounded-full"></div>
-        <h2 class="text-lg font-extrabold text-blue-900 tracking-tight uppercase">Select Class</h2>
-      </div>
-      
-      <!-- Horizontal Card Selector with Pagination -->
-      <div class="flex items-center gap-2 md:gap-4">
-        <!-- Previous Button -->
-        <button
-          v-if="shouldShowClassNavigation"
-          @click="goToClassPage(classCurrentPage - 1)"
-          :disabled="classCurrentPage === 1"
-          class="flex-shrink-0 w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all duration-300 ring-1 ring-gray-200 bg-white text-gray-400 hover:ring-blue-500 hover:text-blue-600 hover:bg-blue-50 active:scale-90 disabled:opacity-20 disabled:cursor-not-allowed shadow-sm"
-          aria-label="Previous classes"
-        >
-          <IconArrowLeft class="w-4 h-4 md:w-5 md:h-5" />
-        </button>
-
-        <!-- Cards Container -->
-        <div class="flex-1 flex flex-wrap gap-3 md:gap-4" :class="classJustifyMode">
-          <button
-            v-for="cls in paginatedClasses"
-            :key="cls.classid"
-            @click="selectClass(cls)"
-            :class="[
-              'group relative min-w-[140px] sm:min-w-[160px] md:min-w-[180px] md:max-w-[240px] flex-1 sm:flex-none p-3 md:p-5 rounded-lg border transition-all duration-300 text-left',
-              selectedClass?.classid === cls.classid
-                ? 'bg-blue-50/50 border-blue-600 ring-1 ring-blue-600 shadow-lg shadow-blue-500/15'
-                : 'bg-white border-gray-100 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-500/10 hover:-translate-y-1'
-            ]"
-          >
-            <!-- Selected Indicator -->
-            <div 
-              v-if="selectedClass?.classid === cls.classid"
-              class="absolute top-2 right-2 md:top-3 md:right-3 w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-blue-600 animate-pulse"
-            ></div>
-
-            <span class="inline-block px-1.5 py-0.5 rounded-md bg-blue-50 text-[8px] md:text-[10px] font-bold text-blue-700 uppercase tracking-wider mb-1 md:mb-2">
-              {{ getLevelName(cls.levelid) }}
-            </span>
-            <h3 class="font-extrabold text-sm md:text-lg text-blue-900 truncate leading-tight mb-1">{{ cls.class_code }}</h3>
-            <p class="text-[10px] md:text-xs text-gray-500 line-clamp-2 leading-relaxed h-7 md:h-8 italic">
-              {{ cls.description || 'Professional academic path' }}
-            </p>
-          </button>
-        </div>
-
-        <!-- Next Button -->
-        <button
-          v-if="shouldShowClassNavigation"
-          @click="goToClassPage(classCurrentPage + 1)"
-          :disabled="classCurrentPage === classTotalPages"
-          class="flex-shrink-0 w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all duration-300 ring-1 ring-gray-200 bg-white text-gray-400 hover:ring-blue-500 hover:text-blue-600 hover:bg-blue-50 active:scale-90 disabled:opacity-20 disabled:cursor-not-allowed shadow-sm"
-          aria-label="Next classes"
-        >
-          <IconArrowRight class="w-4 h-4 md:w-5 md:h-5" />
-        </button>
-      </div>
+  <div v-else-if="myClasses.length > 0" class="flex flex-col md:flex-row gap-6 items-start">
+    
+    <!-- Sidebar Class Selector -->
+    <div class="w-full md:w-64 flex-shrink-0">
+      <ClassSidebar
+        :classes="myClasses"
+        :levels="levels"
+        :selected-class="selectedClass"
+        @select="selectClass"
+      />
     </div>
 
     <!-- Students Section -->
-    <div v-if="selectedClass" class="bg-white rounded-lg shadow-lg p-6">
-      <div class="mb-4">
-        <h2 class="text-2xl font-bold text-gray-900">Students</h2>
-        <p class="text-sm text-gray-600">Class: {{ selectedClass.class_code }}</p>
+    <div v-if="selectedClass" class="flex-1 min-w-0 flex flex-col gap-6">
+      <div>
+        <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Students</h2>
+        <p class="text-sm text-gray-500 mt-1">Class: {{ selectedClass.class_code }}</p>
       </div>
 
       <!-- Search Bar -->
-      <div class="mb-4">
+      <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col gap-2">
         <div class="relative">
           <input
             v-model="searchQuery"
             @input="resetPagination"
             type="text"
             placeholder="Search by name, email, username, or phone..."
-            class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            class="w-full px-4 py-3 pl-11 bg-gray-50 border-none rounded-lg focus:ring-2 focus:ring-blue-500 transition-all text-sm"
           />
-          <svg class="absolute left-3 top-2.5 w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+          <svg class="absolute left-4 top-3.5 w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
           </svg>
         </div>
-        <p class="text-sm text-gray-500 mt-2">Total: {{ classStudents.length }} student(s)</p>
+        <p class="text-xs text-gray-500 font-medium px-1">Total: {{ classStudents.length }} student(s)</p>
       </div>
 
-      <!-- No Students -->
-      <div v-if="classStudents.length === 0" class="text-center py-12 text-gray-500">
-        {{ searchQuery ? 'No students found matching your search.' : 'No students enrolled in this class yet.' }}
-      </div>
+      <!-- Content Container -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <!-- No Students -->
+        <div v-if="classStudents.length === 0" class="text-center py-16 text-gray-500">
+          {{ searchQuery ? 'No students found matching your search.' : 'No students enrolled in this class yet.' }}
+        </div>
 
-      <!-- Students Table -->
-      <div v-else class="w-full max-w-full overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
+        <!-- Students Table -->
+        <div v-else class="w-full max-w-full overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-100">
           <thead class="bg-gray-50">
             <tr>
               <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
@@ -374,39 +294,40 @@ watch(
         </table>
       </div>
 
-      <!-- Pagination -->
-      <div v-if="totalPages > 1" class="mt-4 flex items-center justify-between">
-        <p class="text-sm text-gray-600">
-          Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to {{ Math.min(currentPage * itemsPerPage, classStudents.length) }} of {{ classStudents.length }}
-        </p>
-        <div class="flex gap-2">
-          <button
-            @click="goToPage(currentPage - 1)"
-            :disabled="currentPage === 1"
-            class="px-4 py-2 border-2 border-gray-300 text-gray-600 rounded-full text-sm font-semibold transition-all hover:bg-blue-50 hover:border-blue-400 hover:text-blue-700 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-sm hover:shadow-md"
-          >
-            Previous
-          </button>
-          <button
-            v-for="page in totalPages"
-            :key="page"
-            @click="goToPage(page)"
-            :class="[
-              'px-4 py-2 border-2 rounded-full text-sm font-semibold transition-all shadow-sm hover:shadow-md',
-              currentPage === page
-                ? 'bg-blue-600 text-white border-blue-600 scale-105'
-                : 'border-gray-300 text-gray-600 hover:bg-blue-50 hover:border-blue-400 hover:text-blue-700 hover:scale-105 active:scale-95'
-            ]"
-          >
-            {{ page }}
-          </button>
-          <button
-            @click="goToPage(currentPage + 1)"
-            :disabled="currentPage === totalPages"
-            class="px-4 py-2 border-2 border-gray-300 text-gray-600 rounded-full text-sm font-semibold transition-all hover:bg-blue-50 hover:border-blue-400 hover:text-blue-700 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-sm hover:shadow-md"
-          >
-            Next
-          </button>
+        <!-- Pagination -->
+        <div v-if="totalPages > 1" class="px-6 py-4 border-t border-gray-100 flex items-center justify-between bg-gray-50/50">
+          <p class="text-sm text-gray-600">
+            Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to {{ Math.min(currentPage * itemsPerPage, classStudents.length) }} of {{ classStudents.length }}
+          </p>
+          <div class="flex gap-2">
+            <button
+              @click="goToPage(currentPage - 1)"
+              :disabled="currentPage === 1"
+              class="px-4 py-2 border border-gray-200 bg-white text-gray-600 rounded-full text-sm font-semibold transition-all hover:bg-gray-50 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+            >
+              Previous
+            </button>
+            <button
+              v-for="page in totalPages"
+              :key="page"
+              @click="goToPage(page)"
+              :class="[
+                'w-9 h-9 border rounded-full text-sm font-semibold transition-all shadow-sm flex items-center justify-center',
+                currentPage === page
+                  ? 'bg-gray-900 text-white border-gray-900'
+                  : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-gray-300'
+              ]"
+            >
+              {{ page }}
+            </button>
+            <button
+              @click="goToPage(currentPage + 1)"
+              :disabled="currentPage === totalPages"
+              class="px-4 py-2 border border-gray-200 bg-white text-gray-600 rounded-full text-sm font-semibold transition-all hover:bg-gray-50 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+            >
+              Next
+            </button>
+          </div>
         </div>
       </div>
     </div>
