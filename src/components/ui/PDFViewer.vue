@@ -7,7 +7,7 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner.vue'
 import PDFThumbnail from './PDFThumbnail.vue'
 import PDFPage from './PDFPage.vue'
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl + '?v=2'
 
 interface OutlineNode {
   title: string
