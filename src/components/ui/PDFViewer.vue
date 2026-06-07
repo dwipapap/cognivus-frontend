@@ -354,144 +354,162 @@ watch(viewMode, (newMode) => {
 <template>
   <div ref="containerRef" class="pdf-viewer-container flex flex-col h-full bg-surface">
     <div class="sticky top-0 z-20 bg-surface border-b border-divider px-2 sm:px-3 py-1.5 sm:py-2 shadow-card-rest">
-      <div class="flex items-center gap-1 sm:gap-2">
-        <UButton
-          v-if="tocItems.length"
-          :icon="activeSidebar === 'toc' ? 'i-lucide-list-x' : 'i-lucide-list'"
-          size="sm"
-          :color="activeSidebar === 'toc' ? 'primary' : 'neutral'"
-          variant="ghost"
-          aria-label="Table of contents"
-          @click="activeSidebar = activeSidebar === 'toc' ? 'none' : 'toc'"
-        />
-
-        <UButton
-          :icon="activeSidebar === 'thumbnails' ? 'i-lucide-layout-grid' : 'i-lucide-layout-grid'"
-          size="sm"
-          :color="activeSidebar === 'thumbnails' ? 'primary' : 'neutral'"
-          variant="ghost"
-          aria-label="Thumbnails"
-          @click="activeSidebar = activeSidebar === 'thumbnails' ? 'none' : 'thumbnails'"
-        />
-
-        <USeparator orientation="vertical" class="h-5 sm:h-6" />
-
-        <UButton
-          icon="i-lucide-zoom-out"
-          size="sm"
-          color="neutral"
-          variant="ghost"
-          aria-label="Zoom out"
-          :disabled="!canZoomOut"
-          @click="zoomOut"
-        />
-        <UButton
-          size="sm"
-          color="neutral"
-          variant="ghost"
-          :label="`${zoomPct}%`"
-          aria-label="Reset zoom"
-          class="min-w-[52px] sm:min-w-[60px] font-mono text-xs sm:text-sm justify-center"
-          @click="resetZoom"
-        />
-        <UButton
-          icon="i-lucide-zoom-in"
-          size="sm"
-          color="neutral"
-          variant="ghost"
-          aria-label="Zoom in"
-          :disabled="!canZoomIn"
-          @click="zoomIn"
-        />
-
-        <USeparator orientation="vertical" class="h-5 sm:h-6" />
-
-        <UButton
-          :icon="fitWidth ? 'i-lucide-arrow-down-left' : 'i-lucide-arrow-up-right'"
-          size="sm"
-          color="neutral"
-          variant="ghost"
-          :aria-label="fitWidth ? 'Disable fit to width' : 'Fit to width'"
-          @click="toggleFitWidth"
-        />
-        <UButton
-          icon="i-lucide-rotate-cw"
-          size="sm"
-          color="neutral"
-          variant="ghost"
-          aria-label="Rotate clockwise"
-          @click="rotateCW"
-        />
-        <UButton
-          :icon="viewMode === 'single' ? 'i-lucide-scroll' : 'i-lucide-square'"
-          size="sm"
-          color="neutral"
-          variant="ghost"
-          :aria-label="viewMode === 'single' ? 'Continuous scroll' : 'Single page'"
-          @click="viewMode = viewMode === 'single' ? 'continuous' : 'single'"
-        />
-        <UButton
-          :icon="isFullscreen ? 'i-lucide-shrink' : 'i-lucide-expand'"
-          size="sm"
-          color="neutral"
-          variant="ghost"
-          :aria-label="isFullscreen ? 'Exit full screen' : 'Full screen'"
-          @click="toggleFullscreen"
-        />
-
-        <div class="flex-1" />
-
-        <UButton
-          icon="i-lucide-chevrons-left"
-          size="sm"
-          color="neutral"
-          variant="ghost"
-          aria-label="First page"
-          :disabled="!canPrev"
-          @click="firstPage"
-        />
-        <UButton
-          icon="i-lucide-chevron-left"
-          size="sm"
-          color="neutral"
-          variant="ghost"
-          aria-label="Previous page"
-          :disabled="!canPrev"
-          @click="prevPage"
-        />
-
-        <div class="flex items-center gap-1 text-xs sm:text-sm text-ink-muted whitespace-nowrap">
-          <UInput
-            v-model="pageInput"
-            size="xs"
-            class="w-10 sm:w-12"
-            :ui="{ base: 'text-center font-mono' }"
-            aria-label="Page number"
-            @keydown.enter="jumpToPage"
-            @blur="jumpToPage"
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-0">
+        
+        <!-- Top/Left Controls: Sidebar, Zoom, View Options -->
+        <div class="flex items-center gap-1 sm:gap-2 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0 hide-scrollbars">
+          <UButton
+            v-if="tocItems.length"
+            :icon="activeSidebar === 'toc' ? 'i-lucide-list-x' : 'i-lucide-list'"
+            size="sm"
+            :color="activeSidebar === 'toc' ? 'primary' : 'neutral'"
+            variant="ghost"
+            class="shrink-0"
+            aria-label="Table of contents"
+            @click="activeSidebar = activeSidebar === 'toc' ? 'none' : 'toc'"
           />
-          <span class="hidden sm:inline">/ {{ totalPages }}</span>
-          <span class="sm:hidden">/{{ totalPages }}</span>
+
+          <UButton
+            :icon="activeSidebar === 'thumbnails' ? 'i-lucide-layout-grid' : 'i-lucide-layout-grid'"
+            size="sm"
+            :color="activeSidebar === 'thumbnails' ? 'primary' : 'neutral'"
+            variant="ghost"
+            class="shrink-0"
+            aria-label="Thumbnails"
+            @click="activeSidebar = activeSidebar === 'thumbnails' ? 'none' : 'thumbnails'"
+          />
+
+          <USeparator orientation="vertical" class="h-5 sm:h-6 shrink-0" />
+
+          <UButton
+            icon="i-lucide-zoom-out"
+            size="sm"
+            color="neutral"
+            variant="ghost"
+            class="shrink-0"
+            aria-label="Zoom out"
+            :disabled="!canZoomOut"
+            @click="zoomOut"
+          />
+          <UButton
+            size="sm"
+            color="neutral"
+            variant="ghost"
+            :label="`${zoomPct}%`"
+            aria-label="Reset zoom"
+            class="min-w-[52px] sm:min-w-[60px] font-mono text-xs sm:text-sm justify-center shrink-0"
+            @click="resetZoom"
+          />
+          <UButton
+            icon="i-lucide-zoom-in"
+            size="sm"
+            color="neutral"
+            variant="ghost"
+            class="shrink-0"
+            aria-label="Zoom in"
+            :disabled="!canZoomIn"
+            @click="zoomIn"
+          />
+
+          <USeparator orientation="vertical" class="h-5 sm:h-6 shrink-0" />
+
+          <UButton
+            :icon="fitWidth ? 'i-lucide-arrow-down-left' : 'i-lucide-arrow-up-right'"
+            size="sm"
+            color="neutral"
+            variant="ghost"
+            class="shrink-0"
+            :aria-label="fitWidth ? 'Disable fit to width' : 'Fit to width'"
+            @click="toggleFitWidth"
+          />
+          <UButton
+            icon="i-lucide-rotate-cw"
+            size="sm"
+            color="neutral"
+            variant="ghost"
+            class="shrink-0"
+            aria-label="Rotate clockwise"
+            @click="rotateCW"
+          />
+          <UButton
+            :icon="viewMode === 'single' ? 'i-lucide-scroll' : 'i-lucide-square'"
+            size="sm"
+            color="neutral"
+            variant="ghost"
+            class="shrink-0"
+            :aria-label="viewMode === 'single' ? 'Continuous scroll' : 'Single page'"
+            @click="viewMode = viewMode === 'single' ? 'continuous' : 'single'"
+          />
+          <UButton
+            :icon="isFullscreen ? 'i-lucide-shrink' : 'i-lucide-expand'"
+            size="sm"
+            color="neutral"
+            variant="ghost"
+            class="shrink-0"
+            :aria-label="isFullscreen ? 'Exit full screen' : 'Full screen'"
+            @click="toggleFullscreen"
+          />
         </div>
 
-        <UButton
-          icon="i-lucide-chevron-right"
-          size="sm"
-          color="neutral"
-          variant="ghost"
-          aria-label="Next page"
-          :disabled="!canNext"
-          @click="nextPage"
-        />
-        <UButton
-          icon="i-lucide-chevrons-right"
-          size="sm"
-          color="neutral"
-          variant="ghost"
-          aria-label="Last page"
-          :disabled="!canNext"
-          @click="lastPage"
-        />
+        <USeparator class="sm:hidden block w-full opacity-50" />
+
+        <!-- Bottom/Right Controls: Pagination -->
+        <div class="flex items-center justify-between sm:justify-end gap-1 w-full sm:w-auto shrink-0">
+          <div class="flex items-center">
+            <UButton
+              icon="i-lucide-chevrons-left"
+              size="sm"
+              color="neutral"
+              variant="ghost"
+              aria-label="First page"
+              :disabled="!canPrev"
+              @click="firstPage"
+            />
+            <UButton
+              icon="i-lucide-chevron-left"
+              size="sm"
+              color="neutral"
+              variant="ghost"
+              aria-label="Previous page"
+              :disabled="!canPrev"
+              @click="prevPage"
+            />
+          </div>
+
+          <div class="flex items-center gap-1 text-xs sm:text-sm text-ink-muted whitespace-nowrap">
+            <UInput
+              v-model="pageInput"
+              size="xs"
+              class="w-10 sm:w-12"
+              :ui="{ base: 'text-center font-mono' }"
+              aria-label="Page number"
+              @keydown.enter="jumpToPage"
+              @blur="jumpToPage"
+            />
+            <span>/ {{ totalPages }}</span>
+          </div>
+
+          <div class="flex items-center">
+            <UButton
+              icon="i-lucide-chevron-right"
+              size="sm"
+              color="neutral"
+              variant="ghost"
+              aria-label="Next page"
+              :disabled="!canNext"
+              @click="nextPage"
+            />
+            <UButton
+              icon="i-lucide-chevrons-right"
+              size="sm"
+              color="neutral"
+              variant="ghost"
+              aria-label="Last page"
+              :disabled="!canNext"
+              @click="lastPage"
+            />
+          </div>
+        </div>
       </div>
     </div>
 
@@ -641,6 +659,14 @@ watch(viewMode, (newMode) => {
 
 .overflow-y-auto::-webkit-scrollbar-thumb:hover {
   background-color: rgba(107, 114, 128, 0.7);
+}
+
+.hide-scrollbars {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.hide-scrollbars::-webkit-scrollbar {
+  display: none;
 }
 
 .slide-enter-active,
