@@ -41,6 +41,8 @@ declare module 'vue' {
     PageHeaderCard: typeof import('./src/components/student/PageHeaderCard.vue')['default']
     PaymentHistoryTable: typeof import('./src/components/student/PaymentHistoryTable.vue')['default']
     PaymentOptionCard: typeof import('./src/components/student/PaymentOptionCard.vue')['default']
+    PDFPage: typeof import('./src/components/ui/PDFPage.vue')['default']
+    PDFThumbnail: typeof import('./src/components/ui/PDFThumbnail.vue')['default']
     PDFViewer: typeof import('./src/components/ui/PDFViewer.vue')['default']
     PencilSvg: typeof import('./src/components/home/illustrations/PencilSvg.vue')['default']
     ProgramBillingCard: typeof import('./src/components/student/ProgramBillingCard.vue')['default']

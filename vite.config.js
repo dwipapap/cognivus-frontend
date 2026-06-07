@@ -45,8 +45,7 @@ export default defineConfig({
           'vendor-vue': ['vue', 'vue-router'],
           'vendor-http': ['axios'],
           'vendor-crypto': ['crypto-js'],
-          'vendor-ui': ['@nuxt/ui', 'gsap'],
-          'vendor-pdf': ['@tato30/vue-pdf']
+          'vendor-ui': ['@nuxt/ui', 'gsap']
         }
       }
     }

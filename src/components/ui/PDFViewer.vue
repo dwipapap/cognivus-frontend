@@ -1,37 +1,185 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
-import { VuePDF, usePDF } from '@tato30/vue-pdf'
+import { ref, shallowRef, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
+import * as pdfjsLib from 'pdfjs-dist'
+import type { PDFDocumentProxy, PDFDocumentLoadingTask, RenderTask } from 'pdfjs-dist'
+import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
 import LoadingSpinner from '@/components/ui/LoadingSpinner.vue'
+import PDFThumbnail from './PDFThumbnail.vue'
+import PDFPage from './PDFPage.vue'
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl
+
+interface OutlineNode {
+  title: string
+  bold: boolean
+  italic: boolean
+  color: Uint8ClampedArray
+  dest: string | any[] | null
+  url: string | null
+  unsafeUrl: string | undefined
+  newWindow: boolean | undefined
+  count: number | undefined
+  items: OutlineNode[]
+}
+
+interface FlatOutlineItem {
+  title: string
+  depth: number
+  original: OutlineNode
+}
+
+interface WatermarkOptions {
+  columns: number
+  rows: number
+  rotation: number
+  fontSize: number
+  color: string
+}
 
 const props = defineProps<{ src: string }>()
 
 const isLoading = ref(true)
 const error = ref<string | null>(null)
 
-const { pdf, pages, info, getPDFDestination } = usePDF(props.src, {
-  onProgress: ({ loaded, total }) => {
-    if (loaded === total) isLoading.value = false
-  },
-  onError: (reason) => {
-    error.value = `Failed to load PDF: ${reason}`
+const pdfDoc = shallowRef<PDFDocumentProxy | null>(null)
+let currentLoadingTask: PDFDocumentLoadingTask<PDFDocumentProxy> | null = null
+let renderTask: RenderTask | null = null
+const totalPages = ref(0)
+const outlineItems = ref<OutlineNode[]>([])
+
+async function loadPDF() {
+  isLoading.value = true
+  error.value = null
+  if (currentLoadingTask) {
+    currentLoadingTask.destroy()
+    currentLoadingTask = null
+    pdfDoc = null
+  }
+  
+  try {
+    currentLoadingTask = pdfjsLib.getDocument({ url: props.src })
+    pdfDoc.value = await currentLoadingTask.promise
+    totalPages.value = pdfDoc.value.numPages
+    
+    const outline = await pdfDoc.value.getOutline()
+    outlineItems.value = (outline as OutlineNode[]) || []
+    
+    isLoading.value = false
+    
+    await nextTick()
+    renderPage(currentPage.value)
+  } catch (err: any) {
+    error.value = `Failed to load PDF: ${err.message}`
     isLoading.value = false
   }
-})
+}
+
+async function renderPage(pageNum: number) {
+  if (!pdfDoc.value || !pdfCanvasRef.value) return
+  
+  try {
+    const page = await pdfDoc.value.getPage(pageNum)
+    
+    let currentScale = scale.value
+    if (fitWidth.value && containerRef.value) {
+      const containerWidth = containerRef.value.clientWidth
+      const unscaledViewport = page.getViewport({ scale: 1, rotation: rotation.value })
+      currentScale = Math.max(0.1, (containerWidth - 32) / unscaledViewport.width)
+    }
+    
+    const viewport = page.getViewport({ scale: currentScale, rotation: rotation.value })
+    
+    const canvas = pdfCanvasRef.value
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    
+    const outputScale = window.devicePixelRatio || 1
+    
+    canvas.width = Math.floor(viewport.width * outputScale)
+    canvas.height = Math.floor(viewport.height * outputScale)
+    canvas.style.width = Math.floor(viewport.width) + 'px'
+    canvas.style.height = Math.floor(viewport.height) + 'px'
+    
+    const transform = outputScale !== 1 ? [outputScale, 0, 0, outputScale, 0, 0] : undefined
+
+    if (renderTask) {
+      await renderTask.cancel()
+    }
+    
+    renderTask = page.render({
+      canvasContext: ctx,
+      viewport,
+      transform: transform as any
+    })
+    
+    await renderTask.promise
+    renderTask = null
+    
+    applyWatermark(canvas, ctx, viewport.width, viewport.height)
+  } catch (err: any) {
+    if (err.name !== 'RenderingCancelledException') {
+      console.error('Error rendering page:', err)
+    }
+  }
+}
+
+function applyWatermark(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D, width: number, height: number) {
+  ctx.save()
+  const outputScale = window.devicePixelRatio || 1
+  ctx.scale(outputScale, outputScale)
+  
+  ctx.font = `${watermarkOptions.fontSize}px Arial`
+  ctx.fillStyle = watermarkOptions.color
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  
+  const cols = watermarkOptions.columns
+  const rows = watermarkOptions.rows
+  
+  for (let i = 0; i <= cols; i++) {
+    for (let j = 0; j <= rows; j++) {
+      ctx.save()
+      const x = (width / cols) * i
+      const y = (height / rows) * j
+      ctx.translate(x, y)
+      ctx.rotate((watermarkOptions.rotation * Math.PI) / 180)
+      ctx.fillText(watermarkText, 0, 0)
+      ctx.restore()
+    }
+  }
+  ctx.restore()
+}
+
+async function getPDFDestination(dest: any) {
+  if (!pdfDoc.value) return null
+  try {
+    const destination = typeof dest === 'string' ? await pdfDoc.value.getDestination(dest) : dest
+    if (destination) {
+      const pageIndex = await pdfDoc.value.getPageIndex(destination[0])
+      return pageIndex + 1
+    }
+  } catch (err) {
+    console.error('Error getting destination:', err)
+  }
+  return null
+}
 
 const watermarkText = 'Property of ITTREnglish Course'
-const watermarkOptions = { columns: 3, rows: 4, rotation: 45, fontSize: 15, color: 'rgba(100, 100, 100, 0.15)' }
+const watermarkOptions: WatermarkOptions = { columns: 3, rows: 4, rotation: 45, fontSize: 15, color: 'rgba(100, 100, 100, 0.15)' }
 
 const scale = ref(1)
 const fitWidth = ref(false)
 const rotation = ref(0)
 const currentPage = ref(1)
 const pageInput = ref('1')
-const showToc = ref(false)
+const activeSidebar = ref<'none' | 'toc' | 'thumbnails'>('none')
+const viewMode = ref<'single' | 'continuous'>('single')
 const isMobile = ref(false)
 
 const containerRef = ref<HTMLElement | null>(null)
-const vuePdfRef = ref<any>(null)
+const pdfCanvasRef = ref<HTMLCanvasElement | null>(null)
 const isFullscreen = ref(false)
+const containerWidth = ref(0)
 
 function toggleFullscreen() {
   if (!document.fullscreenElement) {
@@ -45,31 +193,36 @@ function toggleFullscreen() {
 
 function handleFullscreenChange() {
   isFullscreen.value = !!document.fullscreenElement
-  setTimeout(() => { vuePdfRef.value?.reload() }, 150)
+  if (viewMode.value === 'single') {
+    setTimeout(() => renderPage(currentPage.value), 150)
+  }
 }
 
 function handleResize() {
-  if (fitWidth.value) vuePdfRef.value?.reload()
+  if (containerRef.value) {
+    containerWidth.value = containerRef.value.clientWidth
+  }
+  if (fitWidth.value && viewMode.value === 'single') {
+    renderPage(currentPage.value)
+  }
 }
 
 const zoomPct = computed(() => Math.round(scale.value * 100))
 const canZoomIn = computed(() => scale.value < 2)
 const canZoomOut = computed(() => scale.value > 0.5)
-const totalPages = computed(() => pages.value || 0)
 const canPrev = computed(() => currentPage.value > 1)
 const canNext = computed(() => currentPage.value < totalPages.value)
 
 const tocItems = computed(() => {
-  const outline = (info.value as any)?.outline
-  if (!outline || !Array.isArray(outline)) return []
-  const flat: Array<{ title: string; depth: number; original: any }> = []
-  function walk(items: any[], depth: number) {
+  if (!outlineItems.value) return []
+  const flat: FlatOutlineItem[] = []
+  function walk(items: OutlineNode[], depth: number) {
     for (const item of items) {
       flat.push({ title: item.title, depth, original: item })
       if (item.items?.length) walk(item.items, depth + 1)
     }
   }
-  walk(outline, 0)
+  walk(outlineItems.value, 0)
   return flat
 })
 
@@ -79,18 +232,26 @@ function zoomIn() {
 function zoomOut() {
   if (canZoomOut.value) { scale.value = Math.max(scale.value - 0.25, 0.5); fitWidth.value = false }
 }
-function resetZoom() { scale.value = 1; fitWidth.value = false; setTimeout(() => vuePdfRef.value?.reload(), 50) }
+function resetZoom() { scale.value = 1; fitWidth.value = false; setTimeout(() => renderPage(currentPage.value), 50) }
 function toggleFitWidth() { 
   fitWidth.value = !fitWidth.value
   if (fitWidth.value) scale.value = 1 
-  setTimeout(() => vuePdfRef.value?.reload(), 50)
+  setTimeout(() => renderPage(currentPage.value), 50)
 }
 function rotateCW() { rotation.value = (rotation.value + 90) % 360 }
 
 function goToPage(n: number) {
   const p = Math.max(1, Math.min(n, totalPages.value))
-  currentPage.value = p
-  pageInput.value = String(p)
+  
+  if (viewMode.value === 'continuous') {
+    const el = document.getElementById(`pdf-page-${p}`)
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  } else {
+    currentPage.value = p
+    pageInput.value = String(p)
+  }
 }
 function prevPage() { if (canPrev.value) goToPage(currentPage.value - 1) }
 function nextPage() { if (canNext.value) goToPage(currentPage.value + 1) }
@@ -101,28 +262,24 @@ function jumpToPage() {
   if (!isNaN(n)) goToPage(n)
 }
 
-async function navigateToOutlineItem(item: any) {
+function handlePageVisible(pageNum: number) {
+  if (viewMode.value === 'continuous') {
+    currentPage.value = pageNum
+    pageInput.value = String(pageNum)
+  }
+}
+
+async function navigateToOutlineItem(item: OutlineNode) {
   if (item.dest) {
     const pageNum = await getPDFDestination(item.dest)
     if (pageNum) goToPage(pageNum)
   }
-  showToc.value = false
+  if (isMobile.value) activeSidebar.value = 'none'
 }
 
-let mql: MediaQueryList | null = null
-onMounted(() => {
-  mql = window.matchMedia('(max-width: 767px)')
-  isMobile.value = mql.matches
-  mql.addEventListener('change', (e) => { isMobile.value = e.matches })
-  if (isMobile.value) fitWidth.value = true
-  document.addEventListener('fullscreenchange', handleFullscreenChange)
-  window.addEventListener('resize', handleResize)
-})
-onUnmounted(() => { 
-  mql?.removeEventListener('change', () => {}) 
-  document.removeEventListener('fullscreenchange', handleFullscreenChange)
-  window.removeEventListener('resize', handleResize)
-})
+function onMqlChange(e: MediaQueryListEvent) {
+  isMobile.value = e.matches
+}
 
 function handleKeydown(e: KeyboardEvent) {
   const tag = (e.target as HTMLElement)?.tagName
@@ -133,8 +290,29 @@ function handleKeydown(e: KeyboardEvent) {
   else if (e.key === 'End') { e.preventDefault(); lastPage() }
 }
 
-onMounted(() => window.addEventListener('keydown', handleKeydown))
-onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
+let mql: MediaQueryList | null = null
+onMounted(() => {
+  mql = window.matchMedia('(max-width: 767px)')
+  isMobile.value = mql.matches
+  mql.addEventListener('change', onMqlChange)
+  if (isMobile.value) fitWidth.value = true
+  document.addEventListener('fullscreenchange', handleFullscreenChange)
+  window.addEventListener('resize', handleResize)
+  window.addEventListener('keydown', handleKeydown)
+  
+  if (containerRef.value) {
+    containerWidth.value = containerRef.value.clientWidth
+  }
+  
+  loadPDF()
+})
+onUnmounted(() => { 
+  if (mql) mql.removeEventListener('change', onMqlChange)
+  document.removeEventListener('fullscreenchange', handleFullscreenChange)
+  window.removeEventListener('resize', handleResize)
+  window.removeEventListener('keydown', handleKeydown)
+  if (currentLoadingTask) currentLoadingTask.destroy()
+})
 
 let touchStartX = 0
 let touchStartY = 0
@@ -152,13 +330,24 @@ function onTouchEnd(e: TouchEvent) {
 }
 
 watch(() => props.src, () => {
-  isLoading.value = true
-  error.value = null
   scale.value = 1
   rotation.value = 0
   currentPage.value = 1
   pageInput.value = '1'
   fitWidth.value = isMobile.value
+  loadPDF()
+})
+
+watch([currentPage, scale, rotation], () => {
+  if (!isLoading.value && viewMode.value === 'single') {
+    renderPage(currentPage.value)
+  }
+})
+
+watch(viewMode, (newMode) => {
+  if (newMode === 'single' && !isLoading.value) {
+    setTimeout(() => renderPage(currentPage.value), 50)
+  }
 })
 </script>
 
@@ -168,15 +357,24 @@ watch(() => props.src, () => {
       <div class="flex items-center gap-1 sm:gap-2">
         <UButton
           v-if="tocItems.length"
-          :icon="showToc ? 'i-lucide-panel-left-close' : 'i-lucide-panel-left-open'"
+          :icon="activeSidebar === 'toc' ? 'i-lucide-list-x' : 'i-lucide-list'"
           size="sm"
-          color="neutral"
+          :color="activeSidebar === 'toc' ? 'primary' : 'neutral'"
           variant="ghost"
           aria-label="Table of contents"
-          @click="showToc = !showToc"
+          @click="activeSidebar = activeSidebar === 'toc' ? 'none' : 'toc'"
         />
 
-        <USeparator v-if="tocItems.length" orientation="vertical" class="h-5 sm:h-6" />
+        <UButton
+          :icon="activeSidebar === 'thumbnails' ? 'i-lucide-layout-grid' : 'i-lucide-layout-grid'"
+          size="sm"
+          :color="activeSidebar === 'thumbnails' ? 'primary' : 'neutral'"
+          variant="ghost"
+          aria-label="Thumbnails"
+          @click="activeSidebar = activeSidebar === 'thumbnails' ? 'none' : 'thumbnails'"
+        />
+
+        <USeparator orientation="vertical" class="h-5 sm:h-6" />
 
         <UButton
           icon="i-lucide-zoom-out"
@@ -223,6 +421,14 @@ watch(() => props.src, () => {
           variant="ghost"
           aria-label="Rotate clockwise"
           @click="rotateCW"
+        />
+        <UButton
+          :icon="viewMode === 'single' ? 'i-lucide-scroll' : 'i-lucide-square'"
+          size="sm"
+          color="neutral"
+          variant="ghost"
+          :aria-label="viewMode === 'single' ? 'Continuous scroll' : 'Single page'"
+          @click="viewMode = viewMode === 'single' ? 'continuous' : 'single'"
         />
         <UButton
           :icon="isFullscreen ? 'i-lucide-shrink' : 'i-lucide-expand'"
@@ -292,11 +498,11 @@ watch(() => props.src, () => {
     <div class="flex flex-1 overflow-hidden relative">
       <Transition name="slide">
         <div
-          v-if="showToc && tocItems.length"
-          class="absolute left-0 top-0 bottom-0 z-10 w-56 sm:w-64 bg-surface border-r border-divider overflow-y-auto shadow-lg"
+          v-if="activeSidebar !== 'none'"
+          class="absolute left-0 top-0 bottom-0 z-10 w-56 sm:w-64 bg-surface border-r border-divider flex flex-col shadow-lg"
         >
-          <div class="p-3">
-            <h3 class="text-sm font-semibold text-ink mb-2">Contents</h3>
+          <div v-if="activeSidebar === 'toc'" class="p-3 flex-1 overflow-y-auto">
+            <h3 class="text-sm font-semibold text-ink mb-2 sticky top-0 bg-surface z-10 py-1">Contents</h3>
             <div class="space-y-0.5">
               <button
                 v-for="(item, i) in tocItems"
@@ -307,6 +513,20 @@ watch(() => props.src, () => {
               >
                 {{ item.title }}
               </button>
+            </div>
+          </div>
+
+          <div v-else-if="activeSidebar === 'thumbnails'" class="p-3 flex-1 overflow-y-auto bg-surface-subtle">
+            <h3 class="text-sm font-semibold text-ink mb-2 sticky top-0 bg-surface-subtle z-10 py-1">Thumbnails</h3>
+            <div class="flex flex-col gap-2 pb-4">
+              <PDFThumbnail
+                v-for="pageNum in totalPages"
+                :key="pageNum"
+                :pdf-doc="pdfDoc"
+                :page-num="pageNum"
+                :is-active="currentPage === pageNum"
+                @click="goToPage(pageNum); if (isMobile) activeSidebar = 'none'"
+              />
             </div>
           </div>
         </div>
@@ -336,46 +556,59 @@ watch(() => props.src, () => {
         </div>
 
         <div
-          v-else
+          v-else-if="viewMode === 'single'"
           class="flex flex-col items-center min-h-full"
           @contextmenu.prevent
         >
-          <div :class="['bg-surface shadow-card-hover rounded-token-lg overflow-hidden max-w-full transition-all', fitWidth ? 'w-full' : '']">
-            <VuePDF
-              ref="vuePdfRef"
-              :pdf="pdf"
-              :page="currentPage"
-              :scale="fitWidth ? 1 : scale"
-              :fit-parent="fitWidth"
-              :rotation="rotation"
-              :watermark-text="watermarkText"
-              :watermark-options="watermarkOptions"
-            />
-          </div>
+          <div class="my-auto flex flex-col items-center w-full">
+            <div :class="['bg-surface shadow-card-hover rounded-token-lg overflow-hidden max-w-full transition-all', fitWidth ? 'w-full' : '']">
+              <canvas ref="pdfCanvasRef" class="mx-auto block" />
+            </div>
 
-          <div class="flex items-center gap-2 mt-4 mb-2 sm:hidden">
-            <UButton
-              icon="i-lucide-chevron-left"
-              size="sm"
-              color="neutral"
-              variant="outline"
-              aria-label="Previous page"
-              :disabled="!canPrev"
-              @click="prevPage"
-            />
-            <span class="text-xs text-ink-muted font-mono min-w-[60px] text-center">
-              {{ currentPage }} / {{ totalPages }}
-            </span>
-            <UButton
-              icon="i-lucide-chevron-right"
-              size="sm"
-              color="neutral"
-              variant="outline"
-              aria-label="Next page"
-              :disabled="!canNext"
-              @click="nextPage"
-            />
+            <div class="flex items-center gap-2 mt-4 mb-2 sm:hidden">
+              <UButton
+                icon="i-lucide-chevron-left"
+                size="sm"
+                color="neutral"
+                variant="outline"
+                aria-label="Previous page"
+                :disabled="!canPrev"
+                @click="prevPage"
+              />
+              <span class="text-xs text-ink-muted font-mono min-w-[60px] text-center">
+                {{ currentPage }} / {{ totalPages }}
+              </span>
+              <UButton
+                icon="i-lucide-chevron-right"
+                size="sm"
+                color="neutral"
+                variant="outline"
+                aria-label="Next page"
+                :disabled="!canNext"
+                @click="nextPage"
+              />
+            </div>
           </div>
+        </div>
+
+        <div 
+          v-else-if="viewMode === 'continuous'"
+          class="flex flex-col items-center w-full pb-16"
+          @contextmenu.prevent
+        >
+          <PDFPage
+            v-for="pageNum in totalPages"
+            :key="pageNum"
+            :pdf-doc="pdfDoc"
+            :page-num="pageNum"
+            :scale="scale"
+            :rotation="rotation"
+            :fit-width="fitWidth"
+            :container-width="containerWidth"
+            :watermark-text="watermarkText"
+            :watermark-options="watermarkOptions"
+            @visible="handlePageVisible"
+          />
         </div>
       </div>
     </div>
