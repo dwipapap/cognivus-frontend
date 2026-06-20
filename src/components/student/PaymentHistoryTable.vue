@@ -14,7 +14,7 @@ const props = defineProps({
   formatDate: { type: Function, required: true }
 });
 
-const emit = defineEmits(['refresh', 'page-change']);
+const emit = defineEmits(['refresh', 'page-change', 'continue-payment']);
 
 const isMobile = ref(false);
 
@@ -85,7 +85,8 @@ const previousPage = () => { if (hasPrevious.value) emit('page-change', props.cu
               <th class="text-left py-3.5 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider">Type</th>
               <th class="text-left py-3.5 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider">Amount</th>
               <th class="text-left py-3.5 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider">Status</th>
-              <th class="text-left py-3.5 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider last:rounded-tr-xl">Order ID</th>
+              <th class="text-left py-3.5 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider">Order ID</th>
+              <th class="text-right py-3.5 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider last:rounded-tr-xl">Action</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-50">
@@ -101,6 +102,12 @@ const previousPage = () => { if (hasPrevious.value) emit('page-change', props.cu
                 </span>
               </td>
               <td class="py-3.5 px-4 text-xs text-gray-500 font-mono">{{ payment.midtrans_transactionid || payment.midtrans_orderid }}</td>
+              <td class="py-3.5 px-4 text-right">
+                <button v-if="payment.status === 'pending'" @click="emit('continue-payment', payment)"
+                  class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors">
+                  Continue
+                </button>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -129,6 +136,10 @@ const previousPage = () => { if (hasPrevious.value) emit('page-change', props.cu
               <span class="text-xs text-gray-500">Order ID</span>
               <span class="text-xs text-gray-500 font-mono truncate max-w-[55%] text-right">{{ payment.midtrans_transactionid || payment.midtrans_orderid }}</span>
             </div>
+            <button v-if="payment.status === 'pending'" @click="emit('continue-payment', payment)"
+              class="mt-2 w-full inline-flex items-center justify-center gap-1 px-3 py-2 text-xs font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors">
+              Continue Payment
+            </button>
           </div>
         </div>
       </div>

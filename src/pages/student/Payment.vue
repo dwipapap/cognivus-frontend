@@ -39,6 +39,13 @@ const {
 
 const hideMobileNav = inject("hideMobileNav");
 
+// Responsive state
+const isMobile = ref(false);
+
+function checkScreen() {
+    isMobile.value = window.innerWidth < 1024;
+}
+
 // State
 const selectedPaymentType = ref(null);
 const prices = ref([]);
@@ -47,6 +54,10 @@ const showSuccessModal = ref(false);
 const showErrorModal = ref(false);
 const showGuideModal = ref(false);
 const showMobilePaymentSummary = ref(false);
+const showContinueModal = ref(false);
+const continuePayment = ref(null);
+const continueLoading = ref(false);
+const continueError = ref('');
 const isHistoryLoading = ref(false);
 const paymentHistory = ref([]);
 const ancillaryPrices = ref([]);
@@ -208,14 +219,19 @@ const handlePayment = async () => {
     try {
         resetPaymentState();
 
+        const studentid = studentProfile.value?.studentid || authStore.user?.userid;
         const paymentData = {
             email: studentEmail.value,
             amount: selectedAmount.value,
             name: studentName.value,
-            studentid:
-                studentProfile.value?.studentid || authStore.user?.userid,
+            studentid,
             payment_type: selectedPaymentType.value,
         };
+
+        // Sync stale pending payments before generating new token
+        if (studentid) {
+            try { await paymentAPI.refreshPaymentStatus(studentid); } catch (_) {}
+        }
 
         // Generate token from backend
         const response = await paymentAPI.generateToken(paymentData);
@@ -255,6 +271,78 @@ const closeSuccessModal = () => {
 
 const closeErrorModal = () => {
     showErrorModal.value = false;
+    continueError.value = '';
+};
+
+const handleContinuePayment = async () => {
+    if (!continuePayment.value?.token) return;
+    try {
+        continueLoading.value = true;
+
+        // Sync payment status with Midtrans first
+        const studentid = continuePayment.value.studentid || authStore.user?.userid;
+        if (studentid) {
+            try {
+                await paymentAPI.refreshPaymentStatus(studentid);
+                await fetchPaymentHistory();
+            } catch (_) {}
+        }
+
+        // Check if payment is still pending after refresh
+        if (continuePayment.value?.status !== 'pending') {
+            showContinueModal.value = false;
+            continuePayment.value = null;
+            return;
+        }
+
+        await pay(continuePayment.value.token, {
+            onSuccess: (result) => {
+                showContinueModal.value = false;
+                continuePayment.value = null;
+                showSuccessModal.value = true;
+                fetchPaymentHistory();
+                selectedPaymentType.value = null;
+            },
+            onPending: (result) => {
+                showContinueModal.value = false;
+                continuePayment.value = null;
+                fetchPaymentHistory();
+            },
+            onError: (result) => {
+                showContinueModal.value = false;
+                continuePayment.value = null;
+                continueError.value = 'Payment session may have expired. Please try creating a new payment.';
+                showErrorModal.value = true;
+            },
+            onClose: () => {
+                // Sync status after closing the popup
+                if (studentid) {
+                    paymentAPI.refreshPaymentStatus(studentid).then(() => {
+                        fetchPaymentHistory();
+                    });
+                } else {
+                    fetchPaymentHistory();
+                }
+            },
+        });
+    } catch (err) {
+        console.error("Continue payment error:", err);
+        showErrorModal.value = true;
+        showContinueModal.value = false;
+        continuePayment.value = null;
+    } finally {
+        continueLoading.value = false;
+    }
+};
+
+const openContinueModal = (payment) => {
+    continuePayment.value = payment;
+    showContinueModal.value = true;
+};
+
+const closeContinueModal = () => {
+    showContinueModal.value = false;
+    continuePayment.value = null;
 };
 
 const openGuideModal = () => {
@@ -343,10 +431,13 @@ watch(
 
 onUnmounted(() => {
     if (hideMobileNav) hideMobileNav.value = false;
+    window.removeEventListener("resize", checkScreen);
 });
 
 // Lifecycle
 onMounted(async () => {
+    checkScreen();
+    window.addEventListener("resize", checkScreen);
     await fetchStudentProfile();
     fetchPrices();
     fetchAncillaryPrices();
@@ -497,6 +588,7 @@ onMounted(async () => {
                         :format-date="formatDate"
                         @refresh="handleRefreshHistory"
                         @page-change="currentPage = $event"
+                        @continue-payment="openContinueModal"
                     />
                 </div>
             </div>
@@ -728,6 +820,7 @@ onMounted(async () => {
                 :format-date="formatDate"
                 @refresh="handleRefreshHistory"
                 @page-change="currentPage = $event"
+                @continue-payment="openContinueModal"
             />
         </div>
 
@@ -745,14 +838,98 @@ onMounted(async () => {
         <Modal
             :show="showErrorModal"
             type="error"
-            title="Payment Failed"
+            :title="continueError ? 'Payment Session Expired' : 'Payment Failed'"
             :message="
+                continueError ||
                 paymentError ||
                 'An error occurred while processing the payment.'
             "
             @close="closeErrorModal"
             @confirm="closeErrorModal"
         />
+
+        <!-- Continue Payment — Desktop Modal -->
+        <UModal v-if="!isMobile" v-model:open="showContinueModal" title="Continue Payment" description="Complete your pending payment." :ui="{ footer: 'justify-end' }">
+            <template #body>
+                <div v-if="continuePayment" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-xs text-gray-500 font-medium mb-1">Payment Type</p>
+                            <p class="text-sm font-semibold text-gray-800">{{ getPaymentTypeName(continuePayment.payment_type) }}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 font-medium mb-1">Amount</p>
+                            <p class="text-sm font-bold text-blue-600">{{ formatCurrency(continuePayment.amount) }}</p>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 font-medium mb-1">Order ID</p>
+                        <p class="text-sm font-mono text-gray-700">{{ continuePayment.midtrans_orderid }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 font-medium mb-1">Created</p>
+                        <p class="text-sm text-gray-700">{{ formatDate(continuePayment.created_at) }}</p>
+                    </div>
+                    <div class="flex items-start gap-2 bg-blue-50 rounded-lg p-3 border border-blue-100">
+                        <UIcon name="i-lucide-info" class="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                        <p class="text-xs text-blue-700">You have a pending payment. Click below to reopen the payment window and complete your transaction.</p>
+                    </div>
+                </div>
+            </template>
+            <template #footer="{ close }">
+                <UButton label="Cancel" color="neutral" variant="outline" @click="close" />
+                <UButton label="Pay Now" color="primary" :loading="continueLoading" @click="handleContinuePayment" />
+            </template>
+        </UModal>
+
+        <!-- Continue Payment — Mobile Bottom Sheet -->
+        <USlideover
+            v-if="isMobile"
+            v-model:open="showContinueModal"
+            side="bottom"
+            :close="false"
+            :ui="{
+                content: 'rounded-t-2xl min-h-[35vh]'
+            }"
+        >
+            <template #body>
+                <div v-if="continuePayment" class="flex flex-col px-6 py-6 gap-5">
+                    <div class="flex items-center justify-center">
+                        <div class="flex items-center justify-center w-14 h-14 rounded-full bg-blue-100">
+                            <UIcon name="i-lucide-wallet" class="w-7 h-7 text-blue-600" />
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <h3 class="text-lg font-bold text-gray-900">Continue Payment</h3>
+                        <p class="text-sm text-gray-500 mt-1">Complete your pending payment</p>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-4 space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-gray-500">Payment Type</span>
+                            <span class="text-sm font-semibold text-gray-800">{{ getPaymentTypeName(continuePayment.payment_type) }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-gray-500">Amount</span>
+                            <span class="text-sm font-bold text-blue-600">{{ formatCurrency(continuePayment.amount) }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-gray-500">Order ID</span>
+                            <span class="text-xs font-mono text-gray-600">{{ continuePayment.midtrans_orderid }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-gray-500">Created</span>
+                            <span class="text-xs text-gray-600">{{ formatDate(continuePayment.created_at) }}</span>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-2 bg-blue-50 rounded-lg p-3 border border-blue-100">
+                        <UIcon name="i-lucide-info" class="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                        <p class="text-xs text-blue-700">You have a pending payment. Tap below to reopen the payment window and complete your transaction.</p>
+                    </div>
+                    <UButton label="Pay Now" color="primary" size="lg" class="w-full rounded-full" :loading="continueLoading" @click="handleContinuePayment" />
+                    <UButton label="Cancel" color="neutral" variant="outline" size="lg" class="w-full rounded-full" @click="showContinueModal = false; continuePayment = null" />
+                </div>
+            </template>
+        </USlideover>
 
         <!-- Payment Guide Modal -->
         <Modal
