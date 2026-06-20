@@ -26,9 +26,6 @@ const handleLogout = () => {
 <template>
   <UDashboardGroup>
     <UDashboardSidebar collapsible resizable>
-      <template #header="{ collapsed }">
-        <UDashboardSearchButton :collapsed="collapsed" />
-      </template>
       <template #default="{ collapsed }">
         <UNavigationMenu :collapsed="collapsed" :items="navItems" orientation="vertical" />
       </template>

@@ -1,7 +1,6 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { programAPI } from '../../services/api';
-import Modal from '../../components/ui/Modal.vue';
 
 import { useConfirm } from '@/composables/useConfirm'
 
@@ -14,6 +13,7 @@ const selectedProgram = ref(null);
 
 const { open: confirmOpen, message: confirmMessage, confirm, onConfirm, onCancel } = useConfirm()
 const isEditMode = ref(false);
+const programFormRef = ref(null);
 const currentPage = ref(1);
 const itemsPerPage = 9; // 3x3 grid
 
@@ -156,27 +156,29 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- Form Modal -->
-    <Modal 
-      :show="showFormModal" 
-      @close="showFormModal = false" 
-      :persistent="true" 
+    <!-- Form Slideover -->
+    <USlideover
+      v-model:open="showFormModal"
       :title="isEditMode ? 'Edit Program' : 'Add New Program'"
-      size="5xl"
-      :hide-footer="true"
+      description="Program types and descriptions"
+      :dismissible="false"
     >
-      <template #icon>
-        <UIcon name="i-lucide-folder-tree" class="w-6 h-6 text-white" />
-      </template>
-      <template #content>
+      <template #body>
         <ProgramForm
+          ref="programFormRef"
           :program="selectedProgram"
           :is-edit-mode="isEditMode"
           @submit="handleSave"
-          @cancel="showFormModal = false"
         />
       </template>
-    </Modal>
+
+      <template #footer="{ close }">
+        <UButton label="Cancel" color="neutral" variant="outline" @click="close" />
+        <UButton type="submit" form="program-form" color="primary" variant="solid" :loading="programFormRef?.isSubmitting" icon="i-lucide-check">
+          {{ isEditMode ? 'Update Program' : 'Create Program' }}
+        </UButton>
+      </template>
+    </USlideover>
 
   </div>
 

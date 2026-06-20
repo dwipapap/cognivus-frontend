@@ -1,5 +1,5 @@
 <template>
-  <form @submit.prevent="handleSave" class="space-y-6">
+  <form id="program-form" @submit.prevent="handleSave" class="space-y-6">
     <div>
       <h3 class="text-sm font-semibold text-default flex items-center gap-2">
         <UIcon name="i-lucide-book-marked" class="w-4 h-4 text-toned" />
@@ -8,24 +8,13 @@
       <p class="text-xs text-muted mt-1">Define the core identity of this academic program.</p>
     </div>
 
-    <div class="bg-default p-6 rounded-lg border border-default space-y-4">
-      <UFormField label="Program Name" required description="Unique, descriptive. Visible to students during enrollment.">
-        <UInput v-bind="getFieldProps('name')" placeholder="e.g., Intensive English" />
-      </UFormField>
+    <UFormField label="Program Name" required description="Unique, descriptive. Visible to students during enrollment.">
+      <UInput v-bind="getFieldProps('name')" placeholder="e.g., Intensive English" class="w-full" />
+    </UFormField>
 
-      <UFormField label="Program Description">
-        <UTextarea v-bind="getFieldProps('description')" :rows="4" placeholder="Program objectives and curriculum structure" />
-      </UFormField>
-    </div>
-
-    <div class="flex items-center justify-end gap-3 pt-6 border-t border-default">
-      <UButton type="button" color="neutral" variant="outline" @click="$emit('cancel')">
-        Cancel
-      </UButton>
-      <UButton type="submit" color="primary" variant="solid" :loading="isSubmitting" icon="i-lucide-check">
-        {{ isEditMode ? 'Update Program' : 'Create Program' }}
-      </UButton>
-    </div>
+    <UFormField label="Program Description">
+      <UTextarea v-bind="getFieldProps('description')" :rows="4" placeholder="Program objectives and curriculum structure" class="w-full" />
+    </UFormField>
   </form>
 </template>
 
@@ -41,7 +30,7 @@ const props = defineProps({
   isEditMode: { type: Boolean, default: false }
 });
 
-const emit = defineEmits(['submit', 'cancel']);
+const emit = defineEmits(['submit']);
 
 const { formData, errors, isSubmitting, submit, getFieldProps, reset } = useForm(
   {
@@ -52,6 +41,8 @@ const { formData, errors, isSubmitting, submit, getFieldProps, reset } = useForm
     name: ['required']
   }
 );
+
+defineExpose({ isSubmitting });
 
 watch(() => props.program, (newProgram) => {
   if (newProgram) {

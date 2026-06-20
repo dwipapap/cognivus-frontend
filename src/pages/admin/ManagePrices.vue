@@ -1,7 +1,6 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { priceAPI, levelAPI, programAPI, ancillaryPriceAPI } from '../../services/api';
-import Modal from '../../components/ui/Modal.vue';
 import { useConfirm } from '@/composables/useConfirm'
 
 import PriceForm from './PriceForm.vue';
@@ -24,6 +23,7 @@ const selectedPrice = ref(null);
 
 const { open: confirmOpen, message: confirmMessage, confirm, onConfirm, onCancel } = useConfirm()
 const isEditMode = ref(false);
+const priceFormRef = ref(null);
 const currentPage = ref(1);
 const itemsPerPage = 15;
 
@@ -34,6 +34,7 @@ const showAncillaryModal = ref(false);
 const selectedAncillary = ref(null);
 const isAncillaryEditMode = ref(false);
 const ancillaryForm = ref({ name: '', description: '', price: '' });
+const isAncillarySubmitting = ref(false);
 
 /** Paginated prices */
 const paginatedPrices = computed(() => {
@@ -174,6 +175,7 @@ const openAncillaryEditModal = (item) => {
 };
 
 const handleAncillarySave = async () => {
+  isAncillarySubmitting.value = true;
   try {
     if (isAncillaryEditMode.value) {
       await ancillaryPriceAPI.update(selectedAncillary.value.apid, ancillaryForm.value);
@@ -186,6 +188,8 @@ const handleAncillarySave = async () => {
     fetchAncillaryPrices();
   } catch (error) {
     toast.add({ title: 'Error', description: 'Failed to save ancillary price.', color: 'error' });
+  } finally {
+    isAncillarySubmitting.value = false;
   }
 };
 
@@ -347,45 +351,61 @@ onMounted(() => {
       </template>
     </UTabs>
 
-    <!-- Class Price Form Modal -->
-    <Modal :show="showFormModal" @close="showFormModal = false" :persistent="true"
-      :title="isEditMode ? 'Edit Price' : 'Add New Price'" size="5xl" :hide-footer="true">
-      <template #icon>
-        <UIcon name="i-lucide-tag" class="w-6 h-6 text-white" />
+    <!-- Class Price Form Slideover -->
+    <USlideover
+      v-model:open="showFormModal"
+      :title="isEditMode ? 'Edit Price' : 'Add New Price'"
+      description="Manage class and ancillary pricing"
+      :dismissible="false"
+    >
+      <template #body>
+        <PriceForm
+          ref="priceFormRef"
+          :price-item="selectedPrice"
+          :is-edit-mode="isEditMode"
+          :levels="levels"
+          :programs="programs"
+          :prices="prices"
+          @save="handleSave"
+        />
       </template>
-      <template #content>
-        <PriceForm :price-item="selectedPrice" :is-edit-mode="isEditMode" :levels="levels" :programs="programs"
-          :prices="prices" @close="showFormModal = false" @save="handleSave" />
-      </template>
-    </Modal>
 
-    <!-- Ancillary Price Form Modal -->
-    <Modal :show="showAncillaryModal" @close="showAncillaryModal = false" :persistent="true"
-      :title="isAncillaryEditMode ? 'Edit Ancillary Price' : 'Add Ancillary Price'" size="md"
-      :hide-footer="true">
-      <template #icon>
-        <UIcon name="i-lucide-wallet" class="w-6 h-6 text-white" />
+      <template #footer="{ close }">
+        <UButton label="Cancel" color="neutral" variant="outline" @click="close" />
+        <UButton type="submit" form="price-form" color="primary" variant="solid" :loading="priceFormRef?.isSubmitting" :disabled="priceFormRef?.isDuplicateCombination" icon="i-lucide-check">
+          {{ isEditMode ? 'Update Price' : 'Create Price' }}
+        </UButton>
       </template>
-      <template #content>
-        <form @submit.prevent="handleAncillarySave" class="space-y-4">
+    </USlideover>
+
+    <!-- Ancillary Price Form Slideover -->
+    <USlideover
+      v-model:open="showAncillaryModal"
+      :title="isAncillaryEditMode ? 'Edit Ancillary Price' : 'Add Ancillary Price'"
+      description="One-time fees for exams, materials, or services"
+      :dismissible="false"
+    >
+      <template #body>
+        <form id="ancillary-price-form" @submit.prevent="handleAncillarySave" class="space-y-4">
           <UFormField label="Name" required>
-            <UInput v-model="ancillaryForm.name" placeholder="e.g., Final Exam" />
+            <UInput v-model="ancillaryForm.name" placeholder="e.g., Final Exam" class="w-full" />
           </UFormField>
           <UFormField label="Description">
-            <UInput v-model="ancillaryForm.description" placeholder="Optional" />
+            <UInput v-model="ancillaryForm.description" placeholder="Optional" class="w-full" />
           </UFormField>
           <UFormField label="Price" required>
-            <UInput v-model="ancillaryForm.price" type="number" placeholder="e.g., 200000" />
+            <UInput v-model="ancillaryForm.price" type="number" placeholder="e.g., 200000" class="w-full" />
           </UFormField>
-          <div class="flex justify-end gap-3 pt-6 border-t border-default">
-            <UButton type="button" color="neutral" variant="outline" @click="showAncillaryModal = false">Cancel</UButton>
-            <UButton type="submit" color="primary" variant="solid" icon="i-lucide-check">
-              {{ isAncillaryEditMode ? 'Update' : 'Create' }}
-            </UButton>
-          </div>
         </form>
       </template>
-    </Modal>
+
+      <template #footer="{ close }">
+        <UButton label="Cancel" color="neutral" variant="outline" @click="close" />
+        <UButton type="submit" form="ancillary-price-form" color="primary" variant="solid" :loading="isAncillarySubmitting" icon="i-lucide-check">
+          {{ isAncillaryEditMode ? 'Update' : 'Create' }}
+        </UButton>
+      </template>
+    </USlideover>
 
   </div>
 

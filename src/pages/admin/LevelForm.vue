@@ -1,5 +1,5 @@
 <template>
-  <form @submit.prevent="handleSave" class="space-y-6">
+  <form id="level-form" @submit.prevent="handleSave" class="space-y-6">
     <div>
       <h3 class="text-sm font-semibold text-default flex items-center gap-2">
         <UIcon name="i-lucide-layers" class="w-4 h-4 text-toned" />
@@ -8,24 +8,13 @@
       <p class="text-xs text-muted mt-1">Define a milestone in the curriculum hierarchy.</p>
     </div>
 
-    <div class="bg-default p-6 rounded-lg border border-default space-y-4">
-      <UFormField label="Level Name" required description="Descriptive. Communicates difficulty (e.g., Intermediate, Advanced).">
-        <UInput v-bind="getFieldProps('name')" placeholder="e.g., Intermediate" />
-      </UFormField>
+    <UFormField label="Level Name" required description="Descriptive. Communicates difficulty (e.g., Intermediate, Advanced).">
+      <UInput v-bind="getFieldProps('name')" placeholder="e.g., Intermediate" class="w-full" />
+    </UFormField>
 
-      <UFormField label="Description" description="Goals, prerequisites, and what this level covers.">
-        <UTextarea v-bind="getFieldProps('description')" :rows="5" placeholder="Optional" />
-      </UFormField>
-    </div>
-
-    <div class="flex items-center justify-end gap-3 pt-6 border-t border-default">
-      <UButton type="button" color="neutral" variant="outline" @click="$emit('cancel')">
-        Cancel
-      </UButton>
-      <UButton type="submit" color="primary" variant="solid" :loading="isSubmitting" icon="i-lucide-check">
-        {{ isEditMode ? 'Update Level' : 'Create Level' }}
-      </UButton>
-    </div>
+    <UFormField label="Description" description="Goals, prerequisites, and what this level covers.">
+      <UTextarea v-bind="getFieldProps('description')" :rows="5" placeholder="Optional" class="w-full" />
+    </UFormField>
   </form>
 </template>
 
@@ -41,7 +30,7 @@ const props = defineProps({
   isEditMode: { type: Boolean, default: false }
 });
 
-const emit = defineEmits(['submit', 'cancel']);
+const emit = defineEmits(['submit']);
 
 const { formData, errors, isSubmitting, submit, getFieldProps, reset } = useForm(
   {
@@ -52,6 +41,8 @@ const { formData, errors, isSubmitting, submit, getFieldProps, reset } = useForm
     name: ['required']
   }
 );
+
+defineExpose({ isSubmitting });
 
 watch(() => props.level, (newLevel) => {
   if (newLevel) {

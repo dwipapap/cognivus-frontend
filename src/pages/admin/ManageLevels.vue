@@ -1,7 +1,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { levelAPI } from '../../services/api';
-import Modal from '../../components/ui/Modal.vue';
 
 import { useConfirm } from '@/composables/useConfirm'
 
@@ -14,6 +13,7 @@ const selectedLevel = ref(null);
 
 const { open: confirmOpen, message: confirmMessage, confirm, onConfirm, onCancel } = useConfirm()
 const isEditMode = ref(false);
+const levelFormRef = ref(null);
 const currentPage = ref(1);
 const itemsPerPage = 9; // 3x3 grid
 
@@ -151,27 +151,29 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- Form Modal -->
-    <Modal
-      :show="showFormModal"
-      @close="showFormModal = false"
-      :persistent="true"
-      size="4xl"
+    <!-- Form Slideover -->
+    <USlideover
+      v-model:open="showFormModal"
       :title="isEditMode ? 'Edit Level' : 'Add New Level'"
-      :hide-footer="true"
+      description="Course levels in progression order"
+      :dismissible="false"
     >
-      <template #icon>
-        <UIcon name="i-lucide-bar-chart-3" class="w-6 h-6 text-white" />
-      </template>
-      <template #content>
+      <template #body>
         <LevelForm
+          ref="levelFormRef"
           :level="selectedLevel"
           :is-edit-mode="isEditMode"
           @submit="handleSave"
-          @cancel="showFormModal = false"
         />
       </template>
-    </Modal>
+
+      <template #footer="{ close }">
+        <UButton label="Cancel" color="neutral" variant="outline" @click="close" />
+        <UButton type="submit" form="level-form" color="primary" variant="solid" :loading="levelFormRef?.isSubmitting" icon="i-lucide-check">
+          {{ isEditMode ? 'Update Level' : 'Create Level' }}
+        </UButton>
+      </template>
+    </USlideover>
 
   </div>
 

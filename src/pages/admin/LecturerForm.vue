@@ -88,26 +88,26 @@ const handleSave = async () => {
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <UFormField label="Full Name" required class="md:col-span-2">
-              <UInput v-bind="getFieldProps('fullname')" placeholder="Full name with titles" />
+              <UInput v-bind="getFieldProps('fullname')" placeholder="Full name with titles" class="w-full" />
             </UFormField>
 
             <UFormField label="Gender">
               <USelect v-bind="getFieldProps('gender')" :items="[
                 { label: 'Male', value: 'Male' },
                 { label: 'Female', value: 'Female' }
-              ]" placeholder="Select gender" />
+              ]" placeholder="Select gender" class="w-full" />
             </UFormField>
 
             <UFormField label="Phone Number" required>
-              <UInput v-bind="getFieldProps('phone')" type="tel" placeholder="+62 ..." />
+              <UInput v-bind="getFieldProps('phone')" type="tel" placeholder="+62 ..." class="w-full" />
             </UFormField>
 
             <UFormField label="Birth Place">
-              <UInput v-bind="getFieldProps('birthplace')" placeholder="City of birth" />
+              <UInput v-bind="getFieldProps('birthplace')" placeholder="City of birth" class="w-full" />
             </UFormField>
 
             <UFormField label="Birth Date">
-              <UInput v-bind="getFieldProps('birthdate')" type="date" />
+              <UInput v-bind="getFieldProps('birthdate')" type="date" class="w-full" />
             </UFormField>
           </div>
         </section>
@@ -121,15 +121,15 @@ const handleSave = async () => {
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <UFormField label="Username" required>
-              <UInput v-bind="getFieldProps('username')" :disabled="isEditMode" :placeholder="isEditMode ? 'Cannot be changed' : 'Unique username'" />
+              <UInput v-bind="getFieldProps('username')" :disabled="isEditMode" :placeholder="isEditMode ? 'Cannot be changed' : 'Unique username'" class="w-full" />
             </UFormField>
 
             <UFormField label="Email Address" :required="!isEditMode">
-              <UInput v-bind="getFieldProps('email')" type="email" :placeholder="isEditMode ? 'Current email' : 'lecturer@example.com'" />
+              <UInput v-bind="getFieldProps('email')" type="email" :placeholder="isEditMode ? 'Current email' : 'lecturer@example.com'" class="w-full" />
             </UFormField>
 
             <UFormField label="Access Password" :required="!isEditMode" class="md:col-span-2" description="Minimum 8 characters.">
-              <UInput v-bind="getFieldProps('password')" type="password" :placeholder="isEditMode ? 'Leave empty to keep current' : 'Min. 8 characters'" />
+              <UInput v-bind="getFieldProps('password')" type="password" :placeholder="isEditMode ? 'Leave empty to keep current' : 'Min. 8 characters'" class="w-full" />
             </UFormField>
           </div>
         </section>
@@ -146,11 +146,11 @@ const handleSave = async () => {
 
           <div class="space-y-4">
             <UFormField label="Latest Education">
-              <UInput v-bind="getFieldProps('lasteducation')" placeholder="e.g., M.Sc in Computer Science" />
+              <UInput v-bind="getFieldProps('lasteducation')" placeholder="e.g., M.Sc in Computer Science" class="w-full" />
             </UFormField>
 
             <UFormField label="Residential Address">
-              <UTextarea v-bind="getFieldProps('address')" placeholder="Full physical address" :rows="4" />
+              <UTextarea v-bind="getFieldProps('address')" placeholder="Full physical address" :rows="4" class="w-full" />
             </UFormField>
           </div>
         </section>

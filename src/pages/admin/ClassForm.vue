@@ -139,15 +139,15 @@ const handleStudentSave = async (studentData) => {
 
               <div class="space-y-4">
                 <UFormField label="Class Code" required>
-                  <UInput v-bind="getFieldProps('class_code')" placeholder="e.g., ENG-A1" />
+                  <UInput v-bind="getFieldProps('class_code')" placeholder="e.g., ENG-A1" class="w-full" />
                 </UFormField>
 
                 <UFormField label="Academic Level" required>
-                  <USelect v-bind="getFieldProps('levelid')" :items="levels.map(l => ({ label: l.name, value: l.levelid }))" placeholder="Select Level" />
+                  <USelect v-bind="getFieldProps('levelid')" :items="levels.map(l => ({ label: l.name, value: l.levelid }))" placeholder="Select Level" class="w-full" />
                 </UFormField>
 
                 <UFormField label="Description" description="Class objectives, requirements, or other notes.">
-                  <UTextarea v-bind="getFieldProps('description')" placeholder="Optional" :rows="4" />
+                  <UTextarea v-bind="getFieldProps('description')" placeholder="Optional" :rows="4" class="w-full" />
                 </UFormField>
               </div>
             </div>
@@ -163,7 +163,7 @@ const handleStudentSave = async (studentData) => {
               </h3>
 
               <UFormField label="Assigned Lecturer" description="Only approved lecturers are shown. Update later if needed.">
-                <USelect v-bind="getFieldProps('lecturerid')" :items="lecturers.map(l => ({ label: l.fullname, value: l.lecturerid }))" placeholder="Assign Lecturer" clearable />
+                <USelect v-bind="getFieldProps('lecturerid')" :items="lecturers.map(l => ({ label: l.fullname, value: l.lecturerid }))" placeholder="Assign Lecturer" clearable class="w-full" />
               </UFormField>
             </div>
 
@@ -179,11 +179,11 @@ const handleStudentSave = async (studentData) => {
                   <p class="text-xs font-medium text-muted uppercase tracking-wider">Primary Session</p>
                   <div class="grid grid-cols-2 gap-4">
                     <UFormField label="Session Day">
-                      <USelect v-bind="getFieldProps('schedule_day')" :items="daysOfWeek.map(d => ({ label: d.label, value: d.value }))" placeholder="Select Day" />
+                      <USelect v-bind="getFieldProps('schedule_day')" :items="daysOfWeek.map(d => ({ label: d.label, value: d.value }))" placeholder="Select Day" class="w-full" />
                     </UFormField>
 
                     <UFormField label="Start Time">
-                      <UInput v-bind="getFieldProps('schedule_time')" type="time" />
+                      <UInput v-bind="getFieldProps('schedule_time')" type="time" class="w-full" />
                     </UFormField>
                   </div>
                 </div>
@@ -192,11 +192,11 @@ const handleStudentSave = async (studentData) => {
                   <p class="text-xs font-medium text-muted uppercase tracking-wider">Secondary Session</p>
                   <div class="grid grid-cols-2 gap-4">
                     <UFormField label="Session Day">
-                      <USelect v-bind="getFieldProps('schedule_day_2')" :items="daysOfWeek.map(d => ({ label: d.label, value: d.value }))" placeholder="Select Day" clearable />
+                      <USelect v-bind="getFieldProps('schedule_day_2')" :items="daysOfWeek.map(d => ({ label: d.label, value: d.value }))" placeholder="Select Day" clearable class="w-full" />
                     </UFormField>
 
                     <UFormField label="Start Time">
-                      <UInput v-bind="getFieldProps('schedule_time_2')" type="time" />
+                      <UInput v-bind="getFieldProps('schedule_time_2')" type="time" class="w-full" />
                     </UFormField>
                   </div>
                 </div>
