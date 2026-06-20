@@ -19,7 +19,7 @@
   </div>
 
   <!-- Content -->
-  <div v-else-if="student && grade" class="space-y-8 mb-8">
+  <div v-else-if="student && (grade || isNewGrade)" class="space-y-8 mb-8">
     <!-- Page Header -->
     <div>
       <h1 class="text-2xl font-semibold text-default tracking-tight">{{ isNewGrade ? 'Add New Grade' : 'Edit Grade' }}</h1>
