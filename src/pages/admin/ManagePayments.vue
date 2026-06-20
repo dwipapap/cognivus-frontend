@@ -129,19 +129,6 @@ const refreshPayments = async () => {
   showNotification('success', 'Payment data refreshed successfully!');
 };
 
-/** Update payment status */
-const updatePaymentStatus = async (status) => {
-  if (!selectedPayment.value) return;
-  try {
-    await paymentAPI.updatePaymentStatus(selectedPayment.value.paymentid, status);
-    toast.add({ title: 'Success', description: `Payment marked as ${status}`, color: 'success' });
-    showDetailsModal.value = false;
-    fetchPayments();
-  } catch (error) {
-    toast.add({ title: 'Error', description: 'Failed to update payment status.', color: 'error' });
-  }
-};
-
 /** Export to CSV */
 const exportToCSV = () => {
   const headers = ['Payment ID', 'Student Name', 'Order ID', 'Transaction ID', 'Amount', 'Type', 'Status', 'Date'];
@@ -460,10 +447,6 @@ onMounted(() => {
             </div>
           </div>
 
-          <div v-if="selectedPayment?.status === 'pending' || selectedPayment?.status === 'failed'" class="flex gap-2 mt-4 pt-4 border-t border-default">
-            <UButton label="Mark as Success" color="success" @click="updatePaymentStatus('success')" />
-            <UButton label="Mark as Failed" color="error" variant="soft" @click="updatePaymentStatus('failed')" />
-          </div>
         </div>
       </template>
       <template #footer>
