@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref, reactive, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import { useLecturerProfile } from '../../composables/useLecturerProfile';
 import { classAPI, courseAPI, courseFileAPI, levelAPI } from '../../services/api';
 import BaseFileUpload from '../../components/form/BaseFileUpload.vue';
@@ -9,16 +9,9 @@ import BaseButton from '../../components/ui/BaseButton.vue';
 import LoadingSpinner from '../../components/ui/LoadingSpinner.vue';
 import ConfirmDialog from '../../components/ui/ConfirmDialog.vue';
 import ClassSidebar from '../../components/lecturer/ClassSidebar.vue';
-import IconPlus from '~icons/solar/add-circle-bold';
-import IconPen from '~icons/solar/pen-new-square-bold';
 import IconTrash from '~icons/solar/trash-bin-trash-bold';
 import IconFile from '~icons/solar/file-text-bold';
 import IconVideo from '~icons/solar/videocamera-record-bold';
-import IconLink from '~icons/solar/link-bold';
-import IconCheck from '~icons/solar/check-circle-bold';
-import IconInfo from '~icons/solar/info-circle-bold';
-import IconCloudUpload from '~icons/solar/cloud-upload-bold';
-import IconClose from '~icons/solar/close-circle-bold';
 import { formatDate } from '../../utils/formatters';
 
 const { lecturerProfile, isLoading: profileLoading } = useLecturerProfile();
@@ -31,21 +24,48 @@ const isLoading = ref(true);
 const errorMessage = ref('');
 const successMessage = ref('');
 const currentPage = ref(1);
-const itemsPerPage = 5;
+const itemsPerPage = 10;
 
 /** Modal and form state */
 const showModal = ref(false);
 const editingCourse = ref(null);
 const existingFiles = ref([]);
-const formData = ref({
+const formState = reactive({
   title: '',
   course_code: '',
   description: '',
   video_link: ''
-});
+})
+const fieldErrors = reactive({
+  title: '',
+  course_code: '',
+  description: '',
+  video_link: ''
+})
 const uploadFiles = ref([]);
 const isUploading = ref(false);
 const isDeletingFile = ref(false);
+
+/** Dirty state tracking for unsaved-changes warning */
+const initialFormSnapshot = ref(null)
+const isDirty = computed(() => {
+  if (!initialFormSnapshot.value) return false
+  const s = initialFormSnapshot.value
+  return (
+    formState.title !== s.title ||
+    formState.course_code !== s.course_code ||
+    formState.description !== s.description ||
+    formState.video_link !== s.video_link ||
+    uploadFiles.value.length > 0
+  )
+})
+
+const takeFormSnapshot = () => ({
+  title: formState.title,
+  course_code: formState.course_code,
+  description: formState.description,
+  video_link: formState.video_link
+})
 
 /** Confirmation dialog state */
 const showConfirmDialog = ref(false);
@@ -53,7 +73,9 @@ const confirmAction = ref(null);
 const confirmConfig = ref({
   title: '',
   message: '',
-  variant: 'danger'
+  variant: 'danger',
+  confirmText: 'Delete',
+  cancelText: 'Cancel'
 });
 
 /** Get courses for selected class with file count */
@@ -140,36 +162,46 @@ const fetchCourses = async () => {
   }
 };
 
-/** Reset form */
+const clearFieldErrors = () => {
+  fieldErrors.title = ''
+  fieldErrors.course_code = ''
+  fieldErrors.description = ''
+  fieldErrors.video_link = ''
+}
+
 const resetForm = () => {
-  formData.value = {
-    title: '',
-    course_code: '',
-    description: '',
-    video_link: ''
-  };
+  formState.title = ''
+  formState.course_code = ''
+  formState.description = ''
+  formState.video_link = ''
   uploadFiles.value = [];
   existingFiles.value = [];
   editingCourse.value = null;
   showModal.value = false;
 };
 
-/** Open add form */
 const openAddForm = () => {
-  resetForm();
+  clearFieldErrors()
+  formState.title = ''
+  formState.course_code = ''
+  formState.description = ''
+  formState.video_link = ''
+  uploadFiles.value = [];
+  existingFiles.value = [];
+  editingCourse.value = null;
+  initialFormSnapshot.value = takeFormSnapshot()
   showModal.value = true;
 };
 
-/** Open edit form */
 const openEditForm = (course) => {
+  clearFieldErrors()
   editingCourse.value = course;
-  formData.value = {
-    title: course.title,
-    course_code: course.course_code || '',
-    description: course.description || '',
-    video_link: course.video_link || ''
-  };
+  formState.title = course.title
+  formState.course_code = course.course_code || ''
+  formState.description = course.description || ''
+  formState.video_link = course.video_link || ''
   existingFiles.value = course.tbcourse_files || [];
+  initialFormSnapshot.value = takeFormSnapshot()
   showModal.value = true;
 };
 
@@ -193,6 +225,26 @@ const handleCancel = () => {
   showConfirmDialog.value = false;
   confirmAction.value = null;
 };
+
+/** Dirty close confirmation */
+const attemptClose = () => {
+  if (isDirty.value) {
+    showConfirmation(
+      {
+        title: 'Unsaved Changes',
+        message: 'You have unsaved changes. Are you sure you want to close? Your changes will be lost.',
+        variant: 'warning',
+        confirmText: 'Discard Changes',
+        cancelText: 'Keep Editing'
+      },
+      () => {
+        resetForm()
+      }
+    )
+  } else {
+    resetForm()
+  }
+}
 
 /** Delete an existing course file */
 const deleteExistingFile = (fileId) => {
@@ -219,30 +271,72 @@ const deleteExistingFile = (fileId) => {
   );
 };
 
-/** Save material (files optional) */
-const saveMaterial = async () => {
-  if (!formData.value.title.trim()) {
-    errorMessage.value = 'Title is required';
-    return;
+const validateForm = () => {
+  clearFieldErrors()
+  let valid = true
+
+  if (!formState.title.trim()) {
+    fieldErrors.title = 'Title is required'
+    valid = false
+  } else if (formState.title.length > 200) {
+    fieldErrors.title = 'Title must be under 200 characters'
+    valid = false
+  }
+
+  if (formState.course_code && formState.course_code.length > 50) {
+    fieldErrors.course_code = 'Course code must be under 50 characters'
+    valid = false
+  }
+
+  if (formState.description && formState.description.length > 2000) {
+    fieldErrors.description = 'Description must be under 2000 characters'
+    valid = false
+  }
+
+  if (formState.video_link) {
+    try {
+      new URL(formState.video_link)
+    } catch {
+      fieldErrors.video_link = 'Enter a valid URL (e.g., https://youtube.com/...)'
+      valid = false
+    }
   }
 
   if (!selectedClass.value) {
-    errorMessage.value = 'Please select a class';
-    return;
+    valid = false
+  }
+
+  return valid
+}
+
+const scrollToFirstError = () => {
+  nextTick(() => {
+    const firstError = document.querySelector('[class*="fieldErrors"]') || document.querySelector('.text-brand-danger, .text-red-600')
+    firstError?.scrollIntoView?.({ behavior: 'smooth', block: 'center' })
+  })
+}
+
+const saveMaterial = async () => {
+  if (!validateForm()) {
+    if (!selectedClass.value) {
+      errorMessage.value = 'Please select a class first'
+    }
+    scrollToFirstError()
+    return
   }
 
   try {
     isUploading.value = true;
+    errorMessage.value = ''
     const payload = {
-      title: formData.value.title,
-      course_code: formData.value.course_code,
-      description: formData.value.description,
-      video_link: formData.value.video_link,
+      title: formState.title,
+      course_code: formState.course_code,
+      description: formState.description,
+      video_link: formState.video_link,
       classid: selectedClass.value.classid
     };
 
-    // Upload files only if provided
-    const filesToUpload = uploadFiles.value.length > 0 ? uploadFiles.value : null;
+    const filesToUpload = uploadFiles.value.length > 0 ? uploadFiles.value : [];
     
     if (editingCourse.value) {
       await courseAPI.updateCourse(editingCourse.value.courseid, payload, filesToUpload);
@@ -259,8 +353,10 @@ const saveMaterial = async () => {
       successMessage.value = '';
     }, 3000);
   } catch (error) {
-    errorMessage.value = 'Failed to save material';
+    const msg = error?.response?.data?.message || error?.message || 'Failed to save material'
+    errorMessage.value = msg;
     console.error('Error saving material:', error);
+    setTimeout(() => { errorMessage.value = '' }, 5000)
   } finally {
     isUploading.value = false;
   }
@@ -323,6 +419,17 @@ watch(
   },
   { immediate: true }
 );
+
+/** Keyboard shortcut: Cmd+Enter / Ctrl+Enter to submit */
+const handleKeydown = (e) => {
+  if (showModal.value && (e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+    e.preventDefault()
+    saveMaterial()
+  }
+}
+
+onMounted(() => document.addEventListener('keydown', handleKeydown))
+onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
 </script>
 
 <template>
@@ -490,16 +597,16 @@ watch(
         <div
           v-if="showModal"
           class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-          @click.self="resetForm"
+          @click.self="attemptClose"
         >
-          <div class="bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[92vh] overflow-hidden flex flex-col border border-gray-100">
+          <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[92vh] overflow-hidden flex flex-col border border-gray-100">
             <!-- Modal Header -->
             <div class="sticky top-0 bg-white px-8 py-6 flex justify-between items-center z-10 border-b border-gray-100">
               <h3 class="text-xl font-bold text-gray-900">
                 {{ editingCourse ? 'Edit Material' : 'Add Material' }}
               </h3>
               <button
-                @click="resetForm"
+                @click="attemptClose"
                 class="text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg p-2 transition-all"
               >
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -511,7 +618,7 @@ watch(
             <!-- Modal Body - Scrollable -->
             <div class="flex-1 overflow-y-auto px-8 py-6 bg-white">
               <!-- Two Column Grid Layout -->
-              <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+              <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 
                 <!-- Left Column: Material Details (7 cols) -->
                 <div class="lg:col-span-7 space-y-8">
@@ -524,25 +631,28 @@ watch(
                     <div class="space-y-6">
                       <!-- Title Input -->
                       <BaseInput
-                        v-model="formData.title"
+                        v-model="formState.title"
                         label="Material Title"
                         placeholder="Enter a descriptive title"
                         required
+                        :error="fieldErrors.title"
                       />
 
                       <!-- Course Code Input -->
                       <BaseInput
-                        v-model="formData.course_code"
+                        v-model="formState.course_code"
                         label="Course Code"
                         placeholder="e.g., CS-204"
+                        :error="fieldErrors.course_code"
                       />
 
                       <!-- Description Textarea -->
                       <BaseTextarea
-                        v-model="formData.description"
+                        v-model="formState.description"
                         label="Description"
                         placeholder="Provide context or instructions for students..."
                         :rows="5"
+                        :error="fieldErrors.description"
                       />
                     </div>
                   </div>
@@ -603,10 +713,11 @@ watch(
                       <!-- Video Link Input -->
                       <div class="pt-4 border-t border-gray-50">
                         <BaseInput
-                          v-model="formData.video_link"
+                          v-model="formState.video_link"
                           label="Video Resource"
                           placeholder="YouTube or Vimeo link"
                           type="url"
+                          :error="fieldErrors.video_link"
                         />
                       </div>
                     </div>
@@ -620,7 +731,7 @@ watch(
             <div class="sticky bottom-0 bg-white border-t border-gray-100 px-8 py-6 flex justify-end items-center gap-4 z-10">
               <button 
                 type="button" 
-                @click="resetForm"
+                @click="attemptClose"
                 class="px-6 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
               >
                 Cancel
@@ -646,8 +757,8 @@ watch(
       :title="confirmConfig.title"
       :message="confirmConfig.message"
       :variant="confirmConfig.variant"
-      confirm-text="Delete"
-      cancel-text="Cancel"
+      :confirm-text="confirmConfig.confirmText"
+      :cancel-text="confirmConfig.cancelText"
       @confirm="handleConfirm"
       @cancel="handleCancel"
       @close="handleCancel"
@@ -668,7 +779,7 @@ watch(
 
 .modal-enter-active .bg-white,
 .modal-leave-active .bg-white {
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .modal-enter-from .bg-white {
