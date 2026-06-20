@@ -14,15 +14,15 @@
           
           <div class="space-y-4">
             <UFormField label="Username" :required="!isEditMode">
-              <UInput v-bind="getFieldProps('username')" :placeholder="isEditMode ? 'Leave blank to keep current' : 'Choose a username'" />
+              <UInput v-bind="getFieldProps('username')" :placeholder="isEditMode ? 'Leave blank to keep current' : 'Choose a username'" class="w-full" />
             </UFormField>
 
             <UFormField label="Email" :required="!isEditMode">
-              <UInput v-bind="getFieldProps('email')" type="email" :placeholder="isEditMode ? 'Leave blank to keep current' : 'student@example.com'" />
+              <UInput v-bind="getFieldProps('email')" type="email" :placeholder="isEditMode ? 'Leave blank to keep current' : 'student@example.com'" class="w-full" />
             </UFormField>
 
             <UFormField label="Password" :required="!isEditMode" description="Minimum 6 characters.">
-              <UInput v-bind="getFieldProps('password')" type="password" :placeholder="isEditMode ? 'Leave blank to keep current' : 'Min. 6 characters'" />
+              <UInput v-bind="getFieldProps('password')" type="password" :placeholder="isEditMode ? 'Leave blank to keep current' : 'Min. 6 characters'" class="w-full" />
             </UFormField>
           </div>
         </div>
@@ -36,22 +36,22 @@
           
           <div class="space-y-4">
             <UFormField label="Full Name" required>
-              <UInput v-bind="getFieldProps('fullname')" placeholder="Full name with titles" />
+              <UInput v-bind="getFieldProps('fullname')" placeholder="Full name with titles" class="w-full" />
             </UFormField>
 
             <UFormField label="Gender" required>
               <USelect v-bind="getFieldProps('gender')" :items="[
                 { label: 'Male', value: 'Male' },
                 { label: 'Female', value: 'Female' }
-              ]" placeholder="Select gender" />
+              ]" placeholder="Select gender" class="w-full" />
             </UFormField>
 
             <UFormField label="Birth Date">
-              <UInput v-bind="getFieldProps('birthdate')" type="date" />
+              <UInput v-bind="getFieldProps('birthdate')" type="date" class="w-full" />
             </UFormField>
 
             <UFormField label="Birth Place">
-              <UInput v-bind="getFieldProps('birthplace')" placeholder="City of birth" />
+              <UInput v-bind="getFieldProps('birthplace')" placeholder="City of birth" class="w-full" />
             </UFormField>
           </div>
         </div>
@@ -68,11 +68,11 @@
           
           <div class="space-y-4">
             <UFormField label="Phone">
-              <UInput v-bind="getFieldProps('phone')" type="tel" placeholder="+62 812-xxx-xxx" />
+              <UInput v-bind="getFieldProps('phone')" type="tel" placeholder="+62 812-xxx-xxx" class="w-full" />
             </UFormField>
 
             <UFormField label="Address">
-              <UTextarea v-bind="getFieldProps('address')" :rows="3" placeholder="Full address" />
+              <UTextarea v-bind="getFieldProps('address')" :rows="3" placeholder="Full address" class="w-full" />
             </UFormField>
           </div>
         </div>
@@ -86,11 +86,11 @@
           
           <div class="space-y-4">
             <UFormField label="Parent Name">
-              <UInput v-bind="getFieldProps('parentname')" placeholder="Parent or guardian" />
+              <UInput v-bind="getFieldProps('parentname')" placeholder="Parent or guardian" class="w-full" />
             </UFormField>
 
             <UFormField label="Parent Phone">
-              <UInput v-bind="getFieldProps('parentphone')" type="tel" placeholder="+62 812-xxx-xxx" />
+              <UInput v-bind="getFieldProps('parentphone')" type="tel" placeholder="+62 812-xxx-xxx" class="w-full" />
             </UFormField>
           </div>
         </div>
@@ -106,7 +106,7 @@
             <USelect v-bind="getFieldProps('classid')" :items="[
               { label: 'No class assigned', value: null },
               ...classes.map(cls => ({ label: cls.class_code + ' - ' + (cls.level?.level_name || 'Unknown Level'), value: cls.classid }))
-            ]" />
+            ]" class="w-full" />
           </UFormField>
         </div>
       </div>

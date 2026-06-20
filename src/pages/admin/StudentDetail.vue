@@ -354,27 +354,27 @@ onMounted(() => {
             <div class="space-y-4">
               <h3 class="text-sm font-medium text-default">Account Details</h3>
               <UFormField label="Username">
-                <UInput v-bind="getFieldProps('username')" placeholder="Leave blank to keep current" />
+                <UInput v-bind="getFieldProps('username')" placeholder="Leave blank to keep current" class="w-full" />
               </UFormField>
               <UFormField label="Email">
-                <UInput v-bind="getFieldProps('email')" type="email" placeholder="Leave blank to keep current" />
+                <UInput v-bind="getFieldProps('email')" type="email" placeholder="Leave blank to keep current" class="w-full" />
               </UFormField>
               <UFormField label="Password">
-                <UInput v-bind="getFieldProps('password')" type="password" placeholder="Leave blank to keep current" />
+                <UInput v-bind="getFieldProps('password')" type="password" placeholder="Leave blank to keep current" class="w-full" />
               </UFormField>
 
               <h3 class="text-sm font-medium text-default pt-4">Personal Information</h3>
               <UFormField label="Full Name" required>
-                <UInput v-bind="getFieldProps('fullname')" />
+                <UInput v-bind="getFieldProps('fullname')" class="w-full" />
               </UFormField>
               <UFormField label="Gender" required>
-                <USelect v-bind="getFieldProps('gender')" :items="['Male', 'Female']" />
+                <USelect v-bind="getFieldProps('gender')" :items="['Male', 'Female']" class="w-full" />
               </UFormField>
               <UFormField label="Birth Date">
-                <UInput v-bind="getFieldProps('birthdate')" type="date" />
+                <UInput v-bind="getFieldProps('birthdate')" type="date" class="w-full" />
               </UFormField>
               <UFormField label="Birth Place">
-                <UInput v-bind="getFieldProps('birthplace')" />
+                <UInput v-bind="getFieldProps('birthplace')" class="w-full" />
               </UFormField>
             </div>
 
@@ -382,18 +382,18 @@ onMounted(() => {
             <div class="space-y-4">
               <h3 class="text-sm font-medium text-default">Contact Information</h3>
               <UFormField label="Phone">
-                <UInput v-bind="getFieldProps('phone')" type="tel" />
+                <UInput v-bind="getFieldProps('phone')" type="tel" class="w-full" />
               </UFormField>
               <UFormField label="Address">
-                <UTextarea v-bind="getFieldProps('address')" :rows="3" />
+                <UTextarea v-bind="getFieldProps('address')" :rows="3" class="w-full" />
               </UFormField>
 
               <h3 class="text-sm font-medium text-default pt-4">Parent Information</h3>
               <UFormField label="Parent Name">
-                <UInput v-bind="getFieldProps('parentname')" />
+                <UInput v-bind="getFieldProps('parentname')" class="w-full" />
               </UFormField>
               <UFormField label="Parent Phone">
-                <UInput v-bind="getFieldProps('parentphone')" type="tel" />
+                <UInput v-bind="getFieldProps('parentphone')" type="tel" class="w-full" />
               </UFormField>
             </div>
           </div>
