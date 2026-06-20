@@ -45,6 +45,7 @@ const fieldErrors = reactive({
 const uploadFiles = ref([]);
 const isUploading = ref(false);
 const isDeletingFile = ref(false);
+const titleInputRef = ref(null)
 
 /** Dirty state tracking for unsaved-changes warning */
 const initialFormSnapshot = ref(null)
@@ -191,6 +192,7 @@ const openAddForm = () => {
   editingCourse.value = null;
   initialFormSnapshot.value = takeFormSnapshot()
   showModal.value = true;
+  nextTick(() => titleInputRef.value?.focus?.())
 };
 
 const openEditForm = (course) => {
@@ -205,14 +207,12 @@ const openEditForm = (course) => {
   showModal.value = true;
 };
 
-/** Show confirmation dialog */
 const showConfirmation = (config, action) => {
   confirmConfig.value = config;
   confirmAction.value = action;
   showConfirmDialog.value = true;
 };
 
-/** Handle confirmation */
 const handleConfirm = async () => {
   if (confirmAction.value) {
     await confirmAction.value();
@@ -220,7 +220,6 @@ const handleConfirm = async () => {
   showConfirmDialog.value = false;
 };
 
-/** Handle cancel */
 const handleCancel = () => {
   showConfirmDialog.value = false;
   confirmAction.value = null;
@@ -443,10 +442,10 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
       <div class="flex items-center justify-between">
         <p class="text-red-800">{{ errorMessage }}</p>
         <button 
-          @click="fetchMyClasses"
-          class="px-4 py-2 text-sm font-semibold text-red-700 hover:text-white bg-gradient-to-r from-red-50 to-rose-50 hover:from-red-600 hover:to-rose-600 border-2 border-red-200 hover:border-red-600 rounded-full transition-all shadow-sm hover:shadow-md hover:scale-105 active:scale-95"
+          @click="errorMessage = ''"
+          class="px-4 py-2 text-sm font-semibold text-red-700 hover:text-red-800 bg-white border-2 border-red-200 hover:border-red-400 rounded-full transition-all"
         >
-          Retry
+          Dismiss
         </button>
       </div>
     </div>
@@ -474,7 +473,7 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
         <div class="flex justify-between items-end">
           <div>
             <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Materials</h2>
-            <p class="text-sm text-gray-500 mt-1">Class: {{ selectedClass.class_code }}</p>
+            <p class="text-sm text-gray-500 mt-1">Class Code: {{ selectedClass.class_code }}</p>
           </div>
           <button
             @click="openAddForm"
@@ -507,7 +506,7 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
                   
                   <div class="flex items-center gap-4 text-xs text-gray-400">
                     <div v-if="getFileCount(course) > 0" class="flex items-center gap-1">
-                      <span aria-hidden="true">📎</span>
+                      <IconFile class="w-3.5 h-3.5 text-gray-400" />
                       {{ getFileCount(course) }} file{{ getFileCount(course) > 1 ? 's' : '' }}
                     </div>
                     <span>Uploaded: {{ formatDate(course.upload_date) }}</span>
@@ -517,7 +516,7 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
                       target="_blank"
                       class="flex items-center gap-1 text-rose-600 hover:text-rose-700 font-semibold"
                     >
-                      <span aria-hidden="true">🎥</span>
+                      <IconVideo class="w-3.5 h-3.5" />
                       Video
                     </a>
                   </div>
@@ -555,7 +554,7 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
               <button
                 @click="goToPage(currentPage - 1)"
                 :disabled="currentPage === 1"
-                class="inline-flex h-9 w-9 items-center justify-center rounded-full border-2 border-gray-300 text-sm text-gray-600 transition-all hover:bg-blue-50 hover:border-blue-400 hover:text-blue-700 hover:scale-110 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 shadow-sm hover:shadow-md"
+                class="inline-flex h-9 w-9 items-center justify-center rounded-full border-2 border-gray-300 text-sm text-blue-700 transition-all hover:bg-blue-100 hover:border-blue-400 hover:text-blue-800 hover:scale-110 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 shadow-sm hover:shadow-md"
               >
                 <span aria-hidden="true">‹</span>
                 <span class="sr-only">Previous page</span>
@@ -568,7 +567,7 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
                   'inline-flex h-9 min-w-[2.25rem] items-center justify-center rounded-full border-2 text-sm font-semibold transition-all shadow-sm hover:shadow-md',
                   currentPage === page
                     ? 'border-blue-600 bg-blue-600 text-white hover:bg-blue-700 scale-110'
-                    : 'border-gray-300 text-gray-600 hover:bg-blue-50 hover:border-blue-400 hover:text-blue-700 hover:scale-110 active:scale-95'
+                    : 'border-gray-300 text-blue-700 hover:bg-blue-100 hover:border-blue-400 hover:text-blue-800 hover:scale-110 active:scale-95'
                 ]"
               >
                 {{ page }}
@@ -576,7 +575,7 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
               <button
                 @click="goToPage(currentPage + 1)"
                 :disabled="currentPage === totalPages"
-                class="inline-flex h-9 w-9 items-center justify-center rounded-full border-2 border-gray-300 text-sm text-gray-600 transition-all hover:bg-blue-50 hover:border-blue-400 hover:text-blue-700 hover:scale-110 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 shadow-sm hover:shadow-md"
+                class="inline-flex h-9 w-9 items-center justify-center rounded-full border-2 border-gray-300 text-sm text-blue-700 transition-all hover:bg-blue-100 hover:border-blue-400 hover:text-blue-800 hover:scale-110 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 shadow-sm hover:shadow-md"
               >
                 <span aria-hidden="true">›</span>
                 <span class="sr-only">Next page</span>
@@ -630,30 +629,38 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
                     
                     <div class="space-y-6">
                       <!-- Title Input -->
-                      <BaseInput
-                        v-model="formState.title"
-                        label="Material Title"
-                        placeholder="Enter a descriptive title"
-                        required
-                        :error="fieldErrors.title"
-                      />
+                      <div>
+                        <BaseInput
+                          ref="titleInputRef"
+                          v-model="formState.title"
+                          label="Material Title"
+                          placeholder="Enter a descriptive title"
+                          required
+                          :error="fieldErrors.title"
+                        />
+                        <span class="text-[10px] text-gray-400 mt-0.5 block text-right">{{ formState.title.length }}/200</span>
+                      </div>
 
-                      <!-- Course Code Input -->
-                      <BaseInput
-                        v-model="formState.course_code"
-                        label="Course Code"
-                        placeholder="e.g., CS-204"
-                        :error="fieldErrors.course_code"
-                      />
+                      <div>
+                        <BaseInput
+                          v-model="formState.course_code"
+                          label="Course Code"
+                          placeholder="e.g., CS-204"
+                          :error="fieldErrors.course_code"
+                        />
+                        <span class="text-[10px] text-gray-400 mt-0.5 block text-right">{{ formState.course_code.length }}/50</span>
+                      </div>
 
-                      <!-- Description Textarea -->
-                      <BaseTextarea
-                        v-model="formState.description"
-                        label="Description"
-                        placeholder="Provide context or instructions for students..."
-                        :rows="5"
-                        :error="fieldErrors.description"
-                      />
+                      <div>
+                        <BaseTextarea
+                          v-model="formState.description"
+                          label="Description"
+                          placeholder="Provide context or instructions for students..."
+                          :rows="5"
+                          :error="fieldErrors.description"
+                        />
+                        <span class="text-[10px] text-gray-400 mt-0.5 block text-right">{{ formState.description.length }}/2000</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -745,6 +752,9 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
               >
                 {{ editingCourse ? 'Save Changes' : 'Add Material' }}
               </BaseButton>
+              <span class="text-xs text-gray-400 hidden sm:inline">
+                <kbd class="px-1.5 py-0.5 bg-gray-100 rounded text-[10px] font-mono">⌘⏎</kbd>
+              </span>
             </div>
           </div>
         </div>
@@ -788,5 +798,20 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
 
 .modal-leave-to .bg-white {
   transform: scale(0.95) translateY(10px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal-enter-active,
+  .modal-leave-active {
+    transition: none;
+  }
+  .modal-enter-active .bg-white,
+  .modal-leave-active .bg-white {
+    transition: none;
+  }
+  .modal-enter-from .bg-white,
+  .modal-leave-to .bg-white {
+    transform: none;
+  }
 }
 </style>
