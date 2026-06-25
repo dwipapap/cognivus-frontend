@@ -4,8 +4,19 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { authStore } from '../auth'
+import { authStore, isProtectedRoutePath } from '../auth'
 import secureStorage from '../../utils/secureStorage'
+
+const encodeJwtPart = (value) => btoa(JSON.stringify(value))
+  .replace(/\+/g, '-')
+  .replace(/\//g, '_')
+  .replace(/=+$/g, '')
+
+const createJwt = (expiresAt) => [
+  encodeJwtPart({ alg: 'none', typ: 'JWT' }),
+  encodeJwtPart({ exp: expiresAt }),
+  'signature'
+].join('.')
 
 describe('Auth Store - Real User Scenarios', () => {
   // Mock user data
@@ -14,7 +25,8 @@ describe('Auth Store - Real User Scenarios', () => {
     email: 'student@test.com',
     user_metadata: { role: 'student' }
   }
-  const mockToken = 'mock-jwt-token-12345'
+  const mockTokenExpiry = Math.floor(Date.now() / 1000) + (3 * 60 * 60)
+  const mockToken = createJwt(mockTokenExpiry)
   const mockLecturerUser = {
     id: 2,
     email: 'lecturer@test.com',
@@ -56,8 +68,8 @@ describe('Auth Store - Real User Scenarios', () => {
     expect(authStore.role).toBe('student')
     expect(authStore.isAuthenticated()).toBe(true)
 
-    // Verifikasi: Token expiry di-set (3 jam dari sekarang)
-    expect(authStore.tokenExpiry).toBeGreaterThan(Date.now())
+    // Verifikasi: Token expiry follows the JWT exp claim
+    expect(authStore.tokenExpiry).toBe(mockTokenExpiry * 1000)
 
     // Verifikasi: Data tersimpan di localStorage (encrypted)
     expect(secureStorage.getItem('token')).toBe(mockToken)
@@ -134,7 +146,7 @@ describe('Auth Store - Real User Scenarios', () => {
 
     const timeRemaining = authStore.getTimeRemaining()
 
-    // Verifikasi: Waktu tersisa sekitar 3 jam (dengan toleransi)
+    // Verifikasi: Waktu tersisa follows the token claim
     expect(timeRemaining).not.toBeNull()
     expect(timeRemaining.hours).toBeGreaterThanOrEqual(2)
     expect(timeRemaining.hours).toBeLessThanOrEqual(3)
@@ -250,5 +262,43 @@ describe('Auth Store - Real User Scenarios', () => {
     expect(authStore.token).toBeNull()
 
     // Router harus redirect ke /login
+  })
+
+  it('should not invent an expiry for an opaque token', () => {
+    authStore.setAuth(mockUser, 'opaque-session-token', 'student')
+
+    expect(authStore.tokenExpiry).toBeNull()
+    expect(secureStorage.getItem('tokenExpiry')).toBeNull()
+    expect(authStore.isAuthenticated()).toBe(true)
+  })
+
+  it.each([
+    '/student/dashboard',
+    '/lecturer/materials',
+    '/admin/payments',
+    '/new-user'
+  ])('should identify %s as protected for expiry redirects', (path) => {
+    expect(isProtectedRoutePath(path)).toBe(true)
+  })
+
+  it('should clear and redirect an expired admin session', () => {
+    vi.useFakeTimers()
+    const now = new Date('2026-06-25T08:00:00.000Z')
+    vi.setSystemTime(now)
+    window.history.pushState({}, '', '/admin/dashboard')
+
+    const token = createJwt(Math.floor(now.getTime() / 1000) + 30)
+    const redirectSpy = vi
+      .spyOn(authStore, 'redirectToLogin')
+      .mockImplementation(() => {})
+
+    authStore.setAuth(mockUser, token, 'admin')
+    authStore.startExpiryCheck()
+    vi.advanceTimersByTime(60000)
+
+    expect(authStore.token).toBeNull()
+    expect(redirectSpy).toHaveBeenCalledOnce()
+
+    vi.useRealTimers()
   })
 })

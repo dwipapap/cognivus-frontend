@@ -1,5 +1,17 @@
 import { reactive } from 'vue';
 import secureStorage from '../utils/secureStorage';
+import { getJwtExpiry } from '../utils/jwt';
+
+export const isProtectedRoutePath = (path) => {
+  return [
+    '/student',
+    '/lecturer',
+    '/admin',
+    '/new-user'
+  ].some((protectedPath) => (
+    path === protectedPath || path.startsWith(`${protectedPath}/`)
+  ));
+};
 
 /**
  * Store manajemen autentikasi.
@@ -28,6 +40,18 @@ export const authStore = reactive({
     // Prevent double initialization
     if (this.isInitialized) {
       return;
+    }
+
+    // Migrate stored sessions away from the former fixed three-hour expiry.
+    if (this.token) {
+      const tokenExpiry = getJwtExpiry(this.token);
+      this.tokenExpiry = tokenExpiry;
+
+      if (tokenExpiry) {
+        secureStorage.setItem('tokenExpiry', tokenExpiry);
+      } else {
+        secureStorage.removeItem('tokenExpiry');
+      }
     }
 
     // Check if token is expired on initialization
@@ -60,11 +84,18 @@ export const authStore = reactive({
 
       if (this.isTokenExpired()) {
         this.clearAuth();
-        if (window.location.pathname.startsWith('/student')) {
-          window.location.href = '/login';
+        if (isProtectedRoutePath(window.location.pathname)) {
+          this.redirectToLogin();
         }
       }
     }, 60000);
+  },
+
+  /**
+   * Redirect an expired protected session to login.
+   */
+  redirectToLogin() {
+    window.location.href = '/login';
   },
 
   /**
@@ -92,14 +123,18 @@ export const authStore = reactive({
     this.token = token;
     this.role = userRole;
     
-    // Token expires in 3 hours
-    const expiryTime = Date.now() + (3 * 60 * 60 * 1000);
+    // JWT exp is authoritative. Opaque tokens rely on backend 401 handling.
+    const expiryTime = getJwtExpiry(token);
     this.tokenExpiry = expiryTime;
     
     // Store encrypted data
     secureStorage.setItem('token', token);
     secureStorage.setItem('role', userRole);
-    secureStorage.setItem('tokenExpiry', expiryTime);
+    if (expiryTime) {
+      secureStorage.setItem('tokenExpiry', expiryTime);
+    } else {
+      secureStorage.removeItem('tokenExpiry');
+    }
     secureStorage.setItem('user', user);
   },
 
@@ -128,7 +163,7 @@ export const authStore = reactive({
     }
     
     const expiry = this.tokenExpiry || secureStorage.getItem('tokenExpiry');
-    return Date.now() > parseInt(expiry);
+    return Date.now() >= Number(expiry);
   },
 
   /**
@@ -147,7 +182,7 @@ export const authStore = reactive({
     const expiry = this.tokenExpiry || secureStorage.getItem('tokenExpiry');
     if (!expiry) return null;
     
-    const remaining = parseInt(expiry) - Date.now();
+    const remaining = Number(expiry) - Date.now();
     if (remaining <= 0) return null;
     
     const hours = Math.floor(remaining / (60 * 60 * 1000));
