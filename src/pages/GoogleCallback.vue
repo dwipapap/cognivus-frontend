@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { authStore } from '../store/auth'
-import apiClient, { studentAPI } from '../services/api'
+import apiClient from '../services/api'
 import LoadingSpinner from '../components/ui/LoadingSpinner.vue'
 import ittrLogo from '../assets/ittrlogo.png'
 
@@ -22,7 +22,19 @@ onMounted(async () => {
     const givenName = urlParams.get('given_name');
     const familyName = urlParams.get('family_name');
 
-    if (!token || !role || !id || !username || !email || isNaN(parseInt(id, 10))) {
+    // Do not leave bearer credentials in browser history after reading them.
+    window.history.replaceState({}, document.title, window.location.pathname);
+    authStore.clearAuth();
+
+    const allowedRoles = ['owner', 'admin', 'moderator', 'lecturer', 'student'];
+    if (
+      !token ||
+      !allowedRoles.includes(role) ||
+      !id ||
+      !username ||
+      !email ||
+      isNaN(parseInt(id, 10))
+    ) {
       throw new Error('Invalid authentication response');
     }
 
@@ -37,80 +49,67 @@ onMounted(async () => {
       }
     };
 
-    authStore.setAuth(user, token, role);
-
     // Check if user needs to complete profile setup
     statusMessage.value = 'Checking account status...';
-    
-    try {
-      const response = await apiClient.get(`/users/${id}`, { timeout: 15000 });
-      
-      if (response.data.success) {
-        const userData = response.data.data;
-        
-        // Check if this is a Google user (has raw_meta_data from Google OAuth)
-        const isGoogleUser = userData.raw_meta_data && userData.raw_meta_data.sub;
-        
-        if (isGoogleUser) {
-          // For Google users, check if student profile is complete
-          const studentResponse = await studentAPI.getStudentById(id);
-          
-          if (studentResponse.data.success) {
-            const studentData = Array.isArray(studentResponse.data.data)
-              ? studentResponse.data.data[0]
-              : studentResponse.data.data;
+    const authenticatedRequest = {
+      headers: { Authorization: `Bearer ${token}` },
+      timeout: 15000
+    };
+    const response = await apiClient.get(`/users/${id}`, authenticatedRequest);
 
-            if (!studentData) {
-              statusMessage.value = 'Setting up your account...';
-              await new Promise(resolve => setTimeout(resolve, 500));
-              router.push('/new-user');
-              return;
-            }
+    if (!response.data.success) {
+      throw new Error('Unable to verify your account. Please try logging in again.');
+    }
 
-            const isFirstTime = !studentData.phone ||
-                               !studentData.address;
+    const userData = response.data.data;
+    const isGoogleUser = userData.raw_meta_data && userData.raw_meta_data.sub;
+    let targetRoute = '/student/dashboard';
 
-            if (isFirstTime) {
-              statusMessage.value = 'Setting up your account...';
-              await new Promise(resolve => setTimeout(resolve, 500));
-              router.push('/new-user');
-              return;
-            }
-          }
-        } else {
-          // For non-Google users, check password (existing logic)
-          if (!userData.password || userData.password === null) {
-            statusMessage.value = 'Setting up your account...';
-            await new Promise(resolve => setTimeout(resolve, 500));
-            router.push('/new-user');
-            return;
-          }
-        }
+    if (isGoogleUser && role === 'student') {
+      const studentResponse = await apiClient.get(
+        `/students/${id}`,
+        authenticatedRequest
+      );
+
+      if (!studentResponse.data.success) {
+        throw new Error('Unable to verify your student profile.');
       }
-    } catch (checkError) {
-      console.error('Error checking user status:', checkError);
-      error.value = 'Unable to verify your account. Please try logging in again.';
-      setTimeout(() => {
-        router.push('/login');
-      }, 3000);
-      return;
+
+      const studentData = Array.isArray(studentResponse.data.data)
+        ? studentResponse.data.data[0]
+        : studentResponse.data.data;
+
+      if (!studentData || !studentData.phone || !studentData.address) {
+        statusMessage.value = 'Setting up your account...';
+        targetRoute = '/new-user';
+      }
+    } else if (role === 'student' && !userData.password) {
+      statusMessage.value = 'Setting up your account...';
+      targetRoute = '/new-user';
     }
 
-    statusMessage.value = 'Redirecting to dashboard...';
+    if (targetRoute !== '/new-user') {
+      const dashboardRoutes = {
+        owner: '/admin/dashboard',
+        admin: '/admin/dashboard',
+        moderator: '/admin/dashboard',
+        lecturer: '/lecturer/dashboard',
+        student: '/student/dashboard'
+      };
+      targetRoute = dashboardRoutes[role] || '/student/dashboard';
+      statusMessage.value = 'Redirecting to dashboard...';
+    }
+
+    // Persist the session only after all account checks have succeeded.
+    authStore.setAuth(user, token, role);
     await new Promise(resolve => setTimeout(resolve, 500));
-
-    // Redirect based on user role
-    let dashboardPath = '/student/dashboard';
-    if (role === 'lecturer') {
-      dashboardPath = '/lecturer/dashboard';
-    } else if (role === 'admin') {
-      dashboardPath = '/admin/dashboard';
-    }
-    router.push(dashboardPath);
+    await router.replace(targetRoute);
   } catch (err) {
-    error.value = err.message;
+    console.error('OAuth callback error:', err);
+    authStore.clearAuth();
+    error.value = err.message || 'Unable to complete login.';
     setTimeout(() => {
-      router.push('/login');
+      router.replace('/login');
     }, 3000);
   }
 });
@@ -126,7 +125,7 @@ onMounted(async () => {
 
       <!-- Success State -->
       <div v-if="!error" class="space-y-6">
-        <LoadingSpinner size="xl" color="blue" variant="spin" class="mx-auto" />
+        <LoadingSpinner size="xl" color="primary" variant="spin" class="mx-auto" />
         
         <div class="space-y-3">
           <h2 class="text-2xl md:text-3xl font-bold text-gray-800">{{ statusMessage }}</h2>
@@ -141,17 +140,14 @@ onMounted(async () => {
 
       <!-- Error State -->
       <div v-else class="space-y-6">
-        <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto">
-          <svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
-        </div>
-        
-        <div class="space-y-3">
-          <h2 class="text-2xl md:text-3xl font-bold text-gray-800">Login Failed</h2>
-          <p class="text-gray-600">{{ error }}</p>
-          <p class="text-sm text-gray-500">Redirecting to login page...</p>
-        </div>
+        <UAlert
+          color="error"
+          variant="soft"
+          icon="i-lucide-circle-alert"
+          title="Login failed"
+          :description="error"
+        />
+        <p class="text-sm text-muted">Redirecting to login page...</p>
 
         <!-- Error Progress -->
         <div class="w-full bg-red-100 rounded-full h-2 overflow-hidden">
