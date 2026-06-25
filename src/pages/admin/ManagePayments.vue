@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { paymentAPI, studentAPI } from '../../services/api';
 import { formatCurrency, formatDate } from '../../utils/formatters';
+import { createCsvContent } from '../../utils/csv';
 import Modal from '../../components/ui/Modal.vue';
 
 
@@ -18,6 +19,12 @@ const statusFilter = ref('');
 const typeFilter = ref('');
 const paymentPage = ref(1);
 const paymentPageSize = 20;
+
+const currentMonth = new Date();
+const currentMonthLabel = currentMonth.toLocaleDateString('en-US', {
+  month: 'long',
+  year: 'numeric'
+});
 
 const getStudentName = (studentid) => {
   if (!studentid) return 'Unknown';
@@ -76,11 +83,18 @@ const stats = computed(() => {
   const pending = payments.value.filter(p => p.status === 'pending').length;
   const success = payments.value.filter(p => p.status === 'success').length;
   const failed = payments.value.filter(p => p.status === 'failed').length;
-  const totalRevenue = payments.value
-    .filter(p => p.status === 'success')
-    .reduce((sum, p) => sum + (p.amount || 0), 0);
+  const monthlyRevenue = payments.value
+    .filter(p => {
+      if (p.status !== 'success' || !p.created_at) return false;
 
-  return { total, pending, success, failed, totalRevenue };
+      const paymentDate = new Date(p.created_at);
+      return !Number.isNaN(paymentDate.getTime())
+        && paymentDate.getFullYear() === currentMonth.getFullYear()
+        && paymentDate.getMonth() === currentMonth.getMonth();
+    })
+    .reduce((sum, p) => sum + Number(p.amount || 0), 0);
+
+  return { total, pending, success, failed, monthlyRevenue };
 });
 
 /** Fetch all payments */
@@ -143,15 +157,17 @@ const exportToCSV = () => {
     formatDate(p.created_at)
   ]);
 
-  const csvContent = [headers, ...rows]
-    .map(row => row.map(cell => `"${cell}"`).join(','))
-    .join('\n');
+  const csvContent = createCsvContent([headers, ...rows]);
 
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
+  const objectUrl = URL.createObjectURL(blob);
+  link.href = objectUrl;
   link.download = `payments_${new Date().toISOString().split('T')[0]}.csv`;
+  document.body.appendChild(link);
   link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(objectUrl);
 };
 
 onMounted(() => {
@@ -198,8 +214,9 @@ onMounted(() => {
           <div class="text-2xl font-bold text-red-800">{{ stats.failed }}</div>
         </div>
         <div class="bg-inverted rounded-lg p-4 shadow-sm col-span-2 md:col-span-1">
-          <div class="text-sm text-muted mb-1">Total Revenue</div>
-          <div class="text-lg md:text-xl font-bold text-white truncate">{{ formatCurrency(stats.totalRevenue) }}</div>
+          <div class="text-sm text-muted mb-1">Monthly Revenue</div>
+          <div class="text-lg md:text-xl font-bold text-white truncate">{{ formatCurrency(stats.monthlyRevenue) }}</div>
+          <div class="text-xs text-muted mt-1">{{ currentMonthLabel }}</div>
         </div>
       </div>
 

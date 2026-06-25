@@ -1,10 +1,13 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { useToast } from '@nuxt/ui/composables';
 import { priceAPI, levelAPI, programAPI, ancillaryPriceAPI } from '../../services/api';
 import { useConfirm } from '@/composables/useConfirm'
 
 import PriceForm from './PriceForm.vue';
 import { formatCurrency } from '../../utils/formatters';
+
+const toast = useToast();
 
 // Tab state
 const activeTab = ref('0');

@@ -53,8 +53,6 @@ watch(() => props.priceItem, (newVal) => {
   }
 }, { immediate: true });
 
-defineExpose({ isSubmitting, isDuplicateCombination });
-
 const isDuplicateCombination = computed(() => {
   if (!formData.levelid || !formData.programid) return false;
 
@@ -66,6 +64,8 @@ const isDuplicateCombination = computed(() => {
            price.programid === Number(formData.programid);
   });
 });
+
+defineExpose({ isSubmitting, isDuplicateCombination });
 
 const formatIDR = (value) => {
   if (!value) return 'Rp 0';
