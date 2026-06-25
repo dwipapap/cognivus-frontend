@@ -121,9 +121,13 @@ const handleLogout = async () => {
           <!-- User Profile Section -->
           <div class="relative z-50">
             <!-- Profile Pill -->
-            <div 
+            <button
+              type="button"
               ref="profileButtonRef"
               @click.stop="toggleDropdown()"
+              aria-haspopup="menu"
+              :aria-expanded="showDropdown"
+              aria-label="Open lecturer profile menu"
               class="flex items-center gap-2 sm:gap-3 h-10 sm:h-12 px-2 xs:px-3 sm:px-4 rounded-full bg-white/30 backdrop-blur-sm border border-white/50 shadow-sm overflow-hidden whitespace-nowrap max-w-[50vw] xs:max-w-[60vw] sm:max-w-[200px] md:max-w-[240px] min-w-0 hover:bg-white/40 transition-all duration-200 cursor-pointer active:scale-95"
             >
               <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 overflow-hidden border-2 border-white/50">
@@ -140,13 +144,14 @@ const handleLogout = async () => {
               </div>
               <!-- Dropdown arrow indicator -->
               <IconCaret class="w-4 h-4 text-gray-600 transition-transform duration-300" :class="{ 'rotate-180': isDropdownVisible }" />
-            </div>
+            </button>
 
             <!-- Dropdown Menu with animation classes -->
             <Teleport to="body">
               <div 
                 v-if="showDropdown" 
                 ref="profileDropdownRef"
+                role="menu"
                 class="fixed w-56 origin-top-right profile-dropdown-glass rounded-lg shadow-lg border border-white/20 overflow-hidden z-[9999]"
                 :class="{'dropdown-enter': isDropdownVisible, 'dropdown-leave': !isDropdownVisible}"
                 :style="dropdownPosition"
@@ -159,14 +164,14 @@ const handleLogout = async () => {
 
               <!-- Dropdown Items -->
               <div class="py-1">
-                <router-link to="/lecturer/profile-view" class="profile-dropdown-item">
+                <router-link to="/lecturer/profile-view" role="menuitem" class="profile-dropdown-item">
                   <IconUser class="w-5 h-5 mr-3" />
                   Profile
                 </router-link>
-                <a @click="handleLogout" class="profile-dropdown-item hover:text-red-600">
+                <button type="button" role="menuitem" @click="handleLogout" class="profile-dropdown-item hover:text-red-600 w-full">
                   <IconLogout class="w-5 h-5 mr-3" />
                   Logout
-                </a>
+                </button>
               </div>
               </div>
             </Teleport>
