@@ -11,6 +11,7 @@ defineProps({
     semesterFee: { type: Number, default: 0 },
     monthlyFee: { type: Number, default: 0 },
     loading: { type: Boolean, default: false },
+    pricingAvailable: { type: Boolean, default: true },
     formatCurrency: { type: Function, required: true },
 });
 </script>
@@ -76,7 +77,11 @@ defineProps({
                     Semester Fee
                 </p>
                 <p class="text-sm font-bold text-blue-600 truncate">
-                    {{ formatCurrency(semesterFee) }}
+                    {{
+                        pricingAvailable
+                            ? formatCurrency(semesterFee)
+                            : "Unavailable"
+                    }}
                 </p>
             </div>
 
@@ -94,7 +99,11 @@ defineProps({
                     Monthly Fee
                 </p>
                 <p class="text-sm font-bold text-blue-600 truncate">
-                    {{ formatCurrency(monthlyFee) }}
+                    {{
+                        pricingAvailable
+                            ? formatCurrency(monthlyFee)
+                            : "Unavailable"
+                    }}
                 </p>
             </div>
         </div>
@@ -103,8 +112,15 @@ defineProps({
             class="mt-4 flex items-start gap-2 bg-blue-50 rounded-full p-3 border border-blue-100"
         >
             <IconInfo class="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-            <p class="text-xs text-blue-700">
-                Fees are calculated based on your program level
+            <p
+                class="text-xs"
+                :class="pricingAvailable ? 'text-blue-700' : 'text-amber-700'"
+            >
+                {{
+                    pricingAvailable
+                        ? "Fees are calculated based on your program level"
+                        : "No billing price is configured for your current level"
+                }}
             </p>
         </div>
     </div>

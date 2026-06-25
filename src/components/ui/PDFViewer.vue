@@ -53,7 +53,7 @@ async function loadPDF() {
   if (currentLoadingTask) {
     currentLoadingTask.destroy()
     currentLoadingTask = null
-    pdfDoc = null
+    pdfDoc.value = null
   }
   
   try {

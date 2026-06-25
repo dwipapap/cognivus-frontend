@@ -6,14 +6,18 @@ import { useClassDetails } from "../../composables/useClassDetails";
 import { useSnapPayment } from "../../composables/useSnapPayment";
 import { paymentAPI, priceAPI, ancillaryPriceAPI } from "../../services/api";
 import { formatCurrency, formatDate } from "../../utils/formatters";
+import {
+    findPriceForLevel,
+    getResumablePayment,
+} from "../../utils/payment";
 import IconQuestionCircle from "~icons/solar/question-circle-broken";
-import IconInfo from "~icons/basil/info-circle-outline";
-import IconClose from "~icons/solar/close-circle-bold";
 import Modal from "../../components/ui/Modal.vue";
 import BaseButton from "../../components/ui/BaseButton.vue";
+import ContinuePaymentOverlay from "../../components/student/ContinuePaymentOverlay.vue";
 import ProgramBillingCard from "../../components/student/ProgramBillingCard.vue";
 import PaymentHistoryTable from "../../components/student/PaymentHistoryTable.vue";
-import PaymentOptionCard from "../../components/student/PaymentOptionCard.vue";
+import PaymentOptionsPanel from "../../components/student/PaymentOptionsPanel.vue";
+import PaymentSummaryPanel from "../../components/student/PaymentSummaryPanel.vue";
 import PageHeaderCard from "../../components/student/PageHeaderCard.vue";
 
 // Composables
@@ -58,6 +62,7 @@ const showContinueModal = ref(false);
 const continuePayment = ref(null);
 const continueLoading = ref(false);
 const continueError = ref('');
+const continueErrorTitle = ref('Payment Cannot Continue');
 const isHistoryLoading = ref(false);
 const paymentHistory = ref([]);
 const ancillaryPrices = ref([]);
@@ -128,41 +133,19 @@ const studentEmail = computed(() => {
     return studentProfile.value?.email || authStore.user?.email || "";
 });
 
-const currentSemesterFee = computed(() => {
-    if (!classInfo.value?.levelid || prices.value.length === 0) {
-        return prices.value[0]?.harga || 0;
-    }
+const currentLevelPrice = computed(() =>
+    findPriceForLevel(prices.value, classInfo.value?.levelid),
+);
 
-    // Find price matching the student's level
-    const matchingPrice = prices.value.find(
-        (p) => p.levelid === classInfo.value.levelid,
-    );
+const hasRegularPricing = computed(() => Boolean(currentLevelPrice.value));
 
-    if (matchingPrice) {
-        return matchingPrice.harga || 0;
-    }
+const currentSemesterFee = computed(
+    () => Number(currentLevelPrice.value?.harga) || 0,
+);
 
-    // Fallback to first available price
-    return prices.value[0]?.harga || 0;
-});
-
-const currentMonthlyFee = computed(() => {
-    if (!classInfo.value?.levelid || prices.value.length === 0) {
-        return prices.value[0]?.monthlyprice || 0;
-    }
-
-    // Find price matching the student's level
-    const matchingPrice = prices.value.find(
-        (p) => p.levelid === classInfo.value.levelid,
-    );
-
-    if (matchingPrice) {
-        return matchingPrice.monthlyprice || 0;
-    }
-
-    // Fallback to first available price
-    return prices.value[0]?.monthlyprice || 0;
-});
+const currentMonthlyFee = computed(
+    () => Number(currentLevelPrice.value?.monthlyprice) || 0,
+);
 
 /** Fetch ancillary prices from API */
 const fetchAncillaryPrices = async () => {
@@ -209,6 +192,11 @@ const fetchPrices = async () => {
 };
 
 const selectPaymentType = (typeId) => {
+    const isRegularPayment = regularPaymentTypes.some(
+        (type) => type.id === typeId,
+    );
+    if (isRegularPayment && !hasRegularPricing.value) return;
+
     selectedPaymentType.value = typeId;
     resetPaymentState();
 };
@@ -272,30 +260,65 @@ const closeSuccessModal = () => {
 const closeErrorModal = () => {
     showErrorModal.value = false;
     continueError.value = '';
+    continueErrorTitle.value = 'Payment Cannot Continue';
 };
 
 const handleContinuePayment = async () => {
-    if (!continuePayment.value?.token) return;
+    const selectedPendingPayment = continuePayment.value;
+    if (!selectedPendingPayment) return;
+
     try {
         continueLoading.value = true;
+        continueError.value = '';
 
-        // Sync payment status with Midtrans first
-        const studentid = continuePayment.value.studentid || authStore.user?.userid;
-        if (studentid) {
-            try {
-                await paymentAPI.refreshPaymentStatus(studentid);
-                await fetchPaymentHistory();
-            } catch (_) {}
+        const studentid =
+            selectedPendingPayment.studentid ||
+            studentProfile.value?.studentid ||
+            authStore.user?.userid;
+
+        if (!studentid) {
+            throw new Error("Student account is unavailable");
         }
 
-        // Check if payment is still pending after refresh
-        if (continuePayment.value?.status !== 'pending') {
+        // The backend remains authoritative for Midtrans transaction status.
+        await paymentAPI.refreshPaymentStatus(studentid);
+        const refreshedPayments = await fetchPaymentHistory();
+
+        if (!refreshedPayments) {
+            throw new Error("Unable to load the latest payment history");
+        }
+
+        const { payment: refreshedPayment, reason } = getResumablePayment(
+            refreshedPayments,
+            selectedPendingPayment,
+        );
+
+        if (reason === 'not_pending') {
             showContinueModal.value = false;
             continuePayment.value = null;
+
+            if (String(refreshedPayment.status).toLowerCase() === 'success') {
+                showSuccessModal.value = true;
+            } else {
+                continueErrorTitle.value = 'Payment Status Changed';
+                continueError.value =
+                    `This payment is no longer pending. Current status: ${refreshedPayment.status || 'unknown'}.`;
+                showErrorModal.value = true;
+            }
             return;
         }
 
-        await pay(continuePayment.value.token, {
+        if (reason === 'not_found') {
+            throw new Error("The payment could not be found after refreshing");
+        }
+
+        if (reason === 'missing_token') {
+            throw new Error("The refreshed payment has no reusable token");
+        }
+
+        continuePayment.value = refreshedPayment;
+
+        await pay(refreshedPayment.token, {
             onSuccess: (result) => {
                 showContinueModal.value = false;
                 continuePayment.value = null;
@@ -311,15 +334,17 @@ const handleContinuePayment = async () => {
             onError: (result) => {
                 showContinueModal.value = false;
                 continuePayment.value = null;
+                continueErrorTitle.value = 'Payment Session Expired';
                 continueError.value = 'Payment session may have expired. Please try creating a new payment.';
                 showErrorModal.value = true;
             },
             onClose: () => {
                 // Sync status after closing the popup
                 if (studentid) {
-                    paymentAPI.refreshPaymentStatus(studentid).then(() => {
-                        fetchPaymentHistory();
-                    });
+                    paymentAPI
+                        .refreshPaymentStatus(studentid)
+                        .then(() => fetchPaymentHistory())
+                        .catch(() => fetchPaymentHistory());
                 } else {
                     fetchPaymentHistory();
                 }
@@ -327,6 +352,9 @@ const handleContinuePayment = async () => {
         });
     } catch (err) {
         console.error("Continue payment error:", err);
+        continueErrorTitle.value = 'Payment Cannot Continue';
+        continueError.value =
+            'We could not verify the latest payment status. Refresh your payment history and try again.';
         showErrorModal.value = true;
         showContinueModal.value = false;
         continuePayment.value = null;
@@ -368,7 +396,8 @@ const fetchPaymentHistory = async () => {
             studentProfile.value?.studentid || authStore.user?.userid;
 
         if (!studentid) {
-            return;
+            paymentHistory.value = [];
+            return null;
         }
 
         const response = await paymentAPI.getPaymentHistory(studentid);
@@ -381,9 +410,11 @@ const fetchPaymentHistory = async () => {
         } else {
             paymentHistory.value = [];
         }
+        return paymentHistory.value;
     } catch (err) {
         console.error("Failed to fetch payment history:", err);
         paymentHistory.value = [];
+        return null;
     } finally {
         isHistoryLoading.value = false;
     }
@@ -472,6 +503,7 @@ onMounted(async () => {
                 :semester-fee="currentSemesterFee"
                 :monthly-fee="currentMonthlyFee"
                 :loading="isClassLoading || isPricesLoading"
+                :pricing-available="hasRegularPricing"
                 :format-currency="formatCurrency"
             />
         </div>
@@ -480,101 +512,18 @@ onMounted(async () => {
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- LEFT COLUMN: Payment Types & History (spans 2 cols on desktop) -->
             <div class="lg:col-span-2 space-y-6">
-                <!-- Payment Options Card (Always first) -->
-                <div
-                    class="payment-section-glass rounded-xl md:rounded-xl px-4 py-5 md:p-6 shadow-md border border-gray-200"
-                >
-                    <h2
-                        class="text-base md:text-lg font-bold text-gray-800 mb-4 md:mb-5"
-                    >
-                        Payment Options
-                    </h2>
-
-                    <!-- Regular Payments Section -->
-                    <div class="mb-4 md:mb-5">
-                        <h3
-                            class="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-3"
-                        >
-                            Regular Payments
-                        </h3>
-
-                        <div
-                            v-if="isPricesLoading"
-                            class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4"
-                        >
-                            <div v-for="i in 2" :key="i" class="animate-pulse">
-                                <div
-                                    class="h-24 md:h-28 bg-gray-100 rounded-lg"
-                                ></div>
-                            </div>
-                        </div>
-
-                        <div
-                            v-else
-                            class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4"
-                        >
-                            <PaymentOptionCard
-                                v-for="type in regularPaymentTypes"
-                                :key="type.id"
-                                :selected="selectedPaymentType === type.id"
-                                :name="type.name"
-                                :description="type.description"
-                                :price="
-                                    type.id === 'semester'
-                                        ? currentSemesterFee
-                                        : currentMonthlyFee
-                                "
-                                :icon-path="type.icon"
-                                variant="regular"
-                                :format-currency="formatCurrency"
-                                @select="selectPaymentType(type.id)"
-                            />
-                        </div>
-                    </div>
-
-                    <!-- Divider -->
-                    <div class="border-t border-gray-100 my-4 md:my-5"></div>
-
-                    <!-- Additional Fees Section (Dynamic from database) -->
-                    <div>
-                        <h3
-                            class="text-xs font-semibold text-blue-600 uppercase tracking-wider mb-3"
-                        >
-                            Additional Fees
-                        </h3>
-
-                        <div v-if="isAncillaryLoading" class="animate-pulse">
-                            <div
-                                class="h-24 md:h-28 bg-gray-100 rounded-lg"
-                            ></div>
-                        </div>
-
-                        <div
-                            v-else-if="ancillaryPaymentTypes.length === 0"
-                            class="text-center py-5 md:py-6 text-gray-400 text-sm"
-                        >
-                            No additional fees available
-                        </div>
-
-                        <div
-                            v-else
-                            class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4"
-                        >
-                            <PaymentOptionCard
-                                v-for="type in ancillaryPaymentTypes"
-                                :key="type.id"
-                                :selected="selectedPaymentType === type.id"
-                                :name="type.name"
-                                :description="type.description"
-                                :price="type.price"
-                                :icon-path="type.icon"
-                                variant="ancillary"
-                                :format-currency="formatCurrency"
-                                @select="selectPaymentType(type.id)"
-                            />
-                        </div>
-                    </div>
-                </div>
+                <PaymentOptionsPanel
+                    :regular-payment-types="regularPaymentTypes"
+                    :ancillary-payment-types="ancillaryPaymentTypes"
+                    :selected-payment-type="selectedPaymentType"
+                    :semester-fee="currentSemesterFee"
+                    :monthly-fee="currentMonthlyFee"
+                    :regular-pricing-available="hasRegularPricing"
+                    :regular-loading="isClassLoading || isPricesLoading"
+                    :ancillary-loading="isAncillaryLoading"
+                    :format-currency="formatCurrency"
+                    @select="selectPaymentType"
+                />
 
                 <!-- Payment History (Desktop Only) -->
                 <div class="hidden lg:block">
@@ -603,210 +552,30 @@ onMounted(async () => {
                         :semester-fee="currentSemesterFee"
                         :monthly-fee="currentMonthlyFee"
                         :loading="isClassLoading || isPricesLoading"
+                        :pricing-available="hasRegularPricing"
                         :format-currency="formatCurrency"
                     />
                 </div>
 
-                <!-- Payment Summary (Desktop) -->
-                <div class="hidden lg:block">
-                    <div
-                        class="payment-section-glass rounded-xl p-5 shadow-md border border-gray-200"
-                    >
-                        <h2 class="text-lg font-bold text-gray-800 mb-4">
-                            Payment Summary
-                        </h2>
-
-                        <div class="space-y-3 mb-5">
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm text-gray-500">Name</span>
-                                <span
-                                    class="text-sm font-semibold text-gray-800 truncate ml-2 max-w-[60%] text-right"
-                                    >{{ studentName }}</span
-                                >
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm text-gray-500">Email</span>
-                                <span
-                                    class="text-sm font-semibold text-gray-800 truncate ml-2 max-w-[60%] text-right"
-                                    >{{ studentEmail }}</span
-                                >
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm text-gray-500"
-                                    >Payment Type</span
-                                >
-                                <span
-                                    class="text-sm font-semibold text-gray-800"
-                                    >{{
-                                        selectedPaymentType
-                                            ? getPaymentTypeName(
-                                                  selectedPaymentType,
-                                              )
-                                            : "-"
-                                    }}</span
-                                >
-                            </div>
-                            <div class="h-px bg-gray-100 my-3"></div>
-                            <div
-                                v-if="selectedPaymentType"
-                                class="flex items-start gap-2 bg-blue-50 rounded-lg p-3 border border-blue-100 mb-3"
-                            >
-                                <IconInfo
-                                    class="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5"
-                                />
-                                <p class="text-xs text-blue-700">
-                                    Please verify the details above before
-                                    confirming
-                                </p>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-base font-bold text-gray-800"
-                                    >Total</span
-                                >
-                                <span
-                                    class="text-2xl font-bold text-blue-600"
-                                    >{{
-                                        selectedPaymentType
-                                            ? formatCurrency(selectedAmount)
-                                            : "Rp 0"
-                                    }}</span
-                                >
-                            </div>
-                        </div>
-
-                        <BaseButton
-                            variant="primary"
-                            size="lg"
-                            block
-                            :disabled="!canPay"
-                            :loading="isPaymentLoading"
-                            @click="handlePayment"
-                        >
-                            {{
-                                canPay ? "Confirm & Pay" : "Select Payment Type"
-                            }}
-                        </BaseButton>
-
-                        <p class="text-xs text-gray-400 text-center mt-3">
-                            {{
-                                canPay
-                                    ? "Secure payment powered by Midtrans"
-                                    : "Choose a payment option to continue"
-                            }}
-                        </p>
-                    </div>
-                </div>
+                <PaymentSummaryPanel
+                    v-model:open="showMobilePaymentSummary"
+                    :student-name="studentName"
+                    :student-email="studentEmail"
+                    :payment-type-name="
+                        selectedPaymentType
+                            ? getPaymentTypeName(selectedPaymentType)
+                            : '-'
+                    "
+                    :selected="Boolean(selectedPaymentType)"
+                    :amount="selectedAmount"
+                    :can-pay="canPay"
+                    :loading="isPaymentLoading"
+                    :format-currency="formatCurrency"
+                    @pay="handlePayment"
+                    @cancel="selectPaymentType(null)"
+                />
             </div>
         </div>
-
-        <!-- Mobile: Floating payment action bar -->
-        <Transition name="slide-up">
-            <div
-                v-if="selectedPaymentType"
-                class="fixed bottom-4 left-4 right-4 z-40 bg-white border border-gray-200 rounded-3xl px-5 py-3 shadow-xl lg:hidden"
-            >
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="flex flex-col">
-                            <p class="text-xs text-gray-500">Total</p>
-                            <p class="text-lg font-bold text-blue-600">
-                                {{ formatCurrency(selectedAmount) }}
-                            </p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <BaseButton
-                            variant="primary"
-                            size="md"
-                            @click="showMobilePaymentSummary = true"
-                        >
-                            Review Payment
-                        </BaseButton>
-                        <button
-                            @click="selectPaymentType(null)"
-                            class="flex items-center justify-center w-9 h-9 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-                            aria-label="Cancel payment selection"
-                        >
-                            <IconClose class="w-5 h-5" />
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </Transition>
-
-        <!-- Mobile: Payment Summary Drawer -->
-        <UDrawer
-            v-model:open="showMobilePaymentSummary"
-            title="Payment Summary"
-            class="lg:hidden"
-            :ui="{ footer: 'px-4 pb-6 pt-2', body: 'px-4' }"
-        >
-            <template #body>
-                <div class="space-y-4">
-                    <div class="flex justify-between items-center">
-                        <span class="text-sm text-gray-500">Name</span>
-                        <span
-                            class="text-sm font-semibold text-gray-800 truncate ml-2 max-w-[60%] text-right"
-                            >{{ studentName }}</span
-                        >
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-sm text-gray-500">Email</span>
-                        <span
-                            class="text-sm font-semibold text-gray-800 truncate ml-2 max-w-[60%] text-right"
-                            >{{ studentEmail }}</span
-                        >
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-sm text-gray-500">Payment Type</span>
-                        <span class="text-sm font-semibold text-gray-800">{{
-                            selectedPaymentType
-                                ? getPaymentTypeName(selectedPaymentType)
-                                : "-"
-                        }}</span>
-                    </div>
-                    <div class="h-px bg-gray-100"></div>
-                    <div
-                        v-if="selectedPaymentType"
-                        class="flex items-start gap-2 bg-blue-50 rounded-lg p-3 border border-blue-100"
-                    >
-                        <IconInfo
-                            class="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5"
-                        />
-                        <p class="text-xs text-blue-700">
-                            Please verify the details above before confirming
-                        </p>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-base font-bold text-gray-800"
-                            >Total</span
-                        >
-                        <span class="text-2xl font-bold text-blue-600">{{
-                            formatCurrency(selectedAmount)
-                        }}</span>
-                    </div>
-                </div>
-            </template>
-            <template #footer="{ close }">
-                <BaseButton
-                    variant="primary"
-                    size="lg"
-                    block
-                    :disabled="!canPay"
-                    :loading="isPaymentLoading"
-                    @click="handlePayment"
-                >
-                    {{ canPay ? "Confirm & Pay" : "Select Payment Type" }}
-                </BaseButton>
-                <p class="text-xs text-gray-400 text-center mt-2">
-                    {{
-                        canPay
-                            ? "Secure payment powered by Midtrans"
-                            : "Choose a payment option to continue"
-                    }}
-                </p>
-            </template>
-        </UDrawer>
 
         <!-- Payment History (Mobile Only) -->
         <div class="lg:hidden">
@@ -838,7 +607,7 @@ onMounted(async () => {
         <Modal
             :show="showErrorModal"
             type="error"
-            :title="continueError ? 'Payment Session Expired' : 'Payment Failed'"
+            :title="continueError ? continueErrorTitle : 'Payment Failed'"
             :message="
                 continueError ||
                 paymentError ||
@@ -849,87 +618,19 @@ onMounted(async () => {
         />
 
         <!-- Continue Payment — Desktop Modal -->
-        <UModal v-if="!isMobile" v-model:open="showContinueModal" title="Continue Payment" description="Complete your pending payment." :ui="{ footer: 'justify-end' }">
-            <template #body>
-                <div v-if="continuePayment" class="space-y-4">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <p class="text-xs text-gray-500 font-medium mb-1">Payment Type</p>
-                            <p class="text-sm font-semibold text-gray-800">{{ getPaymentTypeName(continuePayment.payment_type) }}</p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-500 font-medium mb-1">Amount</p>
-                            <p class="text-sm font-bold text-blue-600">{{ formatCurrency(continuePayment.amount) }}</p>
-                        </div>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-500 font-medium mb-1">Order ID</p>
-                        <p class="text-sm font-mono text-gray-700">{{ continuePayment.midtrans_orderid }}</p>
-                    </div>
-                    <div>
-                        <p class="text-xs text-gray-500 font-medium mb-1">Created</p>
-                        <p class="text-sm text-gray-700">{{ formatDate(continuePayment.created_at) }}</p>
-                    </div>
-                    <div class="flex items-start gap-2 bg-blue-50 rounded-lg p-3 border border-blue-100">
-                        <UIcon name="i-lucide-info" class="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                        <p class="text-xs text-blue-700">You have a pending payment. Click below to reopen the payment window and complete your transaction.</p>
-                    </div>
-                </div>
-            </template>
-            <template #footer="{ close }">
-                <UButton label="Cancel" color="neutral" variant="outline" @click="close" />
-                <UButton label="Pay Now" color="primary" :loading="continueLoading" @click="handleContinuePayment" />
-            </template>
-        </UModal>
+        <ContinuePaymentOverlay
+            v-model:open="showContinueModal"
+            :is-mobile="isMobile"
+            :payment="continuePayment"
+            :loading="continueLoading"
+            :get-payment-type-name="getPaymentTypeName"
+            :format-currency="formatCurrency"
+            :format-date="formatDate"
+            @pay="handleContinuePayment"
+            @cancel="closeContinueModal"
+        />
 
         <!-- Continue Payment — Mobile Bottom Sheet -->
-        <USlideover
-            v-if="isMobile"
-            v-model:open="showContinueModal"
-            side="bottom"
-            :close="false"
-            :ui="{
-                content: 'rounded-t-2xl min-h-[35vh]'
-            }"
-        >
-            <template #body>
-                <div v-if="continuePayment" class="flex flex-col px-6 py-6 gap-5">
-                    <div class="flex items-center justify-center">
-                        <div class="flex items-center justify-center w-14 h-14 rounded-full bg-blue-100">
-                            <UIcon name="i-lucide-wallet" class="w-7 h-7 text-blue-600" />
-                        </div>
-                    </div>
-                    <div class="text-center">
-                        <h3 class="text-lg font-bold text-gray-900">Continue Payment</h3>
-                        <p class="text-sm text-gray-500 mt-1">Complete your pending payment</p>
-                    </div>
-                    <div class="bg-gray-50 rounded-xl p-4 space-y-3">
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs text-gray-500">Payment Type</span>
-                            <span class="text-sm font-semibold text-gray-800">{{ getPaymentTypeName(continuePayment.payment_type) }}</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs text-gray-500">Amount</span>
-                            <span class="text-sm font-bold text-blue-600">{{ formatCurrency(continuePayment.amount) }}</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs text-gray-500">Order ID</span>
-                            <span class="text-xs font-mono text-gray-600">{{ continuePayment.midtrans_orderid }}</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs text-gray-500">Created</span>
-                            <span class="text-xs text-gray-600">{{ formatDate(continuePayment.created_at) }}</span>
-                        </div>
-                    </div>
-                    <div class="flex items-start gap-2 bg-blue-50 rounded-lg p-3 border border-blue-100">
-                        <UIcon name="i-lucide-info" class="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-                        <p class="text-xs text-blue-700">You have a pending payment. Tap below to reopen the payment window and complete your transaction.</p>
-                    </div>
-                    <UButton label="Pay Now" color="primary" size="lg" class="w-full rounded-full" :loading="continueLoading" @click="handleContinuePayment" />
-                    <UButton label="Cancel" color="neutral" variant="outline" size="lg" class="w-full rounded-full" @click="showContinueModal = false; continuePayment = null" />
-                </div>
-            </template>
-        </USlideover>
 
         <!-- Payment Guide Modal -->
         <Modal
@@ -1070,20 +771,6 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.payment-section-glass {
-    background: #ffffff;
-}
-
-.payment-type-card {
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.payment-type-card:hover {
-    box-shadow:
-        0 10px 25px -5px rgba(0, 0, 0, 0.1),
-        0 8px 10px -6px rgba(0, 0, 0, 0.1);
-}
-
 .guide-step-card {
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -1092,29 +779,9 @@ onMounted(async () => {
     box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.08);
 }
 
-.slide-up-enter-active {
-    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.slide-up-leave-active {
-    transition: transform 0.2s ease-in;
-}
-.slide-up-enter-from,
-.slide-up-leave-to {
-    transform: translateY(100%);
-}
-
 @media (prefers-reduced-motion: reduce) {
-    .payment-type-card,
     .guide-step-card {
         transition: none;
-    }
-    .slide-up-enter-active,
-    .slide-up-leave-active {
-        transition: none;
-    }
-    .slide-up-enter-from,
-    .slide-up-leave-to {
-        transform: none;
     }
 }
 </style>

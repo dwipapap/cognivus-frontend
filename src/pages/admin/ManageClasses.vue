@@ -1,11 +1,13 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { useToast } from '@nuxt/ui/composables';
 import { classAPI, levelAPI, lecturerAPI, studentAPI } from '../../services/api';
 import Modal from '../../components/ui/Modal.vue';
 
 import { useConfirm } from '@/composables/useConfirm'
 import ClassForm from './ClassForm.vue';
 
+const toast = useToast();
 const classes = ref([]);
 const levels = ref([]);
 const lecturers = ref([]);

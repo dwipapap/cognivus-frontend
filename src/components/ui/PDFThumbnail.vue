@@ -94,10 +94,13 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div 
+  <button
+    type="button"
     ref="containerRef"
-    class="flex flex-col items-center gap-1 cursor-pointer p-2 rounded-token-base transition-colors"
+    class="flex flex-col items-center gap-1 cursor-pointer p-2 rounded-token-base transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
     :class="[isActive ? 'bg-primary/10' : 'hover:bg-surface-hover']"
+    :aria-label="`Go to page ${pageNum}`"
+    :aria-current="isActive ? 'page' : undefined"
     @click="emit('click')"
   >
     <div 
@@ -115,5 +118,5 @@ onUnmounted(() => {
     <span class="text-xs font-medium" :class="[isActive ? 'text-primary' : 'text-ink-muted']">
       {{ pageNum }}
     </span>
-  </div>
+  </button>
 </template>
