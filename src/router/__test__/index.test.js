@@ -1,77 +1,71 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createRouter, createWebHistory } from 'vue-router';
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-// Dummy route components
-const Home = { template: '<div>Home</div>' };
-const Login = { template: '<div>Login</div>' };
-const Admin = { template: '<div>Admin</div>' };
-const NotFound = { template: '<div>404</div>' };
+const mockAuthStore = vi.hoisted(() => ({
+  isAuthenticated: vi.fn(() => false),
+  role: null,
+  user: null
+}))
 
-// Dummy routes config mirip index.js
-const routes = [
-  { path: '/', name: 'Home', component: Home },
-  { path: '/login', name: 'Login', component: Login },
-  { path: '/admin', name: 'Admin', component: Admin, meta: { requiresAuth: true, role: 'admin' } },
-  { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotFound },
-];
+vi.mock('../../store/auth', () => ({ authStore: mockAuthStore }))
 
-let router;
+const { default: router } = await import('../index')
 
-beforeEach(() => {
-  router = createRouter({
-    history: createWebHistory(),
-    routes,
-  });
-});
+describe('production router configuration', () => {
+  beforeEach(async () => {
+    mockAuthStore.isAuthenticated.mockReturnValue(false)
+    mockAuthStore.role = null
+    mockAuthStore.user = null
+    await router.replace('/')
+  })
 
-describe('Vue Router Core Functionality', () => {
-  it('1. should resolve Home route', async () => {
-    const route = router.resolve('/');
-    expect(route.name).toBe('Home');
-  });
+  it('resolves the real public routes', () => {
+    expect(router.resolve('/').name).toBe('Home')
+    expect(router.resolve('/login').name).toBe('Login')
+    expect(router.resolve('/auth/callback').name).toBe('GoogleCallback')
+  })
 
-  it('2. should resolve Login route', async () => {
-    const route = router.resolve('/login');
-    expect(route.name).toBe('Login');
-  });
+  it('inherits authentication metadata on nested role routes', () => {
+    const studentRoute = router.resolve('/student/payment')
+    const lecturerRoute = router.resolve('/lecturer/materials')
+    const adminRoute = router.resolve('/admin/payments')
 
-  it('3. should resolve Admin route', async () => {
-    const route = router.resolve('/admin');
-    expect(route.name).toBe('Admin');
-  });
+    expect(studentRoute.meta.requiresAuth).toBe(true)
+    expect(studentRoute.meta.role).toBe('student')
+    expect(lecturerRoute.meta).toMatchObject({
+      requiresAuth: true,
+      role: 'lecturer'
+    })
+    expect(adminRoute.meta).toMatchObject({
+      requiresAuth: true,
+      roles: ['owner', 'admin', 'moderator']
+    })
+  })
 
-  it('4. should resolve NotFound route for unknown path', async () => {
-    const route = router.resolve('/unknown');
-    expect(route.name).toBe('NotFound');
-  });
+  it('keeps the configured legacy student redirects', () => {
+    expect(router.resolve('/dashboardstudent').redirectedFrom).toBeUndefined()
 
-  it('5. should have meta.requiresAuth for Admin route', () => {
-    const route = routes.find(r => r.name === 'Admin');
-    expect(route.meta.requiresAuth).toBe(true);
-  });
+    const legacyRoute = router.getRoutes().find((route) => route.path === '/dashboardstudent')
+    expect(legacyRoute?.redirect).toBe('/student/dashboard')
+  })
 
-  it('6. should have meta.role for Admin route', () => {
-    const route = routes.find(r => r.name === 'Admin');
-    expect(route.meta.role).toBe('admin');
-  });
+  it('resolves unknown URLs to the production not-found page', () => {
+    const unknownRoute = router.resolve('/does-not-exist')
+    expect(unknownRoute.name).toBe('NotFound')
+    expect(unknownRoute.matched).toHaveLength(1)
+  })
 
-  it('7. should not have meta.requiresAuth for Home route', () => {
-    const route = routes.find(r => r.name === 'Home');
-    expect(route.meta).toBeUndefined();
-  });
+  it('redirects an authenticated admin away from student routes', async () => {
+    mockAuthStore.isAuthenticated.mockReturnValue(true)
+    mockAuthStore.role = 'admin'
 
-  it('8. should return correct component for Home route', () => {
-    const route = routes.find(r => r.name === 'Home');
-    expect(route.component).toBe(Home);
-  });
+    await router.push('/student/payment')
 
-  it('9. should return correct component for NotFound route', () => {
-    const route = routes.find(r => r.name === 'NotFound');
-    expect(route.component).toBe(NotFound);
-  });
+    expect(router.currentRoute.value.name).toBe('AdminDashboard')
+  })
 
-  it('10. should match dynamic NotFound for any unknown path', () => {
-    const route = router.resolve('/does-not-exist');
-    expect(route.name).toBe('NotFound');
-  });
-});
+  it('redirects guests from protected routes to login', async () => {
+    await router.push('/lecturer/materials')
+
+    expect(router.currentRoute.value.name).toBe('Login')
+  })
+})

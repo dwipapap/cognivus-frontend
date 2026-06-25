@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { authStore } from '../store/auth';
-import apiClient, { studentAPI } from '../services/api';
+import { studentAPI } from '../services/api';
 
 /**
  * Lazy-loaded route components.
@@ -12,6 +12,7 @@ const Home = () => import('../pages/Home.vue');
 const Login = () => import('../pages/Login.vue');
 const GoogleCallback = () => import('../pages/GoogleCallback.vue');
 const NewUser = () => import('../pages/NewUser.vue');
+const NotFound = () => import('../pages/NotFound.vue');
 
 // Student pages - grouped in 'student' chunk
 const StudentLayout = () => import(/* webpackChunkName: "student" */ '../pages/student/StudentLayout.vue');
@@ -71,7 +72,7 @@ const routes = [
   {
     path: '/student',
     component: StudentLayout,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, role: 'student' },
     children: [
       {
         path: 'dashboard',
@@ -259,6 +260,11 @@ const routes = [
   {
     path: '/profile-view',
     redirect: '/student/profile-view'
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    component: NotFound
   }
 ];
 
@@ -286,17 +292,14 @@ router.beforeEach(async (to, from, next) => {
   const isAuthenticated = authStore.isAuthenticated();
   const userRole = authStore.role;
 
-  console.log('Router guard check:', {
-    to: to.path,
-    requiresAuth: to.meta.requiresAuth,
-    isAuthenticated,
-    userRole
-  });
-
   // Special handling for NewUser page - only allow users without complete profile
   if (to.name === 'NewUser') {
     if (!isAuthenticated) {
       return next({ name: 'Login' });
+    }
+
+    if (userRole !== 'student') {
+      return next({ name: getDefaultDashboard(userRole) });
     }
     
     // Check if student profile is already complete (has phone and address)
