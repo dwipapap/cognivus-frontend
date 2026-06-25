@@ -74,14 +74,18 @@ const sizeMap = {
 const isMobile = ref(false)
 let mql = null
 
+const handleMediaQueryChange = (event) => {
+  isMobile.value = event.matches
+}
+
 onMounted(() => {
   mql = window.matchMedia('(max-width: 767px)')
   isMobile.value = mql.matches
-  mql.addEventListener('change', (e) => { isMobile.value = e.matches })
+  mql.addEventListener('change', handleMediaQueryChange)
 })
 
 onUnmounted(() => {
-  mql?.removeEventListener('change', () => {})
+  mql?.removeEventListener('change', handleMediaQueryChange)
 })
 
 function onClose() {
