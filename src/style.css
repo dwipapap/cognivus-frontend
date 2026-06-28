@@ -133,6 +133,7 @@
 
 :root {
   --ui-radius: 0.75rem;
+  color-scheme: light;
 
   font-family: 'Figtree', system-ui, -apple-system, sans-serif;
   line-height: 1.5;

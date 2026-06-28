@@ -9,6 +9,7 @@ export default defineConfig({
   plugins: [
     vue(),
     ui({
+      colorMode: false,
       colors: {
         primary: 'blue',
         neutral: 'slate'
