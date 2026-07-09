@@ -7,7 +7,6 @@ import BaseInput from '../../components/form/BaseInput.vue';
 import BaseTextarea from '../../components/form/BaseTextarea.vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
 import LoadingSpinner from '../../components/ui/LoadingSpinner.vue';
-import ConfirmDialog from '../../components/ui/ConfirmDialog.vue';
 import ClassSidebar from '../../components/lecturer/ClassSidebar.vue';
 import IconTrash from '~icons/solar/trash-bin-trash-bold';
 import IconFile from '~icons/solar/file-text-bold';
@@ -77,6 +76,10 @@ const confirmConfig = ref({
   variant: 'danger',
   confirmText: 'Delete',
   cancelText: 'Cancel'
+});
+const confirmColor = computed(() => {
+  const map = { danger: 'error', warning: 'warning', info: 'primary' };
+  return map[confirmConfig.value.variant];
 });
 
 /** Get courses for selected class with file count */
@@ -762,17 +765,19 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
     </Teleport>
 
     <!-- Confirmation Dialog -->
-    <ConfirmDialog
-      :show="showConfirmDialog"
+    <UModal
+      v-model:open="showConfirmDialog"
       :title="confirmConfig.title"
-      :message="confirmConfig.message"
-      :variant="confirmConfig.variant"
-      :confirm-text="confirmConfig.confirmText"
-      :cancel-text="confirmConfig.cancelText"
-      @confirm="handleConfirm"
-      @cancel="handleCancel"
+      :description="confirmConfig.message"
       @close="handleCancel"
-    />
+    >
+      <template #footer>
+        <div class="flex justify-end gap-2">
+          <UButton :label="confirmConfig.cancelText" color="neutral" variant="outline" @click="handleCancel" />
+          <UButton :label="confirmConfig.confirmText" :color="confirmColor" @click="handleConfirm" />
+        </div>
+      </template>
+    </UModal>
 </template>
 
 <style scoped>
