@@ -43,6 +43,15 @@ const getStatusBadge = (status) => {
   return classes[status] || 'bg-muted text-default border-default';
 };
 
+const hasActiveFilters = computed(() => searchQuery.value || statusFilter.value || typeFilter.value);
+
+const clearFilters = () => {
+  searchQuery.value = '';
+  statusFilter.value = '';
+  typeFilter.value = '';
+  paymentPage.value = 1;
+};
+
 const filteredPayments = computed(() => {
   let result = payments.value;
 
@@ -253,8 +262,13 @@ onMounted(() => {
           </div>
         </div>
 
-        <div class="mt-3 text-sm text-muted">
-          Showing {{ filteredPayments.length }} of {{ payments.length }} payments
+        <div class="mt-3 flex items-center justify-between">
+          <div class="text-sm text-muted">
+            Showing {{ filteredPayments.length }} of {{ payments.length }} payments
+          </div>
+          <UButton v-if="hasActiveFilters" @click="clearFilters" color="neutral" variant="ghost" size="xs" icon="i-lucide-x">
+            Clear Filters
+          </UButton>
         </div>
       </div>
     </div>

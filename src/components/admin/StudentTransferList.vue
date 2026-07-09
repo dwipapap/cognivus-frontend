@@ -38,6 +38,14 @@ const availablePage = ref(1);
 const enrolledPage = ref(1);
 const itemsPerPage = 15;
 
+const hasActiveFilters = computed(() => searchQuery.value || filterClassId.value);
+
+const clearFilters = () => {
+  searchQuery.value = '';
+  filterClassId.value = '';
+  availablePage.value = 1;
+};
+
 const enrolledStudents = computed(() => {
   const currentlyEnrolled = props.allStudents.filter(s => s.classid === props.currentClassId);
   const enrolledIds = new Set(currentlyEnrolled.map(s => s.studentid));
@@ -206,6 +214,9 @@ const changesSummary = computed(() => {
         ]" placeholder="All students" clearable />
       </UFormField>
     </div>
+    <UButton v-if="hasActiveFilters" @click="clearFilters" color="neutral" variant="ghost" size="xs" icon="i-lucide-x">
+      Clear Filters
+    </UButton>
 
     <!-- Transfer panes -->
     <div class="grid grid-cols-1 lg:grid-cols-7 gap-4">

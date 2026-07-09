@@ -234,6 +234,9 @@ onMounted(() => {
               <USelect v-model="selectedClassFilter" :items="classes.map(cls => ({ label: cls.class_code + (cls.branch ? ' (' + cls.branch + ')' : '') + ' - ' + (cls.level?.name || 'Unknown Level'), value: cls.classid }))" placeholder="All Classes" clearable />
             </UFormField>
           </div>
+          <UButton v-if="selectedClassFilter" @click="selectedClassFilter = ''" color="neutral" variant="ghost" size="xs" icon="i-lucide-x">
+            Clear Filter
+          </UButton>
           <div class="text-sm text-muted">
             Showing {{ filteredStudents.length }} of {{ students.length }} students
           </div>

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { studentAPI, reportFileAPI, gradeAPI } from '../../services/api';
 
 
@@ -13,6 +13,14 @@ const isLoading = ref(true);
 const successMessage = ref('');
 const errorMessage = ref('');
 const showUploadModal = ref(false);
+
+const gradePage = ref(1);
+const gradePageSize = 20;
+const paginatedGrades = computed(() => {
+  const start = (gradePage.value - 1) * gradePageSize;
+  const end = start + gradePageSize;
+  return existingGrades.value.slice(start, end);
+});
 
 const gradeColumns = [
   { key: 'test_type', label: 'Test Type' },
@@ -192,7 +200,7 @@ onMounted(() => {
     <!-- Grades Table -->
     <div v-if="existingGrades.length > 0" class="mb-8">
       <h2 class="text-lg font-medium text-default mb-4">Existing Grades</h2>
-      <UTable :data="existingGrades" :columns="gradeColumns" class="border border-default rounded-lg">
+      <UTable :data="paginatedGrades" :columns="gradeColumns" class="border border-default rounded-lg">
         <template #actions-data="{ row }">
           <div class="flex gap-2">
             <UButton color="primary" variant="solid" size="sm" @click="$router.push({ name: 'AdminEditGrade', params: { userid: row.studentid, gradeid: row.gradeid } })">
@@ -204,6 +212,12 @@ onMounted(() => {
           </div>
         </template>
       </UTable>
+      <div v-if="existingGrades.length > gradePageSize" class="flex items-center justify-between px-4 py-3 bg-muted border border-t-0 border-default rounded-b-lg">
+        <p class="text-sm text-muted">
+          Showing {{ (gradePage - 1) * gradePageSize + 1 }} to {{ Math.min(gradePage * gradePageSize, existingGrades.length) }} of {{ existingGrades.length }} grades
+        </p>
+        <UPagination v-model:page="gradePage" :total="existingGrades.length" :max="gradePageSize" :sibling-count="1" size="sm" />
+      </div>
     </div>
 
     <!-- Main Content -->
