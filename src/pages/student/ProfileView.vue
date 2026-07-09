@@ -263,7 +263,7 @@ const fetchClassData = async () => {
           </div>
 
   <!-- Modal Component -->
-  <Modal :show="showModal" :type="modalType" :message="modalMessage" @close="closeModal" />
+  <Modal :show="showModal" :type="modalType" :message="modalMessage" @close="closeModal" @confirm="closeModal" />
 
   <!-- Change Password OTP Flow -->
   <OtpFlow :show="showChangePassword" title="Change Password" :prefill-email="userEmail" :prefill-phone="userPhone"

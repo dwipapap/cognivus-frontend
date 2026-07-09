@@ -286,6 +286,6 @@ onMounted(fetchProfile);
     </div>
 
     <!-- Modal Component -->
-    <Modal :show="showModal" :type="modalType" :message="modalMessage" @close="closeModal" />
+    <Modal :show="showModal" :type="modalType" :message="modalMessage" @close="closeModal" @confirm="closeModal" />
   </div>
 </template>

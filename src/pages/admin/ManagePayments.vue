@@ -474,9 +474,10 @@ onMounted(() => {
     </Modal>
 
     <!-- Notification Modal -->
-    <Modal 
-      :show="showNotificationModal" 
-      @close="showNotificationModal = false" 
+    <Modal
+      :show="showNotificationModal"
+      @close="showNotificationModal = false"
+      @confirm="showNotificationModal = false"
       :type="notificationType"
       :message="notificationMessage"
     />

@@ -281,6 +281,7 @@ onMounted(fetchProfile);
       :type="modalType"
       :message="modalMessage"
       @close="closeModal"
+      @confirm="closeModal"
     />
   </div>
 </template>
