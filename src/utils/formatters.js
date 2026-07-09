@@ -22,7 +22,9 @@ export const getAverageScore = (grade) => {
     grade.listening_score,
     grade.speaking_score,
     grade.reading_score,
-    grade.writing_score
+    grade.writing_score,
+    grade.grammar_score,
+    grade.vocabulary_score
   ].filter(score => score !== null && score !== undefined);
   
   if (scores.length === 0) return 0;

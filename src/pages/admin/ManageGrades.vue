@@ -28,6 +28,8 @@ const gradeColumns = [
   { key: 'speaking_score', label: 'Speaking' },
   { key: 'reading_score', label: 'Reading' },
   { key: 'writing_score', label: 'Writing' },
+  { key: 'grammar_score', label: 'Grammar' },
+  { key: 'vocabulary_score', label: 'Vocabulary' },
   { key: 'final_score', label: 'Final' },
   { key: 'date_taken', label: 'Date' },
   { key: 'actions', label: 'Actions' },
@@ -42,7 +44,9 @@ const { formData, errors, getFieldProps, reset } = useForm(
     listening_score: '',
     speaking_score: '',
     reading_score: '',
-    writing_score: ''
+    writing_score: '',
+    grammar_score: '',
+    vocabulary_score: ''
   },
   {
     studentid: ['required'],
@@ -54,6 +58,12 @@ const uploadFile = ref(null);
 const isUploading = ref(false);
 
 const { confirm } = useConfirm()
+
+const parseScore = (value) => {
+  if (value === '' || value === null || value === undefined) return null;
+  const score = Number(value);
+  return Number.isFinite(score) ? score : null;
+};
 
 /** Fetch all students */
 const fetchStudents = async () => {
@@ -73,12 +83,16 @@ const fetchStudents = async () => {
 /** Calculate final score */
 const calculateFinalScore = () => {
   const scores = [
-    parseInt(formData.listening_score) || 0,
-    parseInt(formData.speaking_score) || 0,
-    parseInt(formData.reading_score) || 0,
-    parseInt(formData.writing_score) || 0
-  ];
-  return Math.round(scores.reduce((a, b) => a + b, 0) / 4);
+    formData.listening_score,
+    formData.speaking_score,
+    formData.reading_score,
+    formData.writing_score,
+    formData.grammar_score,
+    formData.vocabulary_score
+  ].map(parseScore).filter(score => score !== null);
+  return scores.length
+    ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
+    : null;
 };
 
 /** Upload grade report */
@@ -105,10 +119,12 @@ const uploadGradeReport = async () => {
     const gradePayload = {
       studentid: formData.studentid,
       test_type: formData.test_type,
-      listening_score: parseInt(formData.listening_score) || null,
-      speaking_score: parseInt(formData.speaking_score) || null,
-      reading_score: parseInt(formData.reading_score) || null,
-      writing_score: parseInt(formData.writing_score) || null,
+      listening_score: parseScore(formData.listening_score),
+      speaking_score: parseScore(formData.speaking_score),
+      reading_score: parseScore(formData.reading_score),
+      writing_score: parseScore(formData.writing_score),
+      grammar_score: parseScore(formData.grammar_score),
+      vocabulary_score: parseScore(formData.vocabulary_score),
       final_score: calculateFinalScore(),
       date_taken: new Date().toISOString().split('T')[0]
     };
@@ -268,6 +284,12 @@ onMounted(() => {
             </UFormField>
             <UFormField label="Writing Score">
               <UInput v-model="formData.writing_score" type="number" min="0" max="100" placeholder="0-100" />
+            </UFormField>
+            <UFormField label="Grammar Score">
+              <UInput v-model="formData.grammar_score" type="number" min="0" max="100" placeholder="0-100" />
+            </UFormField>
+            <UFormField label="Vocabulary Score">
+              <UInput v-model="formData.vocabulary_score" type="number" min="0" max="100" placeholder="0-100" />
             </UFormField>
           </div>
 

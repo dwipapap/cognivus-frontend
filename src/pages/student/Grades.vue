@@ -191,6 +191,14 @@ onMounted(() => {
                     <p class="text-xs font-medium text-gray-500 mb-0.5">Writing</p>
                     <p class="text-base font-semibold text-gray-900">{{ grade.writing_score ?? '-' }}</p>
                   </div>
+                  <div>
+                    <p class="text-xs font-medium text-gray-500 mb-0.5">Grammar</p>
+                    <p class="text-base font-semibold text-gray-900">{{ grade.grammar_score ?? '-' }}</p>
+                  </div>
+                  <div>
+                    <p class="text-xs font-medium text-gray-500 mb-0.5">Vocabulary</p>
+                    <p class="text-base font-semibold text-gray-900">{{ grade.vocabulary_score ?? '-' }}</p>
+                  </div>
                 </div>
 
                 <!-- Certificate Download (Disabled) -->
@@ -208,6 +216,8 @@ onMounted(() => {
                   <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Speaking</th>
                   <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Reading</th>
                   <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Writing</th>
+                  <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Grammar</th>
+                  <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Vocabulary</th>
                   <th class="px-6 py-4 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Final Score</th>
                   <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Date Taken</th>
                 </tr>
@@ -235,6 +245,16 @@ onMounted(() => {
                   <td class="px-6 py-4 text-center text-sm text-gray-600">
                     <span class="inline-flex items-center justify-center w-12 h-8 rounded-lg bg-gray-50 border border-gray-100 text-gray-700 font-medium">
                       {{ grade.writing_score ?? '-' }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 text-center text-sm text-gray-600">
+                    <span class="inline-flex items-center justify-center w-12 h-8 rounded-lg bg-gray-50 border border-gray-100 text-gray-700 font-medium">
+                      {{ grade.grammar_score ?? '-' }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 text-center text-sm text-gray-600">
+                    <span class="inline-flex items-center justify-center w-12 h-8 rounded-lg bg-gray-50 border border-gray-100 text-gray-700 font-medium">
+                      {{ grade.vocabulary_score ?? '-' }}
                     </span>
                   </td>
                   <td class="px-6 py-4 text-center">
