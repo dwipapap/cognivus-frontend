@@ -4,15 +4,21 @@
 // Staff do not reach this page.
 // Note: username and password are required even for Google-primary students —
 // they serve as a fallback login method.
-import { ref, onMounted, nextTick } from 'vue';
+import { computed, ref, onMounted, onUnmounted, nextTick } from 'vue';
 import { studentAPI, userAPI } from '../services/api';
 import { authStore } from '../store/auth';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useForm } from '../composables/useForm';
 import Modal from '../components/ui/Modal.vue';
 import LoadingSpinner from '../components/ui/LoadingSpinner.vue';
+import UCalendar from '@nuxt/ui/components/Calendar.vue';
+import UPopover from '@nuxt/ui/components/Popover.vue';
+import { CalendarDate } from '@internationalized/date';
+import ittrLogo from '../assets/ittrlogo.png';
 
 const router = useRouter();
+const route = useRoute();
+const isDevPreview = import.meta.env.DEV && route.meta.devPreview;
 
 // Gender mapping helper
 const mapGenderToBackend = (frontendGender) => {
@@ -23,6 +29,7 @@ const mapGenderToBackend = (frontendGender) => {
 
 const isLoading = ref(true);
 const showModal = ref(false);
+const showMobileSubmit = ref(false);
 const modalType = ref('info');
 const modalMessage = ref('');
 
@@ -65,7 +72,46 @@ const { formData, errors, isSubmitting, submit, getFieldProps, reset, validate, 
   }
 );
 
+const birthDateValue = computed({
+  get() {
+    if (!formData.birthdate) return undefined;
+    const [year, month, day] = formData.birthdate.split('-').map(Number);
+    return year && month && day ? new CalendarDate(year, month, day) : undefined;
+  },
+  set(value) {
+    formData.birthdate = value?.toString() || '';
+    validateSingleField('birthdate');
+  }
+});
+
+const formattedBirthDate = computed(() => {
+  if (!formData.birthdate) return 'Select date';
+  const [year, month, day] = formData.birthdate.split('-');
+  return `${month}/${day}/${year}`;
+});
+
 const fetchProfile = async () => {
+  if (isDevPreview) {
+    Object.assign(formData, {
+      username: 'student.google',
+      password: '',
+      confirmPassword: '',
+      studentid: 1001,
+      fullname: 'Nadia Putri',
+      gender: 'Female',
+      address: 'Jl. Mawar No. 12, Jakarta',
+      phone: '081234567890',
+      parentname: 'Rina Putri',
+      parentphone: '081298765432',
+      birthdate: '2010-04-18',
+      birthplace: 'Jakarta',
+      classid: 3,
+      userid: 42
+    });
+    isLoading.value = false;
+    return;
+  }
+
   const userId = authStore.user?.id;
   if (!userId) {
     modalType.value = 'error';
@@ -123,6 +169,13 @@ const fetchProfile = async () => {
 };
 
 const handleCompleteProfile = async () => {
+  if (isDevPreview) {
+    modalType.value = 'success';
+    modalMessage.value = 'Preview only: profile would be saved here.';
+    openModal();
+    return;
+  }
+
   await submit(async (data) => {
     try {
       const userId = data.userid || authStore.user?.id;
@@ -184,77 +237,178 @@ const closeModal = () => {
   modalMessage.value = '';
 };
 
-onMounted(fetchProfile);
+const updateMobileSubmitVisibility = () => {
+  if (window.innerWidth >= 768) {
+    showMobileSubmit.value = true;
+    return;
+  }
+
+  const scrollBottom = window.scrollY + window.innerHeight;
+  const pageBottom = document.documentElement.scrollHeight;
+  showMobileSubmit.value = scrollBottom >= pageBottom - 16;
+};
+
+onMounted(() => {
+  fetchProfile();
+  window.addEventListener('scroll', updateMobileSubmitVisibility, { passive: true });
+  window.addEventListener('resize', updateMobileSubmitVisibility);
+  nextTick(updateMobileSubmitVisibility);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', updateMobileSubmitVisibility);
+  window.removeEventListener('resize', updateMobileSubmitVisibility);
+});
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-blue-600 via-blue-500 to-blue-400 flex items-center justify-center p-4 font-sans">
+  <div class="new-user-page min-h-screen bg-blue-600 md:flex md:h-screen md:items-center md:justify-center md:overflow-hidden md:bg-[#eef6ff] md:p-6">
     <!-- Loading State -->
     <div v-if="isLoading" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
         <div class="bg-white p-8 rounded-lg shadow-2xl max-w-md w-full">
-            <LoadingSpinner size="lg" color="blue" :center="true" />
+            <LoadingSpinner size="lg" color="primary" :center="true" />
             <p class="text-center text-gray-600 mt-4 font-medium">Loading profile data...</p>
         </div>
     </div>
 
     <!-- Main Card -->
-    <div v-else class="bg-white w-full max-w-4xl rounded-[2.5rem] shadow-2xl overflow-hidden">
-      
-      <!-- Form -->
-      <div class="w-full p-6 md:p-8 bg-blue-50/30 flex flex-col justify-center">
-        <div class="max-w-3xl mx-auto w-full">
-          <!-- Header -->
-          <div class="text-center mb-6">
-            <h1 class="text-3xl font-bold text-gray-900 mb-2">Complete Your Profile</h1>
-            <p class="text-gray-600 text-sm">Set up your account and profile information</p>
+    <div v-else class="relative w-full overflow-hidden md:grid md:h-full md:max-h-[900px] md:max-w-7xl md:grid-cols-[0.9fr_1.35fr] md:items-center md:gap-8">
+      <aside class="desktop-intro hidden h-full flex-col justify-between rounded-[1.5rem] p-8 md:flex">
+        <div>
+          <img :src="ittrLogo" alt="ITTR Logo" class="h-12 w-auto object-contain" />
+
+          <div class="mt-16">
+            <p class="mb-4 flex items-center gap-2 text-sm font-semibold text-blue-500">
+              <UIcon name="i-lucide-sparkles" class="h-5 w-5" />
+              You're almost there!
+            </p>
+            <h1 class="max-w-md text-4xl font-bold leading-tight text-slate-950 xl:text-5xl">
+              Complete Your <span class="text-blue-600">Profile</span>
+            </h1>
+            <p class="mt-5 max-w-sm text-sm leading-6 text-blue-950/55 xl:text-base xl:leading-7">
+              Tell us a bit about yourself to personalize your learning journey.
+            </p>
+          </div>
+        </div>
+
+        <div>
+          <div class="study-visual mx-auto mb-5">
+            <div class="study-platform"></div>
+            <div class="study-book study-book-bottom"></div>
+            <div class="study-book study-book-top"></div>
+            <div class="study-cap"></div>
+            <div class="study-pot"></div>
           </div>
 
-          <form @submit.prevent="handleCompleteProfile" class="space-y-6">
+          <UCard class="max-w-sm border-0 bg-white/75 shadow-sm ring-1 ring-blue-100" :ui="{ body: 'p-4' }">
+            <div class="flex items-center gap-4">
+              <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+                <UIcon name="i-lucide-shield-check" class="h-6 w-6" />
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-blue-950">Your information is safe with us.</p>
+                <p class="mt-1 text-xs leading-5 text-blue-950/55">We use industry-standard security to protect your data.</p>
+              </div>
+            </div>
+          </UCard>
+        </div>
+      </aside>
+
+      <div class="mobile-hero px-5 pt-4 pb-12 text-slate-950 md:hidden">
+        <div class="mb-7 flex items-center justify-between">
+          <img :src="ittrLogo" alt="ITTR Logo" class="h-9 w-auto object-contain" />
+          <div class="flex h-11 w-11 items-center justify-center rounded-full bg-white text-blue-600 shadow-sm">
+            <UIcon name="i-lucide-user-round" class="h-5 w-5" />
+          </div>
+        </div>
+        <h1 class="max-w-xs text-3xl font-bold leading-tight">Complete Your <span class="text-blue-600">Profile</span></h1>
+        <p class="mt-2 text-xs font-medium text-slate-500">All fields marked with <span class="text-red-500">*</span> are required</p>
+      </div>
+      
+      <!-- Form -->
+      <UCard class="profile-sheet w-full border-0 bg-white shadow-xl ring-1 ring-blue-100/80 md:max-h-full md:self-center md:rounded-[1.75rem]" :ui="{ body: 'px-5 pb-24 pt-6 md:p-6 xl:p-8' }">
+        <div class="max-w-3xl mx-auto w-full">
+          <!-- Header -->
+          <div class="hidden items-center gap-4 mb-5 md:flex xl:mb-8">
+            <div class="flex h-14 w-14 items-center justify-center rounded-full bg-blue-500 text-white shadow-lg shadow-blue-500/25 xl:h-16 xl:w-16">
+              <UIcon name="i-lucide-user-round" class="h-7 w-7 xl:h-8 xl:w-8" />
+            </div>
+            <div>
+              <h1 class="text-xl font-bold text-slate-950 xl:text-2xl">Personal Information</h1>
+              <p class="text-sm text-slate-500">All fields marked with <span class="text-red-500">*</span> are required</p>
+            </div>
+          </div>
+
+          <form @submit.prevent="handleCompleteProfile" class="space-y-5 md:space-y-4 xl:space-y-6">
             <!-- Personal Information Section -->
             <div>
-              <h2 class="text-lg font-semibold text-blue-600 mb-4">Personal Information</h2>
+              <h2 class="section-title text-lg font-semibold text-blue-600 mb-4 flex items-center gap-2 md:hidden">
+                <span class="flex h-9 w-9 items-center justify-center rounded-full bg-blue-500 text-white">
+                  <UIcon name="i-lucide-user-round" class="h-5 w-5" />
+                </span>
+                <span>Personal Information</span>
+              </h2>
               
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 md:gap-x-8 md:gap-y-3 xl:gap-y-5">
                 <!-- Full Name -->
                 <div class="md:col-span-2">
                   <label class="block text-sm font-medium text-gray-900 mb-2">
                     Full Name <span class="text-red-500">*</span>
                   </label>
-                  <input 
+                  <UInput
                     v-model="formData.fullname"
                     @blur="validateSingleField('fullname')"
                     type="text" 
+                    size="sm"
                     placeholder="Enter your full name"
-                    class="block w-full !bg-white px-4 py-2.5 text-gray-900 placeholder-gray-400 border rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    :class="errors.fullname ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'"
-                  >
+                    leading-icon="i-lucide-user-round"
+                    class="w-full"
+                    :color="errors.fullname ? 'error' : 'primary'"
+                  />
                   <p v-if="errors.fullname" class="text-red-600 text-xs mt-1.5">{{ errors.fullname }}</p>
                 </div>
 
                 <!-- Birth Date -->
                 <div class="col-span-1">
                   <label class="block text-sm font-medium text-gray-900 mb-2">Birth Date</label>
-                  <input 
-                    v-model="formData.birthdate"
-                    @blur="validateSingleField('birthdate')"
-                    type="date" 
-                    class="block w-full !bg-white px-4 py-2.5 text-gray-900 border rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    :class="errors.birthdate ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'"
-                  >
+                  <UPopover :content="{ side: 'bottom', align: 'start', sideOffset: 8 }">
+                    <UInput
+                      :model-value="formattedBirthDate"
+                      readonly
+                      size="sm"
+                      trailing-icon="i-lucide-calendar-days"
+                      class="w-full"
+                      :color="errors.birthdate ? 'error' : 'primary'"
+                    />
+                    <template #content="{ close }">
+                      <UCalendar
+                        v-model="birthDateValue"
+                        type="date"
+                        view-control
+                        color="primary"
+                        month-controls
+                        year-controls
+                        class="p-2"
+                        @update:model-value="close"
+                      />
+                    </template>
+                  </UPopover>
                   <p v-if="errors.birthdate" class="text-red-600 text-xs mt-1.5">{{ errors.birthdate }}</p>
                 </div>
 
                 <!-- Birth Place -->
                 <div class="col-span-1">
                   <label class="block text-sm font-medium text-gray-900 mb-2">Birth Place</label>
-                  <input 
+                  <UInput
                     v-model="formData.birthplace"
                     @blur="validateSingleField('birthplace')"
                     type="text" 
+                    size="sm"
                     placeholder="City"
-                    class="block w-full !bg-white px-4 py-2.5 text-gray-900 placeholder-gray-400 border rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    :class="errors.birthplace ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'"
-                  >
+                    leading-icon="i-lucide-map-pin"
+                    class="w-full"
+                    :color="errors.birthplace ? 'error' : 'primary'"
+                  />
                   <p v-if="errors.birthplace" class="text-red-600 text-xs mt-1.5">{{ errors.birthplace }}</p>
                 </div>
 
@@ -263,14 +417,16 @@ onMounted(fetchProfile);
                   <label class="block text-sm font-medium text-gray-900 mb-2">
                     Address <span class="text-red-500">*</span>
                   </label>
-                  <input 
+                  <UInput
                     v-model="formData.address"
                     @blur="validateSingleField('address')"
                     type="text" 
+                    size="sm"
                     placeholder="Complete address"
-                    class="block w-full !bg-white px-4 py-2.5 text-gray-900 placeholder-gray-400 border rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    :class="errors.address ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'"
-                  >
+                    leading-icon="i-lucide-home"
+                    class="w-full"
+                    :color="errors.address ? 'error' : 'primary'"
+                  />
                   <p v-if="errors.address" class="text-red-600 text-xs mt-1.5">{{ errors.address }}</p>
                 </div>
 
@@ -279,21 +435,16 @@ onMounted(fetchProfile);
                   <label class="block text-sm font-medium text-gray-900 mb-2">
                     Gender <span class="text-red-500">*</span>
                   </label>
-                  <div class="relative">
-                    <select 
-                      v-model="formData.gender"
-                      @blur="validateSingleField('gender')"
-                      class="block w-full !bg-white px-4 py-2.5 text-gray-900 border rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
-                      :class="errors.gender ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'"
-                    >
-                      <option value="" disabled>Select</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                    </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4 text-gray-500">
-                      <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-                    </div>
-                  </div>
+                  <USelect
+                    v-model="formData.gender"
+                    :items="genderOptions"
+                    size="sm"
+                    placeholder="Select"
+                    icon="i-lucide-user-round"
+                    class="w-full"
+                    :color="errors.gender ? 'error' : 'primary'"
+                    @blur="validateSingleField('gender')"
+                  />
                   <p v-if="errors.gender" class="text-red-600 text-xs mt-1.5">{{ errors.gender }}</p>
                 </div>
 
@@ -302,14 +453,16 @@ onMounted(fetchProfile);
                   <label class="block text-sm font-medium text-gray-900 mb-2">
                     Phone <span class="text-red-500">*</span>
                   </label>
-                  <input 
+                  <UInput
                     v-model="formData.phone"
                     @blur="validateSingleField('phone')"
                     type="tel" 
+                    size="sm"
                     placeholder="08xxxxxxxxx"
-                    class="block w-full !bg-white px-4 py-2.5 text-gray-900 placeholder-gray-400 border rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    :class="errors.phone ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'"
-                  >
+                    leading-icon="i-lucide-phone"
+                    class="w-full"
+                    :color="errors.phone ? 'error' : 'primary'"
+                  />
                   <p v-if="errors.phone" class="text-red-600 text-xs mt-1.5">{{ errors.phone }}</p>
                 </div>
 
@@ -318,51 +471,62 @@ onMounted(fetchProfile);
                   <label class="block text-sm font-medium text-gray-900 mb-2">
                     Parent Name <span class="text-red-500">*</span>
                   </label>
-                  <input 
+                  <UInput
                     v-model="formData.parentname"
                     @blur="validateSingleField('parentname')"
                     type="text" 
+                    size="sm"
                     placeholder="Parent's full name"
-                    class="block w-full !bg-white px-4 py-2.5 text-gray-900 placeholder-gray-400 border rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    :class="errors.parentname ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'"
-                  >
+                    leading-icon="i-lucide-users-round"
+                    class="w-full"
+                    :color="errors.parentname ? 'error' : 'primary'"
+                  />
                   <p v-if="errors.parentname" class="text-red-600 text-xs mt-1.5">{{ errors.parentname }}</p>
                 </div>
 
                 <!-- Parent Phone -->
                 <div class="col-span-1">
                   <label class="block text-sm font-medium text-gray-900 mb-2">Parent Phone</label>
-                  <input 
+                  <UInput
                     v-model="formData.parentphone"
                     @blur="validateSingleField('parentphone')"
                     type="tel" 
+                    size="sm"
                     placeholder="08xxxxxxxxx"
-                    class="block w-full !bg-white px-4 py-2.5 text-gray-900 placeholder-gray-400 border rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    :class="errors.parentphone ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'"
-                  >
+                    leading-icon="i-lucide-phone"
+                    class="w-full"
+                    :color="errors.parentphone ? 'error' : 'primary'"
+                  />
                   <p v-if="errors.parentphone" class="text-red-600 text-xs mt-1.5">{{ errors.parentphone }}</p>
                 </div>
               </div>
             </div>
 
             <!-- Account Credentials Section -->
-            <div>
-              <h2 class="text-lg font-semibold text-blue-600 mb-4">Account Credentials</h2>
+            <div class="border-t border-gray-200 pt-5 md:pt-4 xl:pt-6">
+              <h2 class="section-title text-lg font-semibold text-blue-600 mb-4 flex items-center gap-2">
+                <span class="flex h-9 w-9 items-center justify-center rounded-full bg-blue-500 text-white">
+                  <UIcon name="i-lucide-lock-keyhole" class="h-5 w-5" />
+                </span>
+                <span>Account Credentials</span>
+              </h2>
               
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 md:gap-x-8 md:gap-y-3 xl:gap-y-5">
                 <!-- Username -->
                 <div class="md:col-span-2">
                   <label class="block text-sm font-medium text-gray-900 mb-2">
                     Username <span class="text-red-500">*</span>
                   </label>
-                  <input 
+                  <UInput
                     v-model="formData.username"
                     @blur="validateSingleField('username')"
                     type="text" 
+                    size="sm"
                     placeholder="Choose a username"
-                    class="block w-full !bg-white px-4 py-2.5 text-gray-900 placeholder-gray-400 border rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    :class="errors.username ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'"
-                  >
+                    leading-icon="i-lucide-user-round"
+                    class="w-full"
+                    :color="errors.username ? 'error' : 'primary'"
+                  />
                   <p v-if="errors.username" class="text-red-600 text-xs mt-1.5">{{ errors.username }}</p>
                 </div>
 
@@ -371,14 +535,16 @@ onMounted(fetchProfile);
                   <label class="block text-sm font-medium text-gray-900 mb-2">
                     Password <span class="text-red-500">*</span>
                   </label>
-                  <input 
+                  <UInput
                     v-model="formData.password"
                     @blur="validateSingleField('password')"
                     type="password" 
+                    size="sm"
                     placeholder="Min. 6 characters"
-                    class="block w-full !bg-white px-4 py-2.5 text-gray-900 placeholder-gray-400 border rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    :class="errors.password ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'"
-                  >
+                    leading-icon="i-lucide-lock-keyhole"
+                    class="w-full"
+                    :color="errors.password ? 'error' : 'primary'"
+                  />
                   <p v-if="errors.password" class="text-red-600 text-xs mt-1.5">{{ errors.password }}</p>
                 </div>
 
@@ -387,33 +553,39 @@ onMounted(fetchProfile);
                   <label class="block text-sm font-medium text-gray-900 mb-2">
                     Confirm Password <span class="text-red-500">*</span>
                   </label>
-                  <input 
+                  <UInput
                     v-model="formData.confirmPassword"
                     @blur="validateSingleField('confirmPassword')"
                     type="password" 
+                    size="sm"
                     placeholder="Re-enter password"
-                    class="block w-full !bg-white px-4 py-2.5 text-gray-900 placeholder-gray-400 border rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    :class="errors.confirmPassword ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'"
-                  >
+                    leading-icon="i-lucide-lock-keyhole"
+                    class="w-full"
+                    :color="errors.confirmPassword ? 'error' : 'primary'"
+                  />
                   <p v-if="errors.confirmPassword" class="text-red-600 text-xs mt-1.5">{{ errors.confirmPassword }}</p>
                 </div>
               </div>
             </div>
 
             <!-- Submit Button -->
-            <div class="flex justify-end pt-2">
-              <button 
+            <div class="submit-bar flex justify-end pt-2" :class="{ 'mobile-submit-visible': showMobileSubmit }">
+              <UButton 
                 type="submit"
                 :disabled="isSubmitting"
-                class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-10 rounded-full shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                color="primary"
+                size="xl"
+                block
+                trailing-icon="i-lucide-arrow-right"
+                class="submit-button justify-center rounded-full font-bold shadow-lg shadow-blue-500/25"
               >
                 <span v-if="isSubmitting">Saving...</span>
                 <span v-else>Complete Profile</span>
-              </button>
+              </UButton>
             </div>
           </form>
         </div>
-      </div>
+      </UCard>
 
     </div>
 
@@ -429,11 +601,145 @@ onMounted(fetchProfile);
 </template>
 
 <style scoped>
-/* Custom scrollbar if needed */
-input::-webkit-calendar-picker-indicator {
-  opacity: 0.5;
+.desktop-intro {
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(232, 244, 255, 0.7)),
+    radial-gradient(circle at 76% 54%, rgba(37, 99, 235, 0.12) 0 11rem, transparent 11.25rem);
 }
-input:focus::-webkit-calendar-picker-indicator {
-  opacity: 1;
+
+.study-visual {
+  position: relative;
+  width: min(25rem, 100%);
+  height: 14rem;
+}
+
+.study-platform {
+  position: absolute;
+  inset: auto 1rem 0 1rem;
+  height: 3.75rem;
+  border-radius: 9999px 9999px 2rem 2rem;
+  background: linear-gradient(180deg, #d9efff, #b9dcff);
+  box-shadow: 0 1.5rem 3rem rgba(37, 99, 235, 0.18);
+}
+
+.study-book {
+  position: absolute;
+  left: 7rem;
+  width: 10.5rem;
+  height: 2.8rem;
+  border-radius: 0.9rem;
+  background: linear-gradient(180deg, #eff8ff, #b8dcff);
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  box-shadow: 0 0.9rem 1.8rem rgba(37, 99, 235, 0.14);
+}
+
+.study-book-bottom {
+  bottom: 3rem;
+  transform: rotate(1deg);
+}
+
+.study-book-top {
+  bottom: 5.25rem;
+  left: 7.8rem;
+  transform: rotate(-2deg);
+}
+
+.study-cap {
+  position: absolute;
+  left: 7.7rem;
+  bottom: 7.75rem;
+  width: 12rem;
+  height: 2.6rem;
+  background: linear-gradient(135deg, #1d4ed8, #60a5fa);
+  clip-path: polygon(50% 0, 100% 42%, 50% 84%, 0 42%);
+  filter: drop-shadow(0 1rem 1.5rem rgba(37, 99, 235, 0.24));
+}
+
+.study-cap::after {
+  content: '';
+  position: absolute;
+  right: 1.5rem;
+  top: 1.15rem;
+  width: 0.15rem;
+  height: 4.25rem;
+  background: #1d4ed8;
+}
+
+.study-pot {
+  position: absolute;
+  left: 2.2rem;
+  bottom: 2.3rem;
+  width: 3.8rem;
+  height: 3.5rem;
+  border-radius: 1.4rem 1.4rem 1.8rem 1.8rem;
+  background: linear-gradient(180deg, #bfdbfe, #60a5fa);
+  box-shadow: 0 1rem 1.8rem rgba(37, 99, 235, 0.18);
+}
+
+.study-pot::before {
+  content: '';
+  position: absolute;
+  left: 1.9rem;
+  bottom: 3.1rem;
+  width: 0.16rem;
+  height: 4.5rem;
+  background: #60a5fa;
+}
+
+.study-pot::after {
+  content: '';
+  position: absolute;
+  left: 0.7rem;
+  bottom: 5.7rem;
+  width: 3rem;
+  height: 2.2rem;
+  border-radius: 100% 0 100% 0;
+  background: linear-gradient(135deg, #dbeafe, #93c5fd);
+  transform: rotate(-18deg);
+}
+
+@media (max-width: 767px) {
+  .new-user-page {
+    background:
+      radial-gradient(circle at 88% 0%, rgba(96, 165, 250, 0.45) 0 5.5rem, transparent 5.6rem),
+      linear-gradient(180deg, #f8fbff 0%, #eef6ff 100%);
+  }
+
+  .mobile-hero {
+    min-height: 14rem;
+  }
+
+  .profile-sheet {
+    margin-top: -1.5rem;
+    border-radius: 1.25rem 1.25rem 0 0;
+  }
+
+  .section-title {
+    font-size: 1.125rem;
+  }
+
+  .submit-bar {
+    position: fixed;
+    left: 1rem;
+    right: 1rem;
+    bottom: max(0.75rem, env(safe-area-inset-bottom));
+    z-index: 40;
+    padding: 0;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(1rem);
+    transition: opacity 180ms ease, transform 180ms ease;
+  }
+
+  .submit-bar.mobile-submit-visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .submit-button {
+    width: 100%;
+    min-height: 3.125rem;
+  }
 }
 </style>
