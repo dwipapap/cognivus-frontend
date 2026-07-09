@@ -21,6 +21,7 @@
               :alt="program.label"
               class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
               loading="lazy"
+              decoding="async"
             />
           </div>
           <div class="p-5">

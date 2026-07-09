@@ -30,6 +30,8 @@
             <img
               :src="item.image"
               :alt="item.title"
+              loading="lazy"
+              decoding="async"
               class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             />
             <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
@@ -54,6 +56,8 @@
           <img
             :src="item.image"
             :alt="item.title"
+            loading="lazy"
+            decoding="async"
             class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
           <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />

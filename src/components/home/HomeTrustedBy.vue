@@ -15,7 +15,7 @@
           :key="logo.alt"
           class="flex items-center justify-center w-36 h-16 px-4 mx-4 md:mx-6 shrink-0"
         >
-          <img :src="logo.src" :alt="logo.alt" class="max-h-full max-w-full object-contain" />
+          <img :src="logo.src" :alt="logo.alt" loading="lazy" decoding="async" class="max-h-full max-w-full object-contain" />
         </div>
       </UMarquee>
     </div>
