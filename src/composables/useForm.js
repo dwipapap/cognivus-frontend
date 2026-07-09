@@ -37,38 +37,12 @@ export function useForm(initialData = {}, validationRules = {}) {
       return value.length >= min ? null : `Minimum ${min} characters required`;
     },
     
-    /** Validasi panjang maksimum */
-    maxLength: (max) => (value) => {
-      if (!value) return null;
-      return value.length <= max ? null : `Maximum ${max} characters allowed`;
-    },
-    
     /** Validasi nomor telepon */
     phone: (value) => {
       if (!value) return null;
       const phoneRegex = /^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s./0-9]*$/;
       return phoneRegex.test(value) ? null : 'Please enter a valid phone number';
-    },
-    
-    /** Validasi URL */
-    url: (value) => {
-      if (!value) return null;
-      try {
-        new URL(value);
-        return null;
-      } catch {
-        return 'Please enter a valid URL';
-      }
-    },
-    
-    /** Validasi dengan pattern regex */
-    pattern: (regex, message = 'Invalid format') => (value) => {
-      if (!value) return null;
-      return regex.test(value) ? null : message;
-    },
-    
-    /** Validasi kustom */
-    custom: (validator) => validator
+    }
   };
 
   const isValid = computed(() => {
@@ -266,14 +240,3 @@ export function useForm(initialData = {}, validationRules = {}) {
     })
   };
 }
-
-/**
- * Set aturan validasi umum.
- */
-export const commonValidations = {
-  email: ['required', 'email'],
-  password: ['required', { type: 'minLength', min: 6 }],
-  phone: ['phone'],
-  name: ['required', { type: 'minLength', min: 2 }],
-  username: ['required', { type: 'minLength', min: 2 }]
-};

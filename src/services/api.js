@@ -48,9 +48,6 @@ apiClient.interceptors.response.use(
 
 // User API endpoints
 export const userAPI = {
-  // Get all users (admin only)
-  getAllUsers: () => apiClient.get("/users"),
-
   // Get user by ID
   getUserById: (id) => apiClient.get(`/users/${id}`),
 
@@ -179,22 +176,8 @@ export const levelAPI = {
   deleteLevel: (id) => apiClient.delete(`/levels/${id}`),
 };
 
-// Teacher Level API endpoints
-export const teacherLevelAPI = {
-  getAllTeacherLevels: () => apiClient.get("/teacher_level"),
-  getTeacherLevelById: (id) => apiClient.get(`/teacher_level/${id}`),
-  createTeacherLevel: (data) => apiClient.post("/teacher_level", data),
-  updateTeacherLevel: (id, data) => apiClient.put(`/teacher_level/${id}`, data),
-  deleteTeacherLevel: (id) => apiClient.delete(`/teacher_level/${id}`),
-};
-
 // Auth API endpoints
 export const authAPI = {
-  login: (credentials) => apiClient.post("/auth/login", credentials),
-  register: (userData) => apiClient.post("/auth/register", userData),
-  getProfile: () => apiClient.get("/auth/profile"),
-  logout: () => apiClient.post("/auth/logout"),
-
   /**
    * Request OTP for password reset or change
    * @param {Object} data - { address: string, phone: string, channel: 'email' | 'whatsapp' }
@@ -229,8 +212,6 @@ export const reportFileAPI = {
       headers: { "Content-Type": "multipart/form-data" },
     });
   },
-  getAllReportFiles: () => apiClient.get("/report_files"),
-  getReportFileById: (id) => apiClient.get(`/report_files/${id}`),
 };
 
 // Grade API endpoints
@@ -280,8 +261,6 @@ export const gradeAPI = {
 
 // Course Files API endpoints
 export const courseFileAPI = {
-  getAllCourseFiles: () => apiClient.get("/course_files"),
-  getCourseFileById: (id) => apiClient.get(`/course_files/${id}`),
   deleteCourseFile: (id) => apiClient.delete(`/course_files/${id}`),
 };
 
