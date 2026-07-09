@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch } from 'vue';
 import { useForm } from '../../composables/useForm';
+import { BRANCHES } from '../../config/branches';
 
 import StudentTransferList from '../../components/admin/StudentTransferList.vue';
 
@@ -50,6 +51,7 @@ const { formData, errors, isSubmitting, submit, getFieldProps, reset } = useForm
   {},
   {
     class_code: ['required'],
+    branch: ['required'],
     levelid: ['required'],
     description: [],
     schedule_day: [],
@@ -63,6 +65,7 @@ const { formData, errors, isSubmitting, submit, getFieldProps, reset } = useForm
 watch(() => props.classItem, (newVal) => {
   if (newVal) {
     formData.class_code = newVal.class_code || '';
+    formData.branch = newVal.branch || '';
     formData.description = newVal.description || '';
     formData.levelid = newVal.levelid ? Number(newVal.levelid) : '';
     formData.lecturerid = newVal.lecturerid ? Number(newVal.lecturerid) : '';
@@ -140,6 +143,10 @@ const handleStudentSave = async (studentData) => {
               <div class="space-y-4">
                 <UFormField label="Class Code" required>
                   <UInput v-bind="getFieldProps('class_code')" placeholder="e.g., ENG-A1" class="w-full" />
+                </UFormField>
+
+                <UFormField label="Branch" required>
+                  <USelect v-bind="getFieldProps('branch')" :items="BRANCHES.map(b => ({ label: b, value: b }))" placeholder="Select Branch" class="w-full" />
                 </UFormField>
 
                 <UFormField label="Academic Level" required>

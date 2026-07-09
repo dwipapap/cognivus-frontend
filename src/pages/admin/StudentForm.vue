@@ -105,7 +105,7 @@
           <UFormField label="Class">
             <USelect v-bind="getFieldProps('classid')" :items="[
               { label: 'No class assigned', value: null },
-              ...classes.map(cls => ({ label: cls.class_code + ' - ' + (cls.level?.level_name || 'Unknown Level'), value: cls.classid }))
+              ...classes.map(cls => ({ label: cls.class_code + (cls.branch ? ' (' + cls.branch + ')' : '') + ' - ' + (cls.level?.level_name || 'Unknown Level'), value: cls.classid }))
             ]" class="w-full" />
           </UFormField>
         </div>

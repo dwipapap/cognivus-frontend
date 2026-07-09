@@ -1,8 +1,9 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useToast } from '@nuxt/ui/composables';
 import { classAPI, levelAPI, lecturerAPI, studentAPI } from '../../services/api';
 import Modal from '../../components/ui/Modal.vue';
+import { BRANCHES } from '../../config/branches';
 
 import { useConfirm } from '@/composables/useConfirm'
 import ClassForm from './ClassForm.vue';
@@ -20,17 +21,28 @@ const { open: confirmOpen, message: confirmMessage, confirm, onConfirm, onCancel
 const isEditMode = ref(false);
 const currentPage = ref(1);
 const itemsPerPage = 15;
+const selectedBranchFilter = ref(null);
+
+/** Classes filtered by branch */
+const filteredClasses = computed(() => {
+  if (!selectedBranchFilter.value) return classes.value;
+  return classes.value.filter(cls => cls.branch === selectedBranchFilter.value);
+});
+
+watch(selectedBranchFilter, () => {
+  currentPage.value = 1;
+});
 
 /** Paginated classes */
 const paginatedClasses = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage;
   const end = start + itemsPerPage;
-  return classes.value.slice(start, end);
+  return filteredClasses.value.slice(start, end);
 });
 
 /** Total pages */
 const totalPages = computed(() => {
-  return Math.ceil(classes.value.length / itemsPerPage);
+  return Math.ceil(filteredClasses.value.length / itemsPerPage);
 });
 
 /** Get level name by ID */
@@ -202,9 +214,21 @@ onMounted(() => {
         <h1 class="text-2xl font-bold text-default">Manage Classes</h1>
         <p class="text-toned mt-1">Create, edit, and manage class records</p>
       </div>
-      <UButton @click="openAddModal" color="primary" variant="solid" icon="i-lucide-plus">
-        Add Class
-      </UButton>
+      <div class="flex items-center gap-3">
+        <USelect
+          v-model="selectedBranchFilter"
+          :items="BRANCHES.map(b => ({ label: b, value: b }))"
+          placeholder="All Branches"
+          clearable
+          class="w-48"
+        />
+        <UButton v-if="selectedBranchFilter" @click="selectedBranchFilter = null" color="neutral" variant="ghost" size="xs" icon="i-lucide-x">
+          Clear Filter
+        </UButton>
+        <UButton @click="openAddModal" color="primary" variant="solid" icon="i-lucide-plus">
+          Add Class
+        </UButton>
+      </div>
     </div>
 
     <div v-if="isLoading" class="flex justify-center py-16">
@@ -218,6 +242,7 @@ onMounted(() => {
             <tr class="bg-muted border-b border-default">
               <th class="px-6 py-4 text-left text-xs font-semibold text-default uppercase tracking-wider w-16">#</th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-default uppercase tracking-wider">Class Code</th>
+              <th class="px-6 py-4 text-left text-xs font-semibold text-default uppercase tracking-wider">Branch</th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-default uppercase tracking-wider">Schedule</th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-default uppercase tracking-wider">Level</th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-default uppercase tracking-wider">Lecturer</th>
@@ -240,6 +265,11 @@ onMounted(() => {
               <!-- Class Code -->
               <td class="px-6 py-4">
                 <div class="text-sm font-medium text-default">{{ classItem.class_code }}</div>
+              </td>
+
+              <!-- Branch -->
+              <td class="px-6 py-4 text-sm text-default">
+                {{ classItem.branch || '-' }}
               </td>
 
               <!-- Schedule -->
@@ -280,8 +310,8 @@ onMounted(() => {
                 </div>
               </td>
             </tr>
-            <tr v-if="classes.length === 0">
-              <td colspan="7" class="px-6 py-12 text-center">
+            <tr v-if="filteredClasses.length === 0">
+              <td colspan="8" class="px-6 py-12 text-center">
                 <div class="flex flex-col items-center justify-center text-muted">
                   <UIcon name="i-lucide-folder" class="w-12 h-12 mb-3 text-muted" />
                   <p class="text-sm font-medium">No classes found</p>
@@ -295,11 +325,11 @@ onMounted(() => {
 
       <div v-if="totalPages > 1" class="px-6 py-4 bg-muted border-t border-default flex items-center justify-between">
         <p class="text-sm text-toned">
-          Showing <span class="font-medium">{{ (currentPage - 1) * itemsPerPage + 1 }}</span> to 
-          <span class="font-medium">{{ Math.min(currentPage * itemsPerPage, classes.length) }}</span> of 
-          <span class="font-medium">{{ classes.length }}</span> classes
+          Showing <span class="font-medium">{{ (currentPage - 1) * itemsPerPage + 1 }}</span> to
+          <span class="font-medium">{{ Math.min(currentPage * itemsPerPage, filteredClasses.length) }}</span> of
+          <span class="font-medium">{{ filteredClasses.length }}</span> classes
         </p>
-        <UPagination v-model:page="currentPage" :total="classes.length" :max="itemsPerPage" :sibling-count="1" size="sm" />
+        <UPagination v-model:page="currentPage" :total="filteredClasses.length" :max="itemsPerPage" :sibling-count="1" size="sm" />
       </div>
     </div>
 

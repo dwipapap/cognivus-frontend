@@ -231,7 +231,7 @@ onMounted(() => {
           <label class="text-sm font-medium text-default whitespace-nowrap">Filter by Class:</label>
           <div class="w-full md:w-64">
             <UFormField label="Class">
-              <USelect v-model="selectedClassFilter" :items="classes.map(cls => ({ label: cls.class_code + ' - ' + (cls.level?.name || 'Unknown Level'), value: cls.classid }))" placeholder="All Classes" clearable />
+              <USelect v-model="selectedClassFilter" :items="classes.map(cls => ({ label: cls.class_code + (cls.branch ? ' (' + cls.branch + ')' : '') + ' - ' + (cls.level?.name || 'Unknown Level'), value: cls.classid }))" placeholder="All Classes" clearable />
             </UFormField>
           </div>
           <div class="text-sm text-muted">
