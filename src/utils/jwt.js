@@ -10,6 +10,19 @@ const decodeBase64Url = (value) => {
   return new TextDecoder().decode(bytes)
 }
 
+export const decodeJwt = (token) => {
+  if (typeof token !== 'string') return null
+
+  const parts = token.split('.')
+  if (parts.length !== 3 || !parts[1]) return null
+
+  try {
+    return JSON.parse(decodeBase64Url(parts[1]))
+  } catch {
+    return null
+  }
+}
+
 export const getJwtExpiry = (token) => {
   if (typeof token !== 'string') return null
 

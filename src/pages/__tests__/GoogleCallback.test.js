@@ -28,9 +28,18 @@ vi.mock('vue-router', () => ({
   })
 }))
 
-const callbackUrl = [
-  '/auth/callback?token=jwt-token',
-  'role=student',
+const b64url = (obj) => btoa(JSON.stringify(obj))
+  .replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_')
+const makeToken = (role) => [
+  b64url({ alg: 'none', typ: 'JWT' }),
+  b64url({ role, exp: 9999999999 }),
+  'sig'
+].join('.')
+
+const callbackUrl = (role = 'student') => [
+  '/auth/callback',
+  `token=${makeToken(role)}`,
+  `role=${role}`,
   'id=10',
   'username=student',
   'email=student%40example.com'
@@ -47,15 +56,8 @@ const mountCallback = () => shallowMount(GoogleCallback, {
 
 describe('GoogleCallback', () => {
   beforeEach(() => {
-    vi.useFakeTimers()
-    vi.clearAllMocks()
-    window.history.pushState({}, '', callbackUrl)
+    window.history.pushState({}, '', callbackUrl('student'))
     vi.spyOn(console, 'error').mockImplementation(() => {})
-  })
-
-  afterEach(() => {
-    vi.useRealTimers()
-    vi.restoreAllMocks()
   })
 
   it('does not persist authentication when account verification fails', async () => {
@@ -68,23 +70,17 @@ describe('GoogleCallback', () => {
     expect(mocks.clearAuth).toHaveBeenCalled()
     expect(mocks.setAuth).not.toHaveBeenCalled()
 
-    await vi.advanceTimersByTimeAsync(3000)
-    expect(mocks.replace).toHaveBeenCalledWith('/login')
+    await vi.waitFor(() => {
+      expect(mocks.replace).toHaveBeenCalledWith('/login')
+    }, { timeout: 5000 })
   })
 
   it('persists authentication only after user and student checks succeed', async () => {
-    mocks.apiGet
-      .mockResolvedValueOnce({
-        data: {
-          success: true,
-          data: { raw_meta_data: { sub: 'google-user' } }
-        }
+    mocks.apiGet.mockResolvedValueOnce({
+        data: { success: true, data: { raw_meta_data: { sub: 'google-user' } } }
       })
       .mockResolvedValueOnce({
-        data: {
-          success: true,
-          data: { phone: '08123456789', address: 'Jakarta' }
-        }
+        data: { success: true, data: { phone: '08123456789', address: 'Jakarta' } }
       })
 
     mountCallback()
@@ -96,21 +92,15 @@ describe('GoogleCallback', () => {
       mocks.setAuth.mock.invocationCallOrder[0]
     )
 
-    await vi.advanceTimersByTimeAsync(500)
-    expect(mocks.replace).toHaveBeenCalledWith('/student/dashboard')
+    await vi.waitFor(() => {
+      expect(mocks.replace).toHaveBeenCalledWith('/student/dashboard')
+    }, { timeout: 5000 })
   })
 
   it('routes verified lecturer accounts without requiring a student profile', async () => {
-    window.history.pushState(
-      {},
-      '',
-      callbackUrl.replace('role=student', 'role=lecturer')
-    )
+    window.history.pushState({}, '', callbackUrl('lecturer'))
     mocks.apiGet.mockResolvedValueOnce({
-      data: {
-        success: true,
-        data: { raw_meta_data: { sub: 'google-lecturer' } }
-      }
+      data: { success: true, data: { raw_meta_data: { sub: 'google-lecturer' } } }
     })
 
     mountCallback()
@@ -119,7 +109,8 @@ describe('GoogleCallback', () => {
     expect(mocks.apiGet).toHaveBeenCalledOnce()
     expect(mocks.setAuth).toHaveBeenCalledOnce()
 
-    await vi.advanceTimersByTimeAsync(500)
-    expect(mocks.replace).toHaveBeenCalledWith('/lecturer/dashboard')
+    await vi.waitFor(() => {
+      expect(mocks.replace).toHaveBeenCalledWith('/lecturer/dashboard')
+    }, { timeout: 5000 })
   })
 })

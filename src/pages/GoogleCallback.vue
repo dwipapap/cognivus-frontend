@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { authStore } from '../store/auth'
+import { decodeJwt } from '../utils/jwt'
 import apiClient from '../services/api'
 import LoadingSpinner from '../components/ui/LoadingSpinner.vue'
 import ittrLogo from '../assets/ittrlogo.png'
@@ -14,7 +15,7 @@ onMounted(async () => {
   try {
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token');
-    const role = urlParams.get('role');
+    const urlRole = urlParams.get('role');
     const id = urlParams.get('id');
     const username = urlParams.get('username');
     const email = urlParams.get('email');
@@ -26,10 +27,17 @@ onMounted(async () => {
     window.history.replaceState({}, document.title, window.location.pathname);
     authStore.clearAuth();
 
+    const payload = decodeJwt(token);
+    if (!payload || !payload.role) {
+      throw new Error('Invalid authentication response');
+    }
+
+    const role = payload.role;
     const allowedRoles = ['owner', 'admin', 'moderator', 'lecturer', 'student'];
     if (
       !token ||
       !allowedRoles.includes(role) ||
+      role !== urlRole ||
       !id ||
       !username ||
       !email ||

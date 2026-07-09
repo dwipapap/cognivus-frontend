@@ -131,6 +131,8 @@ const handleLogin = async () => {
           closeModal();
           router.push(targetRoute);
         }, 2000);
+      } else {
+        throw new Error(response.data.message || 'Login failed. Please check your credentials.');
       }
     });
   } catch (error) {
