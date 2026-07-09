@@ -23,6 +23,10 @@ vi.mock('../../store/auth', () => ({
 }))
 
 vi.mock('vue-router', () => ({
+  useRoute: () => ({
+    meta: {},
+    query: {}
+  }),
   useRouter: () => ({
     replace: mocks.replace
   })

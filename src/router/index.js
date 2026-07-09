@@ -68,6 +68,20 @@ const routes = [
     component: NewUser,
     meta: { requiresAuth: true }
   },
+  ...(import.meta.env.DEV ? [
+    {
+      path: '/dev/new-user',
+      name: 'DevNewUser',
+      component: NewUser,
+      meta: { devPreview: true }
+    },
+    {
+      path: '/dev/google-callback',
+      name: 'DevGoogleCallback',
+      component: GoogleCallback,
+      meta: { devPreview: true }
+    }
+  ] : []),
   // Student routes with nested layout
   {
     path: '/student',

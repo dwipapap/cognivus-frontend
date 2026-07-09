@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { authStore } from '../store/auth'
 import { decodeJwt } from '../utils/jwt'
 import apiClient from '../services/api'
@@ -8,10 +8,20 @@ import LoadingSpinner from '../components/ui/LoadingSpinner.vue'
 import ittrLogo from '../assets/ittrlogo.png'
 
 const router = useRouter();
+const route = useRoute();
+const isDevPreview = import.meta.env.DEV && route.meta.devPreview;
 const error = ref(null);
 const statusMessage = ref('Completing login...');
 
 onMounted(async () => {
+  if (isDevPreview) {
+    statusMessage.value = route.query.message || 'Setting up your account...';
+    error.value = route.query.state === 'error'
+      ? 'Preview only: authentication response failed.'
+      : null;
+    return;
+  }
+
   try {
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token');
