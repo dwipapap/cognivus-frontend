@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref, provide, onMounted, onUnmounted } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
+import { useRouter } from 'vue-router';
 import { authStore } from '../../store/auth';
 import { useStudentProfile } from '../../composables/useStudentProfile';
 import IconHome from '~icons/solar/home-smile-bold';
@@ -15,20 +15,10 @@ import IconLogout from '~icons/basil/logout-solid';
 import IconCaret from '~icons/basil/caret-down-outline';
 
 const router = useRouter();
-const route = useRoute();
 const { studentProfile, isLoading: isProfileLoading, fetchStudentProfile } = useStudentProfile();
 
 const hideMobileNav = ref(false);
 provide('hideMobileNav', hideMobileNav);
-
-const activeTabIndex = computed(() => {
-  const path = route.path;
-  if (path.includes('/dashboard')) return 0;
-  if (path.includes('/courses')) return 1;
-  if (path.includes('/grades')) return 2;
-  if (path.includes('/payment')) return 3;
-  return 0;
-});
 
 // Template refs for dropdown (Vue best practice - use refs instead of document.getElementById)
 const profileButtonRef = ref(null);
@@ -237,39 +227,31 @@ const handleLogout = async () => {
       </aside>
 
       <!-- Mobile Bottom Navigation -->
-      <nav v-show="!hideMobileNav" class="fixed bottom-4 left-4 right-4 h-14 bg-transparent md:hidden z-50">
-        <div class="h-full bg-surface rounded-token-4xl shadow-nav-mobile border border-gray-100 overflow-hidden relative">
-          <ul class="h-full flex relative z-10">
-            <!-- Sliding Indicator -->
-            <div 
-              class="absolute top-1 bottom-1 w-1/4 px-1.5 z-0 transition-transform duration-300 ease-out"
-              :style="{ transform: `translateX(${activeTabIndex * 100}%)` }"
-            >
-              <div class="w-full h-full bg-brand-sky-light rounded-token-3xl"></div>
-            </div>
-
-            <li class="flex-1 flex justify-center items-center z-10">
-              <router-link to="/student/dashboard" class="mobile-nav-item flex flex-col items-center gap-0.5 w-full h-full justify-center transition-colors duration-200">
+      <nav v-show="!hideMobileNav" class="fixed bottom-4 left-4 right-4 h-16 bg-transparent md:hidden z-50">
+        <div class="h-full mobile-nav-shell rounded-token-4xl shadow-nav-mobile border border-gray-100">
+          <ul class="h-full flex items-center justify-around gap-1 px-3">
+            <li class="flex justify-center items-center">
+              <router-link to="/student/dashboard" class="mobile-nav-item flex items-center justify-center gap-2">
                 <IconHome class="w-5 h-5" />
-                <span class="text-[10px] font-medium">Dashboard</span>
+                <span class="mobile-nav-label">Dashboard</span>
               </router-link>
             </li>
-            <li class="flex-1 flex justify-center items-center z-10">
-              <router-link to="/student/courses" class="mobile-nav-item flex flex-col items-center gap-0.5 w-full h-full justify-center transition-colors duration-200">
+            <li class="flex justify-center items-center">
+              <router-link to="/student/courses" class="mobile-nav-item flex items-center justify-center gap-2">
                 <IconBook class="w-5 h-5" />
-                <span class="text-[10px] font-medium">Courses</span>
+                <span class="mobile-nav-label">Courses</span>
               </router-link>
             </li>
-            <li class="flex-1 flex justify-center items-center z-10">
-              <router-link to="/student/grades" class="mobile-nav-item flex flex-col items-center gap-0.5 w-full h-full justify-center transition-colors duration-200">
+            <li class="flex justify-center items-center">
+              <router-link to="/student/grades" class="mobile-nav-item flex items-center justify-center gap-2">
                 <IconGrade class="w-5 h-5" />
-                <span class="text-[10px] font-medium">Grades</span>
+                <span class="mobile-nav-label">Grades</span>
               </router-link>
             </li>
-            <li class="flex-1 flex justify-center items-center z-10">
-              <router-link to="/student/payment" class="mobile-nav-item flex flex-col items-center gap-0.5 w-full h-full justify-center transition-colors duration-200">
+            <li class="flex justify-center items-center">
+              <router-link to="/student/payment" class="mobile-nav-item flex items-center justify-center gap-2">
                 <IconWallet class="w-5 h-5" />
-                <span class="text-[10px] font-medium">Bayar</span>
+                <span class="mobile-nav-label">Bayar</span>
               </router-link>
             </li>
           </ul>
@@ -492,16 +474,48 @@ const handleLogout = async () => {
 }
 
 /* Mobile navigation styles */
+.mobile-nav-shell {
+  background: #ffffff;
+}
+
 .mobile-nav-item {
-  color: #4b5563; /* text-gray-600 */
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 9999px;
+  color: #4b5563;
+  overflow: hidden;
+  transition: width 220ms cubic-bezier(0.22, 1, 0.36, 1), background-color 180ms ease, color 180ms ease, transform 180ms ease;
 }
 
 .mobile-nav-item.router-link-active {
-  color: #0284c7; /* text-sky-600 */
+  width: auto;
+  min-width: 6.75rem;
+  padding: 0 1rem;
+  color: #0284c7;
+  background: #e0f2fe;
+  font-weight: 600;
 }
 
 .mobile-nav-item:hover {
-  color: #0284c7; /* text-sky-600 */
+  color: #0284c7;
+}
+
+.mobile-nav-item:active {
+  transform: scale(0.96);
+}
+
+.mobile-nav-label {
+  max-width: 0;
+  opacity: 0;
+  white-space: nowrap;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  transition: max-width 220ms cubic-bezier(0.22, 1, 0.36, 1), opacity 160ms ease;
+}
+
+.mobile-nav-item.router-link-active .mobile-nav-label {
+  max-width: 5rem;
+  opacity: 1;
 }
 
 /* Additional performance optimizations for glassmorphism */

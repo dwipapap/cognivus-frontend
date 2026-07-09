@@ -215,25 +215,25 @@ const handleLogout = async () => {
       </aside>
 
       <!-- Mobile Bottom Navigation -->
-      <nav class="mobile-nav fixed bottom-0 left-0 right-0 h-16 bg-transparent md:hidden z-50">
-        <div class="mobile-nav-glass h-full mb-0 rounded-xl">
-          <ul class="h-full flex justify-around items-center px-6">
-            <li>
-              <router-link to="/lecturer/dashboard" class="mobile-nav-item flex flex-col items-center gap-1">
+      <nav class="mobile-nav fixed bottom-4 left-4 right-4 h-16 bg-transparent md:hidden z-50">
+        <div class="mobile-nav-shell h-full rounded-xl">
+          <ul class="h-full flex items-center justify-around gap-1 px-3">
+            <li class="flex justify-center items-center">
+              <router-link to="/lecturer/dashboard" class="mobile-nav-item flex items-center justify-center gap-2">
                 <IconHome class="w-5 h-5" />
-                <span class="text-xs">Dashboard</span>
+                <span class="mobile-nav-label">Dashboard</span>
               </router-link>
             </li>
-            <li>
-              <router-link to="/lecturer/materials" class="mobile-nav-item flex flex-col items-center gap-1">
+            <li class="flex justify-center items-center">
+              <router-link to="/lecturer/materials" class="mobile-nav-item flex items-center justify-center gap-2">
                 <IconBook class="w-5 h-5" />
-                <span class="text-xs">Materials</span>
+                <span class="mobile-nav-label">Materials</span>
               </router-link>
             </li>
-            <li>
-              <router-link to="/lecturer/students" class="mobile-nav-item flex flex-col items-center gap-1">
+            <li class="flex justify-center items-center">
+              <router-link to="/lecturer/students" class="mobile-nav-item flex items-center justify-center gap-2">
                 <IconStudents class="w-5 h-5" />
-                <span class="text-xs">Students</span>
+                <span class="mobile-nav-label">Students</span>
               </router-link>
             </li>
           </ul>
@@ -420,8 +420,8 @@ const handleLogout = async () => {
   opacity: 1;
 }
 
-/* Mobile navigation styles - Performance optimized */
-.mobile-nav-glass {
+/* Mobile navigation styles */
+.mobile-nav-shell {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.85), rgba(240, 249, 255, 0.8), rgba(224, 242, 254, 0.75));
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
@@ -430,40 +430,47 @@ const handleLogout = async () => {
     0 -2px 8px rgba(59, 130, 246, 0.12),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  /* Performance optimizations */
   will-change: transform;
   transform: translateZ(0);
 }
 
 .mobile-nav-item {
-  color: #374151; /* text-gray-700 */
-  transition: color 0.2s ease;
-  position: relative;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 9999px;
+  color: #374151;
+  overflow: hidden;
+  transition: width 220ms cubic-bezier(0.22, 1, 0.36, 1), background-color 180ms ease, color 180ms ease, transform 180ms ease;
 }
 
 .mobile-nav-item.router-link-active {
-  color: #2563eb; /* text-blue-600 */
+  width: auto;
+  min-width: 6.75rem;
+  padding: 0 1rem;
+  color: #2563eb;
+  background: rgba(37, 99, 235, 0.12);
+  font-weight: 600;
 }
 
 .mobile-nav-item:hover {
-  color: #2563eb; /* text-blue-600 */
+  color: #2563eb;
 }
 
-.mobile-nav-item::after {
-  content: '';
-  position: absolute;
-  bottom: -4px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background-color: currentColor;
+.mobile-nav-item:active {
+  transform: scale(0.96);
+}
+
+.mobile-nav-label {
+  max-width: 0;
   opacity: 0;
-  transition: opacity 0.2s ease;
+  white-space: nowrap;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  transition: max-width 220ms cubic-bezier(0.22, 1, 0.36, 1), opacity 160ms ease;
 }
 
-.mobile-nav-item.router-link-active::after {
+.mobile-nav-item.router-link-active .mobile-nav-label {
+  max-width: 5rem;
   opacity: 1;
 }
 
@@ -472,7 +479,7 @@ const handleLogout = async () => {
   .header-glass,
   .profile-dropdown-glass,
   .sidebar-glass,
-  .mobile-nav-glass {
+  .mobile-nav-shell {
     backdrop-filter: blur(2px) !important;
     -webkit-backdrop-filter: blur(2px) !important;
     transition: none !important;
@@ -488,7 +495,7 @@ const handleLogout = async () => {
 .header-glass,
 .profile-dropdown-glass,
 .sidebar-glass,
-.mobile-nav-glass {
+.mobile-nav-shell {
   contain: layout style paint;
 }
 </style>
