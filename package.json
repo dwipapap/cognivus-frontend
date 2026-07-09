@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@iconify-json/lucide": "^1.2.111",
-    "@nuxt/ui": "^4.8.1",
+    "@nuxt/ui": "^4.9.0",
     "@tailwindcss/vite": "^4.1.12",
     "axios": "^1.11.0",
     "crypto-js": "^4.2.0",
