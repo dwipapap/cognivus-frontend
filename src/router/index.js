@@ -4,7 +4,7 @@ import { studentAPI } from '../services/api';
 
 /**
  * Lazy-loaded route components.
- * Grouped by role using webpackChunkName for optimal code splitting.
+ * Code splitting is handled by manualChunks in vite.config.js.
  */
 
 // Public pages - loaded immediately for faster initial access
@@ -15,36 +15,36 @@ const NewUser = () => import('../pages/NewUser.vue');
 const NotFound = () => import('../pages/NotFound.vue');
 
 // Student pages - grouped in 'student' chunk
-const StudentLayout = () => import(/* webpackChunkName: "student" */ '../pages/student/StudentLayout.vue');
-const Dashboard = () => import(/* webpackChunkName: "student" */ '../pages/student/Dashboard.vue');
-const Profile = () => import(/* webpackChunkName: "student" */ '../pages/student/Profile.vue');
-const ProfileView = () => import(/* webpackChunkName: "student" */ '../pages/student/ProfileView.vue');
-const MyCourses = () => import(/* webpackChunkName: "student" */ '../pages/student/MyCourses.vue');
-const CourseDetail = () => import(/* webpackChunkName: "student" */ '../pages/student/CourseDetail.vue');
-const Payment = () => import(/* webpackChunkName: "student" */ '../pages/student/Payment.vue');
-const Grades = () => import(/* webpackChunkName: "student" */ '../pages/student/Grades.vue');
+const StudentLayout = () => import('../pages/student/StudentLayout.vue');
+const Dashboard = () => import('../pages/student/Dashboard.vue');
+const Profile = () => import('../pages/student/Profile.vue');
+const ProfileView = () => import('../pages/student/ProfileView.vue');
+const MyCourses = () => import('../pages/student/MyCourses.vue');
+const CourseDetail = () => import('../pages/student/CourseDetail.vue');
+const Payment = () => import('../pages/student/Payment.vue');
+const Grades = () => import('../pages/student/Grades.vue');
 
 // Lecturer pages - grouped in 'lecturer' chunk
-const LecturerLayout = () => import(/* webpackChunkName: "lecturer" */ '../pages/lecturer/LecturerLayout.vue');
-const LecturerDashboard = () => import(/* webpackChunkName: "lecturer" */ '../pages/lecturer/DashboardLecturer.vue');
-const ProfileViewLecturer = () => import(/* webpackChunkName: "lecturer" */ '../pages/lecturer/ProfileViewLecturer.vue');
-const ProfileLecturer = () => import(/* webpackChunkName: "lecturer" */ '../pages/lecturer/ProfileLecturer.vue');
-const ManageMaterials = () => import(/* webpackChunkName: "lecturer" */ '../pages/lecturer/ManageMaterials.vue');
-const ManageStudents = () => import(/* webpackChunkName: "lecturer" */ '../pages/lecturer/ManageStudents.vue');
-const StudentDetail = () => import(/* webpackChunkName: "lecturer" */ '../pages/lecturer/StudentDetail.vue');
+const LecturerLayout = () => import('../pages/lecturer/LecturerLayout.vue');
+const LecturerDashboard = () => import('../pages/lecturer/DashboardLecturer.vue');
+const ProfileViewLecturer = () => import('../pages/lecturer/ProfileViewLecturer.vue');
+const ProfileLecturer = () => import('../pages/lecturer/ProfileLecturer.vue');
+const ManageMaterials = () => import('../pages/lecturer/ManageMaterials.vue');
+const ManageStudents = () => import('../pages/lecturer/ManageStudents.vue');
+const StudentDetail = () => import('../pages/lecturer/StudentDetail.vue');
 
 // Admin pages - grouped in 'admin' chunk
-const AdminLayout = () => import(/* webpackChunkName: "admin" */ '../pages/admin/AdminLayout.vue');
-const DashboardAdmin = () => import(/* webpackChunkName: "admin" */ '../pages/admin/DashboardAdmin.vue');
-const ManageLecturers = () => import(/* webpackChunkName: "admin" */ '../pages/admin/ManageLecturers.vue');
-const ManageClasses = () => import(/* webpackChunkName: "admin" */ '../pages/admin/ManageClasses.vue');
-const ManagePrices = () => import(/* webpackChunkName: "admin" */ '../pages/admin/ManagePrices.vue');
-const AdminManageStudents = () => import(/* webpackChunkName: "admin" */ '../pages/admin/ManageStudents.vue');
-const ManagePrograms = () => import(/* webpackChunkName: "admin" */ '../pages/admin/ManagePrograms.vue');
-const ManageLevels = () => import(/* webpackChunkName: "admin" */ '../pages/admin/ManageLevels.vue');
-const ManageGrades = () => import(/* webpackChunkName: "admin" */ '../pages/admin/ManageGrades.vue');
-const ManagePayments = () => import(/* webpackChunkName: "admin" */ '../pages/admin/ManagePayments.vue');
-const AdminStudentDetail = () => import(/* webpackChunkName: "admin" */ '../pages/admin/StudentDetail.vue');
+const AdminLayout = () => import('../pages/admin/AdminLayout.vue');
+const DashboardAdmin = () => import('../pages/admin/DashboardAdmin.vue');
+const ManageLecturers = () => import('../pages/admin/ManageLecturers.vue');
+const ManageClasses = () => import('../pages/admin/ManageClasses.vue');
+const ManagePrices = () => import('../pages/admin/ManagePrices.vue');
+const AdminManageStudents = () => import('../pages/admin/ManageStudents.vue');
+const ManagePrograms = () => import('../pages/admin/ManagePrograms.vue');
+const ManageLevels = () => import('../pages/admin/ManageLevels.vue');
+const ManageGrades = () => import('../pages/admin/ManageGrades.vue');
+const ManagePayments = () => import('../pages/admin/ManagePayments.vue');
+const AdminStudentDetail = () => import('../pages/admin/StudentDetail.vue');
 
 const routes = [
   {
@@ -243,7 +243,7 @@ const routes = [
       {
         path: 'external-links',
         name: 'AdminExternalLinks',
-        component: () => import(/* webpackChunkName: "admin" */ '../pages/admin/ExternalLinks.vue'),
+        component: () => import('../pages/admin/ExternalLinks.vue'),
       }
     ]
   },
