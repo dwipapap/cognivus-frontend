@@ -1,8 +1,8 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { studentAPI, gradeAPI, paymentAPI } from '../../services/api';
-import { formatDate, getAverageScore, getInitials } from '../../utils/formatters';
+import { formatDate } from '../../utils/formatters';
 import LoadingSpinner from '../../components/ui/LoadingSpinner.vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
 
@@ -150,19 +150,9 @@ onMounted(() => {
           
           <!-- Student Information Card -->
           <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-            <!-- Decorative Header -->
-            <div class="h-24 bg-gradient-to-r from-blue-600 to-indigo-600 relative overflow-hidden">
-              <div class="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
-              <div class="absolute -bottom-6 -right-6 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
-              <div class="absolute top-0 left-0 w-full h-full bg-[url('/patterns/circuit.svg')] opacity-10"></div>
-            </div>
-            
-            <div class="px-8 pb-8">
-              <div class="relative flex justify-between items-end -mt-12 mb-6">
-                <div class="w-24 h-24 rounded-lg border-4 border-white bg-white shadow-lg flex items-center justify-center text-3xl font-bold text-indigo-600 bg-gradient-to-br from-indigo-50 to-blue-50">
-                  {{ getInitials(student.fullname) }}
-                </div>
-                <span class="mb-2 px-3 py-1 bg-blue-50 text-blue-700 text-xs font-bold uppercase tracking-wider rounded-full border border-blue-100">
+            <div class="p-8">
+              <div class="flex justify-end mb-6">
+                <span class="px-3 py-1 bg-gray-50 text-gray-600 text-xs font-bold uppercase tracking-wider rounded-full border border-gray-200">
                   Student
                 </span>
               </div>
@@ -341,14 +331,15 @@ onMounted(() => {
                   </td>
                   <td class="px-6 py-4 text-sm text-gray-500">{{ formatDate(grade.date_taken) }}</td>
                   <td class="px-6 py-4 text-right">
-                    <BaseButton
+                    <UButton
                       size="sm"
-                      variant="secondary"
-                      rounded="lg"
+                      color="primary"
+                      variant="outline"
+                      class="font-semibold"
                       @click="router.push({ name: 'EditGrade', params: { userid: studentId, gradeid: grade.gradeid } })"
                     >
                       Edit
-                    </BaseButton>
+                    </UButton>
                   </td>
                 </tr>
               </tbody>
