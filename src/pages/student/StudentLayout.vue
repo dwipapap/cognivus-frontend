@@ -484,7 +484,7 @@ const handleLogout = async () => {
   border-radius: 9999px;
   color: #4b5563;
   overflow: hidden;
-  transition: width 220ms cubic-bezier(0.22, 1, 0.36, 1), background-color 180ms ease, color 180ms ease, transform 180ms ease;
+  transition: width 320ms cubic-bezier(0.22, 1, 0.36, 1), background-color 240ms ease, color 240ms ease, transform 220ms ease;
 }
 
 .mobile-nav-item.router-link-active {
@@ -510,7 +510,7 @@ const handleLogout = async () => {
   white-space: nowrap;
   font-size: 0.75rem;
   line-height: 1rem;
-  transition: max-width 220ms cubic-bezier(0.22, 1, 0.36, 1), opacity 160ms ease;
+  transition: max-width 320ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease;
 }
 
 .mobile-nav-item.router-link-active .mobile-nav-label {
@@ -527,9 +527,15 @@ const handleLogout = async () => {
     -webkit-backdrop-filter: blur(2px) !important;
     transition: none !important;
   }
-  
+
+  .mobile-nav-item,
+  .mobile-nav-label {
+    transition: none !important;
+  }
+
   .nav-item:hover,
-  .profile-dropdown-item:hover {
+  .profile-dropdown-item:hover,
+  .mobile-nav-item:active {
     transform: none !important;
   }
 }
