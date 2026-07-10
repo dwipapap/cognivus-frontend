@@ -70,6 +70,7 @@ const fetchPrices = async () => {
     const response = await priceAPI.getAllPrices();
     if (response.data.success) {
       prices.value = response.data.data;
+      currentPage.value = Math.min(currentPage.value, totalPages.value || 1);
     }
   } catch (error) {
     toast.add({ title: 'Error', description: 'Failed to load price data.', color: 'error' });

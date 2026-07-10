@@ -112,6 +112,7 @@ const uploadGradeReport = async () => {
     return;
   }
 
+  let gradeid;
   try {
     isUploading.value = true;
 
@@ -130,7 +131,8 @@ const uploadGradeReport = async () => {
     };
 
     const gradeRes = await gradeAPI.createGrade(gradePayload);
-    const gradeid = gradeRes.data.data.gradeid;
+    gradeid = gradeRes.data?.data?.gradeid;
+    if (!gradeid) throw new Error('Grade record was not created');
 
     // Upload the PDF
     await reportFileAPI.uploadReportFile(
@@ -146,7 +148,16 @@ const uploadGradeReport = async () => {
       successMessage.value = '';
     }, 3000);
   } catch (error) {
-    errorMessage.value = 'Failed to upload grade report';
+    if (gradeid) {
+      try {
+        await gradeAPI.deleteGrade(gradeid);
+        errorMessage.value = 'Failed to upload grade report. The incomplete grade record was removed.';
+      } catch {
+        errorMessage.value = 'Failed to upload grade report. Please remove the incomplete grade record before retrying.';
+      }
+    } else {
+      errorMessage.value = 'Failed to upload grade report';
+    }
   } finally {
     isUploading.value = false;
   }

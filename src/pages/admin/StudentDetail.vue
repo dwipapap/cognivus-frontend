@@ -1,11 +1,10 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { studentAPI, gradeAPI, paymentAPI, userAPI, classAPI, levelAPI } from '../../services/api';
-import { useForm } from '../../composables/useForm';
+import { studentAPI, gradeAPI, paymentAPI, classAPI, levelAPI } from '../../services/api';
 
 
-import { formatDate, getAverageScore, getInitials } from '../../utils/formatters';
+import { formatDate, getInitials } from '../../utils/formatters';
 
 const route = useRoute();
 const router = useRouter();
@@ -18,30 +17,6 @@ const grades = ref([]);
 const transactions = ref([]);
 const isLoading = ref(true);
 const errorMessage = ref('');
-
-
-// Form for editing
-const { formData, errors, isSubmitting, submit, getFieldProps } = useForm(
-  {
-    username: '',
-    email: '',
-    password: '',
-    fullname: '',
-    gender: '',
-    birthdate: '',
-    birthplace: '',
-    phone: '',
-    address: '',
-    parentname: '',
-    parentphone: '',
-    classid: null,
-    payment_type: ''
-  },
-  {
-    fullname: ['required'],
-    gender: ['required']
-  }
-);
 
 
 
@@ -120,18 +95,6 @@ const fetchStudentData = async () => {
       }
     }
 
-    // Populate form
-    formData.fullname = studentData.fullname || '';
-    formData.gender = studentData.gender || '';
-    formData.birthdate = studentData.birthdate ? studentData.birthdate.split('T')[0] : '';
-    formData.birthplace = studentData.birthplace || '';
-    formData.phone = studentData.phone || '';
-    formData.address = studentData.address || '';
-    formData.parentname = studentData.parentname || '';
-    formData.parentphone = studentData.parentphone || '';
-    formData.classid = studentData.classid || null;
-    formData.payment_type = studentData.payment_type || '';
-    
     // Fetch grades
     if (student.value.studentid) {
       try {
@@ -165,51 +128,6 @@ const fetchStudentData = async () => {
   } finally {
     isLoading.value = false;
   }
-};
-
-/** Handle save */
-const handleSave = async () => {
-  await submit(async (data) => {
-    try {
-      const userId = student.value.tbuser?.userid || student.value.userid;
-      if (!userId) {
-        throw new Error('User ID not found for update operation');
-      }
-
-      // Prepare student data
-      const studentData = {
-        fullname: data.fullname,
-        gender: data.gender === 'Male' ? 'L' : data.gender === 'Female' ? 'P' : data.gender,
-        birthdate: data.birthdate || null,
-        birthplace: data.birthplace || null,
-        phone: data.phone || null,
-        address: data.address || null,
-        parentname: data.parentname || null,
-        parentphone: data.parentphone || null,
-        classid: data.classid ? Number(data.classid) : null,
-        payment_type: data.payment_type || null
-      };
-
-      // Prepare user data
-      const userData = {};
-      if (data.email && data.email.trim()) userData.email = data.email;
-      if (data.password && data.password.trim()) userData.password = data.password;
-      if (data.username && data.username.trim()) userData.username = data.username;
-
-      // Update student data
-      await studentAPI.updateStudent(userId, studentData);
-      
-      // Update user credentials if any were provided
-      if (Object.keys(userData).length > 0) {
-        await userAPI.updateUser(userId, userData);
-      }
-
-      toast.add({ title: 'Success', description: 'Student updated successfully!', color: 'success' });
-      fetchStudentData(); // Refresh data
-    } catch (error) {
-      toast.add({ title: 'Error', description: error.response?.data?.message || 'Failed to save student.', color: 'error' });
-    }
-  });
 };
 
 /** Download certificate */
@@ -344,67 +262,42 @@ onMounted(() => {
         </div>
       </div>
 
-      <!-- Edit Form -->
-      <div>
-        <h2 class="text-xs font-semibold text-muted uppercase tracking-widest mb-4">Edit Student Information</h2>
-        
-        <form @submit.prevent="handleSave" class="space-y-6">
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Left Column -->
-            <div class="space-y-4">
-              <h3 class="text-sm font-medium text-default">Account Details</h3>
-              <UFormField label="Username">
-                <UInput v-bind="getFieldProps('username')" placeholder="Leave blank to keep current" class="w-full" />
-              </UFormField>
-              <UFormField label="Email">
-                <UInput v-bind="getFieldProps('email')" type="email" placeholder="Leave blank to keep current" class="w-full" />
-              </UFormField>
-              <UFormField label="Password">
-                <UInput v-bind="getFieldProps('password')" type="password" placeholder="Leave blank to keep current" class="w-full" />
-              </UFormField>
+      <!-- Student record -->
+      <section class="border-y border-default py-6">
+        <div class="flex items-baseline justify-between gap-4 mb-5">
+          <h2 class="text-xs font-semibold text-muted uppercase tracking-widest">Student Record</h2>
+          <span class="text-xs text-muted">Read-only profile</span>
+        </div>
 
-              <h3 class="text-sm font-medium text-default pt-4">Personal Information</h3>
-              <UFormField label="Full Name" required>
-                <UInput v-bind="getFieldProps('fullname')" class="w-full" />
-              </UFormField>
-              <UFormField label="Gender" required>
-                <USelect v-bind="getFieldProps('gender')" :items="['Male', 'Female']" class="w-full" />
-              </UFormField>
-              <UFormField label="Birth Date">
-                <UInput v-bind="getFieldProps('birthdate')" type="date" class="w-full" />
-              </UFormField>
-              <UFormField label="Birth Place">
-                <UInput v-bind="getFieldProps('birthplace')" class="w-full" />
-              </UFormField>
-            </div>
-
-            <!-- Right Column -->
-            <div class="space-y-4">
-              <h3 class="text-sm font-medium text-default">Contact Information</h3>
-              <UFormField label="Phone">
-                <UInput v-bind="getFieldProps('phone')" type="tel" class="w-full" />
-              </UFormField>
-              <UFormField label="Address">
-                <UTextarea v-bind="getFieldProps('address')" :rows="3" class="w-full" />
-              </UFormField>
-
-              <h3 class="text-sm font-medium text-default pt-4">Parent Information</h3>
-              <UFormField label="Parent Name">
-                <UInput v-bind="getFieldProps('parentname')" class="w-full" />
-              </UFormField>
-              <UFormField label="Parent Phone">
-                <UInput v-bind="getFieldProps('parentphone')" type="tel" class="w-full" />
-              </UFormField>
-            </div>
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <div class="space-y-3">
+            <h3 class="text-sm font-medium text-default">Identity & account</h3>
+            <dl class="space-y-2 text-sm">
+              <div class="flex justify-between gap-4"><dt class="text-muted">Username</dt><dd class="text-right text-default">{{ student.tbuser?.username || '-' }}</dd></div>
+              <div class="flex justify-between gap-4"><dt class="text-muted">Gender</dt><dd class="text-right text-default">{{ getGenderDisplay(student.gender) }}</dd></div>
+              <div class="flex justify-between gap-4"><dt class="text-muted">Birth</dt><dd class="text-right text-default">{{ student.birthplace || '-' }}, {{ formatDate(student.birthdate) }}</dd></div>
+            </dl>
           </div>
 
-          <div class="flex justify-end gap-3 pt-6 border-t border-default">
-            <UButton type="submit" color="primary" variant="solid" :loading="isSubmitting">
-              Update Student
-            </UButton>
+          <div class="space-y-3">
+            <h3 class="text-sm font-medium text-default">Enrollment</h3>
+            <dl class="space-y-2 text-sm">
+              <div class="flex justify-between gap-4"><dt class="text-muted">Class</dt><dd class="text-right text-default">{{ classInfo?.class_code || 'Unassigned' }}</dd></div>
+              <div class="flex justify-between gap-4"><dt class="text-muted">Level</dt><dd class="text-right text-default">{{ levelInfo?.name || '-' }}</dd></div>
+              <div class="flex justify-between gap-4"><dt class="text-muted">Payment plan</dt><dd class="text-right capitalize text-default">{{ student.payment_type || '-' }}</dd></div>
+            </dl>
           </div>
-        </form>
-      </div>
+
+          <div class="space-y-3">
+            <h3 class="text-sm font-medium text-default">Contact & guardian</h3>
+            <dl class="space-y-2 text-sm">
+              <div class="flex justify-between gap-4"><dt class="text-muted">Guardian</dt><dd class="text-right text-default">{{ student.parentname || '-' }}</dd></div>
+              <div class="flex justify-between gap-4"><dt class="text-muted">Guardian phone</dt><dd class="text-right text-default">{{ student.parentphone || '-' }}</dd></div>
+              <div><dt class="text-muted mb-1">Address</dt><dd class="text-default">{{ student.address || '-' }}</dd></div>
+            </dl>
+          </div>
+        </div>
+      </section>
 
       <!-- Grades Section -->
       <div>

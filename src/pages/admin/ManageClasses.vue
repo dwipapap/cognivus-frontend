@@ -85,6 +85,7 @@ const fetchClasses = async () => {
     const response = await classAPI.getAllClasses();
     if (response.data.success) {
       classes.value = response.data.data;
+      currentPage.value = Math.min(currentPage.value, totalPages.value || 1);
     }
   } catch (error) {
     toast.add({ title: 'Error', description: 'Failed to load class data.', color: 'error' });
@@ -175,12 +176,17 @@ const handleStudentSave = async (studentData) => {
       }
     });
 
-    await Promise.all(updatePromises);
+    const results = await Promise.allSettled(updatePromises);
+    const failed = results.filter(({ status }) => status === 'rejected').length;
+    await fetchOptions();
+
+    if (failed) {
+      toast.add({ title: 'Some changes failed', description: `${failed} student(s) were not updated. The latest enrollment data has been reloaded.`, color: 'error' });
+      return;
+    }
 
     toast.add({ title: 'Success', description: `Successfully updated ${toAdd.length + toRemove.length} student(s).`, color: 'success' });
     showFormModal.value = false;
-    
-    await fetchOptions();
   } catch (error) {
     const message = error.response?.data?.message || 'An error occurred.';
     toast.add({ title: 'Error', description: `Failed to update students: ${message}`, color: 'error' });

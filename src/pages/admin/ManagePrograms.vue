@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { useToast } from '@nuxt/ui/composables';
 import { programAPI } from '../../services/api';
 
 import { useConfirm } from '@/composables/useConfirm'
@@ -10,6 +11,7 @@ const programs = ref([]);
 const isLoading = ref(true);
 const showFormModal = ref(false);
 const selectedProgram = ref(null);
+const toast = useToast();
 
 const { open: confirmOpen, message: confirmMessage, confirm, onConfirm, onCancel } = useConfirm()
 const isEditMode = ref(false);
@@ -36,6 +38,7 @@ const fetchPrograms = async () => {
     const response = await programAPI.getAllPrograms();
     if (response.data.success) {
       programs.value = response.data.data;
+      currentPage.value = Math.min(currentPage.value, totalPages.value || 1);
     }
   } catch (error) {
     toast.add({ title: 'Error', description: 'Failed to load program data.', color: 'error' });
@@ -69,7 +72,7 @@ const handleSave = async (formData) => {
       toast.add({ title: 'Success', description: 'Program created successfully!', color: 'success' });
     }
     showFormModal.value = false;
-    fetchPrograms();
+    await fetchPrograms();
   } catch (error) {
     toast.add({ title: 'Error', description: error.response?.data?.message || 'Failed to save program.', color: 'error' });
   }
@@ -82,7 +85,7 @@ const handleDelete = async (program) => {
   try {
     await programAPI.deleteProgram(program.programid);
     toast.add({ title: 'Success', description: 'Program deleted successfully!', color: 'success' });
-    fetchPrograms();
+    await fetchPrograms();
   } catch (error) {
     toast.add({ title: 'Error', description: 'Failed to delete program.', color: 'error' });
   }

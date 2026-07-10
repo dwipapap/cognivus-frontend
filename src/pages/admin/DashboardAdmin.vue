@@ -10,12 +10,14 @@ const classes = ref([]);
 const payments = ref([]);
 const recentActivities = ref([]);
 const isLoading = ref(true);
+const loadError = ref('');
 
 /** Fetch dashboard data */
 const fetchDashboardData = async () => {
   try {
     isLoading.value = true;
-    const [studentsRes, lecturersRes, classesRes, paymentsRes, activitiesRes] = await Promise.all([
+    loadError.value = '';
+    const [studentsRes, lecturersRes, classesRes, paymentsRes, activitiesRes] = await Promise.allSettled([
       studentAPI.getAllStudents(),
       lecturerAPI.getAllLecturers(),
       classAPI.getAllClasses(),
@@ -23,11 +25,15 @@ const fetchDashboardData = async () => {
       dashboardAPI.getRecentActivity()
     ]);
 
-    if (studentsRes.data.success) students.value = studentsRes.data.data;
-    if (lecturersRes.data.success) lecturers.value = lecturersRes.data.data;
-    if (classesRes.data.success) classes.value = classesRes.data.data;
-    if (paymentsRes.data.success) payments.value = paymentsRes.data.data;
-    if (activitiesRes.data.success) recentActivities.value = activitiesRes.data.data;
+    if (studentsRes.status === 'fulfilled' && studentsRes.value.data.success) students.value = studentsRes.value.data.data;
+    if (lecturersRes.status === 'fulfilled' && lecturersRes.value.data.success) lecturers.value = lecturersRes.value.data.data;
+    if (classesRes.status === 'fulfilled' && classesRes.value.data.success) classes.value = classesRes.value.data.data;
+    if (paymentsRes.status === 'fulfilled' && paymentsRes.value.data.success) payments.value = paymentsRes.value.data.data;
+    if (activitiesRes.status === 'fulfilled' && activitiesRes.value.data.success) recentActivities.value = activitiesRes.value.data.data;
+
+    if ([studentsRes, lecturersRes, classesRes, paymentsRes, activitiesRes].some(({ status }) => status === 'rejected')) {
+      loadError.value = 'Some dashboard data could not be loaded. Displayed metrics may be incomplete.';
+    }
   } catch (error) {
     console.error('Failed to fetch dashboard data:', error);
   } finally {
@@ -91,6 +97,9 @@ onMounted(fetchDashboardData);
     </div>
 
     <div v-else class="space-y-16">
+      <p v-if="loadError" class="rounded-lg border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-800" role="alert">
+        {{ loadError }}
+      </p>
       <!-- Key Metrics Ledger (replaces cards) -->
       <section>
         <h2 class="text-xs font-semibold text-muted uppercase tracking-widest mb-6">Key Metrics</h2>

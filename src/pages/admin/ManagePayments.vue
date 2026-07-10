@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { paymentAPI, studentAPI } from '../../services/api';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 import { createCsvContent } from '../../utils/csv';
@@ -77,7 +77,7 @@ const filteredPayments = computed(() => {
   }
 
   // Sort by created_at descending (newest first)
-  return result.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  return [...result].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 });
 
 const paginatedPayments = computed(() => {
@@ -113,9 +113,12 @@ const fetchPayments = async () => {
     const response = await paymentAPI.getAllPayments();
     if (response.data.success) {
       payments.value = response.data.data;
+      return true;
     }
+    return false;
   } catch (error) {
     showNotification('error', 'Failed to load payment data.');
+    return false;
   } finally {
     isLoading.value = false;
   }
@@ -148,9 +151,14 @@ const openDetailsModal = (payment) => {
 
 /** Refresh payments */
 const refreshPayments = async () => {
-  await fetchPayments();
-  showNotification('success', 'Payment data refreshed successfully!');
+  if (await fetchPayments()) {
+    showNotification('success', 'Payment data refreshed successfully!');
+  }
 };
+
+watch([searchQuery, statusFilter, typeFilter], () => {
+  paymentPage.value = 1;
+});
 
 /** Export to CSV */
 const exportToCSV = () => {

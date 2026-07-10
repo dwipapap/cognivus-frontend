@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { useToast } from '@nuxt/ui/composables';
 import { levelAPI } from '../../services/api';
 
 import { useConfirm } from '@/composables/useConfirm'
@@ -10,6 +11,7 @@ const levels = ref([]);
 const isLoading = ref(true);
 const showFormModal = ref(false);
 const selectedLevel = ref(null);
+const toast = useToast();
 
 const { open: confirmOpen, message: confirmMessage, confirm, onConfirm, onCancel } = useConfirm()
 const isEditMode = ref(false);
@@ -32,6 +34,7 @@ const fetchLevels = async () => {
     const response = await levelAPI.getAllLevels();
     if (response.data.success) {
       levels.value = response.data.data;
+      currentPage.value = Math.min(currentPage.value, totalPages.value || 1);
     }
   } catch (error) {
     toast.add({ title: 'Error', description: 'Failed to load level data.', color: 'error' });

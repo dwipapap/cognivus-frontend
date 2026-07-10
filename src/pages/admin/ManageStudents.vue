@@ -1,5 +1,6 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
+import { useToast } from '@nuxt/ui/composables';
 import { useRouter } from 'vue-router';
 import { studentAPI, userAPI, classAPI, levelAPI } from '../../services/api';
 import Modal from '../../components/ui/Modal.vue';
@@ -13,10 +14,12 @@ const levels = ref([]);
 const isLoading = ref(true);
 const showFormModal = ref(false);
 const selectedStudent = ref(null);
+const toast = useToast();
 
 const { open: confirmOpen, message: confirmMessage, confirm, onConfirm, onCancel } = useConfirm()
 const isEditMode = ref(false);
 const selectedClassFilter = ref('');
+const searchQuery = ref('');
 const studentPage = ref(1);
 const studentPageSize = 20;
 
@@ -44,13 +47,23 @@ const enrichedClasses = computed(() => {
   }));
 });
 
-/** Filtered students based on selected class */
+/** Filtered students based on class and name */
 const filteredStudents = computed(() => {
-  if (!selectedClassFilter.value) {
-    return students.value;
-  }
-  return students.value.filter(student => student.classid === selectedClassFilter.value);
+  const query = searchQuery.value.trim().toLowerCase();
+  return students.value.filter(student =>
+    (!selectedClassFilter.value || student.classid === selectedClassFilter.value) &&
+    (!query || student.fullname?.toLowerCase().includes(query))
+  );
 });
+
+watch([selectedClassFilter, searchQuery], () => {
+  studentPage.value = 1;
+});
+
+const clearFilters = () => {
+  selectedClassFilter.value = '';
+  searchQuery.value = '';
+};
 
 const paginatedStudents = computed(() => {
   const start = (studentPage.value - 1) * studentPageSize;
@@ -65,6 +78,7 @@ const fetchStudents = async () => {
     const response = await studentAPI.getAllStudents();
     if (response.data.success) {
       students.value = response.data.data;
+      studentPage.value = Math.min(studentPage.value, Math.ceil(filteredStudents.value.length / studentPageSize) || 1);
     }
   } catch (error) {
     toast.add({ title: 'Error', description: 'Failed to load student data.', color: 'error' });
@@ -140,6 +154,18 @@ const handleSave = async (formData) => {
         classid: formData.classid ? Number(formData.classid) : null,
         payment_type: formData.payment_type || null
       };
+      const previousStudentData = {
+        fullname: selectedStudent.value.fullname,
+        gender: selectedStudent.value.gender,
+        birthdate: selectedStudent.value.birthdate || null,
+        birthplace: selectedStudent.value.birthplace || null,
+        phone: selectedStudent.value.phone || null,
+        address: selectedStudent.value.address || null,
+        parentname: selectedStudent.value.parentname || null,
+        parentphone: selectedStudent.value.parentphone || null,
+        classid: selectedStudent.value.classid ?? null,
+        payment_type: selectedStudent.value.payment_type || null
+      };
 
       // Prepare user data (fields that go to tbuser) - only if provided
       const userData = {};
@@ -152,7 +178,12 @@ const handleSave = async (formData) => {
       
       // Update user credentials if any were provided
       if (Object.keys(userData).length > 0) {
-        await userAPI.updateUser(userId, userData);
+        try {
+          await userAPI.updateUser(userId, userData);
+        } catch (error) {
+          await studentAPI.updateStudent(userId, previousStudentData);
+          throw new Error('Account update failed; the student profile was restored.');
+        }
       }
 
       toast.add({ title: 'Success', description: 'Student updated successfully!', color: 'success' });
@@ -193,9 +224,13 @@ const handleDelete = async (student) => {
       throw new Error('User ID not found for delete operation');
     }
 
-    // Delete from both tbstudent and tbuser tables
+    // These two deletes require a backend transaction to be atomic.
     await studentAPI.deleteStudent(userId);
-    await userAPI.deleteUser(userId);
+    try {
+      await userAPI.deleteUser(userId);
+    } catch (error) {
+      throw new Error('Student data was deleted, but the user account could not be deleted. Please contact support before retrying.');
+    }
     
     toast.add({ title: 'Success', description: 'Student and user account deleted successfully!', color: 'success' });
     fetchStudents();
@@ -228,13 +263,18 @@ onMounted(() => {
       <!-- Filter Section -->
       <div class="bg-default rounded-lg border border-default p-4 shadow-sm">
         <div class="flex flex-col md:flex-row gap-4 items-end">
+          <div class="w-full md:flex-1">
+            <UFormField label="Search">
+              <UInput v-model="searchQuery" icon="i-lucide-search" placeholder="Search by student name..." />
+            </UFormField>
+          </div>
           <div class="w-full md:w-64">
             <UFormField label="Class">
               <USelect v-model="selectedClassFilter" :items="classes.map(cls => ({ label: cls.class_code + (cls.branch ? ' (' + cls.branch + ')' : '') + ' - ' + (cls.level?.name || 'Unknown Level'), value: cls.classid }))" placeholder="All Classes" clearable />
             </UFormField>
           </div>
-          <UButton v-if="selectedClassFilter" @click="selectedClassFilter = ''" class="md:ml-auto" color="neutral" variant="ghost" size="xs" icon="i-lucide-x">
-            Clear Filter
+          <UButton v-if="selectedClassFilter || searchQuery" @click="clearFilters" color="neutral" variant="ghost" size="xs" icon="i-lucide-x">
+            Clear Filters
           </UButton>
         </div>
         <div class="mt-3 text-sm text-muted">
@@ -309,7 +349,7 @@ onMounted(() => {
                   <UIcon name="i-lucide-users" class="mx-auto h-12 w-12 mb-4" />
                   <p class="text-sm font-medium text-default">No students found</p>
                   <p class="text-sm text-muted mt-1">
-                    {{ selectedClassFilter ? 'Try selecting a different class or clear the filter' : 'Click "Add Student" to create one' }}
+                    {{ searchQuery || selectedClassFilter ? 'Try adjusting your search or filters' : 'Click "Add Student" to create one' }}
                   </p>
                 </div>
               </td>

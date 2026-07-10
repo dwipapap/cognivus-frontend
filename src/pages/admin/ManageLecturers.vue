@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { useToast } from '@nuxt/ui/composables';
 import { lecturerAPI, userAPI } from '../../services/api';
 import Modal from '../../components/ui/Modal.vue';
 
@@ -10,6 +11,7 @@ const lecturers = ref([]);
 const isLoading = ref(true);
 const showFormModal = ref(false);
 const selectedLecturer = ref(null);
+const toast = useToast();
 
 const { open: confirmOpen, message: confirmMessage, confirm, onConfirm, onCancel } = useConfirm()
 const isEditMode = ref(false);
@@ -36,6 +38,7 @@ const fetchLecturers = async () => {
     const response = await lecturerAPI.getAllLecturers();
     if (response.data.success) {
       lecturers.value = response.data.data;
+      currentPage.value = Math.min(currentPage.value, totalPages.value || 1);
     }
   } catch (error) {
     toast.add({ title: 'Error', description: 'Failed to load lecturer data.', color: 'error' });
