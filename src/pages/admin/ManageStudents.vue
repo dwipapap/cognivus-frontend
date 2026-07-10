@@ -227,19 +227,18 @@ onMounted(() => {
 
       <!-- Filter Section -->
       <div class="bg-default rounded-lg border border-default p-4 shadow-sm">
-        <div class="flex flex-col md:flex-row gap-4 items-start md:items-center">
-          <label class="text-sm font-medium text-default whitespace-nowrap">Filter by Class:</label>
+        <div class="flex flex-col md:flex-row gap-4 items-end">
           <div class="w-full md:w-64">
             <UFormField label="Class">
               <USelect v-model="selectedClassFilter" :items="classes.map(cls => ({ label: cls.class_code + (cls.branch ? ' (' + cls.branch + ')' : '') + ' - ' + (cls.level?.name || 'Unknown Level'), value: cls.classid }))" placeholder="All Classes" clearable />
             </UFormField>
           </div>
-          <UButton v-if="selectedClassFilter" @click="selectedClassFilter = ''" color="neutral" variant="ghost" size="xs" icon="i-lucide-x">
+          <UButton v-if="selectedClassFilter" @click="selectedClassFilter = ''" class="md:ml-auto" color="neutral" variant="ghost" size="xs" icon="i-lucide-x">
             Clear Filter
           </UButton>
-          <div class="text-sm text-muted">
-            Showing {{ filteredStudents.length }} of {{ students.length }} students
-          </div>
+        </div>
+        <div class="mt-3 text-sm text-muted">
+          Showing {{ filteredStudents.length }} of {{ students.length }} students
         </div>
       </div>
     </div>
