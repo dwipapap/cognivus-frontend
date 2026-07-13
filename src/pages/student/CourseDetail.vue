@@ -27,6 +27,7 @@ const courseError = ref(null);
 const showPdfModal = ref(false);
 const selectedPdfUrl = ref('');
 const selectedPdfTitle = ref('');
+const pdfModalTrigger = ref(null);
 
 // Use composable for class details
 const classId = computed(() => course.value?.classid);
@@ -53,6 +54,10 @@ const getFileUrl = (file) => {
 };
 
 const openMaterial = (url, title) => {
+  pdfModalTrigger.value = document.activeElement instanceof HTMLElement
+    ? document.activeElement
+    : null;
+  pdfModalTrigger.value?.blur();
   selectedPdfUrl.value = url;
   selectedPdfTitle.value = title;
   showPdfModal.value = true;
@@ -63,6 +68,9 @@ const closePdfModal = () => {
   showPdfModal.value = false;
   selectedPdfUrl.value = '';
   selectedPdfTitle.value = '';
+  requestAnimationFrame(() => {
+    if (pdfModalTrigger.value?.isConnected) pdfModalTrigger.value.focus();
+  });
 };
 
 /** Fetch course details */

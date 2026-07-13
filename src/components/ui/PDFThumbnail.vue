@@ -31,8 +31,9 @@ async function renderThumbnail() {
     if (!ctx) return
     
     const targetWidth = 160
-    const outputScale = targetWidth / viewport.width
-    const scaledViewport = page.getViewport({ scale: outputScale })
+    const viewport = page.getViewport({ scale: 1 })
+    const thumbnailScale = targetWidth / viewport.width
+    const scaledViewport = page.getViewport({ scale: thumbnailScale })
     
     const pixelRatio = window.devicePixelRatio || 1
     canvas.width = Math.floor(scaledViewport.width * pixelRatio)
