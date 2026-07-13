@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed, watch, inject, onMounted, onUnmounted } from "vue";
+import { useToast } from '@nuxt/ui/composables';
 import { authStore } from "../../store/auth";
 import { useStudentProfile } from "../../composables/useStudentProfile";
 import { useClassDetails } from "../../composables/useClassDetails";
@@ -42,6 +43,7 @@ const {
 } = useSnapPayment();
 
 const hideMobileNav = inject("hideMobileNav");
+const toast = useToast();
 
 // Responsive state
 const isMobile = ref(false);
@@ -421,24 +423,54 @@ const fetchPaymentHistory = async () => {
 };
 
 const handleRefreshHistory = async () => {
+    const refreshingToast = toast.add({
+        title: 'Refreshing payment history',
+        description: 'Checking the latest payment status.',
+        color: 'info',
+        icon: 'i-lucide-loader-circle',
+        duration: 0,
+        close: false,
+    });
+
     try {
         isHistoryLoading.value = true;
         const studentid =
             studentProfile.value?.studentid || authStore.user?.userid;
 
         if (!studentid) {
-            return;
+            throw new Error('Student account is unavailable');
         }
 
         // First, refresh payment status from Midtrans
         await paymentAPI.refreshPaymentStatus(studentid);
 
         // Then fetch updated payment history
-        await fetchPaymentHistory();
+        const refreshedPayments = await fetchPaymentHistory();
+
+        if (!refreshedPayments) {
+            throw new Error('Unable to load the latest payment history');
+        }
+
+        toast.update(refreshingToast.id, {
+            title: 'Payment history refreshed',
+            description: 'Your latest payment data is now up to date.',
+            color: 'success',
+            icon: 'i-lucide-circle-check',
+            duration: 4000,
+            close: true,
+        });
     } catch (err) {
         console.error("Failed to refresh payment history:", err);
         // Still try to fetch history even if refresh fails
         await fetchPaymentHistory();
+        toast.update(refreshingToast.id, {
+            title: 'Refresh failed',
+            description: 'We could not refresh your payment history. Please try again.',
+            color: 'error',
+            icon: 'i-lucide-circle-alert',
+            duration: 5000,
+            close: true,
+        });
     }
 };
 

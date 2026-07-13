@@ -1,7 +1,6 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import IconClipboard from '~icons/basil/clipboard-solid';
-import IconLoading from '~icons/svg-spinners/pulse-rings-multiple';
 import BaseButton from '../ui/BaseButton.vue';
 
 const props = defineProps({
@@ -56,16 +55,17 @@ const previousPage = () => { if (hasPrevious.value) emit('page-change', props.cu
   <div class="payment-section-glass rounded-xl md:rounded-xl px-4 py-5 md:p-6 shadow-md border border-gray-200">
     <div class="flex justify-between items-center mb-4 md:mb-5">
       <h2 class="text-lg font-bold text-gray-800">Payment History</h2>
-      <BaseButton variant="secondary" size="sm" icon :disabled="loading" @click="emit('refresh')"
-        aria-label="Refresh payment history">
-        <template #icon>
-          <IconLoading v-if="loading" class="w-5 h-5 animate-spin text-blue-600" />
-          <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-        </template>
-      </BaseButton>
+      <UButton
+        icon="i-lucide-refresh-cw"
+        color="primary"
+        variant="soft"
+        size="sm"
+        square
+        :loading="loading"
+        :disabled="loading"
+        aria-label="Refresh payment history"
+        @click="emit('refresh')"
+      />
     </div>
 
     <div v-if="payments.length === 0" class="text-center py-12">
