@@ -178,7 +178,7 @@ const courseLink = (courseId) => ({
         <PageHeaderCard
             :eyebrow="greeting + ','"
             :title="user.name"
-            :description="'You have ' + courses.length + ' course' + (courses.length !== 1 ? 's' : '') + ' this semester.'"
+            :description="'You have ' + courses.length + ' materials this semester.'"
             :show-decoration="true"
         />
 
@@ -188,23 +188,23 @@ const courseLink = (courseId) => ({
         >
             <!-- Next Class Card -->
             <UCard
-                class="relative overflow-hidden ring-0 border-0 bg-sky-600 rounded-xl text-white shadow-sm flex flex-col min-h-[150px]"
-                :ui="{ body: { base: 'flex-1 flex flex-col p-5 md:p-6' } }"
+                class="relative overflow-hidden ring-0 border-0 bg-sky-600 rounded-xl text-white shadow-sm flex flex-col min-h-[124px] md:min-h-[150px]"
+                :ui="{ body: { base: 'flex-1 flex flex-col p-4 md:p-6' } }"
             >
                 <div v-if="classLoading" class="flex-1 flex flex-col justify-end space-y-2 animate-pulse">
                     <div class="h-8 w-24 bg-white/20 rounded"></div>
                     <div class="h-4 w-32 bg-white/10 rounded"></div>
                 </div>
                 <template v-else-if="nextClassDetails">
-                    <div class="flex items-start justify-between mb-4">
-                        <IconCalendar class="w-5 h-5 text-sky-200" />
-                        <span class="text-sky-100 text-[10px] sm:text-xs font-bold uppercase tracking-wider">Next Class</span>
+                    <div class="flex items-center gap-1.5 mb-2 md:mb-4">
+                        <IconCalendar class="w-4 h-4 md:w-5 md:h-5 text-sky-200" />
+                        <span class="text-sky-100 text-[9px] sm:text-xs font-bold uppercase tracking-wider">Next Class</span>
                     </div>
                     <div class="mt-auto">
-                        <h3 class="text-3xl sm:text-4xl font-black tracking-tight mb-2 text-white leading-none">
+                        <h3 class="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight mb-1.5 md:mb-2 text-white leading-none truncate">
                             {{ nextClassDetails.dayName }}
                         </h3>
-                        <div class="flex flex-col gap-1 text-sm font-medium text-sky-100">
+                        <div class="flex flex-col gap-0.5 md:gap-1 text-xs sm:text-sm font-medium text-sky-100">
                             <span>{{ nextClassDetails.date }} {{ nextClassDetails.month }}</span>
                             <span class="text-sky-200">{{ nextClassDetails.timeRange }}</span>
                         </div>
@@ -218,15 +218,15 @@ const courseLink = (courseId) => ({
 
             <!-- Current Level Card -->
             <UCard
-                class="relative overflow-hidden ring-0 border-0 bg-blue-800 rounded-xl text-white shadow-sm flex flex-col min-h-[150px]"
-                :ui="{ body: { base: 'flex-1 flex flex-col p-5 md:p-6' } }"
+                class="relative overflow-hidden ring-0 border-0 bg-blue-800 rounded-xl text-white shadow-sm flex flex-col min-h-[124px] md:min-h-[150px]"
+                :ui="{ body: { base: 'flex-1 flex flex-col p-4 md:p-6' } }"
             >
                 <div v-if="classLoading" class="flex flex-col h-full justify-between animate-pulse">
                     <div>
                         <div class="h-3 w-16 bg-white/20 rounded mb-2.5"></div>
                         <div class="h-6 sm:h-8 w-32 bg-white/20 rounded"></div>
                     </div>
-                    <div class="mt-6 border-t border-blue-700/50 pt-4 flex justify-between items-center">
+                    <div class="mt-3 md:mt-6 border-t border-blue-700/50 pt-2 md:pt-4 flex justify-between items-center">
                         <div class="h-4 w-16 bg-white/10 rounded"></div>
                         <div class="h-6 w-16 bg-white/20 rounded-md"></div>
                     </div>
@@ -234,26 +234,13 @@ const courseLink = (courseId) => ({
                 <template v-else>
                     <div class="flex flex-col h-full justify-between">
                         <div>
-                            <span class="text-blue-300 text-[10px] sm:text-xs font-bold uppercase tracking-wider block mb-1.5">Program</span>
-                            <h3 class="text-xl sm:text-2xl font-bold tracking-tight text-white leading-snug pr-4 line-clamp-2">
+                            <div class="flex items-center gap-1.5 mb-1.5">
+                                <IconBookSolid class="w-4 h-4 text-blue-300" />
+                                <span class="text-blue-300 text-[9px] sm:text-xs font-bold uppercase tracking-wider">Program</span>
+                            </div>
+                            <h3 class="text-lg sm:text-2xl font-bold tracking-tight text-white leading-tight line-clamp-2">
                                 {{ levelName || "N/A" }}
                             </h3>
-                        </div>
-                        
-                        <div class="mt-6 flex items-center justify-between border-t border-blue-700/50 pt-4">
-                            <span class="text-sm font-medium text-blue-200 flex items-center gap-1.5">
-                                <IconBookSolid class="w-4 h-4 text-blue-300" />
-                                Status
-                            </span>
-                            <UBadge
-                                :color="levelName ? 'emerald' : 'amber'"
-                                variant="subtle"
-                                class="bg-blue-900/50 border border-blue-700 text-white font-bold shadow-sm"
-                                size="sm"
-                            >
-                                <span class="w-1.5 h-1.5 rounded-full mr-1.5" :class="levelName ? 'bg-emerald-400' : 'bg-amber-400'"></span>
-                                {{ levelName ? 'Active' : 'Pending' }}
-                            </UBadge>
                         </div>
                     </div>
                 </template>
@@ -280,11 +267,11 @@ const courseLink = (courseId) => ({
                     </div>
                     <router-link
                         to="/student/courses"
-                        class="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 rounded-md px-2 py-1 -mx-2 -my-1"
+                        class="group inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3.5 py-2 text-sm font-semibold text-blue-700 transition-colors duration-200 hover:border-blue-600 hover:bg-blue-600 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                         aria-label="View all courses"
                     >
                         View All
-                        <IconArrowRight class="w-4 h-4" aria-hidden="true" />
+                        <IconArrowRight class="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden="true" />
                     </router-link>
                 </div>
 
@@ -356,7 +343,74 @@ const courseLink = (courseId) => ({
                     </router-link>
                 </div>
 
-                <div v-else class="space-y-4 md:space-y-6">
+                <template v-else>
+                    <div class="md:hidden">
+                        <UCarousel
+                        :items="dashboardCourses"
+                        :ui="{ item: 'basis-[88%]' }"
+                        align="start"
+                        aria-label="My courses"
+                    >
+                        <template #default="{ item: course, index }">
+                            <router-link
+                                :to="courseLink(course.courseid)"
+                                class="block"
+                            >
+                                <article
+                                    class="bg-blue-600 rounded-xl overflow-hidden shadow-md active:shadow-sm transition-shadow duration-200"
+                                    :aria-labelledby="`mobile-course-title-${course.courseid}`"
+                                >
+                                    <div class="h-44 relative overflow-hidden bg-blue-800">
+                                        <img
+                                            :src="getPlaceholderImage(index)"
+                                            :alt="course.title"
+                                            class="w-full h-full object-cover opacity-90"
+                                            :loading="index === 0 ? 'eager' : 'lazy'"
+                                            :fetchpriority="index === 0 ? 'high' : 'auto'"
+                                            decoding="async"
+                                        />
+                                        <span
+                                            :class="getStatusBadgeClass(course)"
+                                            class="absolute top-3 left-3 z-10 px-2.5 py-1 rounded-full text-white text-xs font-semibold shadow-sm"
+                                        >
+                                            {{ getCourseStatusText(course) }}
+                                        </span>
+                                    </div>
+
+                                    <div class="p-4 flex flex-col min-h-44">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-white/20 text-white">
+                                                {{ index === 0 ? 'Latest' : 'Earlier' }}
+                                            </span>
+                                            <span class="text-xs text-blue-100 flex items-center gap-1 font-medium">
+                                                <IconCalendar class="w-3.5 h-3.5" aria-hidden="true" />
+                                                {{ formatDate(course.upload_date) }}
+                                            </span>
+                                        </div>
+                                        <h3
+                                            :id="`mobile-course-title-${course.courseid}`"
+                                            class="text-lg font-bold text-white mb-2 line-clamp-2"
+                                        >
+                                            {{ course.title }}
+                                        </h3>
+                                        <p
+                                            v-if="course.description"
+                                            class="text-blue-100/90 text-sm mb-4 line-clamp-2"
+                                        >
+                                            {{ course.description }}
+                                        </p>
+                                        <span class="mt-auto inline-flex self-start items-center gap-2 px-4 py-2 bg-white text-blue-600 text-sm font-bold rounded-full">
+                                            Open Course
+                                            <IconArrowRight class="w-4 h-4" aria-hidden="true" />
+                                        </span>
+                                    </div>
+                                </article>
+                            </router-link>
+                        </template>
+                        </UCarousel>
+                    </div>
+
+                    <div class="hidden md:block space-y-6">
                     <router-link
                         :to="courseLink(dashboardCourses[0].courseid)"
                         custom
@@ -423,9 +477,10 @@ const courseLink = (courseId) => ({
                                         {{ dashboardCourses[0].title }}
                                     </h3>
                                     <p
+                                        v-if="dashboardCourses[0].description"
                                         class="text-blue-100/90 text-sm md:text-base mb-4 md:mb-6 line-clamp-2 max-w-xl"
                                     >
-                                        Pick up where you left off.
+                                        {{ dashboardCourses[0].description }}
                                     </p>
 
                                     <div class="mt-auto">
@@ -518,7 +573,8 @@ const courseLink = (courseId) => ({
                             </article>
                         </router-link>
                     </div>
-                </div>
+                    </div>
+                </template>
             </div>
         </section>
     </div>
