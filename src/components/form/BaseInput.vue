@@ -35,6 +35,7 @@ const emit = defineEmits(['update:modelValue', 'focus', 'blur', 'input'])
 
 const slots = useSlots()
 const inputRef = ref(null)
+const showPassword = ref(false)
 
 const inputId = computed(() => props.id || `input-${Math.random().toString(36).slice(2, 9)}`)
 
@@ -46,6 +47,8 @@ const uinputVariant = computed(() => {
   }
   return map[props.variant]
 })
+
+const inputType = computed(() => props.type === 'password' && showPassword.value ? 'text' : props.type)
 
 function handleFocus(e) {
   emit('focus', e)
@@ -87,7 +90,7 @@ defineExpose({
       :id="inputId"
       ref="inputRef"
       :model-value="modelValue"
-      :type="type"
+      :type="inputType"
       :placeholder="placeholder"
       :disabled="disabled"
       :readonly="readonly"
@@ -122,6 +125,16 @@ defineExpose({
             <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
           </svg>
         </slot>
+      </template>
+      <template v-if="type === 'password'" #trailing>
+        <UButton
+          :icon="showPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'"
+          color="neutral"
+          variant="link"
+          size="xs"
+          :aria-label="showPassword ? 'Hide password' : 'Show password'"
+          @click="showPassword = !showPassword"
+        />
       </template>
     </UInput>
 

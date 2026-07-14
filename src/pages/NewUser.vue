@@ -30,6 +30,8 @@ const mapGenderToBackend = (frontendGender) => {
 const isLoading = ref(true);
 const showModal = ref(false);
 const showMobileSubmit = ref(false);
+const showPassword = ref(false);
+const showConfirmPassword = ref(false);
 const modalType = ref('info');
 const modalMessage = ref('');
 
@@ -262,7 +264,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="new-user-page min-h-screen bg-blue-600 md:flex md:h-screen md:items-center md:justify-center md:overflow-hidden md:bg-[#eef6ff] md:p-6">
+  <div class="new-user-page min-h-screen bg-blue-600 md:flex md:h-dvh md:items-center md:justify-center md:overflow-hidden md:bg-[#eef6ff] md:p-6">
     <!-- Loading State -->
     <div v-if="isLoading" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
         <div class="bg-white p-8 rounded-lg shadow-2xl max-w-md w-full">
@@ -272,12 +274,12 @@ onUnmounted(() => {
     </div>
 
     <!-- Main Card -->
-    <div v-else class="relative w-full overflow-hidden md:grid md:h-full md:max-h-[900px] md:max-w-7xl md:grid-cols-[0.9fr_1.35fr] md:items-center md:gap-8">
-      <aside class="desktop-intro hidden h-full flex-col justify-between rounded-[1.5rem] p-8 md:flex">
+    <div v-else class="relative w-full md:grid md:h-[calc(100dvh-3rem)] md:min-h-0 md:max-h-[900px] md:max-w-7xl md:grid-cols-[0.9fr_1.35fr] md:items-center md:gap-6 xl:gap-8">
+      <aside class="desktop-intro hidden h-full min-h-0 flex-col justify-between overflow-hidden rounded-[1.5rem] p-6 md:flex xl:p-8">
         <div>
           <img :src="ittrLogo" alt="ITTR Logo" class="h-12 w-auto object-contain" />
 
-          <div class="mt-16">
+          <div class="mt-10 xl:mt-16">
             <p class="mb-4 flex items-center gap-2 text-sm font-semibold text-blue-500">
               <UIcon name="i-lucide-sparkles" class="h-5 w-5" />
               You're almost there!
@@ -292,7 +294,7 @@ onUnmounted(() => {
         </div>
 
         <div>
-          <div class="study-visual mx-auto mb-5">
+          <div class="study-visual mx-auto mb-4 xl:mb-5">
             <div class="study-platform"></div>
             <div class="study-book study-book-bottom"></div>
             <div class="study-book study-book-top"></div>
@@ -300,7 +302,7 @@ onUnmounted(() => {
             <div class="study-pot"></div>
           </div>
 
-          <UCard class="max-w-sm border-0 bg-white/75 shadow-sm ring-1 ring-blue-100" :ui="{ body: 'p-4' }">
+          <UCard class="hidden max-w-sm border-0 bg-white/75 shadow-sm ring-1 ring-blue-100 lg:block" :ui="{ body: 'p-4' }">
             <div class="flex items-center gap-4">
               <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
                 <UIcon name="i-lucide-shield-check" class="h-6 w-6" />
@@ -326,7 +328,7 @@ onUnmounted(() => {
       </div>
       
       <!-- Form -->
-      <UCard class="profile-sheet w-full border-0 bg-white shadow-xl ring-1 ring-blue-100/80 md:max-h-full md:self-center md:rounded-[1.75rem]" :ui="{ body: 'px-5 pb-24 pt-6 md:p-6 xl:p-8' }">
+      <UCard class="profile-sheet w-full border-0 bg-white shadow-xl ring-1 ring-blue-100/80 md:h-full md:min-h-0 md:self-center md:overflow-hidden md:rounded-[1.75rem]" :ui="{ body: 'px-5 pb-24 pt-6 md:h-full md:overflow-y-auto md:overscroll-contain md:p-6 xl:p-8' }">
         <div class="max-w-3xl mx-auto w-full">
           <!-- Header -->
           <div class="hidden items-center gap-4 mb-5 md:flex xl:mb-8">
@@ -538,13 +540,24 @@ onUnmounted(() => {
                   <UInput
                     v-model="formData.password"
                     @blur="validateSingleField('password')"
-                    type="password" 
+                    :type="showPassword ? 'text' : 'password'"
                     size="sm"
                     placeholder="Min. 6 characters"
                     leading-icon="i-lucide-lock-keyhole"
                     class="w-full"
                     :color="errors.password ? 'error' : 'primary'"
-                  />
+                  >
+                    <template #trailing>
+                      <UButton
+                        :icon="showPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'"
+                        color="neutral"
+                        variant="link"
+                        size="xs"
+                        :aria-label="showPassword ? 'Hide password' : 'Show password'"
+                        @click="showPassword = !showPassword"
+                      />
+                    </template>
+                  </UInput>
                   <p v-if="errors.password" class="text-red-600 text-xs mt-1.5">{{ errors.password }}</p>
                 </div>
 
@@ -556,13 +569,24 @@ onUnmounted(() => {
                   <UInput
                     v-model="formData.confirmPassword"
                     @blur="validateSingleField('confirmPassword')"
-                    type="password" 
+                    :type="showConfirmPassword ? 'text' : 'password'"
                     size="sm"
                     placeholder="Re-enter password"
                     leading-icon="i-lucide-lock-keyhole"
                     class="w-full"
                     :color="errors.confirmPassword ? 'error' : 'primary'"
-                  />
+                  >
+                    <template #trailing>
+                      <UButton
+                        :icon="showConfirmPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'"
+                        color="neutral"
+                        variant="link"
+                        size="xs"
+                        :aria-label="showConfirmPassword ? 'Hide password' : 'Show password'"
+                        @click="showConfirmPassword = !showConfirmPassword"
+                      />
+                    </template>
+                  </UInput>
                   <p v-if="errors.confirmPassword" class="text-red-600 text-xs mt-1.5">{{ errors.confirmPassword }}</p>
                 </div>
               </div>

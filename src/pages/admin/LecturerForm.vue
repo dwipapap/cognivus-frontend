@@ -15,6 +15,7 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['close', 'save']);
+const showPassword = ref(false);
 
 const { formData, errors, isSubmitting, submit, getFieldProps, reset } = useForm(
   {},
@@ -129,7 +130,11 @@ const handleSave = async () => {
             </UFormField>
 
             <UFormField label="Access Password" :required="!isEditMode" class="md:col-span-2" description="Minimum 8 characters.">
-              <UInput v-bind="getFieldProps('password')" type="password" :placeholder="isEditMode ? 'Leave empty to keep current' : 'Min. 8 characters'" class="w-full" />
+              <UInput v-bind="getFieldProps('password')" :type="showPassword ? 'text' : 'password'" :placeholder="isEditMode ? 'Leave empty to keep current' : 'Min. 8 characters'" class="w-full">
+                <template #trailing>
+                  <UButton :icon="showPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'" color="neutral" variant="link" size="xs" :aria-label="showPassword ? 'Hide password' : 'Show password'" @click="showPassword = !showPassword" />
+                </template>
+              </UInput>
             </UFormField>
           </div>
         </section>

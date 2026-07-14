@@ -150,20 +150,20 @@ const handleGoogleLogin = () => {
 </script>
 
 <template>
-  <div class="login-page-background relative isolate h-[100dvh] overflow-hidden lg:flex lg:h-[100dvh] lg:min-h-0 lg:items-center lg:justify-center lg:p-4 animate-fade-in">
+  <div class="login-page-background relative isolate h-[100dvh] overflow-hidden lg:flex lg:h-[100dvh] lg:min-h-0 lg:items-center lg:justify-center lg:p-2 animate-fade-in">
     <!-- Desktop / tablet layout (unchanged) -->
-    <div class="bg-gradient-to-br from-white/80 via-blue-50/70 to-indigo-100/60 backdrop-blur-md border border-white/20 shadow-2xl rounded-3xl max-w-6xl w-full hidden lg:grid lg:grid-cols-5 overflow-hidden opacity-0 animate-fade-in-scale"
+    <div class="bg-gradient-to-br from-white/80 via-blue-50/70 to-indigo-100/60 backdrop-blur-md border border-white/20 shadow-2xl rounded-3xl max-w-6xl w-full hidden lg:grid lg:h-[calc(100dvh-1rem)] lg:grid-cols-5 lg:overflow-hidden opacity-0 animate-fade-in-scale"
          style="animation-delay: 0.1s; animation-fill-mode: forwards;">
       <!-- Left side - Login Form (2 columns) -->
-      <div class="lg:col-span-2 p-8 flex items-center justify-center">
-        <BaseCard size="md" rounded="3xl" class="w-full max-w-md">
+      <div class="lg:col-span-2 lg:min-h-0 lg:overflow-hidden p-5 2xl:p-8 flex items-center justify-center">
+        <BaseCard size="sm" rounded="3xl" class="w-full max-w-md">
           <template #title>
             <div class="text-center">
               <router-link to="/" class="inline-block">
-                <img :src="ittrLogo" alt="ITTR English Logo" class="w-40 mb-6 mx-auto cursor-pointer hover:opacity-80 transition-opacity" />
+                <img :src="ittrLogo" alt="ITTR English Logo" class="w-32 2xl:w-40 mb-4 2xl:mb-6 mx-auto cursor-pointer hover:opacity-80 transition-opacity" />
               </router-link>
-              <h2 class="text-2xl font-bold text-gray-900 mb-2">Welcome!</h2>
-              <p class="text-gray-600 mb-6 text-sm">Put your username and password to login</p>
+              <h2 class="text-xl 2xl:text-2xl font-bold text-gray-900 mb-2">Welcome!</h2>
+              <p class="text-gray-600 mb-4 2xl:mb-6 text-sm">Put your username and password to login</p>
             </div>
           </template>
 
@@ -191,13 +191,13 @@ const handleGoogleLogin = () => {
           </BaseButton>
 
           <!-- Divider -->
-          <div class="flex items-center my-4">
+          <div class="flex items-center my-3 2xl:my-4">
             <div class="flex-grow border-t border-gray-300"></div>
             <span class="flex-shrink mx-4 text-gray-500 text-sm">Or</span>
             <div class="flex-grow border-t border-gray-300"></div>
           </div>
 
-          <form @submit.prevent="handleLogin" class="space-y-5" autocomplete="off" novalidate>
+          <form @submit.prevent="handleLogin" class="space-y-4 2xl:space-y-5" autocomplete="off" novalidate>
             <!-- Hidden fields to prevent browser autofill/autocomplete popups -->
             <input type="text" name="fakeusernameremembered" id="fakeusernameremembered" style="position: absolute; left: -9999px; top: -9999px; width: 1px; height: 1px; opacity: 0;" autocomplete="username" />
             <input type="password" name="fakepasswordremembered" id="fakepasswordremembered" style="position: absolute; left: -9999px; top: -9999px; width: 1px; height: 1px; opacity: 0;" autocomplete="new-password" />
@@ -240,7 +240,7 @@ const handleGoogleLogin = () => {
                   <UIcon name="i-solar-lock-password-bold" class="w-5 h-5 text-gray-400" />
                 </div>
                 <input 
-                  type="password" 
+                  :type="showPassword ? 'text' : 'password'"
                   id="password"
                   name="password"
                   autocomplete="current-password"
@@ -248,10 +248,18 @@ const handleGoogleLogin = () => {
                   autocapitalize="none"
                   spellcheck="false"
                   v-model="formData.password"
-                  class="block w-full !bg-white pl-11 pr-4 py-2.5 text-gray-900 placeholder-gray-400 border rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  class="block w-full !bg-white pl-11 pr-11 py-2.5 text-gray-900 placeholder-gray-400 border rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   :class="errors.password ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'"
                   placeholder="Enter your password"
                 />
+                <button
+                  type="button"
+                  class="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 hover:text-gray-600"
+                  :aria-label="showPassword ? 'Hide password' : 'Show password'"
+                  @click="showPassword = !showPassword"
+                >
+                  <UIcon :name="showPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'" class="h-5 w-5" />
+                </button>
               </div>
               <div class="flex justify-between items-center mt-2">
                 <p v-if="errors.password" class="text-sm text-red-600">{{ errors.password }}</p>
@@ -276,7 +284,7 @@ const handleGoogleLogin = () => {
           </form>
 
           <!-- Footer text -->
-          <div class="mt-6 text-center">
+          <div class="mt-4 2xl:mt-6 text-center">
             <p class="text-xs text-gray-500">
               Need more information? 
               <a href="#" class="text-blue-600 hover:underline">WhatsApp</a> or 
@@ -288,8 +296,8 @@ const handleGoogleLogin = () => {
       </div>
 
       <!-- Right side - Illustration (3 columns) -->
-      <div class="lg:col-span-3 hidden lg:flex items-center justify-center p-8 bg-gradient-to-br from-blue-50 to-indigo-100">
-        <img :src="login" alt="Ilustrasi" class="w-full max-w-4xl" />
+      <div class="lg:col-span-3 hidden lg:flex items-center justify-center overflow-hidden p-8 bg-gradient-to-br from-blue-50 to-indigo-100">
+        <img :src="login" alt="Ilustrasi" class="max-h-full w-full max-w-4xl object-contain" />
       </div>
     </div>
 

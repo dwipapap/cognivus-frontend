@@ -22,7 +22,11 @@
             </UFormField>
 
             <UFormField label="Password" :required="!isEditMode" description="Minimum 6 characters.">
-              <UInput v-bind="getFieldProps('password')" type="password" :placeholder="isEditMode ? 'Leave blank to keep current' : 'Min. 6 characters'" class="w-full" />
+              <UInput v-bind="getFieldProps('password')" :type="showPassword ? 'text' : 'password'" :placeholder="isEditMode ? 'Leave blank to keep current' : 'Min. 6 characters'" class="w-full">
+                <template #trailing>
+                  <UButton :icon="showPassword ? 'i-lucide-eye-off' : 'i-lucide-eye'" color="neutral" variant="link" size="xs" :aria-label="showPassword ? 'Hide password' : 'Show password'" @click="showPassword = !showPassword" />
+                </template>
+              </UInput>
             </UFormField>
           </div>
         </div>
@@ -139,6 +143,7 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['submit', 'cancel']);
+const showPassword = ref(false);
 
 const { formData, errors, isSubmitting, submit, getFieldProps, reset } = useForm(
   {
