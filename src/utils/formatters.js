@@ -33,6 +33,17 @@ export const getAverageScore = (grade) => {
   return Math.round(sum / scores.length);
 };
 
+export const calculateAge = (birthdate) => {
+  if (!birthdate) return null;
+  const birth = new Date(birthdate);
+  if (isNaN(birth)) return null;
+  const now = new Date();
+  let age = now.getFullYear() - birth.getFullYear();
+  if (now.getMonth() < birth.getMonth() ||
+      (now.getMonth() === birth.getMonth() && now.getDate() < birth.getDate())) age--;
+  return age >= 0 ? age : null;
+};
+
 export const getInitials = (name) => {
   if (!name) return '';
   return name

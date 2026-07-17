@@ -151,8 +151,17 @@ const handleSave = async (formData) => {
         address: formData.address || null,
         parentname: formData.parentname || null,
         parentphone: formData.parentphone || null,
+        relationship: formData.relationship || null,
         classid: formData.classid ? Number(formData.classid) : null,
-        payment_type: formData.payment_type || null
+        payment_type: formData.payment_type || null,
+        occupation: formData.occupation || null,
+        program_interest: formData.program_interest || null,
+        english_level: formData.english_level || null,
+        referral_source: formData.referral_source || null,
+        learning_mode: formData.learning_mode || null,
+        preferred_time: formData.preferred_time || null,
+        studied_before: formData.studied_before || null,
+        learning_reason: formData.learning_reason || null
       };
       const previousStudentData = {
         fullname: selectedStudent.value.fullname,
@@ -163,8 +172,17 @@ const handleSave = async (formData) => {
         address: selectedStudent.value.address || null,
         parentname: selectedStudent.value.parentname || null,
         parentphone: selectedStudent.value.parentphone || null,
+        relationship: selectedStudent.value.relationship || null,
         classid: selectedStudent.value.classid ?? null,
-        payment_type: selectedStudent.value.payment_type || null
+        payment_type: selectedStudent.value.payment_type || null,
+        occupation: selectedStudent.value.occupation || null,
+        program_interest: selectedStudent.value.program_interest || null,
+        english_level: selectedStudent.value.english_level || null,
+        referral_source: selectedStudent.value.referral_source || null,
+        learning_mode: selectedStudent.value.learning_mode || null,
+        preferred_time: selectedStudent.value.preferred_time || null,
+        studied_before: selectedStudent.value.studied_before || null,
+        learning_reason: selectedStudent.value.learning_reason || null
       };
 
       // Prepare user data (fields that go to tbuser) - only if provided

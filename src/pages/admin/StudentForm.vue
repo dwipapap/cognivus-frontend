@@ -81,20 +81,74 @@
           </div>
         </div>
 
-        <!-- Parent Information Section -->
+        <!-- Emergency Contact Section -->
         <div class="bg-default rounded-lg p-6 border border-default">
           <h3 class="text-sm font-semibold text-default mb-4 flex items-center gap-2">
             <UIcon name="i-lucide-users" class="w-4 h-4 text-toned" />
-            Parent Information
+            Emergency Contact
           </h3>
-          
+
           <div class="space-y-4">
-            <UFormField label="Parent Name">
-              <UInput v-bind="getFieldProps('parentname')" placeholder="Parent or guardian" class="w-full" />
+            <UFormField label="Full Name">
+              <UInput v-bind="getFieldProps('parentname')" placeholder="Emergency contact's full name" class="w-full" />
             </UFormField>
 
-            <UFormField label="Parent Phone">
+            <UFormField label="Relationship">
+              <UInput v-bind="getFieldProps('relationship')" placeholder="e.g. Parent, Spouse, Sibling" class="w-full" />
+            </UFormField>
+
+            <UFormField label="Phone Number">
               <UInput v-bind="getFieldProps('parentphone')" type="tel" placeholder="+62 812-xxx-xxx" class="w-full" />
+            </UFormField>
+          </div>
+        </div>
+
+        <!-- Background Section -->
+        <div class="bg-default rounded-lg p-6 border border-default">
+          <h3 class="text-sm font-semibold text-default mb-4 flex items-center gap-2">
+            <UIcon name="i-lucide-briefcase" class="w-4 h-4 text-toned" />
+            Background
+          </h3>
+
+          <UFormField label="Occupation">
+            <USelect v-bind="getFieldProps('occupation')" :items="OCCUPATIONS" placeholder="Select occupation" class="w-full" />
+          </UFormField>
+        </div>
+
+        <!-- Course Information Section -->
+        <div class="bg-default rounded-lg p-6 border border-default">
+          <h3 class="text-sm font-semibold text-default mb-4 flex items-center gap-2">
+            <UIcon name="i-lucide-book-open" class="w-4 h-4 text-toned" />
+            Course Information
+          </h3>
+
+          <div class="space-y-4">
+            <UFormField label="Program">
+              <USelect v-bind="getFieldProps('program_interest')" :items="PROGRAMS" placeholder="Select program" class="w-full" />
+            </UFormField>
+
+            <UFormField label="Current English Level">
+              <USelect v-bind="getFieldProps('english_level')" :items="ENGLISH_LEVELS" placeholder="Select level" class="w-full" />
+            </UFormField>
+
+            <UFormField label="Have you studied English before?">
+              <USelect v-bind="getFieldProps('studied_before')" :items="STUDIED_BEFORE" placeholder="Select" class="w-full" />
+            </UFormField>
+
+            <UFormField label="Main reason for learning English">
+              <USelect v-bind="getFieldProps('learning_reason')" :items="LEARNING_REASONS" placeholder="Select reason" class="w-full" />
+            </UFormField>
+
+            <UFormField label="Learning Mode">
+              <USelect v-bind="getFieldProps('learning_mode')" :items="LEARNING_MODES" placeholder="Select mode" class="w-full" />
+            </UFormField>
+
+            <UFormField label="Preferred Time">
+              <USelect v-bind="getFieldProps('preferred_time')" :items="PREFERRED_TIMES" placeholder="Select time" class="w-full" />
+            </UFormField>
+
+            <UFormField label="How did you hear about us?">
+              <USelect v-bind="getFieldProps('referral_source')" :items="REFERRAL_SOURCES" placeholder="Select source" class="w-full" />
             </UFormField>
           </div>
         </div>
@@ -131,6 +185,16 @@
 <script setup>
 import { ref, watch } from 'vue';
 import { useForm } from '../../composables/useForm';
+import {
+  OCCUPATIONS,
+  PROGRAMS,
+  ENGLISH_LEVELS,
+  REFERRAL_SOURCES,
+  LEARNING_MODES,
+  PREFERRED_TIMES,
+  STUDIED_BEFORE,
+  LEARNING_REASONS
+} from '../../config/studentOptions';
 
 
 const props = defineProps({
@@ -158,8 +222,17 @@ const { formData, errors, isSubmitting, submit, getFieldProps, reset } = useForm
     address: '',
     parentname: '',
     parentphone: '',
+    relationship: '',
     classid: null,
-    payment_type: ''
+    payment_type: '',
+    occupation: '',
+    program_interest: '',
+    english_level: '',
+    referral_source: '',
+    learning_mode: '',
+    preferred_time: '',
+    studied_before: '',
+    learning_reason: ''
   },
   {
     username: props.isEditMode ? [] : ['required'],
@@ -184,8 +257,17 @@ watch(() => props.student, (newStudent) => {
     formData.address = newStudent.address || '';
     formData.parentname = newStudent.parentname || '';
     formData.parentphone = newStudent.parentphone || '';
+    formData.relationship = newStudent.relationship || '';
     formData.classid = newStudent.classid || null;
     formData.payment_type = newStudent.payment_type || '';
+    formData.occupation = newStudent.occupation || '';
+    formData.program_interest = newStudent.program_interest || '';
+    formData.english_level = newStudent.english_level || '';
+    formData.referral_source = newStudent.referral_source || '';
+    formData.learning_mode = newStudent.learning_mode || '';
+    formData.preferred_time = newStudent.preferred_time || '';
+    formData.studied_before = newStudent.studied_before || '';
+    formData.learning_reason = newStudent.learning_reason || '';
   } else {
     reset();
   }

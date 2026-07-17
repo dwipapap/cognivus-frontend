@@ -4,7 +4,7 @@
 // Staff do not reach this page.
 // Note: username and password are required even for Google-primary students —
 // they serve as a fallback login method.
-import { computed, ref, onMounted, onUnmounted, nextTick } from 'vue';
+import { computed, defineAsyncComponent, ref, onMounted, onUnmounted, nextTick } from 'vue';
 import { studentAPI, userAPI } from '../services/api';
 import { authStore } from '../store/auth';
 import { useRoute, useRouter } from 'vue-router';
@@ -15,6 +15,19 @@ import UCalendar from '@nuxt/ui/components/Calendar.vue';
 import UPopover from '@nuxt/ui/components/Popover.vue';
 import { CalendarDate } from '@internationalized/date';
 import ittrLogo from '../assets/ittrlogo.png';
+import termsPdfUrl from '../assets/ittr-rules-and-terms.pdf';
+import {
+  OCCUPATIONS,
+  PROGRAMS,
+  ENGLISH_LEVELS,
+  REFERRAL_SOURCES,
+  LEARNING_MODES,
+  PREFERRED_TIMES,
+  STUDIED_BEFORE,
+  LEARNING_REASONS
+} from '../config/studentOptions';
+
+const PDFViewer = defineAsyncComponent(() => import('../components/ui/PDFViewer.vue'));
 
 const router = useRouter();
 const route = useRoute();
@@ -29,9 +42,11 @@ const mapGenderToBackend = (frontendGender) => {
 
 const isLoading = ref(true);
 const showModal = ref(false);
+const showTermsModal = ref(false);
 const showMobileSubmit = ref(false);
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
+const termsAccepted = ref(false);
 const modalType = ref('info');
 const modalMessage = ref('');
 
@@ -56,10 +71,21 @@ const { formData, errors, isSubmitting, submit, getFieldProps, reset, validate, 
     phone: '',
     parentname: '',
     parentphone: '',
+    relationship: '',
     birthdate: '',
     birthplace: '',
     classid: null,
-    userid: null
+    userid: null,
+
+    // Background & course intake
+    occupation: '',
+    program_interest: '',
+    english_level: '',
+    referral_source: '',
+    learning_mode: '',
+    preferred_time: '',
+    studied_before: '',
+    learning_reason: ''
   },
   {
     username: ['required', { type: 'minLength', min: 3 }],
@@ -70,7 +96,16 @@ const { formData, errors, isSubmitting, submit, getFieldProps, reset, validate, 
     address: ['required'],
     phone: ['required', 'phone'],
     parentname: ['required'],
-    parentphone: ['phone']
+    parentphone: ['phone'],
+    relationship: ['required'],
+    occupation: ['required'],
+    program_interest: ['required'],
+    english_level: ['required'],
+    referral_source: ['required'],
+    learning_mode: ['required'],
+    preferred_time: ['required'],
+    studied_before: ['required'],
+    learning_reason: ['required']
   }
 );
 
@@ -170,7 +205,26 @@ const fetchProfile = async () => {
   }
 };
 
-const handleCompleteProfile = async () => {
+const requestCompleteProfile = () => {
+  if (!validate()) return;
+
+  termsAccepted.value = false;
+  showTermsModal.value = true;
+};
+
+const closeTermsModal = () => {
+  showTermsModal.value = false;
+  termsAccepted.value = false;
+};
+
+const confirmTermsAndCompleteProfile = async () => {
+  if (!termsAccepted.value) return;
+
+  closeTermsModal();
+  await completeProfile();
+};
+
+const completeProfile = async () => {
   if (isDevPreview) {
     modalType.value = 'success';
     modalMessage.value = 'Preview only: profile would be saved here.';
@@ -202,8 +256,17 @@ const handleCompleteProfile = async () => {
         phone: data.phone,
         parentname: data.parentname,
         parentphone: data.parentphone,
+        relationship: data.relationship,
         birthdate: data.birthdate,
-        birthplace: data.birthplace
+        birthplace: data.birthplace,
+        occupation: data.occupation,
+        program_interest: data.program_interest,
+        english_level: data.english_level,
+        referral_source: data.referral_source,
+        learning_mode: data.learning_mode,
+        preferred_time: data.preferred_time,
+        studied_before: data.studied_before,
+        learning_reason: data.learning_reason
       };
       
       // Always update existing student record (created during OAuth)
@@ -341,7 +404,7 @@ onUnmounted(() => {
             </div>
           </div>
 
-          <form @submit.prevent="handleCompleteProfile" class="space-y-5 md:space-y-4 xl:space-y-6">
+          <form @submit.prevent="requestCompleteProfile" class="space-y-5 md:space-y-4 xl:space-y-6">
             <!-- Personal Information Section -->
             <div>
               <h2 class="section-title text-lg font-semibold text-blue-600 mb-4 flex items-center gap-2 md:hidden">
@@ -468,17 +531,30 @@ onUnmounted(() => {
                   <p v-if="errors.phone" class="text-red-600 text-xs mt-1.5">{{ errors.phone }}</p>
                 </div>
 
-                <!-- Parent Name -->
+              </div>
+            </div>
+
+            <!-- Emergency Contact Section -->
+            <div class="border-t border-gray-200 pt-5 md:pt-4 xl:pt-6">
+              <h2 class="section-title text-lg font-semibold text-blue-600 mb-4 flex items-center gap-2">
+                <span class="flex h-9 w-9 items-center justify-center rounded-full bg-blue-500 text-white">
+                  <UIcon name="i-lucide-users-round" class="h-5 w-5" />
+                </span>
+                <span>Emergency Contact</span>
+              </h2>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 md:gap-x-8 md:gap-y-3 xl:gap-y-5">
+                <!-- Emergency Contact Name -->
                 <div class="col-span-1">
                   <label class="block text-sm font-medium text-gray-900 mb-2">
-                    Parent Name <span class="text-red-500">*</span>
+                    Full Name <span class="text-red-500">*</span>
                   </label>
                   <UInput
                     v-model="formData.parentname"
                     @blur="validateSingleField('parentname')"
-                    type="text" 
+                    type="text"
                     size="sm"
-                    placeholder="Parent's full name"
+                    placeholder="Emergency contact's full name"
                     leading-icon="i-lucide-users-round"
                     class="w-full"
                     :color="errors.parentname ? 'error' : 'primary'"
@@ -486,13 +562,31 @@ onUnmounted(() => {
                   <p v-if="errors.parentname" class="text-red-600 text-xs mt-1.5">{{ errors.parentname }}</p>
                 </div>
 
-                <!-- Parent Phone -->
+                <!-- Relationship -->
                 <div class="col-span-1">
-                  <label class="block text-sm font-medium text-gray-900 mb-2">Parent Phone</label>
+                  <label class="block text-sm font-medium text-gray-900 mb-2">
+                    Relationship <span class="text-red-500">*</span>
+                  </label>
+                  <UInput
+                    v-model="formData.relationship"
+                    @blur="validateSingleField('relationship')"
+                    type="text"
+                    size="sm"
+                    placeholder="e.g. Parent, Spouse, Sibling"
+                    leading-icon="i-lucide-heart-handshake"
+                    class="w-full"
+                    :color="errors.relationship ? 'error' : 'primary'"
+                  />
+                  <p v-if="errors.relationship" class="text-red-600 text-xs mt-1.5">{{ errors.relationship }}</p>
+                </div>
+
+                <!-- Emergency Contact Phone -->
+                <div class="col-span-1">
+                  <label class="block text-sm font-medium text-gray-900 mb-2">Phone Number</label>
                   <UInput
                     v-model="formData.parentphone"
                     @blur="validateSingleField('parentphone')"
-                    type="tel" 
+                    type="tel"
                     size="sm"
                     placeholder="08xxxxxxxxx"
                     leading-icon="i-lucide-phone"
@@ -500,6 +594,174 @@ onUnmounted(() => {
                     :color="errors.parentphone ? 'error' : 'primary'"
                   />
                   <p v-if="errors.parentphone" class="text-red-600 text-xs mt-1.5">{{ errors.parentphone }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Background Section -->
+            <div class="border-t border-gray-200 pt-5 md:pt-4 xl:pt-6">
+              <h2 class="section-title text-lg font-semibold text-blue-600 mb-4 flex items-center gap-2">
+                <span class="flex h-9 w-9 items-center justify-center rounded-full bg-blue-500 text-white">
+                  <UIcon name="i-lucide-briefcase" class="h-5 w-5" />
+                </span>
+                <span>Background</span>
+              </h2>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 md:gap-x-8 md:gap-y-3 xl:gap-y-5">
+                <!-- Occupation -->
+                <div class="col-span-1">
+                  <label class="block text-sm font-medium text-gray-900 mb-2">
+                    Occupation <span class="text-red-500">*</span>
+                  </label>
+                  <USelect
+                    v-model="formData.occupation"
+                    :items="OCCUPATIONS"
+                    size="sm"
+                    placeholder="Select"
+                    icon="i-lucide-briefcase"
+                    class="w-full"
+                    :color="errors.occupation ? 'error' : 'primary'"
+                    @blur="validateSingleField('occupation')"
+                  />
+                  <p v-if="errors.occupation" class="text-red-600 text-xs mt-1.5">{{ errors.occupation }}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Course Information Section -->
+            <div class="border-t border-gray-200 pt-5 md:pt-4 xl:pt-6">
+              <h2 class="section-title text-lg font-semibold text-blue-600 mb-4 flex items-center gap-2">
+                <span class="flex h-9 w-9 items-center justify-center rounded-full bg-blue-500 text-white">
+                  <UIcon name="i-lucide-book-open" class="h-5 w-5" />
+                </span>
+                <span>Course Information</span>
+              </h2>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 md:gap-x-8 md:gap-y-3 xl:gap-y-5">
+                <!-- Program -->
+                <div class="col-span-1">
+                  <label class="block text-sm font-medium text-gray-900 mb-2">
+                    Program <span class="text-red-500">*</span>
+                  </label>
+                  <USelect
+                    v-model="formData.program_interest"
+                    :items="PROGRAMS"
+                    size="sm"
+                    placeholder="Select"
+                    icon="i-lucide-book-open"
+                    class="w-full"
+                    :color="errors.program_interest ? 'error' : 'primary'"
+                    @blur="validateSingleField('program_interest')"
+                  />
+                  <p v-if="errors.program_interest" class="text-red-600 text-xs mt-1.5">{{ errors.program_interest }}</p>
+                </div>
+
+                <!-- English Level -->
+                <div class="col-span-1">
+                  <label class="block text-sm font-medium text-gray-900 mb-2">
+                    Current English Level <span class="text-red-500">*</span>
+                  </label>
+                  <USelect
+                    v-model="formData.english_level"
+                    :items="ENGLISH_LEVELS"
+                    size="sm"
+                    placeholder="Select"
+                    icon="i-lucide-gauge"
+                    class="w-full"
+                    :color="errors.english_level ? 'error' : 'primary'"
+                    @blur="validateSingleField('english_level')"
+                  />
+                  <p v-if="errors.english_level" class="text-red-600 text-xs mt-1.5">{{ errors.english_level }}</p>
+                </div>
+
+                <!-- Studied Before -->
+                <div class="col-span-1">
+                  <label class="block text-sm font-medium text-gray-900 mb-2">
+                    Have you studied English before? <span class="text-red-500">*</span>
+                  </label>
+                  <USelect
+                    v-model="formData.studied_before"
+                    :items="STUDIED_BEFORE"
+                    size="sm"
+                    placeholder="Select"
+                    icon="i-lucide-graduation-cap"
+                    class="w-full"
+                    :color="errors.studied_before ? 'error' : 'primary'"
+                    @blur="validateSingleField('studied_before')"
+                  />
+                  <p v-if="errors.studied_before" class="text-red-600 text-xs mt-1.5">{{ errors.studied_before }}</p>
+                </div>
+
+                <!-- Learning Reason -->
+                <div class="col-span-1">
+                  <label class="block text-sm font-medium text-gray-900 mb-2">
+                    Main reason for learning English <span class="text-red-500">*</span>
+                  </label>
+                  <USelect
+                    v-model="formData.learning_reason"
+                    :items="LEARNING_REASONS"
+                    size="sm"
+                    placeholder="Select"
+                    icon="i-lucide-target"
+                    class="w-full"
+                    :color="errors.learning_reason ? 'error' : 'primary'"
+                    @blur="validateSingleField('learning_reason')"
+                  />
+                  <p v-if="errors.learning_reason" class="text-red-600 text-xs mt-1.5">{{ errors.learning_reason }}</p>
+                </div>
+
+                <!-- Learning Mode -->
+                <div class="col-span-1">
+                  <label class="block text-sm font-medium text-gray-900 mb-2">
+                    Learning Mode <span class="text-red-500">*</span>
+                  </label>
+                  <USelect
+                    v-model="formData.learning_mode"
+                    :items="LEARNING_MODES"
+                    size="sm"
+                    placeholder="Select"
+                    icon="i-lucide-monitor-smartphone"
+                    class="w-full"
+                    :color="errors.learning_mode ? 'error' : 'primary'"
+                    @blur="validateSingleField('learning_mode')"
+                  />
+                  <p v-if="errors.learning_mode" class="text-red-600 text-xs mt-1.5">{{ errors.learning_mode }}</p>
+                </div>
+
+                <!-- Preferred Time -->
+                <div class="col-span-1">
+                  <label class="block text-sm font-medium text-gray-900 mb-2">
+                    Preferred Time <span class="text-red-500">*</span>
+                  </label>
+                  <USelect
+                    v-model="formData.preferred_time"
+                    :items="PREFERRED_TIMES"
+                    size="sm"
+                    placeholder="Select"
+                    icon="i-lucide-clock"
+                    class="w-full"
+                    :color="errors.preferred_time ? 'error' : 'primary'"
+                    @blur="validateSingleField('preferred_time')"
+                  />
+                  <p v-if="errors.preferred_time" class="text-red-600 text-xs mt-1.5">{{ errors.preferred_time }}</p>
+                </div>
+
+                <!-- Referral Source -->
+                <div class="md:col-span-2">
+                  <label class="block text-sm font-medium text-gray-900 mb-2">
+                    How did you hear about us? <span class="text-red-500">*</span>
+                  </label>
+                  <USelect
+                    v-model="formData.referral_source"
+                    :items="REFERRAL_SOURCES"
+                    size="sm"
+                    placeholder="Select"
+                    icon="i-lucide-megaphone"
+                    class="w-full"
+                    :color="errors.referral_source ? 'error' : 'primary'"
+                    @blur="validateSingleField('referral_source')"
+                  />
+                  <p v-if="errors.referral_source" class="text-red-600 text-xs mt-1.5">{{ errors.referral_source }}</p>
                 </div>
               </div>
             </div>
@@ -613,7 +875,51 @@ onUnmounted(() => {
 
     </div>
 
-    <!-- Modal Component -->
+    <!-- Terms confirmation -->
+    <Modal
+      :show="showTermsModal"
+      title="Rules & Terms"
+      type="info"
+      size="fullscreen"
+      persistent
+      hide-footer
+      responsive-drawer
+      drawer-height="100dvh"
+      @close="closeTermsModal"
+    >
+      <template #content>
+        <div class="flex h-[calc(100dvh-8rem)] min-h-0 flex-col">
+          <div class="min-h-0 flex-1">
+            <Suspense>
+              <template #default>
+                <PDFViewer :src="termsPdfUrl" />
+              </template>
+              <template #fallback>
+                <div class="flex h-full items-center justify-center">
+                  <LoadingSpinner size="lg" color="primary" :center="true" text="Loading terms..." />
+                </div>
+              </template>
+            </Suspense>
+          </div>
+
+          <div class="border-t border-gray-200 bg-white px-4 py-3 sm:flex sm:items-center sm:justify-between sm:gap-4 sm:px-6">
+            <UCheckbox
+              v-model="termsAccepted"
+              label="I have read and agree to the ITTR English Course Rules & Terms."
+              class="items-start text-sm text-slate-700"
+            />
+            <div class="mt-3 flex justify-end gap-2 sm:mt-0 sm:shrink-0">
+              <UButton color="neutral" variant="outline" @click="closeTermsModal">Cancel</UButton>
+              <UButton :disabled="!termsAccepted" color="primary" @click="confirmTermsAndCompleteProfile">
+                Agree & Complete Profile
+              </UButton>
+            </div>
+          </div>
+        </div>
+      </template>
+    </Modal>
+
+    <!-- Status modal -->
     <Modal
       :show="showModal"
       :type="modalType"

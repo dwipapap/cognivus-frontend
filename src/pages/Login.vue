@@ -9,7 +9,6 @@ import login from '../assets/login.png';
 
 import Modal from '../components/ui/Modal.vue';
 import BaseButton from '../components/ui/BaseButton.vue';
-import BaseCard from '../components/ui/BaseCard.vue';
 import OtpFlow from '../components/ui/OtpFlow.vue';
 
 // Modal state
@@ -151,21 +150,19 @@ const handleGoogleLogin = () => {
 
 <template>
   <div class="login-page-background relative isolate h-[100dvh] overflow-hidden lg:flex lg:h-[100dvh] lg:min-h-0 lg:items-center lg:justify-center lg:p-2 animate-fade-in">
-    <!-- Desktop / tablet layout (unchanged) -->
-    <div class="bg-gradient-to-br from-white/80 via-blue-50/70 to-indigo-100/60 backdrop-blur-md border border-white/20 shadow-2xl rounded-3xl max-w-6xl w-full hidden lg:grid lg:h-[calc(100dvh-1rem)] lg:grid-cols-5 lg:overflow-hidden opacity-0 animate-fade-in-scale"
+    <!-- Desktop / tablet layout -->
+    <div class="w-full max-w-6xl hidden overflow-hidden rounded-[2rem] border border-blue-100 bg-white shadow-2xl lg:grid lg:h-[calc(100dvh-1rem)] lg:grid-cols-5 opacity-0 animate-fade-in-scale"
          style="animation-delay: 0.1s; animation-fill-mode: forwards;">
-      <!-- Left side - Login Form (2 columns) -->
-      <div class="lg:col-span-2 lg:min-h-0 lg:overflow-hidden p-5 2xl:p-8 flex items-center justify-center">
-        <BaseCard size="sm" rounded="3xl" class="w-full max-w-md">
-          <template #title>
-            <div class="text-center">
-              <router-link to="/" class="inline-block">
-                <img :src="ittrLogo" alt="ITTR English Logo" class="w-32 2xl:w-40 mb-4 2xl:mb-6 mx-auto cursor-pointer hover:opacity-80 transition-opacity" />
-              </router-link>
-              <h2 class="text-xl 2xl:text-2xl font-bold text-gray-900 mb-2">Welcome!</h2>
-              <p class="text-gray-600 mb-4 2xl:mb-6 text-sm">Put your username and password to login</p>
-            </div>
-          </template>
+      <!-- Left side - Login sheet (2 columns) -->
+      <div class="flex items-center justify-center bg-white p-6 lg:col-span-2 lg:min-h-0 lg:overflow-hidden xl:p-8">
+        <div class="w-full max-w-[23rem]">
+          <div class="text-center">
+            <router-link to="/" class="inline-block">
+              <img :src="ittrLogo" alt="ITTR English Logo" class="mx-auto mb-5 w-32 cursor-pointer transition-opacity hover:opacity-80 2xl:mb-7 2xl:w-40" />
+            </router-link>
+            <h2 class="mb-2 text-xl font-bold tracking-tight text-gray-900 2xl:text-2xl">Welcome!</h2>
+            <p class="mb-5 text-sm text-gray-600 2xl:mb-7">Put your username and password to login</p>
+          </div>
 
           <!-- Student note -->
           <p class="text-xs text-gray-500 text-center mb-3">
@@ -284,7 +281,7 @@ const handleGoogleLogin = () => {
           </form>
 
           <!-- Footer text -->
-          <div class="mt-4 2xl:mt-6 text-center">
+          <div class="mt-5 text-center 2xl:mt-7">
             <p class="text-xs text-gray-500">
               Need more information? 
               <a href="#" class="text-blue-600 hover:underline">WhatsApp</a> or 
@@ -292,7 +289,7 @@ const handleGoogleLogin = () => {
             </p>
             <p class="text-xs text-gray-400 mt-2">2025 ITTR English Course. All rights reserved</p>
           </div>
-        </BaseCard>
+        </div>
       </div>
 
       <!-- Right side - Illustration (3 columns) -->

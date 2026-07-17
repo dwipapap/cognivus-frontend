@@ -3,6 +3,16 @@ import { ref, onMounted, nextTick } from 'vue';
 import { studentAPI } from '../../services/api';
 import { authStore } from '../../store/auth';
 import Modal from '../../components/ui/Modal.vue';
+import {
+  OCCUPATIONS,
+  PROGRAMS,
+  ENGLISH_LEVELS,
+  REFERRAL_SOURCES,
+  LEARNING_MODES,
+  PREFERRED_TIMES,
+  STUDIED_BEFORE,
+  LEARNING_REASONS
+} from '../../config/studentOptions';
 
 // Gender mapping helper
 const mapGenderToBackend = (frontendGender) => {
@@ -27,10 +37,19 @@ const formData = ref({
   phone: '',
   parentname: '',
   parentphone: '',
+  relationship: '',
   birthdate: '',
   birthplace: '',
   classid: null,
-  userid: null
+  userid: null,
+  occupation: '',
+  program_interest: '',
+  english_level: '',
+  referral_source: '',
+  learning_mode: '',
+  preferred_time: '',
+  studied_before: '',
+  learning_reason: ''
 });
 
 // Validation errors
@@ -63,11 +82,11 @@ const validateForm = () => {
   }
 
   if (!formData.value.parentname || formData.value.parentname.trim().length === 0) {
-    errors.value.parentname = 'Parent name is required';
+    errors.value.parentname = 'Emergency contact name is required';
   }
 
   if (formData.value.parentphone && !/^08\d{8,11}$/.test(formData.value.parentphone)) {
-    errors.value.parentphone = 'Parent phone must start with 08 and have 10-13 digits';
+    errors.value.parentphone = 'Emergency contact phone must start with 08 and have 10-13 digits';
   }
 
   return Object.keys(errors.value).length === 0;
@@ -249,21 +268,121 @@ onMounted(fetchProfile);
             <p v-if="errors.phone" class="mt-2 text-sm text-red-600">{{ errors.phone }}</p>
           </div>
 
-          <!-- Parent Name -->
+        </div>
+
+        <!-- Emergency Contact Section -->
+        <h2 class="text-2xl font-bold text-gray-900 mt-10 mb-6">Emergency Contact</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
+          <!-- Emergency Contact Name -->
           <div>
-            <label class="block text-base font-bold text-blue-600 mb-3">Parent Name</label>
-            <input v-model="formData.parentname" type="text" placeholder="Parent Name"
+            <label class="block text-base font-bold text-blue-600 mb-3">Full Name</label>
+            <input v-model="formData.parentname" type="text" placeholder="Emergency contact's full name"
               class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors"
               required />
             <p v-if="errors.parentname" class="mt-2 text-sm text-red-600">{{ errors.parentname }}</p>
           </div>
 
-          <!-- Parent Phone -->
+          <!-- Relationship -->
           <div>
-            <label class="block text-base font-bold text-blue-600 mb-3">Parent Phone</label>
+            <label class="block text-base font-bold text-blue-600 mb-3">Relationship</label>
+            <input v-model="formData.relationship" type="text" placeholder="e.g. Parent, Spouse, Sibling"
+              class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors" />
+          </div>
+
+          <!-- Emergency Contact Phone -->
+          <div>
+            <label class="block text-base font-bold text-blue-600 mb-3">Phone Number</label>
             <input v-model="formData.parentphone" type="tel" placeholder="08xxxxxxxxxx"
               class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors" />
             <p v-if="errors.parentphone" class="mt-2 text-sm text-red-600">{{ errors.parentphone }}</p>
+          </div>
+        </div>
+
+        <!-- Background Section -->
+        <h2 class="text-2xl font-bold text-gray-900 mt-10 mb-6">Background</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
+          <!-- Occupation -->
+          <div>
+            <label class="block text-base font-bold text-blue-600 mb-3">Occupation</label>
+            <select v-model="formData.occupation"
+              class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors">
+              <option value="" disabled>Select Occupation</option>
+              <option v-for="option in OCCUPATIONS" :key="option" :value="option">{{ option }}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Course Information Section -->
+        <h2 class="text-2xl font-bold text-gray-900 mt-10 mb-6">Course Information</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
+          <!-- Program -->
+          <div>
+            <label class="block text-base font-bold text-blue-600 mb-3">Program</label>
+            <select v-model="formData.program_interest"
+              class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors">
+              <option value="" disabled>Select Program</option>
+              <option v-for="option in PROGRAMS" :key="option" :value="option">{{ option }}</option>
+            </select>
+          </div>
+
+          <!-- English Level -->
+          <div>
+            <label class="block text-base font-bold text-blue-600 mb-3">Current English Level</label>
+            <select v-model="formData.english_level"
+              class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors">
+              <option value="" disabled>Select Level</option>
+              <option v-for="option in ENGLISH_LEVELS" :key="option" :value="option">{{ option }}</option>
+            </select>
+          </div>
+
+          <!-- Studied Before -->
+          <div>
+            <label class="block text-base font-bold text-blue-600 mb-3">Have you studied English before?</label>
+            <select v-model="formData.studied_before"
+              class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors">
+              <option value="" disabled>Select</option>
+              <option v-for="option in STUDIED_BEFORE" :key="option" :value="option">{{ option }}</option>
+            </select>
+          </div>
+
+          <!-- Learning Reason -->
+          <div>
+            <label class="block text-base font-bold text-blue-600 mb-3">Main reason for learning English</label>
+            <select v-model="formData.learning_reason"
+              class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors">
+              <option value="" disabled>Select Reason</option>
+              <option v-for="option in LEARNING_REASONS" :key="option" :value="option">{{ option }}</option>
+            </select>
+          </div>
+
+          <!-- Learning Mode -->
+          <div>
+            <label class="block text-base font-bold text-blue-600 mb-3">Learning Mode</label>
+            <select v-model="formData.learning_mode"
+              class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors">
+              <option value="" disabled>Select Mode</option>
+              <option v-for="option in LEARNING_MODES" :key="option" :value="option">{{ option }}</option>
+            </select>
+          </div>
+
+          <!-- Preferred Time -->
+          <div>
+            <label class="block text-base font-bold text-blue-600 mb-3">Preferred Time</label>
+            <select v-model="formData.preferred_time"
+              class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors">
+              <option value="" disabled>Select Time</option>
+              <option v-for="option in PREFERRED_TIMES" :key="option" :value="option">{{ option }}</option>
+            </select>
+          </div>
+
+          <!-- Referral Source -->
+          <div>
+            <label class="block text-base font-bold text-blue-600 mb-3">How did you hear about us?</label>
+            <select v-model="formData.referral_source"
+              class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors">
+              <option value="" disabled>Select Source</option>
+              <option v-for="option in REFERRAL_SOURCES" :key="option" :value="option">{{ option }}</option>
+            </select>
           </div>
         </div>
 
