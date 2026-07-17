@@ -5,7 +5,7 @@ import { useStudentProfile } from '../../composables/useStudentProfile';
 import { classAPI, levelAPI } from '../../services/api';
 import iconBoyImage from '../../assets/iconboy.webp';
 import iconGirlImage from '../../assets/icongirl.webp';
-import { formatDate } from '../../utils/formatters';
+import { formatDate, calculateAge } from '../../utils/formatters';
 import OtpFlow from '../../components/ui/OtpFlow.vue';
 import Modal from '../../components/ui/Modal.vue';
 
@@ -63,7 +63,7 @@ const avatarUrl = computed(() => {
   }
 
   // Use gender-based icon from student profile
-  const gender = studentProfile.value?.jenis_kelamin;
+  const gender = studentProfile.value?.gender;
   if (gender === 'L') {
     return iconBoyImage;
   } else if (gender === 'P') {
@@ -218,11 +218,19 @@ const fetchClassData = async () => {
                     </div>
                   </div>
 
-                  <!-- Place Date -->
+                  <!-- Birth Place -->
                   <div>
-                    <p class="text-base font-bold text-blue-600 mb-3">Place Date</p>
+                    <p class="text-base font-bold text-blue-600 mb-3">Birth Place</p>
                     <div class="bg-blue-200 rounded-full px-6 py-3">
                       <p class="text-base font-medium text-gray-900">{{ studentProfile.birthplace || '-' }}</p>
+                    </div>
+                  </div>
+
+                  <!-- Age -->
+                  <div>
+                    <p class="text-base font-bold text-blue-600 mb-3">Age</p>
+                    <div class="bg-blue-200 rounded-full px-6 py-3">
+                      <p class="text-base font-medium text-gray-900">{{ calculateAge(studentProfile.birthdate) ?? '-' }}</p>
                     </div>
                   </div>
 
@@ -242,19 +250,91 @@ const fetchClassData = async () => {
                     </div>
                   </div>
 
-                  <!-- Parent Name -->
+                  <!-- Emergency Contact Name -->
                   <div>
-                    <p class="text-base font-bold text-blue-600 mb-3">Parent Name</p>
+                    <p class="text-base font-bold text-blue-600 mb-3">Emergency Contact Name</p>
                     <div class="bg-blue-200 rounded-full px-6 py-3">
                       <p class="text-base font-medium text-gray-900">{{ studentProfile.parentname || '-' }}</p>
                     </div>
                   </div>
 
-                   <!-- Parent Phone -->
+                  <!-- Emergency Contact Phone -->
                   <div>
-                    <p class="text-base font-bold text-blue-600 mb-3">Parent Phone</p>
+                    <p class="text-base font-bold text-blue-600 mb-3">Emergency Contact Phone</p>
                     <div class="bg-blue-200 rounded-full px-6 py-3">
                       <p class="text-base font-medium text-gray-900">{{ studentProfile.parentphone || '-' }}</p>
+                    </div>
+                  </div>
+
+                  <!-- Relationship -->
+                  <div>
+                    <p class="text-base font-bold text-blue-600 mb-3">Relationship</p>
+                    <div class="bg-blue-200 rounded-full px-6 py-3">
+                      <p class="text-base font-medium text-gray-900">{{ studentProfile.relationship || '-' }}</p>
+                    </div>
+                  </div>
+
+                  <!-- Occupation -->
+                  <div>
+                    <p class="text-base font-bold text-blue-600 mb-3">Occupation</p>
+                    <div class="bg-blue-200 rounded-full px-6 py-3">
+                      <p class="text-base font-medium text-gray-900">{{ studentProfile.occupation || '-' }}</p>
+                    </div>
+                  </div>
+
+                  <!-- Program -->
+                  <div>
+                    <p class="text-base font-bold text-blue-600 mb-3">Program</p>
+                    <div class="bg-blue-200 rounded-full px-6 py-3">
+                      <p class="text-base font-medium text-gray-900">{{ studentProfile.program_interest || '-' }}</p>
+                    </div>
+                  </div>
+
+                  <!-- English Level -->
+                  <div>
+                    <p class="text-base font-bold text-blue-600 mb-3">Current English Level</p>
+                    <div class="bg-blue-200 rounded-full px-6 py-3">
+                      <p class="text-base font-medium text-gray-900">{{ studentProfile.english_level || '-' }}</p>
+                    </div>
+                  </div>
+
+                  <!-- Studied Before -->
+                  <div>
+                    <p class="text-base font-bold text-blue-600 mb-3">Studied English Before</p>
+                    <div class="bg-blue-200 rounded-full px-6 py-3">
+                      <p class="text-base font-medium text-gray-900">{{ studentProfile.studied_before || '-' }}</p>
+                    </div>
+                  </div>
+
+                  <!-- Learning Reason -->
+                  <div>
+                    <p class="text-base font-bold text-blue-600 mb-3">Reason for Learning</p>
+                    <div class="bg-blue-200 rounded-full px-6 py-3">
+                      <p class="text-base font-medium text-gray-900">{{ studentProfile.learning_reason || '-' }}</p>
+                    </div>
+                  </div>
+
+                  <!-- Learning Mode -->
+                  <div>
+                    <p class="text-base font-bold text-blue-600 mb-3">Learning Mode</p>
+                    <div class="bg-blue-200 rounded-full px-6 py-3">
+                      <p class="text-base font-medium text-gray-900">{{ studentProfile.learning_mode || '-' }}</p>
+                    </div>
+                  </div>
+
+                  <!-- Preferred Time -->
+                  <div>
+                    <p class="text-base font-bold text-blue-600 mb-3">Preferred Time</p>
+                    <div class="bg-blue-200 rounded-full px-6 py-3">
+                      <p class="text-base font-medium text-gray-900">{{ studentProfile.preferred_time || '-' }}</p>
+                    </div>
+                  </div>
+
+                  <!-- Referral Source -->
+                  <div>
+                    <p class="text-base font-bold text-blue-600 mb-3">How did you hear about us?</p>
+                    <div class="bg-blue-200 rounded-full px-6 py-3">
+                      <p class="text-base font-medium text-gray-900">{{ studentProfile.referral_source || '-' }}</p>
                     </div>
                   </div>
                 </div>

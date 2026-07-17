@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { studentAPI, gradeAPI, paymentAPI, classAPI, levelAPI } from '../../services/api';
 
 
-import { formatDate, getInitials } from '../../utils/formatters';
+import { formatDate, getInitials, calculateAge } from '../../utils/formatters';
 
 const route = useRoute();
 const router = useRouter();
@@ -276,6 +276,8 @@ onMounted(() => {
               <div class="flex justify-between gap-4"><dt class="text-muted">Username</dt><dd class="text-right text-default">{{ student.tbuser?.username || '-' }}</dd></div>
               <div class="flex justify-between gap-4"><dt class="text-muted">Gender</dt><dd class="text-right text-default">{{ getGenderDisplay(student.gender) }}</dd></div>
               <div class="flex justify-between gap-4"><dt class="text-muted">Birth</dt><dd class="text-right text-default">{{ student.birthplace || '-' }}, {{ formatDate(student.birthdate) }}</dd></div>
+              <div class="flex justify-between gap-4"><dt class="text-muted">Age</dt><dd class="text-right text-default">{{ calculateAge(student.birthdate) ?? '-' }}</dd></div>
+              <div class="flex justify-between gap-4"><dt class="text-muted">Occupation</dt><dd class="text-right text-default">{{ student.occupation || '-' }}</dd></div>
             </dl>
           </div>
 
@@ -289,11 +291,25 @@ onMounted(() => {
           </div>
 
           <div class="space-y-3">
-            <h3 class="text-sm font-medium text-default">Contact & guardian</h3>
+            <h3 class="text-sm font-medium text-default">Emergency contact</h3>
             <dl class="space-y-2 text-sm">
-              <div class="flex justify-between gap-4"><dt class="text-muted">Guardian</dt><dd class="text-right text-default">{{ student.parentname || '-' }}</dd></div>
-              <div class="flex justify-between gap-4"><dt class="text-muted">Guardian phone</dt><dd class="text-right text-default">{{ student.parentphone || '-' }}</dd></div>
+              <div class="flex justify-between gap-4"><dt class="text-muted">Full name</dt><dd class="text-right text-default">{{ student.parentname || '-' }}</dd></div>
+              <div class="flex justify-between gap-4"><dt class="text-muted">Relationship</dt><dd class="text-right text-default">{{ student.relationship || '-' }}</dd></div>
+              <div class="flex justify-between gap-4"><dt class="text-muted">Phone number</dt><dd class="text-right text-default">{{ student.parentphone || '-' }}</dd></div>
               <div><dt class="text-muted mb-1">Address</dt><dd class="text-default">{{ student.address || '-' }}</dd></div>
+            </dl>
+          </div>
+
+          <div class="space-y-3">
+            <h3 class="text-sm font-medium text-default">Course intake</h3>
+            <dl class="space-y-2 text-sm">
+              <div class="flex justify-between gap-4"><dt class="text-muted">Program</dt><dd class="text-right text-default">{{ student.program_interest || '-' }}</dd></div>
+              <div class="flex justify-between gap-4"><dt class="text-muted">English level</dt><dd class="text-right text-default">{{ student.english_level || '-' }}</dd></div>
+              <div class="flex justify-between gap-4"><dt class="text-muted">Studied before</dt><dd class="text-right text-default">{{ student.studied_before || '-' }}</dd></div>
+              <div class="flex justify-between gap-4"><dt class="text-muted">Learning reason</dt><dd class="text-right text-default">{{ student.learning_reason || '-' }}</dd></div>
+              <div class="flex justify-between gap-4"><dt class="text-muted">Learning mode</dt><dd class="text-right text-default">{{ student.learning_mode || '-' }}</dd></div>
+              <div class="flex justify-between gap-4"><dt class="text-muted">Preferred time</dt><dd class="text-right text-default">{{ student.preferred_time || '-' }}</dd></div>
+              <div class="flex justify-between gap-4"><dt class="text-muted">Referral source</dt><dd class="text-right text-default">{{ student.referral_source || '-' }}</dd></div>
             </dl>
           </div>
         </div>
