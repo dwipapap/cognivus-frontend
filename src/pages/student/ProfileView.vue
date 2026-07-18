@@ -8,6 +8,8 @@ import iconGirlImage from '../../assets/icongirl.webp';
 import { formatDate, calculateAge } from '../../utils/formatters';
 import OtpFlow from '../../components/ui/OtpFlow.vue';
 import Modal from '../../components/ui/Modal.vue';
+import ProfileSection from '../../components/ui/ProfileSection.vue';
+import ProfileField from '../../components/ui/ProfileField.vue';
 
 const { studentProfile, isLoading, errorMessage, fetchStudentProfile } = useStudentProfile();
 const classCode = ref('-');
@@ -191,154 +193,42 @@ const fetchClassData = async () => {
             </div>
 
             <!-- Right Details Card -->
-            <div class="lg:col-span-2">
-              <div class="bg-blue-50 rounded-xl p-10 shadow-lg h-full">
+            <div class="lg:col-span-2 flex flex-col gap-4 md:gap-6">
+              <!-- Personal Information -->
+              <ProfileSection title="Personal Information" :default-open="true">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
-                  <!-- Full Name -->
-                  <div>
-                    <p class="text-base font-bold text-blue-600 mb-3">Full Name</p>
-                    <div class="bg-blue-200 rounded-full px-6 py-3">
-                      <p class="text-base font-medium text-gray-900">{{ studentProfile.fullname || '-' }}</p>
-                    </div>
-                  </div>
-
-                  <!-- Birth Date -->
-                  <div>
-                    <p class="text-base font-bold text-blue-600 mb-3">Birth Date</p>
-                    <div class="bg-blue-200 rounded-full px-6 py-3">
-                      <p class="text-base font-medium text-gray-900">{{ formatDate(studentProfile.birthdate) }}</p>
-                    </div>
-                  </div>
-
-                  <!-- Address -->
-                  <div>
-                    <p class="text-base font-bold text-blue-600 mb-3">Address</p>
-                    <div class="bg-blue-200 rounded-full px-6 py-3">
-                      <p class="text-base font-medium text-gray-900 truncate" :title="studentProfile.address">{{ studentProfile.address || '-' }}</p>
-                    </div>
-                  </div>
-
-                  <!-- Birth Place -->
-                  <div>
-                    <p class="text-base font-bold text-blue-600 mb-3">Birth Place</p>
-                    <div class="bg-blue-200 rounded-full px-6 py-3">
-                      <p class="text-base font-medium text-gray-900">{{ studentProfile.birthplace || '-' }}</p>
-                    </div>
-                  </div>
-
-                  <!-- Age -->
-                  <div>
-                    <p class="text-base font-bold text-blue-600 mb-3">Age</p>
-                    <div class="bg-blue-200 rounded-full px-6 py-3">
-                      <p class="text-base font-medium text-gray-900">{{ calculateAge(studentProfile.birthdate) ?? '-' }}</p>
-                    </div>
-                  </div>
-
-                  <!-- Gender -->
-                  <div>
-                    <p class="text-base font-bold text-blue-600 mb-3">Gender</p>
-                    <div class="bg-blue-200 rounded-full px-6 py-3">
-                      <p class="text-base font-medium text-gray-900">{{ studentProfile.gender || '-' }}</p>
-                    </div>
-                  </div>
-
-                  <!-- Phone -->
-                  <div>
-                    <p class="text-base font-bold text-blue-600 mb-3">Phone</p>
-                    <div class="bg-blue-200 rounded-full px-6 py-3">
-                      <p class="text-base font-medium text-gray-900">{{ studentProfile.phone || '-' }}</p>
-                    </div>
-                  </div>
-
-                  <!-- Emergency Contact Name -->
-                  <div>
-                    <p class="text-base font-bold text-blue-600 mb-3">Emergency Contact Name</p>
-                    <div class="bg-blue-200 rounded-full px-6 py-3">
-                      <p class="text-base font-medium text-gray-900">{{ studentProfile.parentname || '-' }}</p>
-                    </div>
-                  </div>
-
-                  <!-- Emergency Contact Phone -->
-                  <div>
-                    <p class="text-base font-bold text-blue-600 mb-3">Emergency Contact Phone</p>
-                    <div class="bg-blue-200 rounded-full px-6 py-3">
-                      <p class="text-base font-medium text-gray-900">{{ studentProfile.parentphone || '-' }}</p>
-                    </div>
-                  </div>
-
-                  <!-- Relationship -->
-                  <div>
-                    <p class="text-base font-bold text-blue-600 mb-3">Relationship</p>
-                    <div class="bg-blue-200 rounded-full px-6 py-3">
-                      <p class="text-base font-medium text-gray-900">{{ studentProfile.relationship || '-' }}</p>
-                    </div>
-                  </div>
-
-                  <!-- Occupation -->
-                  <div>
-                    <p class="text-base font-bold text-blue-600 mb-3">Occupation</p>
-                    <div class="bg-blue-200 rounded-full px-6 py-3">
-                      <p class="text-base font-medium text-gray-900">{{ studentProfile.occupation || '-' }}</p>
-                    </div>
-                  </div>
-
-                  <!-- Program -->
-                  <div>
-                    <p class="text-base font-bold text-blue-600 mb-3">Program</p>
-                    <div class="bg-blue-200 rounded-full px-6 py-3">
-                      <p class="text-base font-medium text-gray-900">{{ studentProfile.program_interest || '-' }}</p>
-                    </div>
-                  </div>
-
-                  <!-- English Level -->
-                  <div>
-                    <p class="text-base font-bold text-blue-600 mb-3">Current English Level</p>
-                    <div class="bg-blue-200 rounded-full px-6 py-3">
-                      <p class="text-base font-medium text-gray-900">{{ studentProfile.english_level || '-' }}</p>
-                    </div>
-                  </div>
-
-                  <!-- Studied Before -->
-                  <div>
-                    <p class="text-base font-bold text-blue-600 mb-3">Studied English Before</p>
-                    <div class="bg-blue-200 rounded-full px-6 py-3">
-                      <p class="text-base font-medium text-gray-900">{{ studentProfile.studied_before || '-' }}</p>
-                    </div>
-                  </div>
-
-                  <!-- Learning Reason -->
-                  <div>
-                    <p class="text-base font-bold text-blue-600 mb-3">Reason for Learning</p>
-                    <div class="bg-blue-200 rounded-full px-6 py-3">
-                      <p class="text-base font-medium text-gray-900">{{ studentProfile.learning_reason || '-' }}</p>
-                    </div>
-                  </div>
-
-                  <!-- Learning Mode -->
-                  <div>
-                    <p class="text-base font-bold text-blue-600 mb-3">Learning Mode</p>
-                    <div class="bg-blue-200 rounded-full px-6 py-3">
-                      <p class="text-base font-medium text-gray-900">{{ studentProfile.learning_mode || '-' }}</p>
-                    </div>
-                  </div>
-
-                  <!-- Preferred Time -->
-                  <div>
-                    <p class="text-base font-bold text-blue-600 mb-3">Preferred Time</p>
-                    <div class="bg-blue-200 rounded-full px-6 py-3">
-                      <p class="text-base font-medium text-gray-900">{{ studentProfile.preferred_time || '-' }}</p>
-                    </div>
-                  </div>
-
-                  <!-- Referral Source -->
-                  <div>
-                    <p class="text-base font-bold text-blue-600 mb-3">How did you hear about us?</p>
-                    <div class="bg-blue-200 rounded-full px-6 py-3">
-                      <p class="text-base font-medium text-gray-900">{{ studentProfile.referral_source || '-' }}</p>
-                    </div>
-                  </div>
+                  <ProfileField label="Full Name" :value="studentProfile.fullname" />
+                  <ProfileField label="Birth Date" :value="formatDate(studentProfile.birthdate)" />
+                  <ProfileField label="Address" :value="studentProfile.address" :truncate="true" />
+                  <ProfileField label="Birth Place" :value="studentProfile.birthplace" />
+                  <ProfileField label="Age" :value="calculateAge(studentProfile.birthdate)" />
+                  <ProfileField label="Gender" :value="studentProfile.gender" />
+                  <ProfileField label="Phone" :value="studentProfile.phone" />
                 </div>
-              </div>
+              </ProfileSection>
+
+              <!-- Emergency Contact -->
+              <ProfileSection title="Emergency Contact">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
+                  <ProfileField label="Emergency Contact Name" :value="studentProfile.parentname" />
+                  <ProfileField label="Emergency Contact Phone" :value="studentProfile.parentphone" />
+                  <ProfileField label="Relationship" :value="studentProfile.relationship" />
+                  <ProfileField label="Occupation" :value="studentProfile.occupation" />
+                </div>
+              </ProfileSection>
+
+              <!-- Course & Background -->
+              <ProfileSection title="Course & Background">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
+                  <ProfileField label="Program" :value="studentProfile.program_interest" />
+                  <ProfileField label="Current English Level" :value="studentProfile.english_level" />
+                  <ProfileField label="Studied English Before" :value="studentProfile.studied_before" />
+                  <ProfileField label="Reason for Learning" :value="studentProfile.learning_reason" />
+                  <ProfileField label="Learning Mode" :value="studentProfile.learning_mode" />
+                  <ProfileField label="Preferred Time" :value="studentProfile.preferred_time" />
+                  <ProfileField label="How did you hear about us?" :value="studentProfile.referral_source" />
+                </div>
+              </ProfileSection>
             </div>
           </div>
 

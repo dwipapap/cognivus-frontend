@@ -3,6 +3,9 @@ import { ref, onMounted, nextTick } from 'vue';
 import { studentAPI } from '../../services/api';
 import { authStore } from '../../store/auth';
 import Modal from '../../components/ui/Modal.vue';
+import ProfileSection from '../../components/ui/ProfileSection.vue';
+import FormField from '../../components/ui/FormField.vue';
+import USelect from '@nuxt/ui/components/Select.vue';
 import {
   OCCUPATIONS,
   PROGRAMS,
@@ -60,6 +63,15 @@ const genderOptions = [
   { value: 'Male', label: 'Male' },
   { value: 'Female', label: 'Female' }
 ];
+
+// Shared Nuxt UI select styling to match the existing rounded-full blue input look
+const selectUi = {
+  base: 'w-full',
+  trigger: 'rounded-full bg-white ring-1 ring-blue-200 focus:ring-2 focus:ring-blue-200 px-6 py-3 text-base font-medium text-gray-900',
+  value: 'text-base font-medium text-gray-900',
+  placeholder: 'text-base font-medium text-gray-400',
+  trailingIcon: 'text-blue-600 size-5'
+};
 
 // Basic validation
 const validateForm = () => {
@@ -208,186 +220,156 @@ onMounted(fetchProfile);
     </div>
 
     <!-- Form Content -->
-    <div v-else class="bg-blue-50 rounded-3xl p-10 shadow-lg">
-      <form @submit.prevent="handleUpdateProfile">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
-          <!-- Full Name -->
-          <div>
-            <label class="block text-base font-bold text-blue-600 mb-3">Full Name</label>
-            <input v-model="formData.fullname" type="text" placeholder="Full Name"
-              class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors"
-              required />
-            <p v-if="errors.fullname" class="mt-2 text-sm text-red-600">{{ errors.fullname }}</p>
-          </div>
+    <div v-else class="bg-blue-50 rounded-3xl p-6 md:p-10 shadow-lg">
+      <form @submit.prevent="handleUpdateProfile" class="flex flex-col gap-4 md:gap-6">
+        <!-- Personal Information -->
+        <ProfileSection title="Personal Information" :default-open="true">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
+            <FormField label="Full Name" :error="errors.fullname">
+              <input v-model="formData.fullname" type="text" placeholder="Full Name"
+                class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors"
+                required />
+            </FormField>
 
-          <!-- Birth Date -->
-          <div>
-            <label class="block text-base font-bold text-blue-600 mb-3">Birth Date</label>
-            <input v-model="formData.birthdate" type="date"
-              class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors" />
-            <p v-if="errors.birthdate" class="mt-2 text-sm text-red-600">{{ errors.birthdate }}</p>
-          </div>
+            <FormField label="Birth Date" :error="errors.birthdate">
+              <input v-model="formData.birthdate" type="date"
+                class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors" />
+            </FormField>
 
-          <!-- Address -->
-          <div>
-            <label class="block text-base font-bold text-blue-600 mb-3">Address</label>
-            <input v-model="formData.address" type="text" placeholder="Complete address"
-              class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors"
-              required />
-            <p v-if="errors.address" class="mt-2 text-sm text-red-600">{{ errors.address }}</p>
-          </div>
+            <FormField label="Address" :error="errors.address">
+              <input v-model="formData.address" type="text" placeholder="Complete address"
+                class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors"
+                required />
+            </FormField>
 
-          <!-- Place Date (Birth Place) -->
-          <div>
-            <label class="block text-base font-bold text-blue-600 mb-3">Birth Place</label>
-            <input v-model="formData.birthplace" type="text" placeholder="Birth Place"
-              class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors" />
-            <p v-if="errors.birthplace" class="mt-2 text-sm text-red-600">{{ errors.birthplace }}</p>
-          </div>
+            <FormField label="Birth Place" :error="errors.birthplace">
+              <input v-model="formData.birthplace" type="text" placeholder="Birth Place"
+                class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors" />
+            </FormField>
 
-          <!-- Gender -->
-          <div>
-            <label class="block text-base font-bold text-blue-600 mb-3">Gender</label>
-            <select v-model="formData.gender"
-              class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors"
-              required>
-              <option value="" disabled>Select Gender</option>
-              <option v-for="option in genderOptions" :key="option.value" :value="option.value">
-                {{ option.label }}
-              </option>
-            </select>
-            <p v-if="errors.gender" class="mt-2 text-sm text-red-600">{{ errors.gender }}</p>
-          </div>
+            <FormField label="Gender" :error="errors.gender">
+              <USelect
+                v-model="formData.gender"
+                :items="genderOptions"
+                :ui="selectUi"
+                placeholder="Select Gender"
+                :color="errors.gender ? 'error' : 'primary'"
+              />
+            </FormField>
 
-          <!-- Phone -->
-          <div>
-            <label class="block text-base font-bold text-blue-600 mb-3">Phone</label>
-            <input v-model="formData.phone" type="tel" placeholder="08xxxxxxxxxx"
-              class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors"
-              required />
-            <p v-if="errors.phone" class="mt-2 text-sm text-red-600">{{ errors.phone }}</p>
+            <FormField label="Phone" :error="errors.phone">
+              <input v-model="formData.phone" type="tel" placeholder="08xxxxxxxxxx"
+                class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors"
+                required />
+            </FormField>
           </div>
+        </ProfileSection>
 
-        </div>
+        <!-- Emergency Contact -->
+        <ProfileSection title="Emergency Contact">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
+            <FormField label="Full Name" :error="errors.parentname">
+              <input v-model="formData.parentname" type="text" placeholder="Emergency contact's full name"
+                class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors"
+                required />
+            </FormField>
 
-        <!-- Emergency Contact Section -->
-        <h2 class="text-2xl font-bold text-gray-900 mt-10 mb-6">Emergency Contact</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
-          <!-- Emergency Contact Name -->
-          <div>
-            <label class="block text-base font-bold text-blue-600 mb-3">Full Name</label>
-            <input v-model="formData.parentname" type="text" placeholder="Emergency contact's full name"
-              class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors"
-              required />
-            <p v-if="errors.parentname" class="mt-2 text-sm text-red-600">{{ errors.parentname }}</p>
+            <FormField label="Relationship">
+              <input v-model="formData.relationship" type="text" placeholder="e.g. Parent, Spouse, Sibling"
+                class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors" />
+            </FormField>
+
+            <FormField label="Phone Number" :error="errors.parentphone">
+              <input v-model="formData.parentphone" type="tel" placeholder="08xxxxxxxxxx"
+                class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors" />
+            </FormField>
           </div>
+        </ProfileSection>
 
-          <!-- Relationship -->
-          <div>
-            <label class="block text-base font-bold text-blue-600 mb-3">Relationship</label>
-            <input v-model="formData.relationship" type="text" placeholder="e.g. Parent, Spouse, Sibling"
-              class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors" />
+        <!-- Background -->
+        <ProfileSection title="Background">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
+            <FormField label="Occupation">
+              <USelect
+                v-model="formData.occupation"
+                :items="OCCUPATIONS"
+                :ui="selectUi"
+                placeholder="Select Occupation"
+              />
+            </FormField>
           </div>
+        </ProfileSection>
 
-          <!-- Emergency Contact Phone -->
-          <div>
-            <label class="block text-base font-bold text-blue-600 mb-3">Phone Number</label>
-            <input v-model="formData.parentphone" type="tel" placeholder="08xxxxxxxxxx"
-              class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors" />
-            <p v-if="errors.parentphone" class="mt-2 text-sm text-red-600">{{ errors.parentphone }}</p>
-          </div>
-        </div>
+        <!-- Course Information -->
+        <ProfileSection title="Course Information">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
+            <FormField label="Program">
+              <USelect
+                v-model="formData.program_interest"
+                :items="PROGRAMS"
+                :ui="selectUi"
+                placeholder="Select Program"
+              />
+            </FormField>
 
-        <!-- Background Section -->
-        <h2 class="text-2xl font-bold text-gray-900 mt-10 mb-6">Background</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
-          <!-- Occupation -->
-          <div>
-            <label class="block text-base font-bold text-blue-600 mb-3">Occupation</label>
-            <select v-model="formData.occupation"
-              class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors">
-              <option value="" disabled>Select Occupation</option>
-              <option v-for="option in OCCUPATIONS" :key="option" :value="option">{{ option }}</option>
-            </select>
-          </div>
-        </div>
+            <FormField label="Current English Level">
+              <USelect
+                v-model="formData.english_level"
+                :items="ENGLISH_LEVELS"
+                :ui="selectUi"
+                placeholder="Select Level"
+              />
+            </FormField>
 
-        <!-- Course Information Section -->
-        <h2 class="text-2xl font-bold text-gray-900 mt-10 mb-6">Course Information</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
-          <!-- Program -->
-          <div>
-            <label class="block text-base font-bold text-blue-600 mb-3">Program</label>
-            <select v-model="formData.program_interest"
-              class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors">
-              <option value="" disabled>Select Program</option>
-              <option v-for="option in PROGRAMS" :key="option" :value="option">{{ option }}</option>
-            </select>
-          </div>
+            <FormField label="Have you studied English before?">
+              <USelect
+                v-model="formData.studied_before"
+                :items="STUDIED_BEFORE"
+                :ui="selectUi"
+                placeholder="Select"
+              />
+            </FormField>
 
-          <!-- English Level -->
-          <div>
-            <label class="block text-base font-bold text-blue-600 mb-3">Current English Level</label>
-            <select v-model="formData.english_level"
-              class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors">
-              <option value="" disabled>Select Level</option>
-              <option v-for="option in ENGLISH_LEVELS" :key="option" :value="option">{{ option }}</option>
-            </select>
-          </div>
+            <FormField label="Main reason for learning English">
+              <USelect
+                v-model="formData.learning_reason"
+                :items="LEARNING_REASONS"
+                :ui="selectUi"
+                placeholder="Select Reason"
+              />
+            </FormField>
 
-          <!-- Studied Before -->
-          <div>
-            <label class="block text-base font-bold text-blue-600 mb-3">Have you studied English before?</label>
-            <select v-model="formData.studied_before"
-              class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors">
-              <option value="" disabled>Select</option>
-              <option v-for="option in STUDIED_BEFORE" :key="option" :value="option">{{ option }}</option>
-            </select>
-          </div>
+            <FormField label="Learning Mode">
+              <USelect
+                v-model="formData.learning_mode"
+                :items="LEARNING_MODES"
+                :ui="selectUi"
+                placeholder="Select Mode"
+              />
+            </FormField>
 
-          <!-- Learning Reason -->
-          <div>
-            <label class="block text-base font-bold text-blue-600 mb-3">Main reason for learning English</label>
-            <select v-model="formData.learning_reason"
-              class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors">
-              <option value="" disabled>Select Reason</option>
-              <option v-for="option in LEARNING_REASONS" :key="option" :value="option">{{ option }}</option>
-            </select>
-          </div>
+            <FormField label="Preferred Time">
+              <USelect
+                v-model="formData.preferred_time"
+                :items="PREFERRED_TIMES"
+                :ui="selectUi"
+                placeholder="Select Time"
+              />
+            </FormField>
 
-          <!-- Learning Mode -->
-          <div>
-            <label class="block text-base font-bold text-blue-600 mb-3">Learning Mode</label>
-            <select v-model="formData.learning_mode"
-              class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors">
-              <option value="" disabled>Select Mode</option>
-              <option v-for="option in LEARNING_MODES" :key="option" :value="option">{{ option }}</option>
-            </select>
+            <FormField label="How did you hear about us?">
+              <USelect
+                v-model="formData.referral_source"
+                :items="REFERRAL_SOURCES"
+                :ui="selectUi"
+                placeholder="Select Source"
+              />
+            </FormField>
           </div>
-
-          <!-- Preferred Time -->
-          <div>
-            <label class="block text-base font-bold text-blue-600 mb-3">Preferred Time</label>
-            <select v-model="formData.preferred_time"
-              class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors">
-              <option value="" disabled>Select Time</option>
-              <option v-for="option in PREFERRED_TIMES" :key="option" :value="option">{{ option }}</option>
-            </select>
-          </div>
-
-          <!-- Referral Source -->
-          <div>
-            <label class="block text-base font-bold text-blue-600 mb-3">How did you hear about us?</label>
-            <select v-model="formData.referral_source"
-              class="w-full bg-white rounded-full px-6 py-3 text-base font-medium text-gray-900 border border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 focus:outline-none transition-colors">
-              <option value="" disabled>Select Source</option>
-              <option v-for="option in REFERRAL_SOURCES" :key="option" :value="option">{{ option }}</option>
-            </select>
-          </div>
-        </div>
+        </ProfileSection>
 
         <!-- Action Buttons -->
-        <div class="flex justify-end gap-4 mt-10">
+        <div class="flex justify-end gap-4">
           <button type="button" @click="reset"
             class="px-8 py-3 bg-white text-gray-700 font-semibold text-base rounded-full hover:bg-gray-100 border border-gray-300 transition-colors"
             :disabled="isSubmitting">
