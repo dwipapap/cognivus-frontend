@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted, defineAsyncComponent } from 'vue';
+import { ref, computed, onMounted, nextTick, defineAsyncComponent } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useClassDetails } from '../../composables/useClassDetails';
 import { courseAPI } from '../../services/api';
@@ -53,13 +53,14 @@ const getFileUrl = (file) => {
   return file.url || file.path;
 };
 
-const openMaterial = (url, title) => {
+const openMaterial = async (url, title) => {
   pdfModalTrigger.value = document.activeElement instanceof HTMLElement
     ? document.activeElement
     : null;
   pdfModalTrigger.value?.blur();
   selectedPdfUrl.value = url;
   selectedPdfTitle.value = title;
+  await nextTick();
   showPdfModal.value = true;
 };
 
