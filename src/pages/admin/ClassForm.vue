@@ -47,7 +47,7 @@ const daysOfWeek = [
   { value: 'Sunday', label: 'Sunday' }
 ];
 
-const { formData, errors, isSubmitting, submit, getFieldProps, reset } = useForm(
+const { formData, errors, isSubmitting, hasErrors, submit, getFieldProps, reset } = useForm(
   {},
   {
     class_code: ['required'],
@@ -128,6 +128,12 @@ const handleStudentSave = async (studentData) => {
 
     <div v-show="activeTab === 'details'">
       <form @submit.prevent="handleSave" class="space-y-6">
+        <div v-if="hasErrors" class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+          <p class="font-medium mb-1">Please fix the following errors:</p>
+          <ul class="list-disc list-inside space-y-1">
+            <li v-for="(err, field) in errors" :key="field" class="text-red-700">{{ field }}: {{ err }}</li>
+          </ul>
+        </div>
         <!-- Two Column Grid Layout -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
