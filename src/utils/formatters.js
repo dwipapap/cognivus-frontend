@@ -53,3 +53,13 @@ export const getInitials = (name) => {
     .toUpperCase()
     .slice(0, 2);
 };
+
+export const getStatusBadge = (status) => {
+  const classes = {
+    success: 'bg-green-100 text-green-800 border-green-200',
+    pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+    error: 'bg-red-100 text-red-800 border-red-200',
+    failed: 'bg-red-100 text-red-800 border-red-200'
+  };
+  return classes[status] || 'bg-muted text-default border-default';
+};
