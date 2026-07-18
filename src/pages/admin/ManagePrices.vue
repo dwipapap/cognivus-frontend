@@ -234,8 +234,18 @@ onMounted(() => {
 
     <UTabs v-model="activeTab" :items="tabItems">
       <template #classes>
-        <div v-if="isLoading" class="flex justify-center py-16">
-          <UIcon name="i-lucide-loader-circle" class="w-8 h-8 animate-spin text-muted" />
+        <div v-if="isLoading" class="bg-default rounded-lg border border-default shadow-sm overflow-hidden">
+          <div class="divide-y divide-muted">
+            <div v-for="i in 5" :key="i" class="flex items-center gap-4 px-6 py-4">
+              <USkeleton class="h-4 w-8" />
+              <USkeleton class="h-4 w-20" />
+              <USkeleton class="h-4 w-32" />
+              <USkeleton class="h-4 w-40" />
+              <USkeleton class="h-4 w-24" />
+              <USkeleton class="h-4 w-24" />
+              <USkeleton class="h-8 w-24" />
+            </div>
+          </div>
         </div>
 
         <div v-else class="bg-default rounded-lg shadow-sm border border-default overflow-hidden">
@@ -308,8 +318,16 @@ onMounted(() => {
       </template>
 
       <template #ancillary>
-        <div v-if="isAncillaryLoading" class="flex justify-center py-16">
-          <UIcon name="i-lucide-loader-circle" class="w-8 h-8 animate-spin text-muted" />
+        <div v-if="isAncillaryLoading" class="bg-default rounded-lg border border-default shadow-sm overflow-hidden">
+          <div class="divide-y divide-muted">
+            <div v-for="i in 4" :key="i" class="flex items-center gap-4 px-6 py-4">
+              <USkeleton class="h-4 w-8" />
+              <USkeleton class="h-4 w-32" />
+              <USkeleton class="h-4 flex-1" />
+              <USkeleton class="h-4 w-20" />
+              <USkeleton class="h-8 w-24" />
+            </div>
+          </div>
         </div>
 
       <div v-else class="bg-default rounded-lg shadow-sm border border-default overflow-hidden">

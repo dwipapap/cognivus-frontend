@@ -301,10 +301,18 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- Students Table -->
-    <div v-if="isLoading" class="bg-default rounded-lg border border-default shadow-sm p-12 text-center">
-      <div class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-toned border-r-transparent"></div>
-      <p class="text-toned mt-4">Loading students...</p>
+    <!-- Students Table skeleton -->
+    <div v-if="isLoading" class="bg-default rounded-lg border border-default shadow-sm overflow-hidden">
+      <div class="divide-y divide-muted">
+        <div v-for="i in 6" :key="i" class="flex items-center gap-4 px-4 py-4">
+          <USkeleton class="h-4 w-8" />
+          <USkeleton class="h-4 flex-1" />
+          <USkeleton class="h-4 w-48" />
+          <USkeleton class="h-4 w-24" />
+          <USkeleton class="h-4 w-24" />
+          <USkeleton class="h-8 w-32" />
+        </div>
+      </div>
     </div>
 
     <div v-else class="bg-default rounded-lg border border-default shadow-sm overflow-hidden">

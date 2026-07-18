@@ -8,8 +8,16 @@
     Back to Student
   </button>
 
-  <div v-if="isLoading" class="flex justify-center py-16">
-    <UIcon name="i-lucide-loader-circle" class="w-8 h-8 animate-spin text-muted" />
+  <div v-if="isLoading" class="space-y-6">
+    <USkeleton class="h-6 w-48" />
+    <USkeleton class="h-4 w-72" />
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div v-for="i in 6" :key="i" class="space-y-2">
+        <USkeleton class="h-3 w-20" />
+        <USkeleton class="h-10 w-full" />
+      </div>
+    </div>
+    <USkeleton class="h-10 w-32" />
   </div>
 
   <!-- Error -->
@@ -30,6 +38,12 @@
 
     <!-- Grade Form -->
     <form @submit.prevent="handleSave" class="space-y-6">
+      <div v-if="hasErrors" class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+        <p class="font-medium mb-1">Please fix the following errors:</p>
+        <ul class="list-disc list-inside space-y-1">
+          <li v-for="(err, field) in errors" :key="field" class="text-red-700">{{ field }}: {{ err }}</li>
+        </ul>
+      </div>
       <!-- Test Type -->
       <UFormField label="Test Type" required>
         <USelect v-bind="getFieldProps('test_type')" :items="['Final Test', 'Midterm Exam', 'Final Exam', 'Completion']" placeholder="Select test type" />
@@ -140,7 +154,7 @@ const isDeleting = ref(false);
 const errorMessage = ref('');
 const successMessage = ref('');
 const submitError = ref('');
-const { formData, errors, isSubmitting, submit, getFieldProps } = useForm(
+const { formData, errors, isSubmitting, hasErrors, submit, getFieldProps } = useForm(
   {
     test_type: '',
     listening_score: null,
