@@ -59,7 +59,7 @@ const getIconColor = (color) => {
             <p class="text-sm text-muted">
                 <span class="font-medium text-default">Tip:</span>
                 All links open in a new tab. Edit the links in <code
-                    class="bg-accented px-1.5 py-0.5 rounded text-xs">ExternalLinks.vue</code> to customize.
+                    class="bg-accented px-1.5 py-0.5 rounded text-xs">config/external-links.js</code> to customize.
             </p>
         </div>
   </div>
