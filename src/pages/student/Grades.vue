@@ -212,31 +212,31 @@ onMounted(() => {
                     </div>
                     <div class="px-3 pb-3 border-r border-b border-gray-100">
                       <div class="flex items-center gap-2">
-                        <span class="w-7 h-7 rounded-full bg-cyan-50 text-cyan-600 flex items-center justify-center shrink-0"><IconChat class="w-3.5 h-3.5" /></span>
+                        <span class="w-7 h-7 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0"><IconChat class="w-3.5 h-3.5" /></span>
                         <div><p class="text-[10px] font-medium text-gray-500">Speaking</p><p class="text-base leading-none font-semibold text-gray-900">{{ grade.speaking_score ?? '-' }}</p></div>
                       </div>
                     </div>
                     <div class="pl-3 pb-3 border-b border-gray-100">
                       <div class="flex items-center gap-2">
-                        <span class="w-7 h-7 rounded-full bg-violet-50 text-violet-600 flex items-center justify-center shrink-0"><IconBook class="w-3.5 h-3.5" /></span>
+                        <span class="w-7 h-7 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0"><IconBook class="w-3.5 h-3.5" /></span>
                         <div><p class="text-[10px] font-medium text-gray-500">Reading</p><p class="text-base leading-none font-semibold text-gray-900">{{ grade.reading_score ?? '-' }}</p></div>
                       </div>
                     </div>
                     <div class="pt-3 pr-3 border-r border-gray-100">
                       <div class="flex items-center gap-2">
-                        <span class="w-7 h-7 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center shrink-0"><IconDocument class="w-3.5 h-3.5" /></span>
+                        <span class="w-7 h-7 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0"><IconDocument class="w-3.5 h-3.5" /></span>
                         <div><p class="text-[10px] font-medium text-gray-500">Writing</p><p class="text-base leading-none font-semibold text-gray-900">{{ grade.writing_score ?? '-' }}</p></div>
                       </div>
                     </div>
                     <div class="pt-3 px-3 border-r border-gray-100">
                       <div class="flex items-center gap-2">
-                        <span class="w-7 h-7 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0"><IconBookCheck class="w-3.5 h-3.5" /></span>
+                        <span class="w-7 h-7 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0"><IconBookCheck class="w-3.5 h-3.5" /></span>
                         <div><p class="text-[10px] font-medium text-gray-500">Grammar</p><p class="text-base leading-none font-semibold text-gray-900">{{ grade.grammar_score ?? '-' }}</p></div>
                       </div>
                     </div>
                     <div class="pt-3 pl-3">
                       <div class="flex items-center gap-2">
-                        <span class="w-7 h-7 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center shrink-0"><IconBookOpen class="w-3.5 h-3.5" /></span>
+                        <span class="w-7 h-7 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0"><IconBookOpen class="w-3.5 h-3.5" /></span>
                         <div><p class="text-[10px] font-medium text-gray-500">Vocabulary</p><p class="text-base leading-none font-semibold text-gray-900">{{ grade.vocabulary_score ?? '-' }}</p></div>
                       </div>
                     </div>
@@ -252,11 +252,11 @@ onMounted(() => {
                 <tr>
                   <th class="px-4 py-5 text-left text-sm font-semibold text-gray-700"><span class="inline-flex items-center gap-2 whitespace-nowrap"><IconDocument class="w-5 h-5 text-blue-600" />Test</span></th>
                   <th class="px-3 py-5 text-center text-sm font-semibold text-gray-700"><span class="inline-flex items-center gap-2 whitespace-nowrap"><IconHeadphone class="w-5 h-5 text-blue-600" />Listening</span></th>
-                  <th class="px-3 py-5 text-center text-sm font-semibold text-gray-700"><span class="inline-flex items-center gap-2 whitespace-nowrap"><IconChat class="w-5 h-5 text-cyan-600" />Speaking</span></th>
-                  <th class="px-3 py-5 text-center text-sm font-semibold text-gray-700"><span class="inline-flex items-center gap-2 whitespace-nowrap"><IconBook class="w-5 h-5 text-violet-600" />Reading</span></th>
-                  <th class="px-3 py-5 text-center text-sm font-semibold text-gray-700"><span class="inline-flex items-center gap-2 whitespace-nowrap"><IconDocument class="w-5 h-5 text-emerald-600" />Writing</span></th>
-                  <th class="px-3 py-5 text-center text-sm font-semibold text-gray-700"><span class="inline-flex items-center gap-2 whitespace-nowrap"><IconBookCheck class="w-5 h-5 text-emerald-600" />Grammar</span></th>
-                  <th class="px-3 py-5 text-center text-sm font-semibold text-gray-700"><span class="inline-flex items-center gap-2 whitespace-nowrap"><IconBookOpen class="w-5 h-5 text-rose-600" />Vocabulary</span></th>
+                  <th class="px-3 py-5 text-center text-sm font-semibold text-gray-700"><span class="inline-flex items-center gap-2 whitespace-nowrap"><IconChat class="w-5 h-5 text-blue-600" />Speaking</span></th>
+                  <th class="px-3 py-5 text-center text-sm font-semibold text-gray-700"><span class="inline-flex items-center gap-2 whitespace-nowrap"><IconBook class="w-5 h-5 text-blue-600" />Reading</span></th>
+                  <th class="px-3 py-5 text-center text-sm font-semibold text-gray-700"><span class="inline-flex items-center gap-2 whitespace-nowrap"><IconDocument class="w-5 h-5 text-blue-600" />Writing</span></th>
+                  <th class="px-3 py-5 text-center text-sm font-semibold text-gray-700"><span class="inline-flex items-center gap-2 whitespace-nowrap"><IconBookCheck class="w-5 h-5 text-blue-600" />Grammar</span></th>
+                  <th class="px-3 py-5 text-center text-sm font-semibold text-gray-700"><span class="inline-flex items-center gap-2 whitespace-nowrap"><IconBookOpen class="w-5 h-5 text-blue-600" />Vocabulary</span></th>
                   <th class="px-3 py-5 text-center text-sm font-semibold text-gray-700"><span class="inline-flex items-center gap-2 whitespace-nowrap"><IconAward class="w-5 h-5 text-amber-500" />Final Score</span></th>
                   <th class="px-4 py-5 text-left text-sm font-semibold text-gray-700"><span class="inline-flex items-center gap-2 whitespace-nowrap"><IconCalendar class="w-5 h-5 text-gray-500" />Date Taken</span></th>
                 </tr>
@@ -269,16 +269,15 @@ onMounted(() => {
                       <div><span class="font-semibold text-gray-900 block">{{ grade.test_type || 'Standard Test' }}</span><span class="text-xs text-gray-500 mt-1 block">{{ formatDate(grade.date_taken) }}</span></div>
                     </div>
                   </td>
-                  <td class="px-3 py-5 text-center"><p class="text-base font-semibold text-gray-900">{{ grade.listening_score ?? '-' }}</p><span class="inline-flex mt-1 px-2 py-0.5 rounded-full text-[10px] font-medium" :class="getScoreStatus(grade.listening_score).class">{{ getScoreStatus(grade.listening_score).label }}</span></td>
-                  <td class="px-3 py-5 text-center"><p class="text-base font-semibold text-gray-900">{{ grade.speaking_score ?? '-' }}</p><span class="inline-flex mt-1 px-2 py-0.5 rounded-full text-[10px] font-medium" :class="getScoreStatus(grade.speaking_score).class">{{ getScoreStatus(grade.speaking_score).label }}</span></td>
-                  <td class="px-3 py-5 text-center"><p class="text-base font-semibold text-gray-900">{{ grade.reading_score ?? '-' }}</p><span class="inline-flex mt-1 px-2 py-0.5 rounded-full text-[10px] font-medium" :class="getScoreStatus(grade.reading_score).class">{{ getScoreStatus(grade.reading_score).label }}</span></td>
-                  <td class="px-3 py-5 text-center"><p class="text-base font-semibold text-gray-900">{{ grade.writing_score ?? '-' }}</p><span class="inline-flex mt-1 px-2 py-0.5 rounded-full text-[10px] font-medium" :class="getScoreStatus(grade.writing_score).class">{{ getScoreStatus(grade.writing_score).label }}</span></td>
-                  <td class="px-3 py-5 text-center"><p class="text-base font-semibold text-gray-900">{{ grade.grammar_score ?? '-' }}</p><span class="inline-flex mt-1 px-2 py-0.5 rounded-full text-[10px] font-medium" :class="getScoreStatus(grade.grammar_score).class">{{ getScoreStatus(grade.grammar_score).label }}</span></td>
-                  <td class="px-3 py-5 text-center"><p class="text-base font-semibold text-gray-900">{{ grade.vocabulary_score ?? '-' }}</p><span class="inline-flex mt-1 px-2 py-0.5 rounded-full text-[10px] font-medium" :class="getScoreStatus(grade.vocabulary_score).class">{{ getScoreStatus(grade.vocabulary_score).label }}</span></td>
+                  <td class="px-3 py-5 text-center"><p class="text-base font-semibold text-gray-900">{{ grade.listening_score ?? '-' }}</p></td>
+                  <td class="px-3 py-5 text-center"><p class="text-base font-semibold text-gray-900">{{ grade.speaking_score ?? '-' }}</p></td>
+                  <td class="px-3 py-5 text-center"><p class="text-base font-semibold text-gray-900">{{ grade.reading_score ?? '-' }}</p></td>
+                  <td class="px-3 py-5 text-center"><p class="text-base font-semibold text-gray-900">{{ grade.writing_score ?? '-' }}</p></td>
+                  <td class="px-3 py-5 text-center"><p class="text-base font-semibold text-gray-900">{{ grade.grammar_score ?? '-' }}</p></td>
+                  <td class="px-3 py-5 text-center"><p class="text-base font-semibold text-gray-900">{{ grade.vocabulary_score ?? '-' }}</p></td>
                   <td class="px-3 py-5 text-center align-middle">
                     <div class="flex flex-col items-center">
                     <span class="inline-flex items-center justify-center w-12 h-12 rounded-full text-lg font-bold text-white ring-2" :class="getFinalScoreClass(grade)">{{ getAverageScore(grade) }}</span>
-                    <span class="inline-flex mt-2 px-2 py-0.5 rounded-full text-[10px] font-medium" :class="getScoreStatus(getAverageScore(grade)).class">{{ getScoreStatus(getAverageScore(grade)).label }}</span>
                     </div>
                   </td>
                   <td class="px-4 py-5 text-sm text-gray-500">
