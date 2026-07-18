@@ -28,7 +28,7 @@ const props = defineProps({
 
 const emit = defineEmits(['save']);
 
-const { formData, errors, isSubmitting, submit, getFieldProps, reset } = useForm(
+const { formData, errors, isSubmitting, hasErrors, submit, getFieldProps, reset } = useForm(
   {},
   {
     levelid: [],
@@ -81,6 +81,12 @@ const handleSave = async () => {
 
 <template>
   <form id="price-form" @submit.prevent="handleSave" class="space-y-6">
+    <div v-if="hasErrors" class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+      <p class="font-medium mb-1">Please fix the following errors:</p>
+      <ul class="list-disc list-inside space-y-1">
+        <li v-for="(err, field) in errors" :key="field" class="text-red-700">{{ field }}: {{ err }}</li>
+      </ul>
+    </div>
     <div class="space-y-4">
       <h3 class="text-sm font-semibold text-default flex items-center gap-2">
         <UIcon name="i-lucide-tag" class="w-4 h-4 text-toned" />

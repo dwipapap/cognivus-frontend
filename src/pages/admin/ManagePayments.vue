@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
 import { paymentAPI, studentAPI } from '../../services/api';
-import { formatCurrency, formatDate } from '../../utils/formatters';
+import { formatCurrency, formatDate, getStatusBadge } from '../../utils/formatters';
 import { createCsvContent } from '../../utils/csv';
 import Modal from '../../components/ui/Modal.vue';
 
@@ -30,17 +30,6 @@ const getStudentName = (studentid) => {
   if (!studentid) return 'Unknown';
   const student = students.value.find(s => s.studentid === studentid);
   return student?.fullname || 'Unknown';
-};
-
-/** Get status badge classes */
-const getStatusBadge = (status) => {
-  const classes = {
-    success: 'bg-green-100 text-green-800 border-green-200',
-    pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-    error: 'bg-red-100 text-red-800 border-red-200',
-    failed: 'bg-red-100 text-red-800 border-red-200'
-  };
-  return classes[status] || 'bg-muted text-default border-default';
 };
 
 const hasActiveFilters = computed(() => searchQuery.value || statusFilter.value || typeFilter.value);
@@ -281,10 +270,29 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- Loading State -->
-    <div v-if="isLoading" class="bg-default rounded-lg border border-default shadow-sm p-12 text-center">
-      <div class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-toned border-r-transparent"></div>
-      <p class="text-toned mt-4">Loading payments...</p>
+    <!-- Loading skeleton -->
+    <div v-if="isLoading" class="space-y-6">
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
+        <div v-for="i in 5" :key="i" class="bg-default rounded-lg border border-default p-4 shadow-sm space-y-2">
+          <USkeleton class="h-3 w-24" />
+          <USkeleton class="h-8 w-20" />
+        </div>
+      </div>
+      <div class="bg-default rounded-lg border border-default shadow-sm overflow-hidden">
+        <div class="divide-y divide-muted">
+          <div v-for="i in 5" :key="i" class="flex items-center gap-4 px-4 py-4">
+            <USkeleton class="h-4 w-12" />
+            <USkeleton class="h-4 w-32" />
+            <USkeleton class="h-4 w-36" />
+            <USkeleton class="h-4 w-36" />
+            <USkeleton class="h-4 w-20" />
+            <USkeleton class="h-4 w-20" />
+            <USkeleton class="h-4 w-16" />
+            <USkeleton class="h-4 w-28" />
+            <USkeleton class="h-8 w-20" />
+          </div>
+        </div>
+      </div>
     </div>
 
     <template v-else>

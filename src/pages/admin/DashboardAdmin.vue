@@ -91,9 +91,23 @@ onMounted(fetchDashboardData);
       </div>
     </header>
 
-    <!-- Loading -->
-    <div v-if="isLoading" class="flex justify-center py-16">
-      <UIcon name="i-lucide-loader-circle" class="w-8 h-8 animate-spin text-muted" />
+    <!-- Loading skeleton -->
+    <div v-if="isLoading" class="space-y-8">
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-8 md:gap-6 border-y border-default py-8">
+        <div v-for="i in 5" :key="i" class="flex flex-col gap-2">
+          <USkeleton class="h-4 w-24" />
+          <USkeleton class="h-8 w-32" />
+          <USkeleton class="h-3 w-20 mt-2" />
+        </div>
+      </div>
+      <div class="space-y-3">
+        <USkeleton class="h-4 w-40" />
+        <div v-for="i in 5" :key="i" class="flex gap-6 py-4 border-b border-muted">
+          <USkeleton class="h-3 w-24" />
+          <USkeleton class="h-4 flex-1" />
+          <USkeleton class="h-4 flex-[2]" />
+        </div>
+      </div>
     </div>
 
     <div v-else class="space-y-16">

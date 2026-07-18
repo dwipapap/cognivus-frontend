@@ -17,7 +17,7 @@ const props = defineProps({
 const emit = defineEmits(['close', 'save']);
 const showPassword = ref(false);
 
-const { formData, errors, isSubmitting, submit, getFieldProps, reset } = useForm(
+const { formData, errors, isSubmitting, hasErrors, isDirty, submit, getFieldProps, reset } = useForm(
   {},
   {
     username: ['required'],
@@ -77,6 +77,12 @@ const handleSave = async () => {
 
 <template>
   <form @submit.prevent="handleSave" class="max-w-5xl mx-auto p-1">
+    <div v-if="hasErrors && isDirty" class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 mb-6">
+      <p class="font-medium mb-1">Please fix the following errors:</p>
+      <ul class="list-disc list-inside space-y-1">
+        <li v-for="(err, field) in errors" :key="field" class="text-red-700">{{ field }}: {{ err }}</li>
+      </ul>
+    </div>
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
       <!-- Left Column (8 units) -->
       <div class="lg:col-span-8 space-y-6">

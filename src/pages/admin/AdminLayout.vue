@@ -17,7 +17,14 @@ const navItems = [
   { label: 'External Links', icon: 'i-lucide-external-link', to: '/admin/external-links' },
 ];
 
+const showLogoutConfirm = ref(false);
+
 const handleLogout = () => {
+  showLogoutConfirm.value = true;
+};
+
+const confirmLogout = () => {
+  showLogoutConfirm.value = false;
   authStore.clearAuth();
   router.push('/login');
 };
@@ -41,9 +48,23 @@ const handleLogout = () => {
       </template>
     </UDashboardSidebar>
     <UDashboardPanel>
+      <template #header>
+        <UDashboardNavbar title="Admin">
+          <template #leading>
+            <UDashboardSidebarCollapse />
+          </template>
+        </UDashboardNavbar>
+      </template>
       <template #body>
         <router-view />
       </template>
     </UDashboardPanel>
   </UDashboardGroup>
+
+  <UModal v-model:open="showLogoutConfirm" title="Sign out" description="Are you sure you want to sign out? You'll need to log in again to access the admin panel." :ui="{ footer: 'justify-end' }">
+    <template #footer="{ close }">
+      <UButton label="Cancel" color="neutral" variant="outline" @click="close" />
+      <UButton label="Sign out" color="error" @click="confirmLogout" />
+    </template>
+  </UModal>
 </template>

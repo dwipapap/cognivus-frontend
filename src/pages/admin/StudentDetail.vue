@@ -4,12 +4,14 @@ import { useRoute, useRouter } from 'vue-router';
 import { studentAPI, gradeAPI, paymentAPI, classAPI, levelAPI } from '../../services/api';
 
 
-import { formatDate, getInitials, calculateAge } from '../../utils/formatters';
+import { useToast } from '@nuxt/ui/composables';
+import { formatDate, getInitials, calculateAge, formatCurrency, getStatusBadge } from '../../utils/formatters';
 
 const route = useRoute();
 const router = useRouter();
 const studentId = route.params.id;
 
+const toast = useToast();
 const student = ref(null);
 const classInfo = ref(null);
 const levelInfo = ref(null);
@@ -25,17 +27,6 @@ const getGenderDisplay = (code) => {
   if (code === 'L') return 'Male';
   if (code === 'P') return 'Female';
   return '-';
-};
-
-/** Get status badge classes */
-const getStatusBadge = (status) => {
-  const classes = {
-    success: 'bg-green-100 text-green-800 border-green-200',
-    pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-    error: 'bg-red-100 text-red-800 border-red-200',
-    failed: 'bg-red-100 text-red-800 border-red-200'
-  };
-  return classes[status] || 'bg-muted text-default border-default';
 };
 
 /** Fetch student data */
@@ -179,9 +170,34 @@ onMounted(() => {
       <h1 class="text-2xl font-semibold text-default tracking-tight">Student Details</h1>
     </div>
 
-    <!-- Loading -->
-    <div v-if="isLoading" class="flex justify-center py-16">
-      <UIcon name="i-lucide-loader-circle" class="w-8 h-8 animate-spin text-muted" />
+    <!-- Loading skeleton -->
+    <div v-if="isLoading" class="space-y-8">
+      <div class="flex items-start gap-6">
+        <USkeleton class="w-16 h-16 rounded-lg" />
+        <div class="flex-1 space-y-2">
+          <USkeleton class="h-6 w-64" />
+          <USkeleton class="h-4 w-96" />
+        </div>
+      </div>
+      <div class="space-y-3">
+        <USkeleton class="h-4 w-32" />
+        <div v-for="i in 3" :key="i" class="flex gap-4 py-3 border-b border-muted">
+          <USkeleton class="h-4 w-12" />
+          <USkeleton class="h-4 w-28" />
+          <USkeleton class="h-4 w-20" />
+          <USkeleton class="h-4 w-24" />
+          <USkeleton class="h-4 w-16" />
+        </div>
+      </div>
+      <div class="grid grid-cols-3 gap-6">
+        <div v-for="i in 3" :key="i" class="space-y-3">
+          <USkeleton class="h-4 w-32" />
+          <div v-for="j in 4" :key="j" class="flex justify-between">
+            <USkeleton class="h-3 w-20" />
+            <USkeleton class="h-3 w-24" />
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Error -->
@@ -247,7 +263,7 @@ onMounted(() => {
               <tr v-for="transaction in transactions" :key="transaction.paymentid">
                 <td class="px-4 py-3 text-sm font-medium text-default">#{{ transaction.paymentid }}</td>
                 <td class="px-4 py-3 text-sm text-toned">{{ formatDate(transaction.created_at) }}</td>
-                <td class="px-4 py-3 text-sm font-medium text-default">{{ transaction.amount ? `Rp ${transaction.amount.toLocaleString()}` : '-' }}</td>
+                <td class="px-4 py-3 text-sm font-medium text-default">{{ transaction.amount ? formatCurrency(transaction.amount) : '-' }}</td>
                 <td class="px-4 py-3">
                   <span class="text-sm text-toned capitalize">{{ transaction.payment_type || '-' }}</span>
                 </td>

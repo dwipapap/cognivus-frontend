@@ -219,9 +219,25 @@ onMounted(() => {
       <p class="text-sm text-red-800">{{ errorMessage }}</p>
     </div>
 
-    <!-- Loading -->
-    <div v-if="isLoading" class="flex justify-center py-16">
-      <UIcon name="i-lucide-loader-circle" class="w-8 h-8 animate-spin text-muted" />
+    <!-- Loading skeleton -->
+    <div v-if="isLoading" class="space-y-4">
+      <USkeleton class="h-6 w-48" />
+      <div class="border border-default rounded-lg overflow-hidden">
+        <div class="divide-y divide-muted">
+          <div v-for="i in 5" :key="i" class="flex items-center gap-4 px-4 py-4">
+            <USkeleton class="h-4 w-24" />
+            <USkeleton class="h-4 w-12" />
+            <USkeleton class="h-4 w-12" />
+            <USkeleton class="h-4 w-12" />
+            <USkeleton class="h-4 w-12" />
+            <USkeleton class="h-4 w-12" />
+            <USkeleton class="h-4 w-12" />
+            <USkeleton class="h-4 w-12" />
+            <USkeleton class="h-4 w-24" />
+            <USkeleton class="h-8 w-20" />
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Grades Table -->
