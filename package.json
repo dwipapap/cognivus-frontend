@@ -28,7 +28,6 @@
   "devDependencies": {
     "@iconify-json/basil": "^1.2.4",
     "@iconify-json/solar": "^1.2.5",
-    "@iconify-json/svg-spinners": "^1.2.4",
     "@vitejs/plugin-vue": "^6.0.1",
     "@vitest/ui": "^3.2.4",
     "@vue/test-utils": "^2.4.6",

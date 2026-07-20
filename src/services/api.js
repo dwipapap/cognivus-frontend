@@ -46,6 +46,24 @@ apiClient.interceptors.response.use(
   },
 );
 
+/** Build multipart FormData from a flat object plus optional file(s) under fileKey */
+function toFormData(fields, file = null, fileKey = "file") {
+  const formData = new FormData();
+  Object.keys(fields).forEach((key) => {
+    if (fields[key] !== null && fields[key] !== undefined) {
+      formData.append(key, fields[key]);
+    }
+  });
+  if (file) {
+    if (Array.isArray(file)) {
+      file.forEach((f) => formData.append(fileKey, f));
+    } else {
+      formData.append(fileKey, file);
+    }
+  }
+  return formData;
+}
+
 // User API endpoints
 export const userAPI = {
   // Get user by ID
@@ -86,47 +104,15 @@ export const courseAPI = {
   getAllCourses: () => apiClient.get("/courses"),
   getCourseById: (id) => apiClient.get(`/courses/${id}`),
   /** Create course with optional file upload */
-  createCourse: (courseData, files = null) => {
-    const formData = new FormData();
-    // Add course fields
-    Object.keys(courseData).forEach((key) => {
-      if (courseData[key] !== null && courseData[key] !== undefined) {
-        formData.append(key, courseData[key]);
-      }
-    });
-    // Add files if provided
-    if (files) {
-      if (Array.isArray(files)) {
-        files.forEach((file) => formData.append("files", file));
-      } else {
-        formData.append("files", files);
-      }
-    }
-    return apiClient.post("/courses", formData, {
+  createCourse: (courseData, files = null) =>
+    apiClient.post("/courses", toFormData(courseData, files, "files"), {
       headers: { "Content-Type": "multipart/form-data" },
-    });
-  },
+    }),
   /** Update course with optional file upload */
-  updateCourse: (id, courseData, files = null) => {
-    const formData = new FormData();
-    // Add course fields
-    Object.keys(courseData).forEach((key) => {
-      if (courseData[key] !== null && courseData[key] !== undefined) {
-        formData.append(key, courseData[key]);
-      }
-    });
-    // Add files if provided
-    if (files) {
-      if (Array.isArray(files)) {
-        files.forEach((file) => formData.append("files", file));
-      } else {
-        formData.append("files", files);
-      }
-    }
-    return apiClient.put(`/courses/${id}`, formData, {
+  updateCourse: (id, courseData, files = null) =>
+    apiClient.put(`/courses/${id}`, toFormData(courseData, files, "files"), {
       headers: { "Content-Type": "multipart/form-data" },
-    });
-  },
+    }),
   deleteCourse: (id) => apiClient.delete(`/courses/${id}`),
 };
 
@@ -218,40 +204,14 @@ export const reportFileAPI = {
 export const gradeAPI = {
   getAllGrades: () => apiClient.get("/grades"),
   getGradeById: (id) => apiClient.get(`/grades/${id}`),
-  createGrade: (gradeData, file = null) => {
-    const formData = new FormData();
-
-    Object.keys(gradeData).forEach((key) => {
-      if (gradeData[key] !== null && gradeData[key] !== undefined) {
-        formData.append(key, gradeData[key]);
-      }
-    });
-
-    if (file) {
-      formData.append("file", file);
-    }
-
-    return apiClient.post("/grades", formData, {
+  createGrade: (gradeData, file = null) =>
+    apiClient.post("/grades", toFormData(gradeData, file), {
       headers: { "Content-Type": "multipart/form-data" },
-    });
-  },
-  updateGrade: (id, gradeData, file = null) => {
-    const formData = new FormData();
-
-    Object.keys(gradeData).forEach((key) => {
-      if (gradeData[key] !== null && gradeData[key] !== undefined) {
-        formData.append(key, gradeData[key]);
-      }
-    });
-
-    if (file) {
-      formData.append("file", file);
-    }
-
-    return apiClient.put(`/grades/${id}`, formData, {
+    }),
+  updateGrade: (id, gradeData, file = null) =>
+    apiClient.put(`/grades/${id}`, toFormData(gradeData, file), {
       headers: { "Content-Type": "multipart/form-data" },
-    });
-  },
+    }),
   deleteGrade: (id) => apiClient.delete(`/grades/${id}`),
   downloadCertificate: (gradeId) =>
     apiClient.get(`/grades/${gradeId}/certificate`, {
@@ -307,16 +267,10 @@ export const paymentAPI = {
 export const popupAPI = {
   getActive: () => apiClient.get("/popup/active"),
   get: () => apiClient.get("/popup"),
-  save: (fields, file = null) => {
-    const formData = new FormData();
-    Object.entries(fields).forEach(([key, value]) => {
-      if (value !== undefined && value !== null) formData.append(key, value);
-    });
-    if (file) formData.append("file", file);
-    return apiClient.post("/popup", formData, {
+  save: (fields, file = null) =>
+    apiClient.post("/popup", toFormData(fields, file), {
       headers: { "Content-Type": "multipart/form-data" },
-    });
-  },
+    }),
   remove: () => apiClient.delete("/popup"),
 };
 

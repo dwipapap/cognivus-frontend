@@ -74,14 +74,7 @@ export const authStore = reactive({
     // Clear existing interval
     this.stopExpiryCheck();
 
-    let lastCheckTime = Date.now();
     this.expiryCheckInterval = setInterval(() => {
-      const now = Date.now();
-      if (now - lastCheckTime < 60000) {
-        return;
-      }
-      lastCheckTime = now;
-
       if (this.isTokenExpired()) {
         this.clearAuth();
         if (isProtectedRoutePath(window.location.pathname)) {
@@ -172,41 +165,6 @@ export const authStore = reactive({
    */
   isAuthenticated() {
     return !!(this.token || secureStorage.getItem('token')) && !this.isTokenExpired();
-  },
-
-  /**
-   * Get time remaining until token expires.
-   * @returns {Object|null} Hours and minutes remaining
-   */
-  getTimeRemaining() {
-    const expiry = this.tokenExpiry || secureStorage.getItem('tokenExpiry');
-    if (!expiry) return null;
-    
-    const remaining = Number(expiry) - Date.now();
-    if (remaining <= 0) return null;
-    
-    const hours = Math.floor(remaining / (60 * 60 * 1000));
-    const minutes = Math.floor((remaining % (60 * 60 * 1000)) / (60 * 1000));
-    
-    return { hours, minutes, totalMs: remaining };
-  },
-
-  /**
-   * Check if user has specific role.
-   * @param {string} requiredRole - Role to check
-   * @returns {boolean} True if user has role
-   */
-  hasRole(requiredRole) {
-    return this.role === requiredRole;
-  },
-
-  /**
-   * Check if user has any of the specified roles.
-   * @param {string[]} roles - Array of roles to check
-   * @returns {boolean} True if user has any role
-   */
-  hasAnyRole(roles) {
-    return roles.includes(this.role);
   }
 });
 
