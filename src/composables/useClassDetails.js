@@ -1,4 +1,4 @@
-import { ref, watch, toValue, isRef } from 'vue';
+import { ref, computed, watch, toValue, isRef } from 'vue';
 import { classAPI, levelAPI, lecturerAPI, priceAPI, programAPI } from '../services/api';
 
 const formatLecturerName = (fullname, gender) => {
@@ -15,6 +15,9 @@ export function useClassDetails(classId) {
   const programName = ref('');
   const isLoading = ref(false);
   const error = ref(null);
+
+  // true when the student is in the placeholder class new Google sign-ups land in
+  const isPlaceholderClass = computed(() => classInfo.value?.is_default === true);
 
   const fetchDetails = async () => {
     const id = toValue(classId);
@@ -107,6 +110,7 @@ export function useClassDetails(classId) {
 
   return {
     classInfo,
+    isPlaceholderClass,
     levelName,
     lecturerName,
     programName,

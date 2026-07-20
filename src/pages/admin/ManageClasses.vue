@@ -18,6 +18,7 @@ const showFormModal = ref(false);
 const selectedClass = ref(null);
 
 const { open: confirmOpen, message: confirmMessage, confirm, onConfirm, onCancel } = useConfirm()
+const { open: defaultConfirmOpen, message: defaultConfirmMessage, confirm: confirmDefault, onConfirm: onDefaultConfirm, onCancel: onDefaultCancel } = useConfirm()
 const isEditMode = ref(false);
 const currentPage = ref(1);
 const itemsPerPage = 15;
@@ -201,7 +202,22 @@ const handleDelete = async (classItem) => {
       toast.add({ title: 'Success', description: 'Class deleted successfully.', color: 'success' });
       fetchClasses();
     } catch (error) {
-      toast.add({ title: 'Error', description: 'Failed to delete class.', color: 'error' });
+      const message = error.response?.data?.message || 'Failed to delete class.';
+      toast.add({ title: 'Error', description: message, color: 'error' });
+    }
+  }
+};
+
+/** Set class as the default target for new Google sign-ups */
+const handleSetDefault = async (classItem) => {
+  if (await confirmDefault(`Make "${classItem.class_code}" the default class for new Google sign-ups?`)) {
+    try {
+      await classAPI.updateClass(classItem.classid, { is_default: true });
+      toast.add({ title: 'Success', description: `"${classItem.class_code}" is now the default class for new Google sign-ups.`, color: 'success' });
+      fetchClasses();
+    } catch (error) {
+      const message = error.response?.data?.message || 'An error occurred.';
+      toast.add({ title: 'Error', description: `Failed to set default class: ${message}`, color: 'error' });
     }
   }
 };
@@ -281,7 +297,12 @@ onMounted(() => {
 
               <!-- Class Code -->
               <td class="px-6 py-4">
-                <div class="text-sm font-medium text-default">{{ classItem.class_code }}</div>
+                <div class="flex items-center gap-2">
+                  <span class="text-sm font-medium text-default">{{ classItem.class_code }}</span>
+                  <UBadge v-if="classItem.is_default" color="primary" variant="subtle" size="sm" icon="i-lucide-star" title="Default class for new Google sign-ups">
+                    Default
+                  </UBadge>
+                </div>
               </td>
 
               <!-- Branch -->
@@ -318,6 +339,15 @@ onMounted(() => {
               <!-- Actions -->
               <td class="px-6 py-4">
                 <div class="flex justify-center gap-2">
+                    <UButton
+                      v-if="!classItem.is_default"
+                      @click="handleSetDefault(classItem)"
+                      color="neutral"
+                      variant="ghost"
+                      size="sm"
+                      icon="i-lucide-star"
+                      title="Set as default class for new Google sign-ups"
+                    />
                     <UButton @click="openEditModal(classItem)" color="primary" variant="solid" size="sm">
                       Edit
                     </UButton>
@@ -383,6 +413,13 @@ onMounted(() => {
     <template #footer>
       <UButton label="Cancel" color="neutral" variant="outline" @click="onCancel" />
       <UButton label="Delete" color="error" @click="onConfirm" />
+    </template>
+  </UModal>
+
+  <UModal v-model:open="defaultConfirmOpen" :title="defaultConfirmMessage">
+    <template #footer>
+      <UButton label="Cancel" color="neutral" variant="outline" @click="onDefaultCancel" />
+      <UButton label="Set Default" color="primary" @click="onDefaultConfirm" />
     </template>
   </UModal>
 </template>

@@ -28,6 +28,7 @@ onMounted(async () => {
 const classId = computed(() => studentProfile.value?.classid);
 const {
     classInfo,
+    isPlaceholderClass,
     levelName,
     lecturerName,
     isLoading: classLoading,
@@ -182,7 +183,26 @@ const courseLink = (courseId) => ({
             :show-decoration="true"
         />
 
+        <!-- Placeholder class: welcome banner instead of schedule/level cards -->
+        <UAlert
+            v-if="isPlaceholderClass"
+            icon="i-lucide-sparkles"
+            color="primary"
+            variant="subtle"
+            title="Welcome aboard!"
+            description="You're currently in our free starter class. Join a program to get placed in a real class with a schedule and lecturer."
+            :actions="[
+                {
+                    label: 'View Programs',
+                    to: '/student/payment',
+                    trailingIcon: 'i-lucide-arrow-right',
+                    color: 'primary',
+                },
+            ]"
+        />
+
         <section
+            v-if="!isPlaceholderClass"
             aria-label="Quick stats"
             class="grid grid-cols-2 gap-3 md:gap-4"
         >
