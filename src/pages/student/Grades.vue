@@ -3,6 +3,7 @@ import { ref, onMounted, watch, computed } from 'vue';
 import { useStudentProfile } from '../../composables/useStudentProfile';
 import { useClassDetails } from '../../composables/useClassDetails';
 import { gradeAPI } from '../../services/api';
+import Modal from '../../components/ui/Modal.vue';
 import IconWarning from '~icons/basil/info-triangle-outline';
 import IconUser from '~icons/basil/user-solid';
 import IconChart from '~icons/basil/chart-pie-solid';
@@ -16,6 +17,7 @@ import IconBookOpen from '~icons/basil/book-open-solid';
 import IconAward from '~icons/basil/award-solid';
 import IconClose from '~icons/basil/cross-outline';
 import IconInfo from '~icons/basil/info-circle-outline';
+import IconLock from '~icons/lucide/lock';
 import { formatDate, getAverageScore } from '../../utils/formatters';
 import PageHeaderCard from '../../components/student/PageHeaderCard.vue';
 
@@ -23,7 +25,15 @@ const { studentProfile, isLoading: isProfileLoading, fetchStudentProfile } = use
 
 // Use composable for class details to match MyCourses style
 const classId = computed(() => studentProfile.value?.classid);
-const { classInfo, levelName, lecturerName, isLoading: classLoading } = useClassDetails(classId);
+const { classInfo, isPlaceholderClass, levelName, lecturerName, isLoading: classLoading } = useClassDetails(classId);
+
+const showGuardModal = ref(false);
+
+watch(isPlaceholderClass, (val) => {
+  if (val) {
+    showGuardModal.value = true;
+  }
+});
 
 const grades = ref([]);
 const isLoadingGrades = ref(false);
@@ -137,6 +147,39 @@ onMounted(() => {
         <div class="h-16 w-full bg-white rounded-lg"></div>
         <div class="h-16 w-full bg-white rounded-lg"></div>
         <div class="h-16 w-full bg-white rounded-lg"></div>
+      </div>
+    </div>
+
+    <!-- Teaser State -->
+    <div v-else-if="isPlaceholderClass" class="bg-transparent p-0 md:bg-white md:border md:border-gray-200 md:rounded-lg md:p-8 md:shadow-sm relative overflow-hidden">
+      <div class="mb-4 md:mb-6">
+        <h2 class="text-xl md:text-2xl font-bold text-gray-900">Test Results</h2>
+      </div>
+
+      <div class="blur-[4px] opacity-60 pointer-events-none space-y-4">
+        <!-- Mock rows -->
+        <div v-for="i in 3" :key="i" class="bg-white border border-gray-200 rounded-lg p-4 flex items-center justify-between shadow-sm">
+           <div class="flex items-center gap-3">
+             <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-500">
+               <IconDocument class="w-5 h-5" />
+             </div>
+             <div>
+               <div class="h-4 w-32 bg-gray-200 rounded mb-2"></div>
+               <div class="h-3 w-20 bg-gray-100 rounded"></div>
+             </div>
+           </div>
+           <div class="w-12 h-12 bg-gray-200 rounded-full"></div>
+        </div>
+      </div>
+      
+      <div class="absolute inset-0 flex flex-col items-center justify-center z-10 bg-white/30 backdrop-blur-[2px]">
+        <router-link
+            to="/student/payment"
+            class="inline-flex items-center gap-2 rounded-full border border-blue-600 bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-colors duration-200 hover:bg-blue-700 hover:border-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+        >
+            <IconLock class="w-4 h-4" />
+            Unlock Grades
+        </router-link>
       </div>
     </div>
 
@@ -299,6 +342,16 @@ onMounted(() => {
               <span>Scores are updated by your instructor</span>
             </div>
           </div>
-        </div>
       </div>
+    <Modal
+      alert
+      responsiveDrawer
+      :show="showGuardModal"
+      type="warning"
+      title="Feature Unavailable"
+      message="Grades are not available because you are not enrolled in any class yet. Join a program to get started."
+      @close="showGuardModal = false"
+      @confirm="showGuardModal = false"
+    />
+  </div>
 </template>
