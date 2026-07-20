@@ -303,4 +303,21 @@ export const paymentAPI = {
   // Note: Webhook endpoint removed - payment webhooks should only be called by Midtrans to the backend directly
 };
 
+// Popup API endpoints
+export const popupAPI = {
+  getActive: () => apiClient.get("/popup/active"),
+  get: () => apiClient.get("/popup"),
+  save: (fields, file = null) => {
+    const formData = new FormData();
+    Object.entries(fields).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) formData.append(key, value);
+    });
+    if (file) formData.append("file", file);
+    return apiClient.post("/popup", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
+  remove: () => apiClient.delete("/popup"),
+};
+
 export default apiClient;

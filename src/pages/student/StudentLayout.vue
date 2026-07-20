@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import { authStore } from '../../store/auth';
 import { useStudentProfile } from '../../composables/useStudentProfile';
 import { useClassDetails } from '../../composables/useClassDetails';
+import { popupAPI } from '../../services/api';
 import Modal from '../../components/ui/Modal.vue';
 import IconHome from '~icons/solar/home-smile-bold';
 import IconBook from '~icons/solar/book-bookmark-bold';
@@ -84,10 +85,28 @@ const closeDropdownOnOutsideClick = (event) => {
   }
 };
 
+// Photo popup - shown once per session
+const popup = ref(null);
+const showPopup = ref(false);
+
+const dismissPopup = () => {
+  showPopup.value = false;
+  sessionStorage.setItem('popupShown', '1');
+};
+
 // Consolidated lifecycle hooks (Vue best practice - single onMounted/onUnmounted)
 onMounted(() => {
   fetchStudentProfile();
   document.addEventListener('click', closeDropdownOnOutsideClick);
+
+  if (!sessionStorage.getItem('popupShown')) {
+    popupAPI.getActive().then(({ data }) => {
+      if (data.data?.url) {
+        popup.value = data.data;
+        showPopup.value = true;
+      }
+    }).catch(() => console.warn('Failed to load popup'));
+  }
 });
 
 onUnmounted(() => {
@@ -290,6 +309,25 @@ const handleLogout = async () => {
       @close="closeGradeModal"
       @confirm="closeGradeModal"
     />
+
+    <UModal :open="showPopup" @update:open="(v) => !v && dismissPopup()" :ui="{ content: 'max-w-lg' }">
+      <template #content>
+        <div class="relative">
+          <button
+            type="button"
+            @click="dismissPopup"
+            aria-label="Close popup"
+            class="absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 transition-colors"
+          >
+            &times;
+          </button>
+          <a v-if="popup?.link_url" :href="popup.link_url" target="_blank" rel="noopener noreferrer">
+            <img :src="popup?.url" class="w-full max-h-[80vh] object-contain rounded-lg" />
+          </a>
+          <img v-else :src="popup?.url" class="w-full max-h-[80vh] object-contain rounded-lg" />
+        </div>
+      </template>
+    </UModal>
   </div>
 </template>
 

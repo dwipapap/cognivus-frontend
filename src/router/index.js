@@ -258,6 +258,11 @@ const routes = [
         path: 'external-links',
         name: 'AdminExternalLinks',
         component: () => import('../pages/admin/ExternalLinks.vue'),
+      },
+      {
+        path: 'popup',
+        name: 'AdminManagePopup',
+        component: () => import('../pages/admin/ManagePopup.vue'),
       }
     ]
   },
