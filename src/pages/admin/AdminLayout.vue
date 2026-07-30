@@ -15,6 +15,7 @@ const navItems = [
   { label: 'Programs', icon: 'i-lucide-folder-tree', to: '/admin/programs' },
   { label: 'Levels', icon: 'i-lucide-bar-chart-3', to: '/admin/levels' },
   { label: 'External Links', icon: 'i-lucide-external-link', to: '/admin/external-links' },
+  { label: 'Popup', icon: 'i-lucide-image', to: '/admin/popup' },
 ];
 
 const showLogoutConfirm = ref(false);

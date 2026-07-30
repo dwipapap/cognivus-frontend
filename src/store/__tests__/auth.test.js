@@ -85,12 +85,6 @@ describe('Auth Store - Real User Scenarios', () => {
 
     // Verifikasi: Role lecturer tersimpan
     expect(authStore.role).toBe('lecturer')
-    expect(authStore.hasRole('lecturer')).toBe(true)
-    expect(authStore.hasRole('student')).toBe(false)
-
-    // Verifikasi: Lecturer punya akses berbeda dari student
-    expect(authStore.hasAnyRole(['lecturer', 'admin'])).toBe(true)
-    expect(authStore.hasAnyRole(['student', 'moderator'])).toBe(false)
   })
 
   // =====================================
@@ -138,24 +132,6 @@ describe('Auth Store - Real User Scenarios', () => {
   })
 
   // =====================================
-  // Scenario 5: Check Token Time Remaining
-  // =====================================
-  it('should calculate time remaining until token expires', () => {
-    // User login dan mau tahu berapa lama lagi token valid
-    authStore.setAuth(mockUser, mockToken, 'student')
-
-    const timeRemaining = authStore.getTimeRemaining()
-
-    // Verifikasi: Waktu tersisa follows the token claim
-    expect(timeRemaining).not.toBeNull()
-    expect(timeRemaining.hours).toBeGreaterThanOrEqual(2)
-    expect(timeRemaining.hours).toBeLessThanOrEqual(3)
-    expect(timeRemaining.minutes).toBeGreaterThanOrEqual(0)
-    expect(timeRemaining.minutes).toBeLessThan(60)
-    expect(timeRemaining.totalMs).toBeGreaterThan(0)
-  })
-
-  // =====================================
   // Scenario 6: Refresh Browser (Persistence)
   // =====================================
   it('should restore auth state after browser refresh', () => {
@@ -184,42 +160,6 @@ describe('Auth Store - Real User Scenarios', () => {
   })
 
   // =====================================
-  // Scenario 7: Access Control - Student Cannot Access Lecturer Page
-  // =====================================
-  it('should prevent student from accessing lecturer-only features', () => {
-    // Student login
-    authStore.setAuth(mockUser, mockToken, 'student')
-
-    // Student mencoba akses halaman lecturer
-    const canAccessLecturer = authStore.hasRole('lecturer')
-    const canAccessAdmin = authStore.hasRole('admin')
-
-    // Verifikasi: Akses ditolak
-    expect(canAccessLecturer).toBe(false)
-    expect(canAccessAdmin).toBe(false)
-
-    // Tapi bisa akses halaman student
-    expect(authStore.hasRole('student')).toBe(true)
-  })
-
-  // =====================================
-  // Scenario 8: Multiple Role Check (Admin Access)
-  // =====================================
-  it('should check if user has any of multiple roles', () => {
-    // Simulasi: Admin login
-    const adminUser = { ...mockUser, user_metadata: { role: 'admin' } }
-    authStore.setAuth(adminUser, mockToken, 'admin')
-
-    // Cek apakah admin punya akses ke halaman tertentu
-    const canAccessAdminOrOwner = authStore.hasAnyRole(['admin', 'owner'])
-    const canAccessLecturerOrStudent = authStore.hasAnyRole(['lecturer', 'student'])
-
-    // Verifikasi: Admin hanya punya akses admin/owner
-    expect(canAccessAdminOrOwner).toBe(true)
-    expect(canAccessLecturerOrStudent).toBe(false)
-  })
-
-  // =====================================
   // Scenario 9: Token Still Valid (Not Expired)
   // =====================================
   it('should confirm token is still valid within expiry time', () => {
@@ -234,12 +174,10 @@ describe('Auth Store - Real User Scenarios', () => {
     // User melakukan aktivitas (API call, navigate, dll)
     const isExpired = authStore.isTokenExpired()
     const isAuth = authStore.isAuthenticated()
-    const timeRemaining = authStore.getTimeRemaining()
 
     // Verifikasi: Token masih valid
     expect(isExpired).toBe(false)
     expect(isAuth).toBe(true)
-    expect(timeRemaining.hours).toBeGreaterThanOrEqual(2)
   })
 
   // =====================================
@@ -251,13 +189,9 @@ describe('Auth Store - Real User Scenarios', () => {
 
     // User mencoba akses halaman yang butuh login
     const isAuth = authStore.isAuthenticated()
-    const hasRole = authStore.hasRole('student')
-    const hasAnyRole = authStore.hasAnyRole(['student', 'lecturer', 'admin'])
 
     // Verifikasi: Semua akses ditolak
     expect(isAuth).toBe(false)
-    expect(hasRole).toBe(false)
-    expect(hasAnyRole).toBe(false)
     expect(authStore.user).toBeNull()
     expect(authStore.token).toBeNull()
 

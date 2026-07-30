@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import IconClipboard from '~icons/basil/clipboard-solid';
 import BaseButton from '../ui/BaseButton.vue';
+import { getStatusBadge } from '../../utils/formatters';
 
 const props = defineProps({
   payments: { type: Array, default: () => [] },
@@ -36,16 +37,6 @@ const paginated = computed(() => {
   const start = (props.currentPage - 1) * itemsPerPage;
   return props.payments.slice(start, start + itemsPerPage);
 });
-
-const statusClass = (status) => {
-  const map = {
-    success: 'bg-green-100 text-green-800 border-green-200',
-    pending: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-    error: 'bg-red-100 text-red-800 border-red-200',
-    failed: 'bg-red-100 text-red-800 border-red-200'
-  };
-  return map[status] || 'bg-gray-100 text-gray-800 border-gray-200';
-};
 
 const nextPage = () => { if (hasNext.value) emit('page-change', props.currentPage + 1); };
 const previousPage = () => { if (hasPrevious.value) emit('page-change', props.currentPage - 1); };
@@ -97,7 +88,7 @@ const previousPage = () => { if (hasPrevious.value) emit('page-change', props.cu
               <td class="py-3.5 px-4 text-sm font-medium text-gray-800">{{ getPaymentTypeName(payment.payment_type) }}</td>
               <td class="py-3.5 px-4 text-sm font-bold text-gray-800">{{ formatCurrency(payment.amount) }}</td>
               <td class="py-3.5 px-4">
-                <span class="px-3 py-1 text-xs font-semibold rounded-full capitalize" :class="statusClass(payment.status)">
+                <span class="px-3 py-1 text-xs font-semibold rounded-full capitalize" :class="getStatusBadge(payment.status)">
                   {{ payment.status }}
                 </span>
               </td>
@@ -119,7 +110,7 @@ const previousPage = () => { if (hasPrevious.value) emit('page-change', props.cu
           class="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
           <div class="flex items-center justify-between mb-3">
             <span class="text-xs text-gray-500">{{ formatDate(payment.created_at) }}</span>
-            <span class="px-2.5 py-0.5 text-xs font-semibold rounded-full capitalize" :class="statusClass(payment.status)">
+            <span class="px-2.5 py-0.5 text-xs font-semibold rounded-full capitalize" :class="getStatusBadge(payment.status)">
               {{ payment.status }}
             </span>
           </div>

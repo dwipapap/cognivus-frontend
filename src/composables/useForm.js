@@ -45,10 +45,6 @@ export function useForm(initialData = {}, validationRules = {}) {
     }
   };
 
-  const isValid = computed(() => {
-    return Object.keys(errors.value).length === 0;
-  });
-
   const hasErrors = computed(() => {
     return Object.keys(errors.value).some(field => errors.value[field]);
   });
@@ -136,23 +132,6 @@ export function useForm(initialData = {}, validationRules = {}) {
     delete errors.value[fieldName];
   };
 
-  /**
-   * Set error untuk field.
-   * @param {string} fieldName - Nama field
-   * @param {string} message - Pesan error
-   */
-  const setError = (fieldName, message) => {
-    errors.value[fieldName] = message;
-  };
-
-  /**
-   * Set multiple errors.
-   * @param {Object} errorObj - Object error
-   */
-  const setErrors = (errorObj) => {
-    errors.value = { ...errors.value, ...errorObj };
-  };
-
   /** Reset form ke nilai awal */
   const reset = () => {
     Object.keys(formData).forEach(key => {
@@ -201,32 +180,22 @@ export function useForm(initialData = {}, validationRules = {}) {
     }
   };
 
-  /** Tandai form sudah diubah */
-  const markDirty = () => {
-    isDirty.value = true;
-  };
-
+  // ponytail: clearError/clearErrors/updateField stay internal — used by
+  // updateField, reset, and getFieldProps respectively, but no caller needs them.
   return {
     // Data
     formData,
     errors: computed(() => errors.value),
     isSubmitting: computed(() => isSubmitting.value),
     isDirty: computed(() => isDirty.value),
-    isValid,
     hasErrors,
-    
+
     // Methods
     validate,
     validateSingleField,
-    clearErrors,
-    clearError,
-    setError,
-    setErrors,
     reset,
     submit,
-    updateField,
-    markDirty,
-    
+
     /**
      * Dapatkan props untuk field component.
      * @param {string} fieldName - Nama field

@@ -26,7 +26,7 @@ const { studentProfile, isLoading: profileLoading, fetchStudentProfile } = useSt
 
 // Use composable for class details
 const classId = computed(() => studentProfile.value?.classid);
-const { classInfo, levelName, lecturerName, isLoading: classLoading, error: classError, retry: retryClass } = useClassDetails(classId);
+const { classInfo, isPlaceholderClass, levelName, lecturerName, isLoading: classLoading, error: classError, retry: retryClass } = useClassDetails(classId);
 
 const courses = ref([]);
 const coursesLoading = ref(false);
@@ -110,7 +110,7 @@ const errorMessage = computed(() => {
     <!-- Course List -->
     <div v-else
       class="bg-gradient-to-br from-blue-50/80 to-indigo-50/80 border border-blue-100/80 rounded-xl p-6 md:p-8 shadow-sm">
-      <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-4 md:mb-6">Course Materials</h2>
+      <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-4 md:mb-6">{{ isPlaceholderClass ? 'Features' : 'Course Materials' }}</h2>
 
       <div v-if="filteredCourses.length === 0 && !searchQuery" class="py-12 text-center text-gray-500">
         <p class="font-medium text-gray-500">Your course materials will appear here once your lecturer uploads them.</p>

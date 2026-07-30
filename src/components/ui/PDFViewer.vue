@@ -68,8 +68,8 @@ async function loadPDF() {
     
     await nextTick()
     renderPage(currentPage.value)
-  } catch (err: any) {
-    error.value = `Failed to load PDF: ${err.message}`
+  } catch (err: unknown) {
+    error.value = `Failed to load PDF: ${err instanceof Error ? err.message : String(err)}`
     isLoading.value = false
   }
 }
@@ -116,8 +116,8 @@ async function renderPage(pageNum: number) {
     renderTask = null
     
     applyWatermark(canvas, ctx, viewport.width, viewport.height)
-  } catch (err: any) {
-    if (err.name !== 'RenderingCancelledException') {
+  } catch (err: unknown) {
+    if (err instanceof Error && err.name !== 'RenderingCancelledException') {
       console.error('Error rendering page:', err)
     }
   }
@@ -150,7 +150,7 @@ function applyWatermark(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D
   ctx.restore()
 }
 
-async function getPDFDestination(dest: any) {
+async function getPDFDestination(dest: string | unknown[]) {
   if (!pdfDoc.value) return null
   try {
     const destination = typeof dest === 'string' ? await pdfDoc.value.getDestination(dest) : dest

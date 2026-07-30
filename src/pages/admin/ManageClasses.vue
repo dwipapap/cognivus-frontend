@@ -6,7 +6,7 @@ import Modal from '../../components/ui/Modal.vue';
 import { BRANCHES } from '../../config/branches';
 
 import { useConfirm } from '@/composables/useConfirm'
-import ClassForm from './ClassForm.vue';
+import ClassForm from '../../components/admin/ClassForm.vue';
 
 const toast = useToast();
 const classes = ref([]);

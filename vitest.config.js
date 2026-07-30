@@ -37,15 +37,7 @@ export default mergeConfig(viteConfig, defineConfig({
         'vite.config.js',
         'vitest.config.js',
         'tailwind.config.js'
-      ],
-      
-      // Coverage thresholds (uncomment to enforce)
-      // thresholds: {
-      //   lines: 60,
-      //   functions: 60,
-      //   branches: 60,
-      //   statements: 60
-      // }
+      ]
     },
     
     // Include patterns for test files
@@ -67,19 +59,8 @@ export default mergeConfig(viteConfig, defineConfig({
     
     // Hook timeout (milliseconds)
     hookTimeout: 10000,
-    
-    // Allow only .only tests in development
-    allowOnly: process.env.NODE_ENV !== 'production',
-    
-    // Watch options
-    watch: true,
-    
+
     // Reporter configuration
     reporters: ['verbose'],
-    
-    // Inline snapshots
-    resolveSnapshotPath: (testPath, snapExtension) => {
-      return testPath.replace(/\.test\.([tj]sx?)/, `${snapExtension}.$1`)
-    },
   },
 }))

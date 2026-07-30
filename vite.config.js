@@ -2,11 +2,13 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import ui from '@nuxt/ui/vite'
 import Icons from 'unplugin-icons/vite'
+import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
+    tailwindcss(),
     vue(),
     ui({
       colorMode: false,
@@ -45,7 +47,6 @@ export default defineConfig({
         manualChunks: {
           'vendor-vue': ['vue', 'vue-router'],
           'vendor-http': ['axios'],
-          'vendor-crypto': ['crypto-js'],
           'vendor-ui': ['@nuxt/ui']
         }
       }

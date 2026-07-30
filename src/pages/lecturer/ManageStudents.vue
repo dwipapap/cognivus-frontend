@@ -167,7 +167,7 @@ watch(
 
   <!-- Loading -->
   <div v-if="isLoading || profileLoading" class="max-w-2xl mx-auto py-20">
-    <LoadingSpinner size="lg" color="blue" :center="true" />
+    <LoadingSpinner size="lg" color="primary" :center="true" />
   </div>
 
   <!-- Main Content -->

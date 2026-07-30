@@ -1,20 +1,25 @@
+// Built once — these are called from v-for bodies, and constructing an Intl
+// formatter per render is the expensive part, not the formatting itself.
+const DATE_FORMAT = new Intl.DateTimeFormat('en-GB', {
+  day: '2-digit',
+  month: 'long',
+  year: 'numeric'
+});
+
+const CURRENCY_FORMAT = new Intl.NumberFormat('id-ID', {
+  style: 'currency',
+  currency: 'IDR',
+  minimumFractionDigits: 0
+});
+
 export const formatDate = (dateString) => {
   if (!dateString) return '-';
-  const date = new Date(dateString);
-  return new Intl.DateTimeFormat('en-GB', {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric'
-  }).format(date);
+  return DATE_FORMAT.format(new Date(dateString));
 };
 
 export const formatCurrency = (amount) => {
   if (amount === null || amount === undefined) return 'Rp 0';
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    minimumFractionDigits: 0
-  }).format(amount);
+  return CURRENCY_FORMAT.format(amount);
 };
 
 export const getAverageScore = (grade) => {

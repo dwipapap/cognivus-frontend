@@ -24,19 +24,9 @@ export const decodeJwt = (token) => {
 }
 
 export const getJwtExpiry = (token) => {
-  if (typeof token !== 'string') return null
+  const expiresAt = Number(decodeJwt(token)?.exp)
 
-  const parts = token.split('.')
-  if (parts.length !== 3 || !parts[1]) return null
+  if (!Number.isFinite(expiresAt) || expiresAt <= 0) return null
 
-  try {
-    const payload = JSON.parse(decodeBase64Url(parts[1]))
-    const expiresAt = Number(payload.exp)
-
-    if (!Number.isFinite(expiresAt) || expiresAt <= 0) return null
-
-    return expiresAt * 1000
-  } catch {
-    return null
-  }
+  return expiresAt * 1000
 }

@@ -301,7 +301,7 @@ onMounted(() => {
 <template>
   <!-- Loading State -->
   <div v-if="isLoading || dataLoading" class="max-w-2xl mx-auto py-20">
-    <LoadingSpinner size="lg" color="blue" :center="true" />
+    <LoadingSpinner size="lg" color="primary" :center="true" />
   </div>
 
   <!-- Error State -->

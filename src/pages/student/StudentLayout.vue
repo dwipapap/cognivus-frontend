@@ -3,6 +3,9 @@ import { computed, ref, provide, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { authStore } from '../../store/auth';
 import { useStudentProfile } from '../../composables/useStudentProfile';
+import { useClassDetails } from '../../composables/useClassDetails';
+import { popupAPI } from '../../services/api';
+import Modal from '../../components/ui/Modal.vue';
 import IconHome from '~icons/solar/home-smile-bold';
 import IconBook from '~icons/solar/book-bookmark-bold';
 import iconBoyImage from '../../assets/iconboy.webp';
@@ -16,6 +19,20 @@ import IconCaret from '~icons/basil/caret-down-outline';
 
 const router = useRouter();
 const { studentProfile, isLoading: isProfileLoading, fetchStudentProfile } = useStudentProfile();
+
+const classId = computed(() => studentProfile.value?.classid);
+const { isPlaceholderClass } = useClassDetails(classId);
+
+const showGradeModal = ref(false);
+
+const openGradeModal = (e) => {
+  e.preventDefault();
+  showGradeModal.value = true;
+};
+
+const closeGradeModal = () => {
+  showGradeModal.value = false;
+};
 
 const hideMobileNav = ref(false);
 provide('hideMobileNav', hideMobileNav);
@@ -68,10 +85,28 @@ const closeDropdownOnOutsideClick = (event) => {
   }
 };
 
+// Photo popup - shown once per session
+const popup = ref(null);
+const showPopup = ref(false);
+
+const dismissPopup = () => {
+  showPopup.value = false;
+  sessionStorage.setItem('popupShown', '1');
+};
+
 // Consolidated lifecycle hooks (Vue best practice - single onMounted/onUnmounted)
 onMounted(() => {
   fetchStudentProfile();
   document.addEventListener('click', closeDropdownOnOutsideClick);
+
+  if (!sessionStorage.getItem('popupShown')) {
+    popupAPI.getActive().then(({ data }) => {
+      if (data.data?.url) {
+        popup.value = data.data;
+        showPopup.value = true;
+      }
+    }).catch(() => console.warn('Failed to load popup'));
+  }
 });
 
 onUnmounted(() => {
@@ -205,7 +240,7 @@ const handleLogout = async () => {
               <router-link to="/student/courses"
                 class="nav-item flex items-center px-3 py-2 text-sm font-medium rounded-lg group">
                 <IconBook class="w-5 h-5 flex-shrink-0" />
-                <span class="sidebar-text ml-3 opacity-0 whitespace-nowrap overflow-hidden">My Courses</span>
+                <span class="sidebar-text ml-3 opacity-0 whitespace-nowrap overflow-hidden">{{ isPlaceholderClass ? 'Features' : 'My Courses' }}</span>
               </router-link>
             </li>
             <li>
@@ -239,7 +274,7 @@ const handleLogout = async () => {
             <li class="flex justify-center items-center">
               <router-link to="/student/courses" class="mobile-nav-item flex items-center justify-center gap-2">
                 <IconBook class="w-5 h-5" />
-                <span class="mobile-nav-label">Courses</span>
+                <span class="mobile-nav-label">{{ isPlaceholderClass ? 'Features' : 'Courses' }}</span>
               </router-link>
             </li>
             <li class="flex justify-center items-center">
@@ -263,6 +298,36 @@ const handleLogout = async () => {
         <router-view />
       </main>
     </div>
+
+    <Modal
+      alert
+      responsiveDrawer
+      :show="showGradeModal"
+      type="warning"
+      title="Feature Unavailable"
+      message="Grades are not available because you are not enrolled in any class yet. Join a program to get started."
+      @close="closeGradeModal"
+      @confirm="closeGradeModal"
+    />
+
+    <UModal :open="showPopup" @update:open="(v) => !v && dismissPopup()" :ui="{ content: 'max-w-lg' }">
+      <template #content>
+        <div class="relative">
+          <button
+            type="button"
+            @click="dismissPopup"
+            aria-label="Close popup"
+            class="absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-black/70 transition-colors"
+          >
+            &times;
+          </button>
+          <a v-if="popup?.link_url" :href="popup.link_url" target="_blank" rel="noopener noreferrer">
+            <img :src="popup?.url" class="w-full max-h-[80vh] object-contain rounded-lg" />
+          </a>
+          <img v-else :src="popup?.url" class="w-full max-h-[80vh] object-contain rounded-lg" />
+        </div>
+      </template>
+    </UModal>
   </div>
 </template>
 

@@ -12,7 +12,8 @@ import CryptoJS from 'crypto-js';
 
 // Get encryption key from environment variable
 // IMPORTANT: This should be a strong, unique key per environment
-const ENCRYPTION_KEY = import.meta.env.VITE_ENCRYPTION_KEY || 'default-dev-key-change-in-production';
+const ENCRYPTION_KEY = import.meta.env.VITE_ENCRYPTION_KEY;
+if (!ENCRYPTION_KEY) throw new Error('VITE_ENCRYPTION_KEY is required');
 
 /**
  * Encrypt data using AES
@@ -111,18 +112,6 @@ export const secureStorage = {
     localStorage.clear();
   },
 
-  /**
-   * Check if encryption key is default (security warning)
-   * @returns {boolean} True if using default key
-   */
-  isUsingDefaultKey() {
-    return ENCRYPTION_KEY === 'default-dev-key-change-in-production';
-  }
 };
-
-// Warn if using default encryption key in production
-if (import.meta.env.PROD && secureStorage.isUsingDefaultKey()) {
-  console.warn('⚠️ WARNING: Using default encryption key in production! Set VITE_ENCRYPTION_KEY in .env');
-}
 
 export default secureStorage;

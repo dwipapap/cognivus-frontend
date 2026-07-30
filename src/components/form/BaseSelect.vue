@@ -1,5 +1,4 @@
 <script setup>
-import { computed } from 'vue'
 
 const props = defineProps({
   modelValue: { type: [String, Number, Object, null], default: null },
@@ -18,12 +17,6 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:modelValue'])
-
-const items = computed(() => props.options)
-
-function onUpdate(value) {
-  emit('update:modelValue', value)
-}
 </script>
 
 <template>
@@ -35,7 +28,7 @@ function onUpdate(value) {
 
     <USelectMenu
       :model-value="modelValue"
-      :items="items"
+      :items="options"
       :placeholder="placeholder"
       :disabled="disabled"
       :searchable="searchable"
@@ -50,7 +43,7 @@ function onUpdate(value) {
         'shadow-input-rest',
         'transition-all duration-token-default'
       ]"
-      @update:model-value="onUpdate"
+      @update:model-value="(v) => emit('update:modelValue', v)"
     />
 
     <p v-if="error" class="text-xs text-brand-danger">{{ error }}</p>

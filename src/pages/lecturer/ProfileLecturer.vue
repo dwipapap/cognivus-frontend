@@ -12,7 +12,6 @@ import BaseButton from '../../components/ui/BaseButton.vue';
 import BaseInput from '../../components/form/BaseInput.vue';
 import BaseSelect from '../../components/form/BaseSelect.vue';
 import BaseTextarea from '../../components/form/BaseTextarea.vue';
-import BaseCard from '../../components/ui/BaseCard.vue';
 import LoadingSpinner from '../../components/ui/LoadingSpinner.vue';
 
 const { mapGenderToBackend } = useLecturerProfile();

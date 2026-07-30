@@ -8,6 +8,7 @@ import { courseAPI } from "../../services/api";
 import IconArrowRight from "~icons/basil/arrow-right-solid";
 import IconBookSolid from "~icons/basil/book-solid";
 import IconCalendar from "~icons/basil/calendar-outline";
+import IconLock from "~icons/lucide/lock";
 import { formatDate } from "../../utils/formatters";
 import PageHeaderCard from "../../components/student/PageHeaderCard.vue";
 
@@ -189,23 +190,17 @@ const courseLink = (courseId) => ({
             icon="i-lucide-sparkles"
             color="primary"
             variant="subtle"
-            title="Welcome aboard!"
-            description="You're currently in our free starter class. Join a program to get placed in a real class with a schedule and lecturer."
-            :actions="[
-                {
-                    label: 'View Programs',
-                    to: '/student/payment',
-                    trailingIcon: 'i-lucide-arrow-right',
-                    color: 'primary',
-                },
-            ]"
+            title="Welcome aboard! You're currently in our free starter class."
         />
 
         <section
-            v-if="!isPlaceholderClass"
             aria-label="Quick stats"
-            class="grid grid-cols-2 gap-3 md:gap-4"
+            class="relative"
         >
+            <div :class="[
+                'grid grid-cols-2 gap-3 md:gap-4 transition-all duration-300',
+                isPlaceholderClass ? 'blur-[3px] opacity-60 pointer-events-none' : ''
+            ]">
             <!-- Next Class Card -->
             <UCard
                 class="relative overflow-hidden ring-0 border-0 bg-sky-600 rounded-xl text-white shadow-sm flex flex-col min-h-[124px] md:min-h-[150px]"
@@ -265,6 +260,18 @@ const courseLink = (courseId) => ({
                     </div>
                 </template>
             </UCard>
+            </div>
+
+            <!-- Overlay when locked -->
+            <div v-if="isPlaceholderClass" class="absolute inset-0 flex items-center justify-center z-10">
+                <router-link
+                    to="/student/payment"
+                    class="inline-flex items-center gap-2 rounded-full border border-blue-600 bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-colors duration-200 hover:bg-blue-700 hover:border-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                >
+                    <IconLock class="w-4 h-4" />
+                    Unlock Dashboard
+                </router-link>
+            </div>
         </section>
 
         <section aria-labelledby="courses-heading">
@@ -277,7 +284,7 @@ const courseLink = (courseId) => ({
                             id="courses-heading"
                             class="text-2xl font-bold text-gray-900"
                         >
-                            My Courses
+                            {{ isPlaceholderClass ? 'Features' : 'My Courses' }}
                         </h2>
                         <p class="text-sm text-gray-500 mt-1">
                             {{ courses.length }} course{{
