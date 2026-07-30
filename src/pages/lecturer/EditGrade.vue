@@ -12,7 +12,7 @@
 
   <!-- Loading -->
   <div v-if="isLoading" class="max-w-2xl mx-auto py-20">
-    <LoadingSpinner size="lg" color="blue" :center="true" />
+    <LoadingSpinner size="lg" color="primary" :center="true" />
   </div>
 
   <!-- Error -->
@@ -192,13 +192,14 @@
 
           <!-- File Upload -->
           <div class="bg-white rounded-lg p-5 shadow-sm border border-blue-100/50">
-            <BaseFileUpload
+            <UFileUpload
               v-model="uploadFiles"
               label="Upload New Report File (Optional)"
               accept=".pdf,.doc,.docx"
-              :max-size="10"
               :multiple="false"
-              hint="PDF or Word document (max 10MB)"
+              description="PDF or Word document (max 10MB)"
+              color="primary"
+              class="rounded-token-lg border-dashed"
             />
           </div>
         </div>
@@ -281,7 +282,6 @@ import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { studentAPI, gradeAPI } from '../../services/api';
 import { useForm } from '../../composables/useForm';
-import BaseFileUpload from '../../components/form/BaseFileUpload.vue';
 import BaseInput from '../../components/form/BaseInput.vue';
 import BaseSelect from '../../components/form/BaseSelect.vue';
 import BaseTextarea from '../../components/form/BaseTextarea.vue';
@@ -403,7 +403,7 @@ const handleSave = async () => {
         date_taken: data.date_taken || null
       };
 
-      // Extract file from array (BaseFileUpload returns array even with multiple=false)
+      // Extract file from array (UFileUpload returns array even with multiple=false)
       const fileToUpload = uploadFiles.value && uploadFiles.value.length > 0 ? uploadFiles.value[0] : null;
       
       const response = await gradeAPI.updateGrade(gradeid, payload, fileToUpload);

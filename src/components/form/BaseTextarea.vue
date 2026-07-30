@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, useId } from 'vue'
 
 const props = defineProps({
   modelValue: { type: String, default: '' },
@@ -15,7 +15,8 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue'])
 
-const inputId = computed(() => props.id || `textarea-${Math.random().toString(36).slice(2, 9)}`)
+const fallbackId = useId()
+const inputId = computed(() => props.id || fallbackId)
 </script>
 
 <template>

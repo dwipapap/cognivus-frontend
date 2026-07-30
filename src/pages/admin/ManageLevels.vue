@@ -5,7 +5,7 @@ import { levelAPI } from '../../services/api';
 
 import { useConfirm } from '@/composables/useConfirm'
 
-import LevelForm from './LevelForm.vue';
+import NameDescriptionForm from './NameDescriptionForm.vue';
 
 const levels = ref([]);
 const isLoading = ref(true);
@@ -169,10 +169,16 @@ onMounted(() => {
       :dismissible="false"
     >
       <template #body>
-        <LevelForm
+        <NameDescriptionForm
           ref="levelFormRef"
-          :level="selectedLevel"
-          :is-edit-mode="isEditMode"
+          label="Level"
+          icon="i-lucide-layers"
+          hint="Define a milestone in the curriculum hierarchy."
+          name-hint="Descriptive. Communicates difficulty (e.g., Intermediate, Advanced)."
+          name-placeholder="e.g., Intermediate"
+          description-hint="Goals, prerequisites, and what this level covers."
+          :rows="5"
+          :model="selectedLevel"
           @submit="handleSave"
         />
       </template>

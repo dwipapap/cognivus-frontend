@@ -37,7 +37,7 @@ const handleImageError = (event) => {
 <template>
   <!-- Loading State -->
   <div v-if="isLoading" class="max-w-2xl mx-auto py-20">
-    <LoadingSpinner size="lg" color="blue" :center="true" />
+    <LoadingSpinner size="lg" color="primary" :center="true" />
     <p class="text-center text-gray-600 mt-4">Loading profile...</p>
   </div>
 

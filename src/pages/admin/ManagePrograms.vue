@@ -5,7 +5,7 @@ import { programAPI } from '../../services/api';
 
 import { useConfirm } from '@/composables/useConfirm'
 
-import ProgramForm from './ProgramForm.vue';
+import NameDescriptionForm from './NameDescriptionForm.vue';
 
 const programs = ref([]);
 const isLoading = ref(true);
@@ -174,10 +174,16 @@ onMounted(() => {
       :dismissible="false"
     >
       <template #body>
-        <ProgramForm
+        <NameDescriptionForm
           ref="programFormRef"
-          :program="selectedProgram"
-          :is-edit-mode="isEditMode"
+          label="Program"
+          icon="i-lucide-book-marked"
+          hint="Define the core identity of this academic program."
+          name-hint="Unique, descriptive. Visible to students during enrollment."
+          name-placeholder="e.g., Intensive English"
+          description-label="Program Description"
+          description-placeholder="Program objectives and curriculum structure"
+          :model="selectedProgram"
           @submit="handleSave"
         />
       </template>

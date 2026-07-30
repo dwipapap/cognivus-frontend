@@ -2,7 +2,6 @@
 import { ref, reactive, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import { useLecturerProfile } from '../../composables/useLecturerProfile';
 import { classAPI, courseAPI, courseFileAPI, levelAPI } from '../../services/api';
-import BaseFileUpload from '../../components/form/BaseFileUpload.vue';
 import BaseInput from '../../components/form/BaseInput.vue';
 import BaseTextarea from '../../components/form/BaseTextarea.vue';
 import BaseButton from '../../components/ui/BaseButton.vue';
@@ -455,7 +454,7 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
 
     <!-- Loading -->
     <div v-if="isLoading || profileLoading" class="max-w-2xl mx-auto py-20">
-      <LoadingSpinner size="lg" color="blue" :center="true" />
+      <LoadingSpinner size="lg" color="primary" :center="true" />
     </div>
 
     <!-- Main Content -->
@@ -711,13 +710,14 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown))
                       </div>
 
                       <!-- File Upload -->
-                      <BaseFileUpload
+                      <UFileUpload
                         v-model="uploadFiles"
                         label="Upload Materials"
                         accept=".pdf,.doc,.docx,.ppt,.pptx"
-                        :max-size="50"
                         :multiple="true"
-                        hint="PDF, Word, PowerPoint (Max 50MB)"
+                        description="PDF, Word, PowerPoint (Max 50MB)"
+                        color="primary"
+                        class="rounded-token-lg border-dashed"
                       />
 
                       <!-- Video Link Input -->
