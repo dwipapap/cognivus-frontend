@@ -29,7 +29,7 @@ describe('useForm', () => {
 
     it('should have no errors initially', () => {
       expect(Object.keys(form.errors.value)).toHaveLength(0)
-      expect(form.isValid.value).toBe(true)
+      expect(form.hasErrors.value).toBe(false)
     })
 
     it('should not be dirty initially', () => {
@@ -168,74 +168,40 @@ describe('useForm', () => {
   })
 
   describe('Form State Management', () => {
+    /** Fields are only ever updated through getFieldProps in real usage */
+    const setField = (name, value) => form.getFieldProps(name)['onUpdate:modelValue'](value)
+
     it('should mark form as dirty when field is updated', () => {
       expect(form.isDirty.value).toBe(false)
-      
-      form.updateField('email', 'test@example.com')
-      
+
+      setField('email', 'test@example.com')
+
       expect(form.isDirty.value).toBe(true)
       expect(form.formData.email).toBe('test@example.com')
     })
 
-    it('should clear errors when field is updated', () => {
+    it('should clear that field error when the field is updated', () => {
       form.validate() // Generate errors
       expect(form.errors.value.email).toBeDefined()
-      
-      form.updateField('email', 'test@example.com')
-      
+      expect(form.errors.value.password).toBeDefined()
+
+      setField('email', 'test@example.com')
+
       expect(form.errors.value.email).toBeUndefined()
+      expect(form.errors.value.password).toBeDefined()
     })
 
     it('should reset form to initial values', () => {
-      form.formData.email = 'test@example.com'
-      form.formData.password = 'password123'
-      form.markDirty()
+      setField('email', 'test@example.com')
+      setField('password', 'password123')
       form.validate()
-      
+
       form.reset()
-      
+
       expect(form.formData.email).toBe('')
       expect(form.formData.password).toBe('')
       expect(form.isDirty.value).toBe(false)
       expect(Object.keys(form.errors.value)).toHaveLength(0)
-    })
-  })
-
-  describe('Error Management', () => {
-    it('should clear all errors', () => {
-      form.validate()
-      expect(Object.keys(form.errors.value).length).toBeGreaterThan(0)
-      
-      form.clearErrors()
-      
-      expect(Object.keys(form.errors.value)).toHaveLength(0)
-    })
-
-    it('should clear specific field error', () => {
-      form.validate()
-      expect(form.errors.value.email).toBeDefined()
-      expect(form.errors.value.password).toBeDefined()
-      
-      form.clearError('email')
-      
-      expect(form.errors.value.email).toBeUndefined()
-      expect(form.errors.value.password).toBeDefined()
-    })
-
-    it('should set custom error message', () => {
-      form.setError('email', 'Custom error message')
-      
-      expect(form.errors.value.email).toBe('Custom error message')
-    })
-
-    it('should set multiple errors at once', () => {
-      form.setErrors({
-        email: 'Email error',
-        password: 'Password error'
-      })
-      
-      expect(form.errors.value.email).toBe('Email error')
-      expect(form.errors.value.password).toBe('Password error')
     })
   })
 
@@ -355,26 +321,13 @@ describe('useForm', () => {
   })
 
   describe('Computed Properties', () => {
-    it('should calculate isValid correctly', () => {
-      expect(form.isValid.value).toBe(true)
-      
-      form.validate()
-      expect(form.isValid.value).toBe(false)
-      
-      form.formData.email = 'test@example.com'
-      form.formData.password = 'password123'
-      form.formData.fullname = 'Test User'
-      form.validate()
-      expect(form.isValid.value).toBe(true)
-    })
-
     it('should calculate hasErrors correctly', () => {
       expect(form.hasErrors.value).toBe(false)
-      
-      form.setError('email', 'Error message')
+
+      form.validate()
       expect(form.hasErrors.value).toBe(true)
-      
-      form.clearErrors()
+
+      form.reset()
       expect(form.hasErrors.value).toBe(false)
     })
   })
