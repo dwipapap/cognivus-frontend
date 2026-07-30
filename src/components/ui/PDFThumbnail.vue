@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import type { PDFDocumentProxy, RenderTask } from 'pdfjs-dist'
+import { renderPageToCanvas, isRenderCancellation } from './pdfRender'
 
 const props = defineProps<{
   pdfDoc: PDFDocumentProxy | null
@@ -27,32 +28,19 @@ async function renderThumbnail() {
     
     const canvas = canvasRef.value
     if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-    
+
     const targetWidth = 160
     const viewport = page.getViewport({ scale: 1 })
-    const thumbnailScale = targetWidth / viewport.width
-    const scaledViewport = page.getViewport({ scale: thumbnailScale })
-    
-    const pixelRatio = window.devicePixelRatio || 1
-    canvas.width = Math.floor(scaledViewport.width * pixelRatio)
-    canvas.height = Math.floor(scaledViewport.height * pixelRatio)
-    canvas.style.width = Math.floor(scaledViewport.width) + 'px'
-    canvas.style.height = Math.floor(scaledViewport.height) + 'px'
-    
-    const transform = pixelRatio !== 1 ? [pixelRatio, 0, 0, pixelRatio, 0, 0] : undefined
+    const scaledViewport = page.getViewport({ scale: targetWidth / viewport.width })
 
-    renderTask = page.render({
-      canvasContext: ctx,
-      viewport: scaledViewport,
-      transform: transform as any
-    })
-    
+    const render = renderPageToCanvas(page, canvas, scaledViewport)
+    if (!render) return
+    renderTask = render.task
+
     await renderTask.promise
     isLoaded.value = true
   } catch (err: any) {
-    if (err.name !== 'RenderingCancelledException') {
+    if (!isRenderCancellation(err)) {
       console.error(`Error rendering thumbnail for page ${props.pageNum}:`, err)
     }
   } finally {

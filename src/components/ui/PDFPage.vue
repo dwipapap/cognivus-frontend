@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import type { PDFDocumentProxy, RenderTask } from 'pdfjs-dist'
+import { renderPageToCanvas, isRenderCancellation } from './pdfRender'
 
 interface PageWatermarkOptions {
   columns: number
@@ -51,35 +52,22 @@ async function renderPage() {
     
     const canvas = canvasRef.value
     if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-    
-    const outputScale = window.devicePixelRatio || 1
-    
-    canvas.width = Math.floor(viewport.width * outputScale)
-    canvas.height = Math.floor(viewport.height * outputScale)
-    canvas.style.width = Math.floor(viewport.width) + 'px'
-    canvas.style.height = Math.floor(viewport.height) + 'px'
-    
-    const transform = outputScale !== 1 ? [outputScale, 0, 0, outputScale, 0, 0] : undefined
 
     if (renderTask) {
       await renderTask.cancel()
     }
 
-    renderTask = page.render({
-      canvasContext: ctx,
-      viewport,
-      transform: transform as any
-    })
-    
+    const render = renderPageToCanvas(page, canvas, viewport)
+    if (!render) return
+    renderTask = render.task
+
     await renderTask.promise
     renderTask = null
-    
-    applyWatermark(canvas, ctx, viewport.width, viewport.height)
+
+    applyWatermark(canvas, render.ctx, viewport.width, viewport.height)
     isLoaded.value = true
   } catch (err: any) {
-    if (err.name !== 'RenderingCancelledException') {
+    if (!isRenderCancellation(err)) {
       console.error(`Error rendering page ${props.pageNum}:`, err)
     }
   } finally {

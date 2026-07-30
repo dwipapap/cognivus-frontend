@@ -1,7 +1,7 @@
 <script setup>
 import BaseButton from '../ui/BaseButton.vue'
+import PaymentSummaryDetails from './PaymentSummaryDetails.vue'
 import IconClose from '~icons/solar/close-circle-bold'
-import IconInfo from '~icons/basil/info-circle-outline'
 
 const props = defineProps({
   studentName: { type: String, default: '' },
@@ -32,40 +32,15 @@ const totalLabel = () => props.selected
         Payment Summary
       </h2>
 
-      <div class="mb-5 space-y-3">
-        <div class="flex items-center justify-between">
-          <span class="text-sm text-gray-500">Name</span>
-          <span class="ml-2 max-w-[60%] truncate text-right text-sm font-semibold text-gray-800">
-            {{ studentName }}
-          </span>
-        </div>
-        <div class="flex items-center justify-between">
-          <span class="text-sm text-gray-500">Email</span>
-          <span class="ml-2 max-w-[60%] truncate text-right text-sm font-semibold text-gray-800">
-            {{ studentEmail }}
-          </span>
-        </div>
-        <div class="flex items-center justify-between">
-          <span class="text-sm text-gray-500">Payment Type</span>
-          <span class="text-sm font-semibold text-gray-800">
-            {{ paymentTypeName }}
-          </span>
-        </div>
-        <div class="my-3 h-px bg-gray-100"></div>
-        <div
-          v-if="selected"
-          class="mb-3 flex items-start gap-2 rounded-lg border border-blue-100 bg-blue-50 p-3"
-        >
-          <IconInfo class="mt-0.5 h-4 w-4 flex-shrink-0 text-blue-600" />
-          <p class="text-xs text-blue-700">
-            Please verify the details above before confirming
-          </p>
-        </div>
-        <div class="flex items-center justify-between">
-          <span class="text-base font-bold text-gray-800">Total</span>
-          <span class="text-2xl font-bold text-blue-600">{{ totalLabel() }}</span>
-        </div>
-      </div>
+      <PaymentSummaryDetails
+        class="mb-5"
+        compact
+        :student-name="studentName"
+        :student-email="studentEmail"
+        :payment-type-name="paymentTypeName"
+        :selected="selected"
+        :total="totalLabel()"
+      />
 
       <BaseButton
         variant="primary"
@@ -124,40 +99,13 @@ const totalLabel = () => props.selected
     :ui="{ footer: 'px-4 pb-6 pt-2', body: 'px-4' }"
   >
     <template #body>
-      <div class="space-y-4">
-        <div class="flex items-center justify-between">
-          <span class="text-sm text-gray-500">Name</span>
-          <span class="ml-2 max-w-[60%] truncate text-right text-sm font-semibold text-gray-800">
-            {{ studentName }}
-          </span>
-        </div>
-        <div class="flex items-center justify-between">
-          <span class="text-sm text-gray-500">Email</span>
-          <span class="ml-2 max-w-[60%] truncate text-right text-sm font-semibold text-gray-800">
-            {{ studentEmail }}
-          </span>
-        </div>
-        <div class="flex items-center justify-between">
-          <span class="text-sm text-gray-500">Payment Type</span>
-          <span class="text-sm font-semibold text-gray-800">{{ paymentTypeName }}</span>
-        </div>
-        <div class="h-px bg-gray-100"></div>
-        <div
-          v-if="selected"
-          class="flex items-start gap-2 rounded-lg border border-blue-100 bg-blue-50 p-3"
-        >
-          <IconInfo class="mt-0.5 h-4 w-4 flex-shrink-0 text-blue-600" />
-          <p class="text-xs text-blue-700">
-            Please verify the details above before confirming
-          </p>
-        </div>
-        <div class="flex items-center justify-between">
-          <span class="text-base font-bold text-gray-800">Total</span>
-          <span class="text-2xl font-bold text-blue-600">
-            {{ formatCurrency(amount) }}
-          </span>
-        </div>
-      </div>
+      <PaymentSummaryDetails
+        :student-name="studentName"
+        :student-email="studentEmail"
+        :payment-type-name="paymentTypeName"
+        :selected="selected"
+        :total="formatCurrency(amount)"
+      />
     </template>
 
     <template #footer>
