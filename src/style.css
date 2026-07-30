@@ -1,6 +1,5 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
-@import "./assets/performance-glassmorphism.css";
 
 @theme {
   --color-primary: var(--color-brand-primary);

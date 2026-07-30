@@ -45,7 +45,6 @@ export default defineConfig({
         manualChunks: {
           'vendor-vue': ['vue', 'vue-router'],
           'vendor-http': ['axios'],
-          'vendor-crypto': ['crypto-js'],
           'vendor-ui': ['@nuxt/ui']
         }
       }

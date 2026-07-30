@@ -66,12 +66,6 @@ function toFormData(fields, file = null, fileKey = "file") {
 
 // User API endpoints
 export const userAPI = {
-  // Get user by ID
-  getUserById: (id) => apiClient.get(`/users/${id}`),
-
-  // Create new user
-  createUser: (userData) => apiClient.post("/users", userData),
-
   // Update user
   updateUser: (id, userData) => apiClient.put(`/users/${id}`, userData),
 
@@ -138,7 +132,6 @@ export const programAPI = {
 // Price API endpoints
 export const priceAPI = {
   getAllPrices: () => apiClient.get("/prices"),
-  getPriceById: (id) => apiClient.get(`/prices/${id}`),
   createPrice: (priceData) => apiClient.post("/prices", priceData),
   updatePrice: (id, priceData) => apiClient.put(`/prices/${id}`, priceData),
   deletePrice: (id) => apiClient.delete(`/prices/${id}`),
@@ -147,7 +140,6 @@ export const priceAPI = {
 /** Ancillary Price API - additional fees (exam, registration, etc.) */
 export const ancillaryPriceAPI = {
   getAll: () => apiClient.get("/ancillary_price"),
-  getById: (id) => apiClient.get(`/ancillary_price/${id}`),
   create: (data) => apiClient.post("/ancillary_price", data),
   update: (id, data) => apiClient.put(`/ancillary_price/${id}`, data),
   delete: (id) => apiClient.delete(`/ancillary_price/${id}`),
