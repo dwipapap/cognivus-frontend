@@ -1,4 +1,4 @@
-import { ref, onMounted, getCurrentInstance } from 'vue';
+import { ref, onMounted } from 'vue';
 import { lecturerAPI } from '../services/api';
 import { authStore } from '../store/auth';
 import { mapGenderToFrontend, mapGenderToBackend } from '../utils/gender';
@@ -115,13 +115,11 @@ export function useLecturerProfile() {
     }
   };
 
-  if (getCurrentInstance()) {
-    onMounted(() => {
-      if (authStore.role === 'lecturer') {
-        fetchLecturerProfile();
-      }
-    });
-  }
+  onMounted(() => {
+    if (authStore.role === 'lecturer') {
+      fetchLecturerProfile();
+    }
+  })
 
   return {
     lecturerProfile,

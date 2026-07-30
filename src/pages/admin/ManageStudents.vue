@@ -5,7 +5,7 @@ import { useRouter } from 'vue-router';
 import { studentAPI, userAPI, classAPI, levelAPI } from '../../services/api';
 import Modal from '../../components/ui/Modal.vue';
 import { useConfirm } from '@/composables/useConfirm'
-import StudentForm from './StudentForm.vue';
+import StudentForm from '../../components/admin/StudentForm.vue';
 
 const router = useRouter();
 const students = ref([]);

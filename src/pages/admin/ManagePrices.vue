@@ -4,7 +4,7 @@ import { useToast } from '@nuxt/ui/composables';
 import { priceAPI, levelAPI, programAPI, ancillaryPriceAPI } from '../../services/api';
 import { useConfirm } from '@/composables/useConfirm'
 
-import PriceForm from './PriceForm.vue';
+import PriceForm from '../../components/admin/PriceForm.vue';
 import { formatCurrency } from '../../utils/formatters';
 
 const toast = useToast();

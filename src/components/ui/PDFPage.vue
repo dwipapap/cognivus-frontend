@@ -66,7 +66,7 @@ async function renderPage() {
 
     applyWatermark(canvas, render.ctx, viewport.width, viewport.height)
     isLoaded.value = true
-  } catch (err: any) {
+  } catch (err: unknown) {
     if (!isRenderCancellation(err)) {
       console.error(`Error rendering page ${props.pageNum}:`, err)
     }

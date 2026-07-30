@@ -39,7 +39,7 @@ async function renderThumbnail() {
 
     await renderTask.promise
     isLoaded.value = true
-  } catch (err: any) {
+  } catch (err: unknown) {
     if (!isRenderCancellation(err)) {
       console.error(`Error rendering thumbnail for page ${props.pageNum}:`, err)
     }

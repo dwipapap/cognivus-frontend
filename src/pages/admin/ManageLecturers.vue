@@ -5,7 +5,7 @@ import { lecturerAPI, userAPI } from '../../services/api';
 import Modal from '../../components/ui/Modal.vue';
 
 import { useConfirm } from '@/composables/useConfirm'
-import LecturerForm from './LecturerForm.vue';
+import LecturerForm from '../../components/admin/LecturerForm.vue';
 
 const lecturers = ref([]);
 const isLoading = ref(true);

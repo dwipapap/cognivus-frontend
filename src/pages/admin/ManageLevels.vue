@@ -5,7 +5,7 @@ import { levelAPI } from '../../services/api';
 
 import { useConfirm } from '@/composables/useConfirm'
 
-import NameDescriptionForm from './NameDescriptionForm.vue';
+import NameDescriptionForm from '../../components/admin/NameDescriptionForm.vue';
 
 const levels = ref([]);
 const isLoading = ref(true);

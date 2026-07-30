@@ -5,7 +5,7 @@ import { programAPI } from '../../services/api';
 
 import { useConfirm } from '@/composables/useConfirm'
 
-import NameDescriptionForm from './NameDescriptionForm.vue';
+import NameDescriptionForm from '../../components/admin/NameDescriptionForm.vue';
 
 const programs = ref([]);
 const isLoading = ref(true);

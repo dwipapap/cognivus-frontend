@@ -33,4 +33,5 @@ export function renderPageToCanvas(
 }
 
 /** pdf.js throws this whenever a render is superseded; it is not an error. */
-export const isRenderCancellation = (err: any) => err?.name === 'RenderingCancelledException'
+export const isRenderCancellation = (err: unknown) =>
+  err instanceof Object && 'name' in err && (err as { name: string }).name === 'RenderingCancelledException'

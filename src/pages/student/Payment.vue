@@ -220,7 +220,7 @@ const handlePayment = async () => {
 
         // Sync stale pending payments before generating new token
         if (studentid) {
-            try { await paymentAPI.refreshPaymentStatus(studentid); } catch (_) {}
+            try { await paymentAPI.refreshPaymentStatus(studentid); } catch (_) { console.warn('refreshPaymentStatus failed:', _) }
         }
 
         // Generate token from backend
