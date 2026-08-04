@@ -85,13 +85,35 @@ const closeDropdownOnOutsideClick = (event) => {
   }
 };
 
-// Photo popup - shown once per session
+// Popup: either a class-expiry reminder or the global announcement image.
+// The image is shown once per tab; the reminder returns once a day, since a
+// reminder that disappears forever after one dismissal serves no purpose.
 const popup = ref(null);
 const showPopup = ref(false);
 
+const IMAGE_KEY = 'popupShown';
+const reminderKey = () => `popupReminder:${new Date().toISOString().slice(0, 10)}`;
+
+const seenKeyFor = (data) =>
+  data?.type === 'expiry' ? reminderKey() : IMAGE_KEY;
+
 const dismissPopup = () => {
   showPopup.value = false;
-  sessionStorage.setItem('popupShown', '1');
+};
+
+const expiryDate = computed(() => {
+  const raw = popup.value?.deactivate_at;
+  if (!raw) return '';
+  return new Date(raw).toLocaleDateString('id-ID', {
+    day: 'numeric', month: 'long', year: 'numeric'
+  });
+});
+
+const daysLeft = computed(() => Math.max(popup.value?.days_left ?? 0, 0));
+
+const goToPayment = () => {
+  dismissPopup();
+  router.push('/student/payment');
 };
 
 // Consolidated lifecycle hooks (Vue best practice - single onMounted/onUnmounted)
@@ -99,14 +121,20 @@ onMounted(() => {
   fetchStudentProfile();
   document.addEventListener('click', closeDropdownOnOutsideClick);
 
-  if (!sessionStorage.getItem('popupShown')) {
-    popupAPI.getActive().then(({ data }) => {
-      if (data.data?.url) {
-        popup.value = data.data;
-        showPopup.value = true;
-      }
-    }).catch(() => console.warn('Failed to load popup'));
-  }
+  popupAPI.getActive().then(({ data }) => {
+    const active = data.data;
+    if (!active) return;
+    if (active.type !== 'expiry' && !active.url) return;
+
+    // Mark as seen on display, not on dismiss: navigating away without
+    // closing it should not make it reappear on the next layout mount.
+    const key = seenKeyFor(active);
+    if (sessionStorage.getItem(key)) return;
+    sessionStorage.setItem(key, '1');
+
+    popup.value = active;
+    showPopup.value = true;
+  }).catch(() => console.warn('Failed to load popup'));
 });
 
 onUnmounted(() => {
@@ -321,10 +349,54 @@ const handleLogout = async () => {
           >
             &times;
           </button>
-          <a v-if="popup?.link_url" :href="popup.link_url" target="_blank" rel="noopener noreferrer">
-            <img :src="popup?.url" class="w-full max-h-[80vh] object-contain rounded-lg" />
-          </a>
-          <img v-else :src="popup?.url" class="w-full max-h-[80vh] object-contain rounded-lg" />
+          <!-- Class validity reminder -->
+          <div v-if="popup?.type === 'expiry'" class="p-6 pt-10 text-center">
+            <div class="mx-auto mb-4 w-14 h-14 rounded-full bg-amber-100 flex items-center justify-center">
+              <span class="text-3xl" aria-hidden="true">⏳</span>
+            </div>
+
+            <h2 class="text-xl font-semibold text-gray-800">
+              {{ daysLeft > 0 ? 'Masa Belajar Segera Berakhir' : 'Masa Belajar Telah Berakhir' }}
+            </h2>
+
+            <p class="mt-2 text-sm text-gray-600">
+              <template v-if="daysLeft > 0">
+                Masa berlaku kelasmu tersisa
+                <strong class="text-amber-600">{{ daysLeft }} hari</strong> lagi,
+                berakhir pada <strong>{{ expiryDate }}</strong>.
+                Perpanjang sekarang agar akses materimu tidak terputus.
+              </template>
+              <template v-else>
+                Masa berlaku kelasmu berakhir pada <strong>{{ expiryDate }}</strong>.
+                Perpanjang pembayaran untuk membuka kembali akses materi.
+              </template>
+            </p>
+
+            <div class="mt-6 flex flex-col sm:flex-row gap-2 justify-center">
+              <button
+                type="button"
+                @click="goToPayment"
+                class="px-5 py-2.5 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors"
+              >
+                Perpanjang Sekarang
+              </button>
+              <button
+                type="button"
+                @click="dismissPopup"
+                class="px-5 py-2.5 rounded-lg border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors"
+              >
+                Nanti Saja
+              </button>
+            </div>
+          </div>
+
+          <!-- Global announcement image -->
+          <template v-else>
+            <a v-if="popup?.link_url" :href="popup.link_url" target="_blank" rel="noopener noreferrer">
+              <img :src="popup?.url" class="w-full max-h-[80vh] object-contain rounded-lg" />
+            </a>
+            <img v-else :src="popup?.url" class="w-full max-h-[80vh] object-contain rounded-lg" />
+          </template>
         </div>
       </template>
     </UModal>
