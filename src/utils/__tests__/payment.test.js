@@ -2,10 +2,31 @@ import { describe, expect, it } from 'vitest'
 import {
   findPaymentByIdentity,
   findPriceForLevel,
-  getResumablePayment
+  getResumablePayment,
+  resolvePaymentTarget
 } from '../payment'
 
 describe('payment utilities', () => {
+  it('routes tuition selections to the numeric backend type', () => {
+    expect(resolvePaymentTarget('semester')).toEqual({ kind: 'tuition', type: 1 })
+    expect(resolvePaymentTarget('monthly')).toEqual({ kind: 'tuition', type: 2 })
+  })
+
+  it('routes ancillary selections to the row apid', () => {
+    expect(resolvePaymentTarget('ancillary_6')).toEqual({
+      kind: 'ancillary',
+      apid: 6
+    })
+  })
+
+  it('rejects payment types the backend cannot generate', () => {
+    expect(resolvePaymentTarget('ancillary_')).toBeNull()
+    expect(resolvePaymentTarget('ancillary_0')).toBeNull()
+    expect(resolvePaymentTarget('ancillary_abc')).toBeNull()
+    expect(resolvePaymentTarget('unknown')).toBeNull()
+    expect(resolvePaymentTarget(null)).toBeNull()
+  })
+
   it('returns only the price configured for the requested level', () => {
     const prices = [
       { levelid: 1, harga: 1000000 },

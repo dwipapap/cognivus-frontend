@@ -3,6 +3,33 @@ const normalizeIdentifier = (value) => {
   return String(value)
 }
 
+const ANCILLARY_PREFIX = 'ancillary_'
+
+// Backend numeric codes for POST /payment/generate/tuition
+const TUITION_TYPE_BY_ID = {
+  semester: 1,
+  monthly: 2
+}
+
+/**
+ * Resolve a selected payment type id into the backend request shape.
+ * Tuition goes to /payment/generate/tuition with a numeric `type`;
+ * ancillary goes to /payment/generate/ancillary with the row's `apid`.
+ * Returns null for anything unrecognised.
+ */
+export const resolvePaymentTarget = (paymentTypeId) => {
+  const type = TUITION_TYPE_BY_ID[paymentTypeId]
+  if (type) return { kind: 'tuition', type }
+
+  if (typeof paymentTypeId !== 'string') return null
+  if (!paymentTypeId.startsWith(ANCILLARY_PREFIX)) return null
+
+  const apid = Number(paymentTypeId.slice(ANCILLARY_PREFIX.length))
+  if (!Number.isInteger(apid) || apid <= 0) return null
+
+  return { kind: 'ancillary', apid }
+}
+
 export const findPriceForLevel = (prices, levelId) => {
   const normalizedLevelId = normalizeIdentifier(levelId)
 
