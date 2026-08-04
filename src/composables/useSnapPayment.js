@@ -76,22 +76,47 @@ export function useSnapPayment() {
         throw new Error('Midtrans Snap is not available');
       }
 
+      // Reka UI (Nuxt UI dialogs) sets `pointer-events: none` on <body> for as long
+      // as any modal/drawer/slideover layer is mounted. Midtrans Snap injects its
+      // popup straight into <body>, outside those layers, so it inherits the lock
+      // and becomes unclickable.
+      
+      // Force pointer-events auto immediately
+      document.body.style.pointerEvents = 'auto';
+      if (document.documentElement) {
+        document.documentElement.style.pointerEvents = 'auto';
+      }
+
+      // Bulletproof: use a MutationObserver to strictly prevent any framework
+      // from re-applying `pointer-events: none` while Snap is active.
+      const observer = new MutationObserver((mutations) => {
+        const bodyEvents = document.body.style.pointerEvents;
+        if (bodyEvents === 'none') {
+          document.body.style.pointerEvents = 'auto';
+        }
+      });
+      observer.observe(document.body, { attributes: true, attributeFilter: ['style'] });
+
       // Default callbacks with user overrides
       const defaultCallbacks = {
         onSuccess: (result) => {
+          observer.disconnect();
           paymentStatus.value = 'success';
           callbacks.onSuccess?.(result);
         },
         onPending: (result) => {
+          observer.disconnect();
           paymentStatus.value = 'pending';
           callbacks.onPending?.(result);
         },
         onError: (result) => {
+          observer.disconnect();
           paymentStatus.value = 'error';
           error.value = result.status_message || 'Payment failed';
           callbacks.onError?.(result);
         },
         onClose: () => {
+          observer.disconnect();
           if (!paymentStatus.value) {
             paymentStatus.value = 'closed';
           }

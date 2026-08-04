@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch, inject, onMounted, onUnmounted } from "vue";
+import { ref, computed, watch, inject, nextTick, onMounted, onUnmounted } from "vue";
 import { useToast } from '@nuxt/ui/composables';
 import { authStore } from "../../store/auth";
 import { useStudentProfile } from "../../composables/useStudentProfile";
@@ -208,6 +208,19 @@ const selectPaymentType = (typeId) => {
     resetPaymentState();
 };
 
+/**
+ * Hand the screen over to Midtrans Snap.
+ *
+ * Snap renders a full-screen overlay of its own, so leaving ours stacked
+ * behind it is noise. The pointer-events lock that Reka UI puts on <body> is
+ * handled in useSnapPayment, which covers every caller rather than this page.
+ */
+const releaseOverlaysForSnap = async () => {
+    showMobilePaymentSummary.value = false;
+    showContinueModal.value = false;
+    await nextTick();
+};
+
 const handlePayment = async () => {
     if (!canPay.value) return;
 
@@ -247,6 +260,8 @@ const handlePayment = async () => {
         }
 
         const { token, order_id } = response.data;
+
+        await releaseOverlaysForSnap();
 
         // Trigger Snap payment
         await pay(token, {
@@ -335,6 +350,8 @@ const handleContinuePayment = async () => {
         }
 
         continuePayment.value = refreshedPayment;
+
+        await releaseOverlaysForSnap();
 
         await pay(refreshedPayment.token, {
             onSuccess: (result) => {
