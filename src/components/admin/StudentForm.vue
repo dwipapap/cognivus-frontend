@@ -34,6 +34,10 @@
                 </template>
               </UInput>
             </UFormField>
+
+            <UFormField v-if="isEditMode" label="Masa berlaku s/d" description="Extended automatically on payment. Leave blank for no limit.">
+              <UInput v-bind="getFieldProps('deactivate_at')" type="date" class="w-full" />
+            </UFormField>
           </div>
         </div>
 
@@ -220,6 +224,7 @@ const { formData, errors, isSubmitting, hasErrors, isDirty, submit, getFieldProp
     username: '',
     email: '',
     password: '',
+    deactivate_at: '',
     fullname: '',
     gender: '',
     birthdate: '',
@@ -255,6 +260,9 @@ watch(() => props.student, (newStudent) => {
     formData.username = '';
     formData.email = '';
     formData.password = '';
+    formData.deactivate_at = newStudent.tbuser?.deactivate_at
+      ? newStudent.tbuser.deactivate_at.split('T')[0]
+      : '';
     formData.fullname = newStudent.fullname || '';
     formData.gender = newStudent.gender || '';
     formData.birthdate = newStudent.birthdate ? newStudent.birthdate.split('T')[0] : '';

@@ -190,6 +190,10 @@ const handleSave = async (formData) => {
       if (formData.email && formData.email.trim()) userData.email = formData.email;
       if (formData.password && formData.password.trim()) userData.password = formData.password;
       if (formData.username && formData.username.trim()) userData.username = formData.username;
+      // Class validity end date; blank clears it back to "no limit"
+      if (formData.deactivate_at !== undefined) {
+        userData.deactivate_at = formData.deactivate_at || null;
+      }
 
       // Update student data
       await studentAPI.updateStudent(userId, studentData);

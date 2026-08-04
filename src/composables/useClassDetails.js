@@ -1,5 +1,5 @@
 import { ref, computed, watch, toValue, isRef } from 'vue';
-import { classAPI, levelAPI, lecturerAPI, priceAPI, programAPI } from '../services/api';
+import { classAPI, levelAPI, lecturerAPI, programAPI } from '../services/api';
 
 const formatLecturerName = (fullname, gender) => {
   if (!fullname) return '-';
@@ -68,21 +68,14 @@ export function useClassDetails(classId) {
         lecturerName.value = '-';
       }
 
-      // Fetch program name based on level
-      if (classInfo.value.levelid) {
+      // Program comes straight off the class. It used to be reverse-looked-up
+      // through tbprice by levelid, which picked the wrong program whenever
+      // several programs shared a level.
+      if (classInfo.value.programid) {
         try {
-          const priceRes = await priceAPI.getAllPrices();
-          if (priceRes.data?.success && priceRes.data?.data) {
-            const matchingPrice = priceRes.data.data.find(
-              p => p.levelid === classInfo.value.levelid
-            );
-            
-            if (matchingPrice?.programid) {
-              const programRes = await programAPI.getProgramById(matchingPrice.programid);
-              if (programRes.data?.success) {
-                programName.value = programRes.data.data.name || '-';
-              }
-            }
+          const programRes = await programAPI.getProgramById(classInfo.value.programid);
+          if (programRes.data?.success) {
+            programName.value = programRes.data.data.name || '-';
           }
         } catch (err) {
           console.error('Error fetching program:', err);

@@ -224,12 +224,22 @@ export const dashboardAPI = {
 // Payment API endpoints
 export const paymentAPI = {
   /**
-   * Generate Midtrans Snap payment token
-   * @param {Object} paymentData - { email, amount, name, studentid, payment_type }
-   * @returns {Promise} - { success, redirect_url, token, order_id }
+   * Generate Midtrans Snap token for tuition (semester/monthly)
+   * @param {Object} paymentData - { email, amount, name, studentid, payment_type, type }
+   *   type: 1 = semester (tbprice.harga), 2 = monthly (tbprice.monthlyprice)
+   * @returns {Promise} - { success, redirect_url, token, orderid }
    */
-  generateToken: (paymentData) =>
-    apiClient.post("/payment/generate", paymentData),
+  generateTuitionToken: (paymentData) =>
+    apiClient.post("/payment/generate/tuition", paymentData),
+
+  /**
+   * Generate Midtrans Snap token for an ancillary fee
+   * @param {Object} paymentData - { email, amount, name, studentid, payment_type, apid }
+   *   apid: primary key of the tbancillary_price row being paid
+   * @returns {Promise} - { success, redirect_url, token, orderid }
+   */
+  generateAncillaryToken: (paymentData) =>
+    apiClient.post("/payment/generate/ancillary", paymentData),
 
   /**
    * Get payment history for a student
