@@ -137,7 +137,11 @@ const studentEmail = computed(() => {
 });
 
 const currentLevelPrice = computed(() =>
-    findPriceForLevel(prices.value, classInfo.value?.levelid),
+    findPriceForLevel(
+        prices.value,
+        classInfo.value?.levelid,
+        classInfo.value?.programid,
+    ),
 );
 
 const hasRegularPricing = computed(() => Boolean(currentLevelPrice.value));

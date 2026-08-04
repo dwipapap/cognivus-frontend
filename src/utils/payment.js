@@ -30,13 +30,25 @@ export const resolvePaymentTarget = (paymentTypeId) => {
   return { kind: 'ancillary', apid }
 }
 
-export const findPriceForLevel = (prices, levelId) => {
+/**
+ * Find the price row for a class.
+ *
+ * Several programs share the same levelid, so levelid alone is ambiguous and
+ * would pick whichever row happens to come first. The backend keys on
+ * programid + levelid (controllers/payment.js generateTuition), so matching on
+ * both here is what keeps the displayed price equal to the amount charged.
+ */
+export const findPriceForLevel = (prices, levelId, programId) => {
   const normalizedLevelId = normalizeIdentifier(levelId)
+  const normalizedProgramId = normalizeIdentifier(programId)
 
-  if (!normalizedLevelId || !Array.isArray(prices)) return null
+  if (!normalizedLevelId || !normalizedProgramId) return null
+  if (!Array.isArray(prices)) return null
 
   return prices.find(
-    (price) => normalizeIdentifier(price?.levelid) === normalizedLevelId
+    (price) =>
+      normalizeIdentifier(price?.levelid) === normalizedLevelId &&
+      normalizeIdentifier(price?.programid) === normalizedProgramId
   ) || null
 }
 

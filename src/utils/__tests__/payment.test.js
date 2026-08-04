@@ -29,13 +29,34 @@ describe('payment utilities', () => {
 
   it('returns only the price configured for the requested level', () => {
     const prices = [
-      { levelid: 1, harga: 1000000 },
-      { levelid: 2, harga: 2000000 }
+      { levelid: 1, programid: 21, harga: 1000000 },
+      { levelid: 2, programid: 21, harga: 2000000 }
     ]
 
-    expect(findPriceForLevel(prices, '2')).toEqual(prices[1])
-    expect(findPriceForLevel(prices, 3)).toBeNull()
-    expect(findPriceForLevel(prices, null)).toBeNull()
+    expect(findPriceForLevel(prices, '2', '21')).toEqual(prices[1])
+    expect(findPriceForLevel(prices, 3, 21)).toBeNull()
+    expect(findPriceForLevel(prices, null, 21)).toBeNull()
+  })
+
+  it('picks the row for the class programme when several share a level', () => {
+    // Real data: levelid 1 exists under three programmes at wildly different
+    // prices. Matching on levelid alone silently charged the first one.
+    const prices = [
+      { priceid: 4, levelid: 1, programid: 22, harga: 20000000 },
+      { priceid: 7, levelid: 1, programid: 21, harga: 2500000 },
+      { priceid: 6, levelid: 1, programid: 19, harga: 1000000000 }
+    ]
+
+    expect(findPriceForLevel(prices, 1, 21)).toEqual(prices[1])
+    expect(findPriceForLevel(prices, 1, 22)).toEqual(prices[0])
+  })
+
+  it('refuses to guess a price when the programme is unknown', () => {
+    const prices = [{ levelid: 1, programid: 21, harga: 2500000 }]
+
+    expect(findPriceForLevel(prices, 1, null)).toBeNull()
+    expect(findPriceForLevel(prices, 1, undefined)).toBeNull()
+    expect(findPriceForLevel(prices, 1, 99)).toBeNull()
   })
 
   it('reconciles a payment using stable backend identifiers', () => {
