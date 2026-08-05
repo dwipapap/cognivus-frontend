@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { studentAPI, gradeAPI, paymentAPI, classAPI, levelAPI } from '../../services/api';
+import { studentAPI, gradeAPI, paymentAPI, classAPI, levelAPI, readBlobErrorMessage } from '../../services/api';
 
 
 import { useToast } from '@nuxt/ui/composables';
@@ -142,7 +142,11 @@ const handleDownloadCertificate = async (gradeId, testType) => {
     window.URL.revokeObjectURL(url);
   } catch (error) {
     console.error('Error downloading certificate:', error);
-    toast.add({ title: 'Error', description: 'Failed to download certificate. Please try again.', color: 'error' });
+    toast.add({
+      title: 'Certificate unavailable',
+      description: await readBlobErrorMessage(error, 'Failed to download certificate. Please try again.'),
+      color: 'error'
+    });
   }
 };
 

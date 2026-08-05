@@ -24,6 +24,7 @@ const paginatedGrades = computed(() => {
 
 const gradeColumns = [
   { key: 'test_type', label: 'Test Type' },
+  { key: 'level', label: 'Certificate Level' },
   { key: 'listening_score', label: 'Listening' },
   { key: 'speaking_score', label: 'Speaking' },
   { key: 'reading_score', label: 'Reading' },
@@ -244,6 +245,11 @@ onMounted(() => {
     <div v-if="existingGrades.length > 0" class="mb-8">
       <h2 class="text-lg font-medium text-default mb-4">Existing Grades</h2>
       <UTable :data="paginatedGrades" :columns="gradeColumns" class="border border-default rounded-lg">
+        <!-- Without a level the certificate falls back to the student's class level. -->
+        <template #level-data="{ row }">
+          <span v-if="row.level">{{ row.level }}</span>
+          <span v-else class="text-muted italic">From class</span>
+        </template>
         <template #actions-data="{ row }">
           <div class="flex gap-2">
             <UButton color="primary" variant="solid" size="sm" @click="$router.push({ name: 'AdminEditGrade', params: { userid: row.studentid, gradeid: row.gradeid } })">

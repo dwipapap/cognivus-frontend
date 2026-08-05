@@ -49,6 +49,16 @@
         <USelect v-bind="getFieldProps('test_type')" :items="['Final Test', 'Midterm Exam', 'Final Exam', 'Completion']" placeholder="Select test type" />
       </UFormField>
 
+      <!-- Certificate details -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <UFormField label="Certificate Level" help="Leave empty to use the student's class level">
+          <USelect v-bind="getFieldProps('level')" :items="CERTIFICATE_LEVELS" placeholder="Select certificate level" />
+        </UFormField>
+        <UFormField label="Reference Number">
+          <UInput v-bind="getFieldProps('referencenumber')" placeholder="e.g. 4576989/ITTR/ADV/XI/2025" />
+        </UFormField>
+      </div>
+
       <!-- Skill Scores -->
       <div>
         <h3 class="text-xs font-semibold text-muted uppercase tracking-widest mb-4">Skill Scores</h3>
@@ -139,6 +149,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { studentAPI, gradeAPI } from '../../services/api';
 import { useForm } from '../../composables/useForm';
+import { CERTIFICATE_LEVELS } from '../../config/studentOptions';
 import { useConfirm } from '@/composables/useConfirm'
 
 const route = useRoute();
@@ -165,7 +176,9 @@ const { formData, errors, isSubmitting, hasErrors, submit, getFieldProps } = use
     grammar_score: null,
     final_score: null,
     description: '',
-    date_taken: ''
+    date_taken: '',
+    level: '',
+    referencenumber: ''
   },
   {
     test_type: ['required']
@@ -210,6 +223,8 @@ const fetchData = async () => {
               formData.final_score = grade.value.final_score;
               formData.description = grade.value.description || '';
               formData.date_taken = grade.value.date_taken ? new Date(grade.value.date_taken).toISOString().split('T')[0] : '';
+              formData.level = grade.value.level || '';
+              formData.referencenumber = grade.value.referencenumber || '';
             } else {
               errorMessage.value = `Grade with ID ${gradeid} not found for this student`;
             }
@@ -254,7 +269,9 @@ const handleSave = async () => {
         grammar_score: data.grammar_score || null,
         final_score: data.final_score ? Math.round(data.final_score) : null,
         description: data.description || null,
-        date_taken: data.date_taken || null
+        date_taken: data.date_taken || null,
+        level: data.level || null,
+        referencenumber: data.referencenumber || null
       };
 
       const fileToUpload = uploadFiles.value && uploadFiles.value.length > 0 ? uploadFiles.value[0] : null;

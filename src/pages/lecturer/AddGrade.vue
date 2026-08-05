@@ -93,6 +93,24 @@
             />
           </div>
 
+          <!-- Certificate details -->
+          <div class="bg-white rounded-lg p-5 shadow-sm border border-blue-100/50">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <BaseSelect
+                v-bind="getFieldProps('level')"
+                label="Certificate Level"
+                :options="CERTIFICATE_LEVELS"
+                placeholder="Defaults to the student's class level"
+              />
+
+              <BaseInput
+                v-bind="getFieldProps('referencenumber')"
+                label="Reference Number"
+                placeholder="e.g. 4576989/ITTR/ADV/XI/2025"
+              />
+            </div>
+          </div>
+
           <!-- Skill Scores Section -->
           <div class="bg-white rounded-lg p-5 shadow-sm border border-blue-100/50">
             <div class="flex items-center gap-2 mb-4">
@@ -265,6 +283,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { studentAPI, gradeAPI } from '../../services/api';
 import { useForm } from '../../composables/useForm';
+import { CERTIFICATE_LEVELS } from '../../config/studentOptions';
 import BaseInput from '../../components/form/BaseInput.vue';
 import BaseSelect from '../../components/form/BaseSelect.vue';
 import BaseTextarea from '../../components/form/BaseTextarea.vue';
@@ -291,7 +310,9 @@ const { formData, errors, isSubmitting, submit, getFieldProps } = useForm(
     vocabulary_score: null,
     final_score: null,
     description: '',
-    date_taken: new Date().toISOString().split('T')[0]
+    date_taken: new Date().toISOString().split('T')[0],
+    level: '',
+    referencenumber: ''
   },
   {
     test_type: ['required']
@@ -347,7 +368,9 @@ const handleSave = async () => {
         vocabulary_score: data.vocabulary_score || null,
         final_score: data.final_score ? Math.round(data.final_score) : null,
         description: data.description || null,
-        date_taken: data.date_taken || null
+        date_taken: data.date_taken || null,
+        level: data.level || null,
+        referencenumber: data.referencenumber || null
       };
 
       // Extract file from array (UFileUpload returns array even with multiple=false)

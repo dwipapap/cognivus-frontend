@@ -209,6 +209,27 @@ export const gradeAPI = {
     apiClient.get(`/grades/${gradeId}/certificate`, {
       responseType: "blob",
     }),
+  getCertificateLevels: () => apiClient.get("/grades/certificate-levels"),
+};
+
+/**
+ * Reads the message out of a failed blob request. Errors on a responseType
+ * "blob" call arrive as a Blob, so the JSON body has to be read back before it
+ * can be shown -- otherwise the user only ever sees a generic failure.
+ */
+export const readBlobErrorMessage = async (error, fallback) => {
+  try {
+    const data = error?.response?.data;
+    if (data instanceof Blob) {
+      const parsed = JSON.parse(await data.text());
+      if (parsed?.message) return parsed.message;
+    } else if (data?.message) {
+      return data.message;
+    }
+  } catch {
+    // Body was not JSON; fall through to the generic message.
+  }
+  return fallback;
 };
 
 // Course Files API endpoints

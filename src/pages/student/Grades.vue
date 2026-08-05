@@ -2,7 +2,8 @@
 import { ref, onMounted, watch, computed } from 'vue';
 import { useStudentProfile } from '../../composables/useStudentProfile';
 import { useClassDetails } from '../../composables/useClassDetails';
-import { gradeAPI } from '../../services/api';
+import { useToast } from '@nuxt/ui/composables';
+import { gradeAPI, readBlobErrorMessage } from '../../services/api';
 import Modal from '../../components/ui/Modal.vue';
 import IconWarning from '~icons/basil/info-triangle-outline';
 import IconUser from '~icons/basil/user-solid';
@@ -20,6 +21,8 @@ import IconInfo from '~icons/basil/info-circle-outline';
 import IconLock from '~icons/lucide/lock';
 import { formatDate, getAverageScore } from '../../utils/formatters';
 import PageHeaderCard from '../../components/student/PageHeaderCard.vue';
+
+const toast = useToast();
 
 const { studentProfile, isLoading: isProfileLoading, fetchStudentProfile } = useStudentProfile();
 
@@ -83,11 +86,23 @@ const fetchGrades = async () => {
   }
 };
 
+const isDownloadingCertificate = ref(false);
+
+// One certificate per student, issued for the most recent test they sat.
+const latestGrade = computed(() => {
+  if (!grades.value.length) return null;
+  return [...grades.value].sort((a, b) => {
+    const dateDiff = new Date(b.date_taken || 0) - new Date(a.date_taken || 0);
+    return dateDiff !== 0 ? dateDiff : b.gradeid - a.gradeid;
+  })[0];
+});
+
 /**
  * Download certificate for a specific grade
  */
 const handleDownloadCertificate = async (gradeId, testType) => {
   try {
+    isDownloadingCertificate.value = true;
     const response = await gradeAPI.downloadCertificate(gradeId);
 
     // Create blob URL from response
@@ -106,7 +121,13 @@ const handleDownloadCertificate = async (gradeId, testType) => {
     window.URL.revokeObjectURL(url);
   } catch (error) {
     console.error('Error downloading certificate:', error);
-    alert('Failed to download certificate. Please try again.');
+    toast.add({
+      title: 'Certificate unavailable',
+      description: await readBlobErrorMessage(error, 'Failed to download certificate. Please try again.'),
+      color: 'error'
+    });
+  } finally {
+    isDownloadingCertificate.value = false;
   }
 };
 
@@ -202,6 +223,17 @@ onMounted(() => {
     <div v-else class="bg-transparent p-0 md:bg-white md:border md:border-gray-200 md:rounded-lg md:p-8 md:shadow-sm md:hover:shadow-md md:transition-all md:duration-200">
       <div class="mb-4 md:mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h2 class="text-xl md:text-2xl font-bold text-gray-900">Test Results</h2>
+
+        <!-- One certificate per student, for their most recent test. -->
+        <button
+          v-if="latestGrade"
+          @click="handleDownloadCertificate(latestGrade.gradeid, latestGrade.test_type)"
+          :disabled="isDownloadingCertificate"
+          class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-full hover:bg-blue-700 hover:shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed transition-all shadow-md shrink-0"
+        >
+          <IconAward class="w-5 h-5" />
+          {{ isDownloadingCertificate ? 'Preparing...' : 'Download Certificate' }}
+        </button>
       </div>
 
           <!-- Empty State -->
