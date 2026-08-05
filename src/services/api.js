@@ -209,7 +209,6 @@ export const gradeAPI = {
     apiClient.get(`/grades/${gradeId}/certificate`, {
       responseType: "blob",
     }),
-  getCertificateLevels: () => apiClient.get("/grades/certificate-levels"),
 };
 
 /**
