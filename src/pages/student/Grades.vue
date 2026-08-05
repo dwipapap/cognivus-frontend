@@ -105,6 +105,16 @@ const handleDownloadCertificate = async (gradeId, testType) => {
     isDownloadingCertificate.value = true;
     const response = await gradeAPI.downloadCertificate(gradeId);
 
+    // Parse filename from Content-Disposition header if available
+    let filename = `Certificate_${testType || 'Test'}.pdf`;
+    const contentDisposition = response.headers?.['content-disposition'];
+    if (contentDisposition) {
+      const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
+      if (filenameMatch && filenameMatch.length === 2) {
+        filename = filenameMatch[1];
+      }
+    }
+
     // Create blob URL from response
     const blob = new Blob([response.data], { type: 'application/pdf' });
     const url = window.URL.createObjectURL(blob);
@@ -112,7 +122,7 @@ const handleDownloadCertificate = async (gradeId, testType) => {
     // Create temporary link and trigger download
     const link = document.createElement('a');
     link.href = url;
-    link.download = `Certificate_${testType || 'Test'}.pdf`;
+    link.download = filename;
     document.body.appendChild(link);
     link.click();
 
