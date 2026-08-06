@@ -207,7 +207,7 @@ async function handleVerifyOtp() {
       address: channel.value === 'email' ? email.value : '',
       phone: channel.value === 'whatsapp' ? phone.value : '',
       channel: channel.value,
-      otp: otpCode.value
+      otp: Array.isArray(otpCode.value) ? otpCode.value.join('') : String(otpCode.value ?? '')
     };
     const response = await authAPI.verifyOtp(payload);
     if (response.data.success) {
@@ -520,7 +520,7 @@ onUnmounted(() => {
 
           <div class="flex gap-3">
             <BaseButton
-              variant="secondary"
+              variant="danger"
               size="lg"
               @click="goBack"
               :disabled="isSubmitting"
@@ -580,7 +580,7 @@ onUnmounted(() => {
 
           <div class="flex gap-3">
             <BaseButton
-              variant="secondary"
+              variant="danger"
               size="lg"
               @click="goBack"
               :disabled="isSubmitting"

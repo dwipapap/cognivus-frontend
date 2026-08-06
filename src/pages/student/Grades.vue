@@ -88,15 +88,6 @@ const fetchGrades = async () => {
 
 const isDownloadingCertificate = ref(false);
 
-// One certificate per student, issued for the most recent test they sat.
-const latestGrade = computed(() => {
-  if (!grades.value.length) return null;
-  return [...grades.value].sort((a, b) => {
-    const dateDiff = new Date(b.date_taken || 0) - new Date(a.date_taken || 0);
-    return dateDiff !== 0 ? dateDiff : b.gradeid - a.gradeid;
-  })[0];
-});
-
 /**
  * Download certificate for a specific grade
  */
@@ -234,16 +225,7 @@ onMounted(() => {
       <div class="mb-4 md:mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <h2 class="text-xl md:text-2xl font-bold text-gray-900">Test Results</h2>
 
-        <!-- One certificate per student, for their most recent test. -->
-        <button
-          v-if="latestGrade"
-          @click="handleDownloadCertificate(latestGrade.gradeid, latestGrade.test_type)"
-          :disabled="isDownloadingCertificate"
-          class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-full hover:bg-blue-700 hover:shadow-lg disabled:bg-gray-400 disabled:cursor-not-allowed transition-all shadow-md shrink-0"
-        >
-          <IconAward class="w-5 h-5" />
-          {{ isDownloadingCertificate ? 'Preparing...' : 'Download Certificate' }}
-        </button>
+
       </div>
 
           <!-- Empty State -->
@@ -285,6 +267,13 @@ onMounted(() => {
                       >
                         {{ getAverageScore(grade) }}
                       </span>
+                      <button
+                        @click="handleDownloadCertificate(grade.gradeid, grade.test_type)"
+                        :disabled="isDownloadingCertificate"
+                        class="text-[10px] font-medium text-blue-600 hover:text-blue-800 underline block text-center mt-1"
+                      >
+                        Download Certificate
+                      </button>
                     </div>
                   </div>
 
@@ -344,6 +333,7 @@ onMounted(() => {
                   <th class="px-3 py-5 text-center text-sm font-semibold text-gray-700"><span class="inline-flex items-center gap-2 whitespace-nowrap"><IconBookOpen class="w-5 h-5 text-blue-600" />Vocabulary</span></th>
                   <th class="px-3 py-5 text-center text-sm font-semibold text-gray-700"><span class="inline-flex items-center gap-2 whitespace-nowrap"><IconAward class="w-5 h-5 text-amber-500" />Final Score</span></th>
                   <th class="px-4 py-5 text-left text-sm font-semibold text-gray-700"><span class="inline-flex items-center gap-2 whitespace-nowrap"><IconCalendar class="w-5 h-5 text-gray-500" />Date Taken</span></th>
+                  <th class="px-4 py-5 text-left text-sm font-semibold text-gray-700"><span class="inline-flex items-center gap-2 whitespace-nowrap"><IconAward class="w-5 h-5 text-blue-600" />Certificate</span></th>
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-100">
@@ -370,6 +360,16 @@ onMounted(() => {
                       <IconCalendar class="w-4 h-4 text-gray-400" />
                       {{ formatDate(grade.date_taken) }}
                     </div>
+                  </td>
+                  <td class="px-4 py-5">
+                    <button
+                      @click="handleDownloadCertificate(grade.gradeid, grade.test_type)"
+                      :disabled="isDownloadingCertificate"
+                      class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 rounded-full hover:bg-blue-100 hover:text-blue-800 disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <IconAward class="w-3.5 h-3.5" />
+                      Download
+                    </button>
                   </td>
                 </tr>
               </tbody>
