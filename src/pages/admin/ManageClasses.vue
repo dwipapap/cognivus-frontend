@@ -1,12 +1,13 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
 import { useToast } from '@nuxt/ui/composables';
-import { classAPI, levelAPI, lecturerAPI, studentAPI } from '../../services/api';
+import { classAPI, levelAPI, lecturerAPI, studentAPI, priceAPI } from '../../services/api';
 import Modal from '../../components/ui/Modal.vue';
 import { BRANCHES } from '../../config/branches';
 
 import { useConfirm } from '@/composables/useConfirm'
 import ClassForm from '../../components/admin/ClassForm.vue';
+import { findPriceForLevel } from '../../utils/payment';
 
 const toast = useToast();
 const classes = ref([]);
@@ -16,6 +17,8 @@ const students = ref([]);
 const isLoading = ref(true);
 const showFormModal = ref(false);
 const selectedClass = ref(null);
+
+const prices = ref([]);
 
 const { open: confirmOpen, message: confirmMessage, confirm, onConfirm, onCancel } = useConfirm()
 const { open: defaultConfirmOpen, message: defaultConfirmMessage, confirm: confirmDefault, onConfirm: onDefaultConfirm, onCancel: onDefaultCancel } = useConfirm()
@@ -97,10 +100,11 @@ const fetchClasses = async () => {
 
 const fetchOptions = async () => {
   try {
-    const [levelRes, lecturerRes, studentRes] = await Promise.all([
+    const [levelRes, lecturerRes, studentRes, priceRes] = await Promise.all([
       levelAPI.getAllLevels(),
       lecturerAPI.getAllLecturers(),
-      studentAPI.getAllStudents()
+      studentAPI.getAllStudents(),
+      priceAPI.getAllPrices()
     ]);
     
     if (levelRes.data.success) {
@@ -113,6 +117,10 @@ const fetchOptions = async () => {
 
     if (studentRes.data.success) {
       students.value = studentRes.data.data;
+    }
+
+    if (priceRes.data.success) {
+      prices.value = priceRes.data.data;
     }
   } catch (error) {
     console.error('Failed to fetch options:', error);
@@ -321,9 +329,19 @@ onMounted(() => {
 
               <!-- Level -->
               <td class="px-6 py-4">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-muted text-default">
-                  {{ getLevelName(classItem.levelid) }}
-                </span>
+                <div class="flex flex-col gap-1.5 items-start">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-muted text-default">
+                    {{ getLevelName(classItem.levelid) }}
+                  </span>
+                  <UTooltip
+                    v-if="classItem.programid && classItem.levelid && !findPriceForLevel(prices, classItem.levelid, classItem.programid)"
+                    text="No price configured for this level + program. Students cannot pay tuition."
+                  >
+                    <UBadge color="orange" variant="subtle" size="sm" icon="i-lucide-alert-circle">
+                      No Price
+                    </UBadge>
+                  </UTooltip>
+                </div>
               </td>
 
               <!-- Lecturer -->
