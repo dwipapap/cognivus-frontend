@@ -18,6 +18,10 @@ const props = defineProps({
     type: Array,
     default: () => []
   },
+  programs: {
+    type: Array,
+    default: () => []
+  },
   lecturers: {
     type: Array,
     default: () => []
@@ -68,6 +72,7 @@ watch(() => props.classItem, (newVal) => {
     formData.branch = newVal.branch || '';
     formData.description = newVal.description || '';
     formData.levelid = newVal.levelid ? Number(newVal.levelid) : '';
+    formData.programid = newVal.programid ? Number(newVal.programid) : '';
     formData.lecturerid = newVal.lecturerid ? Number(newVal.lecturerid) : '';
     formData.schedule_day = newVal.schedule_day || '';
     formData.schedule_time = newVal.schedule_time || '';
@@ -157,6 +162,10 @@ const handleStudentSave = async (studentData) => {
 
                 <UFormField label="Academic Level" required>
                   <USelect v-bind="getFieldProps('levelid')" :items="levels.map(l => ({ label: l.name, value: l.levelid }))" placeholder="Select Level" class="w-full" />
+                </UFormField>
+
+                <UFormField label="Program">
+                  <USelect v-bind="getFieldProps('programid')" :items="programs.map(p => ({ label: p.name, value: p.programid }))" placeholder="Select Program (Optional)" clearable class="w-full" />
                 </UFormField>
 
                 <UFormField label="Description" description="Class objectives, requirements, or other notes.">

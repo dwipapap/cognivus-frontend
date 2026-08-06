@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
 import { useToast } from '@nuxt/ui/composables';
-import { classAPI, levelAPI, lecturerAPI, studentAPI, priceAPI } from '../../services/api';
+import { classAPI, levelAPI, lecturerAPI, studentAPI, priceAPI, programAPI } from '../../services/api';
 import Modal from '../../components/ui/Modal.vue';
 import { BRANCHES } from '../../config/branches';
 
@@ -12,6 +12,7 @@ import { findPriceForLevel } from '../../utils/payment';
 const toast = useToast();
 const classes = ref([]);
 const levels = ref([]);
+const programs = ref([]);
 const lecturers = ref([]);
 const students = ref([]);
 const isLoading = ref(true);
@@ -100,11 +101,12 @@ const fetchClasses = async () => {
 
 const fetchOptions = async () => {
   try {
-    const [levelRes, lecturerRes, studentRes, priceRes] = await Promise.all([
+    const [levelRes, lecturerRes, studentRes, priceRes, programRes] = await Promise.all([
       levelAPI.getAllLevels(),
       lecturerAPI.getAllLecturers(),
       studentAPI.getAllStudents(),
-      priceAPI.getAllPrices()
+      priceAPI.getAllPrices(),
+      programAPI.getAllPrograms()
     ]);
     
     if (levelRes.data.success) {
@@ -121,6 +123,10 @@ const fetchOptions = async () => {
 
     if (priceRes.data.success) {
       prices.value = priceRes.data.data;
+    }
+
+    if (programRes.data.success) {
+      programs.value = programRes.data.data;
     }
   } catch (error) {
     console.error('Failed to fetch options:', error);
@@ -415,6 +421,7 @@ onMounted(() => {
           :class-item="selectedClass"
           :is-edit-mode="isEditMode"
           :levels="levels"
+          :programs="programs"
           :lecturers="lecturers"
           :all-students="students"
           :all-classes="classes"
