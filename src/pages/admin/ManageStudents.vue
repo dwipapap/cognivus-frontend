@@ -20,6 +20,7 @@ const { open: confirmOpen, message: confirmMessage, confirm, onConfirm, onCancel
 const isEditMode = ref(false);
 const selectedClassFilter = ref('');
 const searchQuery = ref('');
+const sortOrder = ref('asc');
 const studentPage = ref(1);
 const studentPageSize = 20;
 
@@ -50,19 +51,27 @@ const enrichedClasses = computed(() => {
 /** Filtered students based on class and name */
 const filteredStudents = computed(() => {
   const query = searchQuery.value.trim().toLowerCase();
-  return students.value.filter(student =>
+  const result = students.value.filter(student =>
     (!selectedClassFilter.value || student.classid === selectedClassFilter.value) &&
     (!query || student.fullname?.toLowerCase().includes(query))
   );
+  result.sort((a, b) => {
+    const nameA = a.fullname || '';
+    const nameB = b.fullname || '';
+    const cmp = nameA.localeCompare(nameB, undefined, { sensitivity: 'base' });
+    return sortOrder.value === 'desc' ? -cmp : cmp;
+  });
+  return result;
 });
 
-watch([selectedClassFilter, searchQuery], () => {
+watch([selectedClassFilter, searchQuery, sortOrder], () => {
   studentPage.value = 1;
 });
 
 const clearFilters = () => {
   selectedClassFilter.value = '';
   searchQuery.value = '';
+  sortOrder.value = 'asc';
 };
 
 const paginatedStudents = computed(() => {
@@ -295,7 +304,17 @@ onMounted(() => {
               <USelect v-model="selectedClassFilter" :items="classes.map(cls => ({ label: cls.class_code + (cls.branch ? ' (' + cls.branch + ')' : '') + ' - ' + (cls.level?.name || 'Unknown Level'), value: cls.classid }))" placeholder="All Classes" clearable />
             </UFormField>
           </div>
-          <UButton v-if="selectedClassFilter || searchQuery" @click="clearFilters" color="neutral" variant="ghost" size="xs" icon="i-lucide-x">
+          <UButton
+            @click="sortOrder = sortOrder === 'asc' ? 'desc' : 'asc'"
+            color="neutral"
+            variant="soft"
+            :icon="sortOrder === 'asc' ? 'i-lucide-arrow-down-az' : 'i-lucide-arrow-up-az'"
+            class="shrink-0"
+            title="Sort by name A-Z / Z-A"
+          >
+            {{ sortOrder === 'asc' ? 'A-Z' : 'Z-A' }}
+          </UButton>
+          <UButton v-if="selectedClassFilter || searchQuery || sortOrder !== 'asc'" @click="clearFilters" color="neutral" variant="ghost" size="xs" icon="i-lucide-x">
             Clear Filters
           </UButton>
         </div>
