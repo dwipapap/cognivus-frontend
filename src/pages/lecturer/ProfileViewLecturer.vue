@@ -1,13 +1,52 @@
 <script setup>
-import { computed } from 'vue';
+import { ref, computed } from 'vue';
 import { authStore } from '../../store/auth';
 import { useLecturerProfile } from '../../composables/useLecturerProfile';
-import LoadingSpinner from '../../components/ui/LoadingSpinner.vue';
 import iconBoyImage from '../../assets/iconboy.webp';
 import iconGirlImage from '../../assets/icongirl.webp';
-import { formatDate } from '../../utils/formatters';
+import { formatDate, calculateAge } from '../../utils/formatters';
+import OtpFlow from '../../components/ui/OtpFlow.vue';
+import Modal from '../../components/ui/Modal.vue';
+import ProfileSection from '../../components/ui/ProfileSection.vue';
+import ProfileField from '../../components/ui/ProfileField.vue';
 
 const { lecturerProfile, isLoading, errorMessage } = useLecturerProfile();
+
+// Change Password state
+const showChangePassword = ref(false);
+const showModal = ref(false);
+const modalType = ref('info');
+const modalMessage = ref('');
+
+// Computed properties for prefilling OtpFlow
+const userEmail = computed(() => {
+  return authStore.user?.email || '';
+});
+
+const userPhone = computed(() => {
+  return lecturerProfile.value?.phone || '';
+});
+
+const openChangePassword = () => {
+  showChangePassword.value = true;
+};
+
+const closeChangePassword = () => {
+  showChangePassword.value = false;
+};
+
+const handleChangePasswordSuccess = () => {
+  closeChangePassword();
+  modalType.value = 'success';
+  modalMessage.value = 'Your password has been successfully changed.';
+  showModal.value = true;
+};
+
+const closeModal = () => {
+  showModal.value = false;
+  modalType.value = 'info';
+  modalMessage.value = '';
+};
 
 /** Gender-based avatar computed property */
 const avatarUrl = computed(() => {
@@ -15,7 +54,7 @@ const avatarUrl = computed(() => {
   if (authStore.user?.user_metadata?.avatar_url) {
     return authStore.user.user_metadata.avatar_url;
   }
-  
+
   // Use gender-based icon from lecturer profile
   const gender = lecturerProfile.value?.gender;
   if (gender === 'Laki-laki' || gender === 'L') {
@@ -23,7 +62,7 @@ const avatarUrl = computed(() => {
   } else if (gender === 'Perempuan' || gender === 'P') {
     return iconGirlImage;
   }
-  
+
   // Default fallback
   return iconBoyImage;
 });
@@ -35,10 +74,53 @@ const handleImageError = (event) => {
 </script>
 
 <template>
+  <!-- Welcome Banner -->
+  <div class="relative bg-gradient-to-r from-blue-500 via-blue-600 to-indigo-600 rounded-xl shadow-lg mb-8 overflow-hidden">
+    <!-- Diagonal ID Card Graphics -->
+    <div class="absolute top-0 right-0 w-1/2 h-full pointer-events-none overflow-hidden">
+      <div class="absolute -top-10 -right-10 w-40 h-48 bg-indigo-400/30 rounded-lg transform rotate-12 flex items-center justify-center">
+        <svg class="w-20 h-20 text-white/40" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+          <path fill-rule="evenodd" d="M4 4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H4Zm10 5a1 1 0 0 1 1-1h3a1 1 0 1 1 0 2h-3a1 1 0 0 1-1-1Zm0 3a1 1 0 0 1 1-1h3a1 1 0 1 1 0 2h-3a1 1 0 0 1-1-1Zm0 3a1 1 0 0 1 1-1h3a1 1 0 1 1 0 2h-3a1 1 0 0 1-1-1Zm-8-5a3 3 0 1 1 6 0 3 3 0 0 1-6 0Zm1.942 4a3 3 0 0 0-2.847 2.051l-.044.133-.004.012c-.042.126-.055.167-.042.195.006.013.02.023.038.039.032.025.08.064.146.155A1 1 0 0 0 6 17h6a1 1 0 0 0 .811-.415.713.713 0 0 1 .146-.155c.019-.016.031-.026.038-.04.014-.027 0-.068-.042-.194l-.004-.012-.044-.133A3 3 0 0 0 10.059 14H7.942Z" clip-rule="evenodd"/>
+        </svg>
+      </div>
+      <div class="absolute top-20 -right-5 w-32 h-40 bg-indigo-300/40 rounded-lg transform rotate-12 flex items-center justify-center">
+        <svg class="w-16 h-16 text-white/40" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+          <path fill-rule="evenodd" d="M4 4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H4Zm10 5a1 1 0 0 1 1-1h3a1 1 0 1 1 0 2h-3a1 1 0 0 1-1-1Zm0 3a1 1 0 0 1 1-1h3a1 1 0 1 1 0 2h-3a1 1 0 0 1-1-1Zm0 3a1 1 0 0 1 1-1h3a1 1 0 1 1 0 2h-3a1 1 0 0 1-1-1Zm-8-5a3 3 0 1 1 6 0 3 3 0 0 1-6 0Zm1.942 4a3 3 0 0 0-2.847 2.051l-.044.133-.004.012c-.042.126-.055.167-.042.195.006.013.02.023.038.039.032.025.08.064.146.155A1 1 0 0 0 6 17h6a1 1 0 0 0 .811-.415.713.713 0 0 1 .146-.155c.019-.016.031-.026.038-.04.014-.027 0-.068-.042-.194l-.004-.012-.044-.133A3 3 0 0 0 10.059 14H7.942Z" clip-rule="evenodd"/>
+        </svg>
+      </div>
+      <div class="absolute top-40 right-10 w-28 h-36 bg-white/20 rounded-lg transform rotate-12 flex items-center justify-center">
+        <svg class="w-14 h-14 text-white/40" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+          <path fill-rule="evenodd" d="M4 4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H4Zm10 5a1 1 0 0 1 1-1h3a1 1 0 1 1 0 2h-3a1 1 0 0 1-1-1Zm0 3a1 1 0 0 1 1-1h3a1 1 0 1 1 0 2h-3a1 1 0 0 1-1-1Zm0 3a1 1 0 0 1 1-1h3a1 1 0 1 1 0 2h-3a1 1 0 0 1-1-1Zm-8-5a3 3 0 1 1 6 0 3 3 0 0 1-6 0Zm1.942 4a3 3 0 0 0-2.847 2.051l-.044.133-.004.012c-.042.126-.055.167-.042.195.006.013.02.023.038.039.032.025.08.064.146.155A1 1 0 0 0 6 17h6a1 1 0 0 0 .811-.415.713.713 0 0 1 .146-.155c.019-.016.031-.026.038-.04.014-.027 0-.068-.042-.194l-.004-.012-.044-.133A3 3 0 0 0 10.059 14H7.942Z" clip-rule="evenodd"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="relative p-5 md:p-8 lg:p-12 z-10">
+      <h1 class="text-2xl md:text-4xl lg:text-6xl font-bold text-white mb-6 leading-tight">
+        My Profile
+      </h1>
+      <p class="text-white/80 text-base lg:text-lg leading-relaxed max-w-lg">
+        View and manage your personal information and account details.
+      </p>
+    </div>
+  </div>
+
   <!-- Loading State -->
-  <div v-if="isLoading" class="max-w-2xl mx-auto py-20">
-    <LoadingSpinner size="lg" color="primary" :center="true" />
-    <p class="text-center text-gray-600 mt-4">Loading profile...</p>
+  <div v-if="isLoading" class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8 animate-pulse">
+    <div class="lg:col-span-1 bg-blue-100 rounded-xl p-10 shadow-lg"></div>
+    <div class="lg:col-span-2 bg-blue-50 rounded-xl p-10 shadow-lg">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
+        <div class="h-12 bg-blue-200 rounded-full"></div>
+        <div class="h-12 bg-blue-200 rounded-full"></div>
+        <div class="h-12 bg-blue-200 rounded-full"></div>
+        <div class="h-12 bg-blue-200 rounded-full"></div>
+        <div class="h-12 bg-blue-200 rounded-full"></div>
+        <div class="h-12 bg-blue-200 rounded-full"></div>
+        <div class="h-12 bg-blue-200 rounded-full"></div>
+        <div class="h-12 bg-blue-200 rounded-full"></div>
+      </div>
+    </div>
   </div>
 
   <!-- Error State -->
@@ -53,138 +135,61 @@ const handleImageError = (event) => {
   </div>
 
   <!-- Profile Content -->
-  <div v-else-if="lecturerProfile" class="space-y-8 mb-8">
-    <!-- Profile Header Card -->
-    <div class="relative bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg overflow-hidden">
-      <div class="absolute top-0 right-0 w-1/2 h-full pointer-events-none overflow-hidden opacity-20">
-        <div class="absolute -top-10 -right-10 w-40 h-48 bg-white rounded-lg transform rotate-12"></div>
-        <div class="absolute top-20 -right-5 w-32 h-40 bg-white rounded-lg transform rotate-12"></div>
-        <div class="absolute top-40 right-10 w-28 h-36 bg-white rounded-lg transform rotate-12"></div>
-      </div>
+  <div v-else-if="lecturerProfile" class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8">
+    <!-- Left Profile Card -->
+    <div class="lg:col-span-1">
+      <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-10 text-white text-center shadow-lg">
+        <img
+          :src="avatarUrl"
+          :alt="lecturerProfile.fullname"
+          class="w-24 h-24 md:w-48 md:h-48 rounded-full mx-auto object-cover border-4 border-white shadow-xl mb-6"
+          @error="handleImageError"
+        />
 
-      <div class="relative p-8 md:p-12 z-10">
-        <div class="flex flex-col md:flex-row items-center gap-8">
-          <!-- Avatar -->
-          <img 
-            :src="avatarUrl" 
-            :alt="lecturerProfile.fullname"
-            class="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-4 border-white shadow-xl flex-shrink-0"
-            @error="handleImageError"
-          />
-          
-          <!-- Profile Info -->
-          <div class="flex-1 text-center md:text-left">
-            <h1 class="text-3xl md:text-4xl font-bold text-white mb-3">{{ lecturerProfile.fullname || 'Lecturer' }}</h1>
-            <div class="flex flex-wrap gap-3 justify-center md:justify-start mb-4">
-              <!-- Education Badge -->
-              <div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 border border-white/30">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0v6m0-6l4.5-2.5M12 14L7.5 11.5" />
-                </svg>
-                <span class="text-white font-medium text-sm">{{ lecturerProfile.lasteducation || 'Education Level' }}</span>
-              </div>
-              
-              <!-- Email Badge -->
-              <div class="inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 border border-white/30">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                <span class="text-white font-medium text-sm break-all">{{ authStore.user?.email || '-' }}</span>
-              </div>
-            </div>
-            <router-link 
-              to="/lecturer/profile"
-              class="inline-flex items-center gap-2 px-6 py-3 bg-white text-blue-600 font-semibold rounded-full hover:bg-blue-50 transition-all shadow-md hover:shadow-lg"
-            >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-              </svg>
-              Edit Profile
-            </router-link>
-          </div>
-        </div>
+        <h2 class="text-3xl font-bold mb-3">{{ lecturerProfile.fullname || 'Lecturer' }}</h2>
+        <p class="text-lg md:text-xl font-semibold text-white/95 mb-2">Teacher</p>
+        <p class="text-base text-white/80 mb-8 break-words px-2">{{ authStore.user?.email || '-' }}</p>
+
+        <router-link
+          to="/lecturer/profile"
+          class="inline-block w-full px-8 py-3.5 bg-white text-blue-600 font-semibold text-base rounded-full hover:bg-blue-50 transition-colors shadow-md"
+        >
+          Edit Profile
+        </router-link>
+
+        <button type="button" @click="openChangePassword"
+          class="w-full mt-3 px-6 py-3 bg-gradient-to-r from-blue-700 to-indigo-700 text-white font-semibold text-base rounded-full hover:from-blue-800 hover:to-indigo-800 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+          Change Password
+        </button>
       </div>
     </div>
 
-    <!-- Profile Details Card -->
-    <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-lg p-6 md:p-8 shadow-sm">
-      <div class="flex items-center gap-3 mb-6">
-        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-sm">
-          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-          </svg>
+    <!-- Right Details Card -->
+    <div class="lg:col-span-2 flex flex-col gap-4 md:gap-6">
+      <!-- Personal Information -->
+      <ProfileSection title="Personal Information" :default-open="true">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
+          <ProfileField label="Full Name" :value="lecturerProfile.fullname" />
+          <ProfileField label="Birth Date" :value="formatDate(lecturerProfile.birthdate)" />
+          <ProfileField label="Birth Place" :value="lecturerProfile.birthplace" />
+          <ProfileField label="Age" :value="calculateAge(lecturerProfile.birthdate)" />
+          <ProfileField label="Gender" :value="lecturerProfile.gender" />
+          <ProfileField label="Phone" :value="lecturerProfile.phone" />
+          <ProfileField label="Address" :value="lecturerProfile.address" :truncate="true" />
+          <ProfileField label="Last Education" :value="lecturerProfile.lasteducation" />
         </div>
-        <h2 class="text-xl md:text-2xl font-bold text-gray-900">Personal Information</h2>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Full Name -->
-        <div class="bg-white rounded-lg p-5 shadow-sm border border-blue-100/50">
-          <p class="text-sm font-semibold text-blue-600 mb-2 flex items-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-            Full Name
-          </p>
-          <p class="text-base font-medium text-gray-900">{{ lecturerProfile.fullname || '-' }}</p>
-        </div>
-
-        <!-- Birth Date -->
-        <div class="bg-white rounded-lg p-5 shadow-sm border border-blue-100/50">
-          <p class="text-sm font-semibold text-blue-600 mb-2 flex items-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            Birth Date
-          </p>
-          <p class="text-base font-medium text-gray-900">{{ formatDate(lecturerProfile.birthdate) }}</p>
-        </div>
-
-        <!-- Birth Place -->
-        <div class="bg-white rounded-lg p-5 shadow-sm border border-blue-100/50">
-          <p class="text-sm font-semibold text-blue-600 mb-2 flex items-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-            Birth Place
-          </p>
-          <p class="text-base font-medium text-gray-900">{{ lecturerProfile.birthplace || '-' }}</p>
-        </div>
-
-        <!-- Gender -->
-        <div class="bg-white rounded-lg p-5 shadow-sm border border-blue-100/50">
-          <p class="text-sm font-semibold text-blue-600 mb-2 flex items-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-            Gender
-          </p>
-          <p class="text-base font-medium text-gray-900">{{ lecturerProfile.gender || '-' }}</p>
-        </div>
-
-        <!-- Phone -->
-        <div class="bg-white rounded-lg p-5 shadow-sm border border-blue-100/50">
-          <p class="text-sm font-semibold text-blue-600 mb-2 flex items-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-            </svg>
-            Phone
-          </p>
-          <p class="text-base font-medium text-gray-900">{{ lecturerProfile.phone || '-' }}</p>
-        </div>
-
-        <!-- Address -->
-        <div class="bg-white rounded-lg p-5 shadow-sm border border-blue-100/50">
-          <p class="text-sm font-semibold text-blue-600 mb-2 flex items-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
-            Address
-          </p>
-          <p class="text-base font-medium text-gray-900" :title="lecturerProfile.address">{{ lecturerProfile.address || '-' }}</p>
-        </div>
-      </div>
+      </ProfileSection>
     </div>
   </div>
+
+  <!-- Modal Component -->
+  <Modal :show="showModal" :type="modalType" :message="modalMessage" @close="closeModal" @confirm="closeModal" />
+
+  <!-- Change Password OTP Flow -->
+  <OtpFlow :show="showChangePassword" title="Change Password" :prefill-email="userEmail" :prefill-phone="userPhone"
+    @close="closeChangePassword" @success="handleChangePasswordSuccess" />
 </template>

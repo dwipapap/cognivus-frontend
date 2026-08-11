@@ -161,7 +161,7 @@ const fetchClassData = async () => {
       <div v-else-if="studentProfile" class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8">
         <!-- Left Profile Card -->
         <div class="lg:col-span-1">
-              <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-10 text-white text-center shadow-lg h-full flex flex-col justify-between">
+              <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-10 text-white text-center shadow-lg">
                 <img
                   :src="avatarUrl"
                   :alt="studentProfile.fullname"
