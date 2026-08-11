@@ -64,13 +64,14 @@ const handleSave = async ({ lecturerData, userData }) => {
     if (isEditMode.value) {
       const lecturerId = selectedLecturer.value.tbuser?.userid || selectedLecturer.value.userid;
       
-      // Update lecturer data
-      await lecturerAPI.updateLecturer(lecturerId, lecturerData);
-      
-      // Update user data (email/password) if provided
+      // Update user data (username/email/password) first so a conflict
+      // (e.g. duplicate username) fails before the lecturer profile is touched
       if (userData && Object.keys(userData).length > 0) {
         await userAPI.updateUser(lecturerId, userData);
       }
+      
+      // Update lecturer data
+      await lecturerAPI.updateLecturer(lecturerId, lecturerData);
       
       toast.add({ title: 'Success', description: 'Lecturer data has been successfully updated.', color: 'success' });
     } else {
@@ -122,7 +123,6 @@ onMounted(fetchLecturers);
           <USkeleton class="h-4 w-40" />
           <USkeleton class="h-4 w-48" />
           <USkeleton class="h-4 w-32" />
-          <USkeleton class="h-4 w-24" />
           <USkeleton class="h-8 w-24" />
         </div>
       </div>
@@ -199,7 +199,7 @@ onMounted(fetchLecturers);
               </td>
             </tr>
             <tr v-if="lecturers.length === 0">
-              <td colspan="6" class="px-6 py-12 text-center">
+              <td colspan="5" class="px-6 py-12 text-center">
                 <div class="flex flex-col items-center justify-center text-muted">
                   <UIcon name="i-lucide-users" class="w-12 h-12 mb-3 text-muted" />
                   <p class="text-sm font-medium">No lecturers found</p>

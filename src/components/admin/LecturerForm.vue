@@ -124,7 +124,7 @@ const handleSave = async () => {
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <UFormField label="Username" :required="!isEditMode">
-              <UInput v-bind="getFieldProps('username')" :placeholder="isEditMode ? 'Cannot be changed' : 'Unique username'" class="w-full" />
+              <UInput v-bind="getFieldProps('username')" :placeholder="isEditMode ? 'Current username' : 'Unique username'" class="w-full" />
             </UFormField>
 
             <UFormField label="Email Address" :required="!isEditMode">
