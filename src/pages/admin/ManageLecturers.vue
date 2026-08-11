@@ -138,7 +138,6 @@ onMounted(fetchLecturers);
               <th class="px-6 py-4 text-left text-xs font-semibold text-default uppercase tracking-wider">Name</th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-default uppercase tracking-wider">Email</th>
               <th class="px-6 py-4 text-left text-xs font-semibold text-default uppercase tracking-wider">Class Assignment</th>
-              <th class="px-6 py-4 text-left text-xs font-semibold text-default uppercase tracking-wider">Education</th>
               <th class="px-6 py-4 text-center text-xs font-semibold text-default uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
@@ -185,11 +184,6 @@ onMounted(fetchLecturers);
                   </div>
                 </div>
                 <span v-else class="text-sm text-muted italic">Not assigned</span>
-              </td>
-
-              <!-- Education -->
-              <td class="px-6 py-4 text-sm text-default">
-                {{ lecturer.lasteducation || '-' }}
               </td>
 
               <!-- Actions -->

@@ -61,14 +61,10 @@ const handleSave = async () => {
     if (data.lasteducation !== undefined) lecturerData.lasteducation = data.lasteducation || '';
     if (data.photo !== undefined) lecturerData.photo = data.photo;
 
-    if (props.isEditMode) {
-      if (data.email && data.email.trim()) userData.email = data.email;
-      if (data.password && data.password.trim()) userData.password = data.password;
-    } else {
-      if (data.username) lecturerData.username = data.username;
-      if (data.email) lecturerData.email = data.email;
-      if (data.password) lecturerData.password = data.password;
-    }
+    //account related input
+    if (data.username && data.username.trim()) userData.username = data.username;
+    if (data.password && data.password.trim()) userData.password = data.password;
+    if (data.email && data.email.trim()) userData.email = data.email;
 
     emit('save', { lecturerData, userData });
   });
@@ -127,8 +123,8 @@ const handleSave = async () => {
           </h3>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <UFormField label="Username" required>
-              <UInput v-bind="getFieldProps('username')" :disabled="isEditMode" :placeholder="isEditMode ? 'Cannot be changed' : 'Unique username'" class="w-full" />
+            <UFormField label="Username" :required="!isEditMode">
+              <UInput v-bind="getFieldProps('username')" :placeholder="isEditMode ? 'Cannot be changed' : 'Unique username'" class="w-full" />
             </UFormField>
 
             <UFormField label="Email Address" :required="!isEditMode">
