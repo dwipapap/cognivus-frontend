@@ -207,19 +207,6 @@
               placeholder="Optional notes about this grade"
             />
           </div>
-
-          <!-- File Upload -->
-          <div class="bg-white rounded-lg p-5 shadow-sm border border-blue-100/50">
-            <UFileUpload
-              v-model="uploadFiles"
-              label="Upload New Report File (Optional)"
-              accept=".pdf,.doc,.docx"
-              :multiple="false"
-              description="PDF or Word document (max 10MB)"
-              color="primary"
-              class="rounded-token-lg border-dashed"
-            />
-          </div>
         </div>
 
         <!-- Action Buttons -->
@@ -339,8 +326,6 @@ const { formData, errors, isSubmitting, submit, getFieldProps } = useForm(
   }
 );
 
-const uploadFiles = ref([]);
-
 /** Fetch student and grade data */
 const fetchData = async () => {
   try {
@@ -427,11 +412,8 @@ const handleSave = async () => {
         level: data.level || null,
         referencenumber: data.referencenumber || null
       };
-
-      // Extract file from array (UFileUpload returns array even with multiple=false)
-      const fileToUpload = uploadFiles.value && uploadFiles.value.length > 0 ? uploadFiles.value[0] : null;
       
-      const response = await gradeAPI.updateGrade(gradeid, payload, fileToUpload);
+      const response = await gradeAPI.updateGrade(gradeid, payload);
 
       if (response.data.success) {
         successMessage.value = 'Grade updated successfully!';

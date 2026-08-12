@@ -99,11 +99,6 @@
         <UTextarea v-bind="getFieldProps('description')" :rows="3" placeholder="Optional notes about this grade" />
       </UFormField>
 
-      <!-- File Upload -->
-      <UFormField label="Upload Report File" hint="PDF or Word document (max 10MB)">
-        <UInput type="file" accept=".pdf,.doc,.docx" @change="e => uploadFiles = e.target.files" />
-      </UFormField>
-
       <!-- Actions -->
       <div class="flex flex-wrap gap-3 pt-6 border-t border-default">
         <UButton type="submit" color="primary" variant="solid" :loading="isSubmitting" icon="i-lucide-check">
@@ -184,8 +179,6 @@ const { formData, errors, isSubmitting, hasErrors, submit, getFieldProps } = use
     test_type: ['required']
   }
 );
-
-const uploadFiles = ref([]);
 
 const { open: confirmOpen, message: confirmMessage, confirm, onConfirm, onCancel } = useConfirm()
 
@@ -274,10 +267,9 @@ const handleSave = async () => {
         referencenumber: data.referencenumber || null
       };
 
-      const fileToUpload = uploadFiles.value && uploadFiles.value.length > 0 ? uploadFiles.value[0] : null;
       const response = isNewGrade.value
-        ? await gradeAPI.createGrade(payload, fileToUpload)
-        : await gradeAPI.updateGrade(gradeid, payload, fileToUpload);
+        ? await gradeAPI.createGrade(payload)
+        : await gradeAPI.updateGrade(gradeid, payload);
 
       if (response.data.success) {
         successMessage.value = isNewGrade.value ? 'Grade added successfully' : 'Grade updated successfully';

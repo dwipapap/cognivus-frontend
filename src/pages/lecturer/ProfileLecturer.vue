@@ -1,8 +1,9 @@
 <script setup>
 import { ref, onMounted, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
-import { lecturerAPI } from '../../services/api';
+import { lecturerAPI, userAPI } from '../../services/api';
 import { authStore } from '../../store/auth';
+import secureStorage from '../../utils/secureStorage';
 import { useForm } from '../../composables/useForm';
 import { useLecturerProfile } from '../../composables/useLecturerProfile';
 
@@ -34,7 +35,8 @@ const { formData, errors, isSubmitting, submit, getFieldProps, reset } = useForm
     address: '',
     phone: '',
     lasteducation: '',
-    userid: null
+    userid: null,
+    email: ''
   },
   {
     fullname: ['required', { type: 'minLength', min: 2 }],
@@ -43,7 +45,8 @@ const { formData, errors, isSubmitting, submit, getFieldProps, reset } = useForm
     address: ['required'],
     phone: ['required', 'phone'],
     birthdate: ['required'],
-    lasteducation: ['required']
+    lasteducation: ['required'],
+    email: ['required', 'email']
   }
 );
 
@@ -68,6 +71,7 @@ const fetchProfile = async () => {
       const profileData = response.data.data;
       Object.assign(formData, {
         ...profileData,
+        email: profileData.tbuser?.email || '',
         birthdate: profileData.birthdate ? profileData.birthdate.split('T')[0] : ''
       });
     }
@@ -91,17 +95,30 @@ const handleUpdateProfile = async () => {
       }
       
       // Transform gender to backend format
+      const { email, ...lecturerData } = data;
       const updateData = {
-        ...data,
+        ...lecturerData,
         gender: mapGenderToBackend(data.gender)
       };
       
       const response = await lecturerAPI.updateLecturer(userId, updateData);
-      if (response.data.success) {
-        modalType.value = 'success';
-        modalMessage.value = "Profile updated successfully!";
-        openModal();
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Failed to update profile.');
       }
+
+      // Update email on the associated user account
+      const userRes = await userAPI.updateUser(userId, { email });
+      if (!userRes.data.success) {
+        throw new Error(userRes.data.message || 'Failed to update email.');
+      }
+
+      // Sync the auth store so the profile view reflects the new email immediately
+      authStore.user = { ...authStore.user, email };
+      secureStorage.setItem('user', authStore.user);
+
+      modalType.value = 'success';
+      modalMessage.value = "Profile updated successfully!";
+      openModal();
     });
   } catch (error) {
     console.error('Update error:', error);
@@ -241,8 +258,19 @@ onMounted(fetchProfile);
           />
         </div>
 
+        <!-- Email -->
+        <div class="bg-white rounded-lg p-5 shadow-sm border border-blue-100/50">
+          <BaseInput
+            v-bind="getFieldProps('email')"
+            type="email"
+            label="Email"
+            placeholder="name@example.com"
+            required
+          />
+        </div>
+
         <!-- Address -->
-        <div class="md:col-span-2 bg-white rounded-lg p-5 shadow-sm border border-blue-100/50">
+        <div class="bg-white rounded-lg p-5 shadow-sm border border-blue-100/50">
           <BaseTextarea
             v-bind="getFieldProps('address')"
             label="Address"
