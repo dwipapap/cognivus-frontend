@@ -108,11 +108,8 @@ const handleImageError = (event) => {
 
   <!-- Loading State -->
   <div v-if="isLoading" class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8 animate-pulse">
-<<<<<<< HEAD
     <div class="lg:col-span-1 bg-blue-100 rounded-xl p-10 shadow-lg"></div>
-=======
     <div class="lg:col-span-1 bg-blue-100 rounded-xl p-10 shadow-lg h-[540px]"></div>
->>>>>>> 0178cc57c10546831414baed2dd038bf444d8d99
     <div class="lg:col-span-2 bg-blue-50 rounded-xl p-10 shadow-lg">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
         <div class="h-12 bg-blue-200 rounded-full"></div>

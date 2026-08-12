@@ -11,7 +11,7 @@ const students = ref([]);
 const existingGrades = ref([]);
 const isLoading = ref(true);
 const successMessage = ref('');
-const errorMessage = ref '';
+const errorMessage = ref('');
 
 const gradePage = ref(1);
 const gradePageSize = 20;
@@ -188,6 +188,7 @@ onMounted(() => {
           Showing {{ (gradePage - 1) * gradePageSize + 1 }} to {{ Math.min(gradePage * gradePageSize, existingGrades.length) }} of {{ existingGrades.length }} grades
         </p>
 <UPagination v-model:page="gradePage" :total="existingGrades.length" :max="gradePageSize" :sibling-count="1" size="sm" />
+    </div>
     </div>
   </div>
 </template>
