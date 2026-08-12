@@ -196,14 +196,8 @@ export const reportFileAPI = {
 export const gradeAPI = {
   getAllGrades: () => apiClient.get("/grades"),
   getGradeById: (id) => apiClient.get(`/grades/${id}`),
-  createGrade: (gradeData, file = null) =>
-    apiClient.post("/grades", toFormData(gradeData, file), {
-      headers: { "Content-Type": "multipart/form-data" },
-    }),
-  updateGrade: (id, gradeData, file = null) =>
-    apiClient.put(`/grades/${id}`, toFormData(gradeData, file), {
-      headers: { "Content-Type": "multipart/form-data" },
-    }),
+  createGrade: (gradeData) => apiClient.post("/grades", gradeData),
+  updateGrade: (id, gradeData) => apiClient.put(`/grades/${id}`, gradeData),
   deleteGrade: (id) => apiClient.delete(`/grades/${id}`),
   downloadCertificate: (gradeId) =>
     apiClient.get(`/grades/${gradeId}/certificate`, {
