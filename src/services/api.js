@@ -1,9 +1,12 @@
 import axios from "axios";
 import { authStore } from "../store/auth";
 
-// Use environment variable for API base URL, fallback to localhost for development
+// Use same base URL for API requests and OAuth redirects.
+export const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:5000",
+  baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },

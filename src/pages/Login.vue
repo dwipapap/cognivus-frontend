@@ -2,7 +2,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { authStore } from '../store/auth';
-import apiClient from '../services/api';
+import apiClient, { API_BASE_URL } from '../services/api';
 import { useForm } from '../composables/useForm';
 import ittrLogo from '../assets/ittrlogo.png';
 import login from '../assets/login.png';
@@ -143,8 +143,7 @@ const handleLogin = async () => {
 
 const handleGoogleLogin = () => {
   // Use environment variable for API base URL
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
-  window.location.href = `${apiBaseUrl}/auth/google`;
+  window.location.href = `${API_BASE_URL}/auth/google`;
 };
 </script>
 
