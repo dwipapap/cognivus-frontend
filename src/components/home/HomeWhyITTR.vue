@@ -1,75 +1,43 @@
 <template>
-  <section class="bg-white">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div class="lg:col-span-4 flex flex-col justify-center">
-          <h2 class="text-4xl md:text-5xl font-black leading-tight text-gray-900">
-            <span class="text-[#0094ce]">Mengapa</span>
-            <br />
-            <span>memilih kursus ini?</span>
+  <section class="bg-[#EFF4FF] border-y-[3px] border-black">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 md:py-12">
+      <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+        <div>
+          <div class="brutal-label">WHY ITTR × LMS</div>
+          <h2 class="reveal mt-3 text-[28px] md:text-[40px] font-black leading-[0.9] tracking-[-0.02em] uppercase" data-delay="30">
+            60 YRS <span class="bg-black text-white px-1">Heritage</span><br /> + Modern LMS
           </h2>
-          <p class="mt-6 text-gray-600 text-lg leading-relaxed">
+        </div>
+        <div class="max-w-xl">
+          <p class="reveal text-sm md:text-[15px] leading-relaxed font-medium border-[3px] border-black bg-white p-3 shadow-[4px_4px_0_#000]" data-delay="60">
             {{ description }}
           </p>
-          <div class="mt-8">
-            <a
-              href="#"
-              class="inline-flex items-center justify-center gap-2 bg-[#0094ce] text-white font-semibold px-8 py-4 sm:py-3.5 rounded-full transition-all duration-200 hover:bg-[#239a8b] hover:-translate-y-0.5 hover:shadow-lg w-full sm:w-auto"
-            >
-              Daftar Sekarang
-            </a>
-          </div>
-        </div>
-
-        <div class="lg:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <div
-            v-for="(item, i) in topCards"
-            :key="i"
-            class="relative rounded-3xl overflow-hidden min-h-[180px] sm:min-h-[240px] group"
-          >
-            <img
-              :src="item.image"
-              :alt="item.title"
-              loading="lazy"
-              decoding="async"
-              class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-            />
-            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-            <div class="relative z-10 h-full flex flex-col justify-end p-8">
-              <h3 class="text-xl font-bold text-white">
-                {{ item.title }}
-              </h3>
-              <p class="text-white/80 text-sm leading-relaxed mt-2">
-                {{ item.desc }}
-              </p>
-            </div>
-          </div>
+          <a href="#lms-features" class="reveal mt-4 inline-flex brutal-btn brutal-btn--primary px-5 py-2.5 text-sm" data-delay="80">
+            Why LMS ITTR is different <UIcon name="i-lucide-arrow-right" class="ml-2 h-4 w-4" />
+          </a>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
-        <div
-          v-for="(item, i) in bottomCards"
-          :key="i"
-          class="relative rounded-3xl overflow-hidden min-h-[200px] sm:min-h-[280px] group"
+      <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+        <article
+          v-for="(item, i) in cards"
+          :key="item.title"
+          class="reveal brutal-card p-4 flex flex-col min-h-[170px]"
+          :class="item.variant"
+          :data-delay="String(i * 70)"
         >
-          <img
-            :src="item.image"
-            :alt="item.title"
-            loading="lazy"
-            decoding="async"
-            class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-          />
-          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-          <div class="relative z-10 h-full flex flex-col justify-end p-6">
-            <h3 class="text-lg font-bold text-white mb-1">
-              {{ item.title }}
-            </h3>
-            <p class="text-white/70 text-sm leading-relaxed line-clamp-3">
-              {{ item.desc }}
-            </p>
+          <div class="flex items-start justify-between gap-3">
+            <div class="icon-box h-9 w-9 border-[3px] flex items-center justify-center shrink-0" :class="item.iconBox">
+              <UIcon :name="item.icon" class="h-4 w-4" />
+            </div>
+            <span class="font-mono text-[11px] font-bold tracking-widest border-[2px] border-black px-1.5 py-0.5" :class="item.numClass">0{{ i+1 }}</span>
           </div>
-        </div>
+          <h3 class="mt-4 text-[15px] font-black leading-tight uppercase tracking-tight">{{ item.title }}</h3>
+          <p class="mt-1.5 text-[13.5px] leading-relaxed font-medium line-clamp-3" :class="item.textMuted ? 'text-white/90' : 'text-zinc-700'">{{ item.desc }}</p>
+          <div class="mt-auto pt-3 flex items-center gap-1.5 text-xs font-black uppercase tracking-wide">
+            <span class="h-[3px] flex-1" :class="item.line"></span> {{ item.tag }}
+          </div>
+        </article>
       </div>
     </div>
   </section>
@@ -77,41 +45,12 @@
 
 <script setup>
 const description =
-  "60+ tahun pengalaman, ribuan alumni, dan metode belajar terbukti dalam satu tempat."
+  "Pioneering since 1960. Our LMS makes every step one-stop — from enrollment to grades — hassle-free."
 
-const topCards = [
-  {
-    title: 'Pelopor Kursus Bahasa Inggris',
-    desc: 'Kami adalah lembaga kursus bahasa Inggris yang pertama hadir di Pekanbaru dan mungkin di Provinsi Riau.',
-    image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&q=80'
-  },
-  {
-    title: '60+ Tahun Pengalaman',
-    desc: 'ITTR English Course sudah berpengalaman lebih dari 60 tahun untuk kursus bahasa Inggris di Pekanbaru.',
-    image: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&q=80'
-  }
-]
-
-const bottomCards = [
-  {
-    title: 'Banyak Metode Belajar',
-    desc: 'Sebagai lembaga kursus yang berpengalaman tentunya kami memiliki banyak metode yang cocok diterapkan agar siswa kami tidak jenuh dengan materi belajar.',
-    image: 'https://images.unsplash.com/photo-1501504905252-473c47e087f8?w=600&q=80'
-  },
-  {
-    title: 'Banyak Pilihan Program',
-    desc: 'Sebagai lembaga kursus terkemuka di Pekanbaru kami menawarkan banyak pilihan kursus yang bisa disesuaikan dengan kebutuhan peserta belajar.',
-    image: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=600&q=80'
-  },
-  {
-    title: 'Lokasi Strategis di Pusat Kota',
-    desc: 'Tentunya sebagai lembaga kursus yang terkemuka kami berada di tengah kota yang memudahkan siswa untuk menjangkau lokasi kami.',
-    image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&q=80'
-  },
-  {
-    title: 'Biaya Lebih Terjangkau',
-    desc: 'Kami menawarkan biaya yang lebih terjangkau dibandingkan dengan lembaga kursus lainnya di Pekanbaru.',
-    image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=600&q=80'
-  }
+const cards = [
+  { title: 'Pioneer in Pekanbaru', desc: 'The first English course in Pekanbaru — perhaps in Riau.', icon: 'i-lucide-flag', variant: 'bg-white', iconBox: 'bg-[#DBEAFE] border-black text-[#1E3A8A]', numClass: 'bg-white text-black', line: 'bg-black', tag: 'SINCE 1960' },
+  { title: 'Trusted for 60+ Years', desc: 'Proven curriculum across generations, updated via LMS.', icon: 'i-lucide-history', variant: 'brutal-card--light', iconBox: 'bg-white border-black text-black', numClass: 'bg-black text-white', line: 'bg-black', tag: 'TRUSTED' },
+  { title: 'One-Stop LMS', desc: 'Classes, materials, assignments, grades, payments — one dashboard.', icon: 'i-lucide-layout-dashboard', variant: 'brutal-card--blue', iconBox: 'bg-white border-black text-[#1D4ED8]', numClass: 'bg-white text-black', line: 'bg-white', textMuted: true, tag: 'LMS' },
+  { title: 'Transparent Pricing', desc: 'Affordable, no hidden fees. Check real-time in the LMS.', icon: 'i-lucide-badge-percent', variant: 'brutal-card--navy', iconBox: 'bg-white border-black text-black', numClass: 'bg-white text-black', line: 'bg-white', textMuted: true, tag: 'AFFORDABLE' }
 ]
 </script>

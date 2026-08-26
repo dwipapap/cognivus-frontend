@@ -1,77 +1,40 @@
 <template>
-  <section class="bg-white py-16 md:py-24">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="reveal max-w-2xl mb-14">
-        <p class="text-sm font-medium tracking-wide text-coral-red uppercase mb-3">Apa Tujuanmu?</p>
-        <h2 class="text-3xl md:text-4xl font-bold text-default leading-tight">
-          Tentukan Tujuan Belajar Bahasa Inggris
-        </h2>
-        <p class="mt-4 text-lg text-muted">
-          Pilih jalur yang sesuai dengan tujuanmu, lalu mulai perjalanan belajar bersama ITTR.
-        </p>
+  <section id="lms-features" class="bg-white border-y-[3px] border-black">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 md:py-12">
+      <div class="reveal flex flex-col md:flex-row md:items-end justify-between gap-4 border-b-[3px] border-black pb-6">
+        <div>
+          <div class="brutal-label">ITTR LMS FEATURES</div>
+          <h2 class="mt-3 text-[28px] md:text-[36px] font-black uppercase tracking-[-0.02em] leading-none">Learn <span class="bg-[#1D4ED8] text-white px-1 border-[3px] border-black">Without Hassle</span></h2>
+          <p class="mt-2 font-mono text-xs font-bold tracking-widest uppercase text-zinc-600">ITTR × LMS — FROM ENROLLMENT TO GRADUATION</p>
+        </div>
+        <p class="max-w-md text-sm font-medium leading-relaxed border-[3px] border-black bg-[#EFF4FF] p-3">Every step of your course lives in the LMS: choose your goal, join a class, submit tasks, track grades.</p>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-10" data-reveal-stagger="0.08" data-reveal="fade-left">
-        <div
-          v-for="(goal, i) in goals"
-          :key="i"
-          class="reveal"
-          :class="{ 'sm:pt-12': i >= 2 }"
-        >
-          <div class="flex gap-4">
-            <span
-              class="flex-shrink-0 text-5xl font-bold text-muted/25 leading-none select-none"
-            >
-              {{ String(i + 1).padStart(2, '0') }}
-            </span>
-            <div class="min-w-0 pt-1.5">
-              <div class="flex items-center gap-2.5 mb-2">
-                <div
-                  class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                  :class="goal.iconBg"
-                >
-                  <UIcon :name="goal.icon" class="w-3.5 h-3.5" :class="goal.iconColor" />
-                </div>
-                <h3 class="text-base font-bold text-default leading-tight">{{ goal.heading }}</h3>
-              </div>
-              <p class="text-sm text-muted leading-relaxed">{{ goal.description }}</p>
+      <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <article v-for="(f,i) in features" :key="i" class="reveal brutal-card p-0 flex overflow-hidden min-h-[150px]" :class="i%2===1 ? 'bg-[#DBEAFE]' : 'bg-white'" :data-delay="String(i*70)">
+          <div class="w-[76px] shrink-0 flex flex-col items-center justify-center border-r-[3px] border-black" :class="i%2===1 ? 'bg-[#1D4ED8] text-white' : 'bg-black text-white'">
+            <span class="text-2xl font-black">{{ String(i+1).padStart(2,'0') }}</span>
+            <UIcon :name="f.icon" class="h-5 w-5 mt-1" />
+          </div>
+          <div class="p-4 flex-1 flex flex-col">
+            <h3 class="text-sm font-black uppercase tracking-wide">{{ f.title }}</h3>
+            <p class="mt-1 text-[13px] leading-relaxed font-medium text-zinc-700">{{ f.desc }}</p>
+            <div class="mt-auto pt-3 flex items-center gap-2">
+              <span class="inline-flex border-[2px] border-black px-2 py-0.5 text-[11px] font-black uppercase" :class="i%2===1 ? 'bg-black text-white' : 'bg-[#1D4ED8] text-white'">{{ f.cta }}</span>
+              <span class="h-[3px] flex-1 bg-black"></span>
             </div>
           </div>
-        </div>
+        </article>
       </div>
     </div>
   </section>
 </template>
 
 <script setup>
-const goals = [
-  {
-    heading: 'Persiapan Test',
-    description: 'Siapkan dirimu dengan kursus bersama simulasi tes kami untuk meraih skor TOEFL, IELTS dan soal ujian dengan nilai terbaik.',
-    icon: 'i-lucide-graduation-cap',
-    iconBg: 'bg-pastel-mint',
-    iconColor: 'text-swatch-green'
-  },
-  {
-    heading: 'Kelas Umum',
-    description: 'Dapatkan Layanan Les, Bimbel & Kursus Bahasa Inggris Reguler dengan kurikulum terpercaya yang dirancang oleh kurikulum ITTR.',
-    icon: 'i-lucide-crown',
-    iconBg: 'bg-pastel-peach',
-    iconColor: 'text-coral-red'
-  },
-  {
-    heading: 'Kesuksesan Karir',
-    description: 'Sukses di pekerjaan atau tingkatkan jangkauan bisnismu dengan pembelajaran kami yang didesain khusus untuk kelas profesional.',
-    icon: 'i-lucide-handshake',
-    iconBg: 'bg-pastel-lavender',
-    iconColor: 'text-swatch-magenta'
-  },
-  {
-    heading: 'Upgrade Kemampuan',
-    description: 'Perluas pengetahuanmu dengan belajar keterampilan berbahasa Inggris dengan belajar bersama ahlinya yang akan membantumu mengatasi kesulitan.',
-    icon: 'i-lucide-star',
-    iconBg: 'bg-pastel-sky',
-    iconColor: 'text-swatch-blue'
-  }
+const features = [
+  { title: 'Small, Focused Classes', desc: 'Max 10 students per class. Schedule & attendance live in the LMS.', icon: 'i-lucide-users', cta: 'ENTER CLASS →' },
+  { title: 'Centralized Materials & Tasks', desc: 'Modules, videos, assignments & deadlines — auto notifications.', icon: 'i-lucide-book-open', cta: 'OPEN MATERIALS →' },
+  { title: 'Transparent Grades', desc: 'Assignment & exam scores in real time. Download report cards in LMS.', icon: 'i-lucide-bar-chart-3', cta: 'CHECK GRADES →' },
+  { title: 'Secure Payments', desc: 'Invoices, installments & receipts recorded. No hidden fees.', icon: 'i-lucide-credit-card', cta: 'PAY NOW →' }
 ]
 </script>

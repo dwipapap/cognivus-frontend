@@ -1,0 +1,108 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@700&display=swap');
+
+/* 
+  Homepage Brutalism — BIRU ONLY — scoped .homepage--brutal
+  Tidak menyentuh :root global agar admin/student tetap soft
+  Palet: black / white / paper kebiruan + blue monokrom
+*/
+.homepage--brutal {
+  --brutal-black: #0a0a0a;
+  --brutal-white: #ffffff;
+  --brutal-paper: #EFF4FF;
+  --brutal-blue: #1D4ED8;
+  --brutal-blue-strong: #1E3A8A;
+  --brutal-blue-light: #DBEAFE;
+  --brutal-blue-mid: #3B82F6;
+  --brutal-blue-ink: #0F172A;
+  --brutal-border: 3px;
+  --brutal-shadow: 6px 6px 0 #000;
+  --brutal-shadow-sm: 4px 4px 0 #000;
+  --brutal-radius: 0px;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  background: var(--brutal-paper);
+  color: var(--brutal-black);
+}
+
+/* hard reset radius inside brutal */
+.homepage--brutal * {
+  border-radius: 0px !important;
+}
+/* exception: instructor avatars bulat */
+.homepage--brutal .instructor-avatar,
+.homepage--brutal .instructor-avatar img {
+  border-radius: 9999px !important;
+}
+.homepage--brutal .brutal-card {
+  border: var(--brutal-border) solid var(--brutal-black);
+  background: var(--brutal-white);
+  box-shadow: var(--brutal-shadow);
+}
+.homepage--brutal .brutal-card--blue { background: var(--brutal-blue); color: #fff; }
+.homepage--brutal .brutal-card--blue h3,
+.homepage--brutal .brutal-card--blue p,
+.homepage--brutal .brutal-card--blue span { color: #fff; }
+.homepage--brutal .brutal-card--light { background: var(--brutal-blue-light); }
+.homepage--brutal .brutal-card--navy { background: var(--brutal-blue-strong); color: #fff; }
+.homepage--brutal .brutal-card--navy h3,
+.homepage--brutal .brutal-card--navy p,
+.homepage--brutal .brutal-card--navy span { color: #fff; }
+/* icon box on blue/navy must stay contrasting: white bg + dark icon */
+.homepage--brutal .brutal-card--blue .icon-box { background: #fff !important; color: var(--brutal-blue) !important; border-color: var(--brutal-black) !important; }
+.homepage--brutal .brutal-card--navy .icon-box { background: #fff !important; color: var(--brutal-black) !important; border-color: var(--brutal-black) !important; }
+
+.homepage--brutal .brutal-btn {
+  border: var(--brutal-border) solid var(--brutal-black);
+  box-shadow: var(--brutal-shadow-sm);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  transition: transform 0s, box-shadow 0s, background 0s;
+}
+.homepage--brutal .brutal-btn--primary {
+  background: var(--brutal-blue);
+  color: #fff;
+}
+.homepage--brutal .brutal-btn--ghost {
+  background: var(--brutal-white);
+  color: var(--brutal-black);
+}
+.homepage--brutal .brutal-btn:active {
+  transform: translate(3px, 3px);
+  box-shadow: 1px 1px 0 #000;
+}
+.homepage--brutal .brutal-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: 2px solid var(--brutal-black);
+  background: var(--brutal-blue-light);
+  color: var(--brutal-blue-ink);
+  padding: 4px 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Navbar override only inside brutal */
+.homepage--brutal header.header-glass {
+  background: var(--brutal-white) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-radius: 0 !important;
+  border: 0 !important;
+  border-bottom: var(--brutal-border) solid var(--brutal-black) !important;
+  box-shadow: none !important;
+}
+
+/* brutal ticker — biru navy */
+.homepage--brutal .brutal-ticker {
+  background: var(--brutal-blue-strong);
+  color: var(--brutal-white);
+  border-top: var(--brutal-border) solid var(--brutal-black);
+  border-bottom: var(--brutal-border) solid var(--brutal-black);
+  font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
