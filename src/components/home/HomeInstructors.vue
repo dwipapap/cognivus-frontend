@@ -1,51 +1,19 @@
 <template>
-  <section class="relative overflow-hidden bg-[var(--color-hero-sky)] rounded-3xl mx-4 my-8">
-    <svg class="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1440 800" fill="none" preserveAspectRatio="xMidYMid slice">
-      <path d="M-100 400 Q360 200 720 450 T1540 350" stroke="rgba(255,255,255,0.25)" stroke-width="2" stroke-linecap="round" />
-      <path d="M-50 500 Q400 300 800 520 T1600 420" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" stroke-linecap="round" />
-    </svg>
-
-    <div class="relative z-10 px-6 py-16 md:py-24 max-w-7xl mx-auto">
-      <div class="text-center mb-16 max-w-2xl mx-auto">
-        <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
-          Meet Our
-          <span class="relative inline-block">
-            <svg class="absolute -top-3 -left-5 w-6 h-6 text-orange-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-            Instructors
-          </span>
-
-        </h2>
-        <p class="text-white/85 text-base md:text-lg">
-          Our team of certified and passionate educators brings years of experience and expertise to every class. Committed to student success
-        </p>
+  <section class="bg-[#DBEAFE] border-y-[3px] border-black py-10 md:py-12">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-2xl mx-auto">
+        <div class="inline-flex bg-black text-white px-3 py-1 font-black uppercase text-xs tracking-widest border-[3px] border-black">INSTRUCTORS — EXPERTS</div>
+        <h2 class="mt-3 text-[28px] md:text-[36px] font-black uppercase leading-none">Meet Our <span class="bg-white border-[3px] border-black px-1">Instructors</span></h2>
+        <p class="mt-2 text-sm font-medium">Certified, passionate and experienced — focused on your success.</p>
       </div>
-
-      <div class="grid grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8 items-start">
-        <div
-          v-for="(instructor, i) in instructors"
-          :key="i"
-          class="flex flex-col items-center text-center"
-          :class="i % 2 === 0 ? 'lg:mt-0' : 'lg:mt-12'"
-        >
-          <div class="relative mb-4">
-            <div class="w-20 h-20 sm:w-28 sm:h-28 md:w-36 md:h-36 lg:w-40 lg:h-40 rounded-full overflow-hidden border-4 border-white shadow-lg">
-              <img
-                :src="instructor.image"
-                :alt="instructor.name"
-                class="w-full h-full object-cover"
-                loading="lazy"
-                decoding="async"
-              />
-            </div>
+      <div class="mt-8 grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-6 md:gap-8">
+        <div v-for="(ins,i) in instructors" :key="i" class="reveal flex flex-col items-center text-center" :data-delay="String(i*40)">
+          <div class="instructor-avatar h-28 w-28 sm:h-32 sm:w-32 md:h-36 md:w-36 border-[3px] border-black overflow-hidden bg-white shadow-[4px_4px_0_#000]">
+            <img :src="ins.image" :alt="ins.name" class="h-full w-full object-cover" loading="lazy" decoding="async" />
           </div>
-
-          <div class="bg-white rounded-lg p-2.5 sm:p-4 md:p-5 shadow-lg w-full max-w-[120px] sm:max-w-[160px] md:max-w-[200px] relative">
-            <div class="absolute -top-2 sm:-top-3 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] sm:border-l-[10px] border-l-transparent border-r-[6px] sm:border-r-[10px] border-r-transparent border-b-[8px] sm:border-b-[12px] border-b-white"></div>
-            <p class="font-bold text-gray-900 text-[10px] sm:text-xs md:text-sm mb-0.5 md:mb-1 leading-tight">{{ instructor.name }}</p>
-            <p class="text-[#2ab5a3] text-[9px] sm:text-[10px] md:text-xs font-medium leading-tight">Examiners</p>
-
+          <div class="mt-3 border-[3px] border-black bg-black text-white px-3 py-2 w-full max-w-[180px] shadow-[3px_3px_0_#000]">
+            <p class="text-[11px] font-black leading-tight uppercase line-clamp-2">{{ ins.name }}</p>
+            <p class="text-[10px] font-mono font-bold tracking-widest text-[#DBEAFE]">EXAMINER</p>
           </div>
         </div>
       </div>
