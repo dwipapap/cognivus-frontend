@@ -281,15 +281,12 @@ async function handleResendOtp() {
 }
 
 function goBack() {
+  // ponytail: Back RESET dihapus, restore branch RESET->VERIFY jika butuh edit OTP setelah verify
   if (currentStep.value === STEPS.VERIFY) {
     currentStep.value = STEPS.REQUEST;
     otpCode.value = '';
     stopOtpTimer();
     otpTimer.value = 0;
-  } else if (currentStep.value === STEPS.RESET) {
-    currentStep.value = STEPS.VERIFY;
-    newPassword.value = '';
-    confirmPassword.value = '';
   }
   errorMessage.value = '';
   successMessage.value = '';
@@ -578,26 +575,16 @@ onUnmounted(() => {
             </p>
           </div>
 
-          <div class="flex gap-3">
-            <BaseButton
-              variant="danger"
-              size="lg"
-              @click="goBack"
-              :disabled="isSubmitting"
-            >
-              Back
-            </BaseButton>
-            <BaseButton
-              variant="primary"
-              size="lg"
-              block
-              :loading="isSubmitting"
-              :disabled="!isStep3Valid"
-              @click="handleChangePassword"
-            >
-              Change password
-            </BaseButton>
-          </div>
+          <BaseButton
+            variant="primary"
+            size="lg"
+            block
+            :loading="isSubmitting"
+            :disabled="!isStep3Valid"
+            @click="handleChangePassword"
+          >
+            Change password
+          </BaseButton>
         </div>
 
         <div v-if="currentStep === STEPS.SUCCESS" class="text-center space-y-6">

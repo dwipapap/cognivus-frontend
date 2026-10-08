@@ -1,60 +1,31 @@
 <template>
-  <section class="mx-4 my-8">
-    <div
-        class="reveal bg-[var(--color-hero-sky)] rounded-3xl px-6 py-8 md:px-10 md:py-10 flex flex-col md:flex-row gap-8 md:gap-0 items-start"
-      >
-        <div class="md:w-1/3 md:pr-10 md:border-r md:border-white/20">
-          <h2 class="text-3xl md:text-4xl font-bold text-white leading-tight">
-            Metode<br />
-            <span class="italic text-sun-yellow">Belajar</span>
-          </h2>
-          <p class="mt-4 text-sm text-white/75 leading-relaxed max-w-xs">
-            Kursus bahasa Inggris terpercaya dengan instruktur berpengalaman, kapan saja.
-          </p>
+  <section class="bg-[#1D4ED8] border-y-[3px] border-black py-6">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="brutal-card bg-white p-4 md:p-6 flex flex-col md:flex-row gap-6">
+        <div class="md:w-[280px] shrink-0 border-r-0 md:border-r-[3px] md:pr-6 border-black">
+          <div class="bg-black text-white inline-flex px-2 py-1 text-xs font-black uppercase tracking-widest">LEVEL</div>
+          <h2 class="mt-2 text-2xl md:text-3xl font-black uppercase leading-none">Learning<br/><span class="bg-[#DBEAFE] px-1 border-[3px] border-black">Method</span></h2>
+          <p class="mt-3 text-sm font-medium leading-relaxed bg-[#EFF4FF] border-[3px] border-black p-2">Experienced instructors, ≤10 students per class. Never boring.</p>
         </div>
-
-        <div class="md:w-2/3 md:pl-10 grid grid-cols-2 lg:grid-cols-4 gap-8">
-          <div
-            v-for="(card, i) in cards"
-            :key="i"
-            class="flex flex-col items-center text-center"
-          >
-            <div class="w-14 h-14 rounded-full bg-white flex items-center justify-center mb-4">
-              <UIcon :name="card.icon" class="size-6" :class="card.iconColor" />
+        <div class="flex-1 grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div v-for="(c,i) in cards" :key="i" class="reveal border-[3px] border-black bg-white p-3 text-center shadow-[4px_4px_0_#000]" :data-delay="String(i*60)">
+            <div class="mx-auto h-10 w-10 border-[3px] border-black bg-[#DBEAFE] flex items-center justify-center">
+              <UIcon :name="c.icon" class="h-5 w-5" />
             </div>
-            <h3 class="text-white font-semibold text-base mb-1">{{ card.level }}</h3>
-            <p class="text-white/70 text-sm leading-relaxed">{{ card.description }}</p>
+            <h3 class="mt-2 text-xs font-black uppercase leading-tight">{{ c.level }}</h3>
+            <p class="mt-1 text-[12px] leading-snug font-medium text-zinc-700">{{ c.description }}</p>
           </div>
         </div>
       </div>
+    </div>
   </section>
 </template>
 
 <script setup>
 const cards = [
-  {
-    level: 'Pre Elementary',
-    icon: 'i-lucide-book-open',
-    iconColor: 'text-swatch-blue',
-    description: 'Dapatkan kelas pembelajaran bahasa Inggris Pre Elementary (English for Young Learner). Maksimum per kelas 10 orang.'
-  },
-  {
-    level: 'Elementary',
-    icon: 'i-lucide-pencil',
-    iconColor: 'text-sun-yellow-deep',
-    description: 'Dapatkan kelas pembelajaran bahasa Inggris Elementary (Pemula). Maksimum per kelas 10 orang.'
-  },
-  {
-    level: 'Intermediate',
-    icon: 'i-lucide-graduation-cap',
-    iconColor: 'text-swatch-red',
-    description: 'Dapatkan kelas pembelajaran bahasa Inggris Intermediate (Mahir). Maksimum per kelas 10 orang.'
-  },
-  {
-    level: 'Advanced',
-    icon: 'i-lucide-award',
-    iconColor: 'text-swatch-magenta',
-    description: 'Dapatkan kelas pembelajaran bahasa Inggris Advanced (Ahli). Maksimum per kelas 10 orang.'
-  }
+  { level: 'Pre Elementary', icon: 'i-lucide-book-open', description: 'Young Learner. Max 10/class.' },
+  { level: 'Elementary', icon: 'i-lucide-pencil', description: 'Beginner. Max 10/class.' },
+  { level: 'Intermediate', icon: 'i-lucide-graduation-cap', description: 'Intermediate. Max 10/class.' },
+  { level: 'Advanced', icon: 'i-lucide-award', description: 'Advanced. Max 10/class.' }
 ]
 </script>
