@@ -38,8 +38,8 @@ export function useSnapPayment() {
       // Create and load script
       const script = document.createElement('script');
       script.id = 'midtrans-snap-script';
-      script.src = 'https://app.sandbox.midtrans.com/snap/snap.js'; // Use sandbox for testing
-      // For production: 'https://app.midtrans.com/snap/snap.js'
+      // ponytail: ties Snap URL to Vite build mode, add VITE_MIDTRANS_ENV override when a prod build must hit sandbox
+      script.src = import.meta.env.PROD ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js';
       script.setAttribute('data-client-key', import.meta.env.VITE_MIDTRANS_CLIENT_KEY);
       
       script.onload = () => {
