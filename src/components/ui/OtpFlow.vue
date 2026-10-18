@@ -14,6 +14,15 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'success']);
 
+const locked = computed(() => Boolean(props.prefillEmail || props.prefillPhone));
+
+const lockHint = computed(() => {
+  if (!locked) return '';
+  return channel.value === 'email'
+    ? 'Code will be sent to your registered email address.'
+    : 'Code will be sent to your registered WhatsApp number.';
+});
+
 const STEPS = { REQUEST: 1, VERIFY: 2, RESET: 3, SUCCESS: 4 };
 const currentStep = ref(STEPS.REQUEST);
 const isSubmitting = ref(false);
@@ -145,7 +154,7 @@ function resetState() {
   isSubmitting.value = false;
   errorMessage.value = '';
   successMessage.value = '';
-  channel.value = 'email';
+  channel.value = props.prefillEmail ? 'email' : props.prefillPhone ? 'whatsapp' : 'email';
   email.value = '';
   phone.value = '';
   otpCode.value = '';
@@ -405,11 +414,13 @@ onUnmounted(() => {
             <button
               type="button"
               @click="channel = 'email'"
+              :disabled="locked && !props.prefillEmail"
               :class="[
                 'p-4 rounded-token-xl border-2 transition-all duration-token-default flex flex-col items-center gap-2',
                 channel === 'email'
                   ? 'border-brand-primary bg-brand-primary/5'
-                  : 'border-divider hover:border-divider-strong bg-surface'
+                  : 'border-divider hover:border-divider-strong bg-surface',
+                locked && !props.prefillEmail ? 'opacity-50 cursor-not-allowed' : ''
               ]"
             >
               <UIcon
@@ -424,11 +435,13 @@ onUnmounted(() => {
             <button
               type="button"
               @click="channel = 'whatsapp'"
+              :disabled="locked && !props.prefillPhone"
               :class="[
                 'p-4 rounded-token-xl border-2 transition-all duration-token-default flex flex-col items-center gap-2',
                 channel === 'whatsapp'
                   ? 'border-brand-primary bg-brand-primary/5'
-                  : 'border-divider hover:border-divider-strong bg-surface'
+                  : 'border-divider hover:border-divider-strong bg-surface',
+                locked && !props.prefillPhone ? 'opacity-50 cursor-not-allowed' : ''
               ]"
             >
               <UIcon
@@ -448,7 +461,7 @@ onUnmounted(() => {
               type="email"
               label="Email address"
               placeholder="you@university.ac.id"
-              :disabled="isSubmitting"
+              :disabled="locked || isSubmitting"
               size="lg"
             />
           </div>
@@ -458,10 +471,18 @@ onUnmounted(() => {
               type="tel"
               label="WhatsApp number"
               placeholder="08xxxxxxxxxx"
-              :disabled="isSubmitting"
+              :disabled="locked || isSubmitting"
               size="lg"
             />
-            <p class="text-xs text-ink-muted mt-1">Enter your WhatsApp number, e.g. 08123456789</p>
+            <p v-if="!locked" class="text-xs text-ink-muted mt-1">Enter your WhatsApp number, e.g. 08123456789</p>
+          </div>
+
+          <div
+            v-if="lockHint"
+            class="flex items-center gap-1.5 px-3 py-2 bg-surface-elevated rounded-token-lg text-xs text-ink-muted"
+          >
+            <UIcon name="i-lucide-lock" class="w-3.5 h-3.5 flex-shrink-0" />
+            <span>{{ lockHint }}</span>
           </div>
 
           <BaseButton
